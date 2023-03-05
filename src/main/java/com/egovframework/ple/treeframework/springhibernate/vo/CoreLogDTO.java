@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @MappedSuperclass
-public class JsTreeHibernateLogDTO extends JsTreeHibernateSearchDTO implements Serializable {
+public class CoreLogDTO extends CoreSearchDTO implements Serializable {
 
     //@Getter @Setter
     @Column(name="C_DATAID")
@@ -75,9 +75,9 @@ public class JsTreeHibernateLogDTO extends JsTreeHibernateSearchDTO implements S
     }
 
     @Override
-    public <T extends JsTreeHibernateSearchDTO> void setFieldFromNewInstance(T paramInstance) {
+    public <T extends CoreSearchDTO> void setFieldFromNewInstance(T paramInstance) {
 
-        if( paramInstance instanceof JsTreeHibernateDTO){
+        if( paramInstance instanceof CoreDTO){
             if(paramInstance.isCopied()) {
                 this.setC_title("copy_" + this.getC_title());
             }

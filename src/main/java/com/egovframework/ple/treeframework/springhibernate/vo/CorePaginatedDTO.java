@@ -9,7 +9,7 @@ import javax.persistence.Transient;
 import java.io.Serializable;
 
 @MappedSuperclass
-public abstract class JsTreeHibernatePaginatedDTO extends JsTreeHibernateBaseDTO implements Serializable{
+public abstract class CorePaginatedDTO extends CoreBaseDTO implements Serializable{
 
 	/** 검색조건 */
 	@JsonIgnore
@@ -58,14 +58,14 @@ public abstract class JsTreeHibernatePaginatedDTO extends JsTreeHibernateBaseDTO
 	@JsonIgnore
 	PaginationInfo paginationInfo = new PaginationInfo();
     
-	public JsTreeHibernatePaginatedDTO() {
+	public CorePaginatedDTO() {
 		super();
     	paginationSetting();
 	}
 	
-	public JsTreeHibernatePaginatedDTO(String searchCondition, String searchKeyword, String searchUseYn, int pageIndex,
-			int pageUnit, int pageSize, int firstIndex, int lastIndex, int recordCountPerPage,
-			String searchKeywordFrom, String searchKeywordTo) {
+	public CorePaginatedDTO(String searchCondition, String searchKeyword, String searchUseYn, int pageIndex,
+							int pageUnit, int pageSize, int firstIndex, int lastIndex, int recordCountPerPage,
+							String searchKeywordFrom, String searchKeywordTo) {
 		super();
 		this.searchCondition = searchCondition;
 		this.searchKeyword = searchKeyword;

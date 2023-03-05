@@ -11,8 +11,8 @@
  */
 package com.arms.filerepository.model;
 
-import com.egovframework.ple.treeframework.springhibernate.vo.JsTreeHibernateDTO;
-import com.egovframework.ple.treeframework.springhibernate.vo.JsTreeHibernateSearchDTO;
+import com.egovframework.ple.treeframework.springhibernate.vo.CoreDTO;
+import com.egovframework.ple.treeframework.springhibernate.vo.CoreSearchDTO;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;
@@ -31,7 +31,7 @@ import java.io.Serializable;
 @DynamicUpdate(value=true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SequenceGenerator(name = "S_T_ARMS_FILEREPOSITORY", sequenceName = "S_T_ARMS_FILEREPOSITORY", allocationSize = 1)
-public class FileRepositoryDTO extends JsTreeHibernateSearchDTO implements Serializable {
+public class FileRepositoryDTO extends CoreSearchDTO implements Serializable {
 
     public FileRepositoryDTO() {
         super();
@@ -185,8 +185,8 @@ public class FileRepositoryDTO extends JsTreeHibernateSearchDTO implements Seria
     }
 
     @Override
-    public <T extends JsTreeHibernateSearchDTO> void setFieldFromNewInstance(T paramInstance) {
-        if( paramInstance instanceof JsTreeHibernateDTO){
+    public <T extends CoreSearchDTO> void setFieldFromNewInstance(T paramInstance) {
+        if( paramInstance instanceof CoreDTO){
             if(paramInstance.isCopied()) {
                 this.setC_title("copy_" + this.getC_title());
             }

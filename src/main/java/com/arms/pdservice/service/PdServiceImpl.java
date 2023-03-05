@@ -12,7 +12,7 @@
 package com.arms.pdservice.service;
 
 import com.arms.pdservice.model.PdServiceDTO;
-import com.egovframework.ple.treeframework.springhibernate.service.JsTreeHibernateServiceImpl;
+import com.egovframework.ple.treeframework.springhibernate.service.CoreServiceImpl;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service("pdService")
-public class PdServiceImpl extends JsTreeHibernateServiceImpl implements PdService {
+public class PdServiceImpl extends CoreServiceImpl implements PdService {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 

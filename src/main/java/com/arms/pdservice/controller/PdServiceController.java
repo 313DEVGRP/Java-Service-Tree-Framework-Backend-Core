@@ -17,7 +17,7 @@ import com.arms.pdservice.service.PdService;
 import com.arms.pdserviceversion.model.PdServiceVersionDTO;
 import com.arms.pdserviceversion.service.PdServiceVersion;
 import com.egovframework.ple.treeframework.springhibernate.util.FileHandler;
-import com.egovframework.ple.treeframework.springhibernate.controller.SHVAbstractController;
+import com.egovframework.ple.treeframework.springhibernate.controller.CoreAbstractController;
 import com.egovframework.ple.treeframework.springhibernate.util.Util_TitleChecker;
 import com.egovframework.ple.treeframework.springhibernate.validation.group.AddNode;
 import com.egovframework.ple.treeframework.springhibernate.util.ParameterParser;
@@ -46,7 +46,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/pdService"})
-public class PdServiceController extends SHVAbstractController<PdService, PdServiceDTO> {
+public class PdServiceController extends CoreAbstractController<PdService, PdServiceDTO> {
 
     @Autowired
     @Qualifier("pdService")
@@ -62,7 +62,7 @@ public class PdServiceController extends SHVAbstractController<PdService, PdServ
 
     @PostConstruct
     public void initialize() {
-        setJsTreeHibernateService(pdService);
+        setCoreService(pdService);
     }
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

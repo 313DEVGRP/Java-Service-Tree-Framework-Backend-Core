@@ -14,7 +14,7 @@ package com.arms.filerepository.controller;
 import com.arms.filerepository.model.FileRepositoryDTO;
 import com.arms.filerepository.service.FileRepository;
 import com.egovframework.ple.treeframework.springhibernate.util.PropertiesReader;
-import com.egovframework.ple.treeframework.springhibernate.controller.SHVAbstractController;
+import com.egovframework.ple.treeframework.springhibernate.controller.CoreAbstractController;
 import com.egovframework.ple.treeframework.springhibernate.util.ParameterParser;
 import com.egovframework.ple.treeframework.springhibernate.util.EgovFormBasedFileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/fileRepository"})
-public class FileRepositoryController extends SHVAbstractController<FileRepository, FileRepositoryDTO> {
+public class FileRepositoryController extends CoreAbstractController<FileRepository, FileRepositoryDTO> {
 
     @Autowired
     @Qualifier("fileRepository")
@@ -47,7 +47,7 @@ public class FileRepositoryController extends SHVAbstractController<FileReposito
 
     @PostConstruct
     public void initialize() {
-        setJsTreeHibernateService(fileRepository);
+        setCoreService(fileRepository);
     }
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

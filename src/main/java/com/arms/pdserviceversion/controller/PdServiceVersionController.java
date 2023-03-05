@@ -14,7 +14,7 @@ package com.arms.pdserviceversion.controller;
 import com.arms.pdserviceversion.model.PdServiceVersionDTO;
 import com.arms.pdserviceversion.service.PdServiceVersion;
 import com.egovframework.ple.treeframework.springhibernate.util.StringUtility;
-import com.egovframework.ple.treeframework.springhibernate.controller.SHVAbstractController;
+import com.egovframework.ple.treeframework.springhibernate.controller.CoreAbstractController;
 import com.egovframework.ple.treeframework.springhibernate.util.ParameterParser;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/pdServiceVersion"})
-public class PdServiceVersionController extends SHVAbstractController<PdServiceVersion, PdServiceVersionDTO> {
+public class PdServiceVersionController extends CoreAbstractController<PdServiceVersion, PdServiceVersionDTO> {
 
     @Autowired
     @Qualifier("pdServiceVersion")
@@ -45,7 +45,7 @@ public class PdServiceVersionController extends SHVAbstractController<PdServiceV
 
     @PostConstruct
     public void initialize() {
-        setJsTreeHibernateService(pdServiceVersion);
+        setCoreService(pdServiceVersion);
     }
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

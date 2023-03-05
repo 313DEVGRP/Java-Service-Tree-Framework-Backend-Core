@@ -11,9 +11,8 @@
  */
 package com.arms.pdserviceversion.model;
 
-import com.egovframework.ple.treeframework.springhibernate.vo.JsTreeHibernateDTO;
-import com.egovframework.ple.treeframework.springhibernate.vo.JsTreeHibernateSearchDTO;
-import lombok.AllArgsConstructor;
+import com.egovframework.ple.treeframework.springhibernate.vo.CoreDTO;
+import com.egovframework.ple.treeframework.springhibernate.vo.CoreSearchDTO;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
@@ -33,7 +32,7 @@ import java.io.Serializable;
 @DynamicUpdate(value=true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SequenceGenerator(name = "S_T_ARMS_PDSERVICEVERSION", sequenceName = "S_T_ARMS_PDSERVICEVERSION", allocationSize = 1)
-public class PdServiceVersionDTO extends JsTreeHibernateSearchDTO implements Serializable {
+public class PdServiceVersionDTO extends CoreSearchDTO implements Serializable {
 
     public PdServiceVersionDTO() {
         super();
@@ -87,8 +86,8 @@ public class PdServiceVersionDTO extends JsTreeHibernateSearchDTO implements Ser
     }
 
     @Override
-    public <T extends JsTreeHibernateSearchDTO> void setFieldFromNewInstance(T paramInstance) {
-        if( paramInstance instanceof JsTreeHibernateDTO){
+    public <T extends CoreSearchDTO> void setFieldFromNewInstance(T paramInstance) {
+        if( paramInstance instanceof CoreDTO){
             if(paramInstance.isCopied()) {
                 this.setC_title("copy_" + this.getC_title());
             }

@@ -12,11 +12,11 @@
 package com.arms.pdservice.service;
 
 import com.arms.pdservice.model.PdServiceDTO;
-import com.egovframework.ple.treeframework.springhibernate.service.JsTreeHibernateService;
+import com.egovframework.ple.treeframework.springhibernate.service.CoreService;
 
 import java.util.List;
 
-public interface PdService extends JsTreeHibernateService {
+public interface PdService extends CoreService {
 
     public List<PdServiceDTO> getNodesWithoutRoot(PdServiceDTO pdServiceDTO) throws Exception;
 

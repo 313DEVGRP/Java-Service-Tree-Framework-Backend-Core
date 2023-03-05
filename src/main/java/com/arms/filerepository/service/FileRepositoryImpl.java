@@ -11,13 +11,13 @@
  */
 package com.arms.filerepository.service;
 
-import com.egovframework.ple.treeframework.springhibernate.service.JsTreeHibernateServiceImpl;
+import com.egovframework.ple.treeframework.springhibernate.service.CoreServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service("fileRepository")
-public class FileRepositoryImpl extends JsTreeHibernateServiceImpl implements FileRepository{
+public class FileRepositoryImpl extends CoreServiceImpl implements FileRepository{
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 

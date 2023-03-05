@@ -1,6 +1,5 @@
 package com.egovframework.ple.treeframework.springhibernate.vo;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.*;
@@ -20,13 +19,13 @@ import java.io.Serializable;
 @DynamicUpdate(value=true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SequenceGenerator(name = "S_COMPREHENSIVETREE_HIBER", sequenceName = "S_COMPREHENSIVETREE_HIBER", allocationSize = 1)
-public class JsTreeHibernateDTO extends JsTreeHibernateSearchDTO implements Serializable {
+public class CoreDTO extends CoreSearchDTO implements Serializable {
 
-	public JsTreeHibernateDTO() {
+	public CoreDTO() {
 		super();
 	}
 
-	public JsTreeHibernateDTO(Boolean copyBooleanValue) {
+	public CoreDTO(Boolean copyBooleanValue) {
 		super();
 		this.copyBooleanValue = copyBooleanValue;
 	}
@@ -60,9 +59,9 @@ public class JsTreeHibernateDTO extends JsTreeHibernateSearchDTO implements Seri
 	}
 
 	@Override
-	public <T extends JsTreeHibernateSearchDTO> void setFieldFromNewInstance(T paramInstance) {
+	public <T extends CoreSearchDTO> void setFieldFromNewInstance(T paramInstance) {
 		
-		if( paramInstance instanceof JsTreeHibernateDTO){
+		if( paramInstance instanceof CoreDTO){
 			if(paramInstance.isCopied()) {
 				this.setC_title("copy_" + this.getC_title());
 			}

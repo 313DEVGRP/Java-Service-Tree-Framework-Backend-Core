@@ -1,6 +1,6 @@
 package com.egovframework.ple.treeframework.springhibernate.dao;
 
-import com.egovframework.ple.treeframework.springhibernate.vo.JsTreeHibernateSearchDTO;
+import com.egovframework.ple.treeframework.springhibernate.vo.CoreSearchDTO;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.*;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public abstract class JsTreeHibernateAbstractDao<T extends JsTreeHibernateSearchDTO, ID extends Serializable> extends HibernateDaoSupport {
+public abstract class CoreAbstractDao<T extends CoreSearchDTO, ID extends Serializable> extends HibernateDaoSupport {
 
 	@Resource(name = "sessionFactory")
     public void init(SessionFactory sessionFactory) {

@@ -8,7 +8,7 @@ import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.*;
 
-public abstract class JsTreeHibernateSearchDTO extends JsTreeHibernatePaginatedDTO implements Serializable {
+public abstract class CoreSearchDTO extends CorePaginatedDTO implements Serializable {
 
 	@JsonIgnore
 	private List<Order> order = new ArrayList<>();
@@ -21,12 +21,12 @@ public abstract class JsTreeHibernateSearchDTO extends JsTreeHibernatePaginatedD
 	@JsonIgnore
 	private int whereCount = 0;
 
-	public JsTreeHibernateSearchDTO() {
+	public CoreSearchDTO() {
 		super();
 	}
 
-	public JsTreeHibernateSearchDTO(List<Order> order, List<Criterion> criterions, Projection projection,
-			Map<String, Object> whereMap, int whereCount) {
+	public CoreSearchDTO(List<Order> order, List<Criterion> criterions, Projection projection,
+						 Map<String, Object> whereMap, int whereCount) {
 		super();
 		this.order = order;
 		this.criterions = criterions;
@@ -35,7 +35,7 @@ public abstract class JsTreeHibernateSearchDTO extends JsTreeHibernatePaginatedD
 		this.whereCount = whereCount;
 	}
 	
-	public abstract <T extends JsTreeHibernateSearchDTO> void setFieldFromNewInstance(T paramInstance);
+	public abstract <T extends CoreSearchDTO> void setFieldFromNewInstance(T paramInstance);
 
 	@Transient
 	public List<Order> getOrder() {

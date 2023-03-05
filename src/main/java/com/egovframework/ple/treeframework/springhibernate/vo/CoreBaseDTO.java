@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 @MappedSuperclass
-public abstract class JsTreeHibernateBaseDTO implements Serializable {
+public abstract class CoreBaseDTO implements Serializable {
 
 	/** 노드의 고유 id, 1부터 시작(Root Node) */
 	private Long c_id;
@@ -59,7 +59,7 @@ public abstract class JsTreeHibernateBaseDTO implements Serializable {
 
 	private long rightPositionFromNodeByRef;
 
-	private JsTreeHibernateBaseDTO nodeById;
+	private CoreBaseDTO nodeById;
 
 	private long idifLeft;
 	private long idifRight;
@@ -67,17 +67,17 @@ public abstract class JsTreeHibernateBaseDTO implements Serializable {
 	private long id;
 	private final HashMap<String, String> attr;
 
-	public JsTreeHibernateBaseDTO() {
+	public CoreBaseDTO() {
 		super();
 		attr = new HashMap<String, String>();
 	}
 
-	public JsTreeHibernateBaseDTO(Long c_id, Long c_parentid, Long c_position, Long c_left,
-                                  Long c_right, Long c_level, String c_title, String c_type, long ref, long copy, long multiCounter,
-                                  long status, String ajaxMessage, String childcount, String searchStr, long idif, long ldif,
-                                  long spaceOfTargetNode, Collection<Long> c_idsByChildNodeFromNodeById, long fixCopyId,
-                                  long fixCopyPosition, long rightPositionFromNodeByRef, JsTreeHibernateBaseDTO nodeById, long idifLeft,
-                                  long idifRight, long id) {
+	public CoreBaseDTO(Long c_id, Long c_parentid, Long c_position, Long c_left,
+					   Long c_right, Long c_level, String c_title, String c_type, long ref, long copy, long multiCounter,
+					   long status, String ajaxMessage, String childcount, String searchStr, long idif, long ldif,
+					   long spaceOfTargetNode, Collection<Long> c_idsByChildNodeFromNodeById, long fixCopyId,
+					   long fixCopyPosition, long rightPositionFromNodeByRef, CoreBaseDTO nodeById, long idifLeft,
+					   long idifRight, long id) {
 		super();
 		this.c_id = c_id;
 		this.c_parentid = c_parentid;
@@ -334,11 +334,11 @@ public abstract class JsTreeHibernateBaseDTO implements Serializable {
 	}
 
 	@Transient
-	public JsTreeHibernateBaseDTO getNodeById() {
+	public CoreBaseDTO getNodeById() {
 		return nodeById;
 	}
 
-	public void setNodeById(JsTreeHibernateBaseDTO nodeById) {
+	public void setNodeById(CoreBaseDTO nodeById) {
 		this.nodeById = nodeById;
 	}
 
