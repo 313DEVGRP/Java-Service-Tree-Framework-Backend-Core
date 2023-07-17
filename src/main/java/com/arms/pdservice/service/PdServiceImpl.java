@@ -14,6 +14,7 @@ package com.arms.pdservice.service;
 import com.arms.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.filerepository.model.FileRepositoryEntity;
 import com.arms.filerepository.service.FileRepository;
+import com.arms.pdservice.model.PdServiceD3Chart;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.pdserviceversion.service.PdServiceVersion;
@@ -272,5 +273,49 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
         this.updateNode(pdService);
         return pdService;
+    }
+
+    @Override
+    public PdServiceD3Chart getD3ChartData() throws Exception {
+        PdServiceEntity pdServiceEntity = new PdServiceEntity();
+        List<PdServiceEntity> pdServiceEntityList = this.getNodesWithoutRoot(pdServiceEntity);
+
+        if (!pdServiceEntityList.isEmpty()) {
+            List<PdServiceD3Chart> returnList = new ArrayList<>();
+            for (PdServiceEntity entity : pdServiceEntityList) {
+                Set<PdServiceVersionEntity> versionEntitySet = entity.getPdServiceVersionEntities();
+                List<PdServiceD3Chart> versionEntityList = new ArrayList<>();
+
+                if (!versionEntitySet.isEmpty()) {
+                    for (PdServiceVersionEntity versionEntity : versionEntitySet) {
+                        versionEntityList.add(
+                                PdServiceD3Chart.builder()
+                                        .type("Version")
+                                        .name(versionEntity.getC_title())
+                                        .build()
+                        );
+                    }
+                    returnList.add(
+                            PdServiceD3Chart.builder()
+                                    .type("PdService")
+                                    .name(entity.getC_title())
+                                    .children(versionEntityList)
+                                    .build()
+                    );
+                } else {
+                    returnList.add(
+                            PdServiceD3Chart.builder()
+                                    .type("PdService")
+                                    .name(entity.getC_title())
+                                    .build()
+                    );
+                }
+            }
+            return PdServiceD3Chart.builder()
+                    .name("a-RMS")
+                    .children(returnList)
+                    .build();
+        }
+        return null;
     }
 }

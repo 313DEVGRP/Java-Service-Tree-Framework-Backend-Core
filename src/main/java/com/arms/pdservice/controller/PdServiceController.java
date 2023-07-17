@@ -165,4 +165,10 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return modelAndView;
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/getD3ChartData.do", method = RequestMethod.GET)
+    public ResponseEntity<?> getD3ChartData() throws Exception {
+        return ResponseEntity.ok(CommonResponse.success(pdService.getD3ChartData()));
+    }
+
 }

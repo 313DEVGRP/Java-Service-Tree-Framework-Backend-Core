@@ -12,6 +12,7 @@
 package com.arms.pdservice.service;
 
 import com.arms.filerepository.model.FileRepositoryEntity;
+import com.arms.pdservice.model.PdServiceD3Chart;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
@@ -33,5 +34,7 @@ public interface PdService extends TreeService {
     public Set<FileRepositoryEntity> uploadFileForPdServiceNode(Long pdservice_link, MultipartHttpServletRequest multiRequest) throws Exception;
 
     public PdServiceEntity removeVersionNode(Long pdServiceID, Long versionID) throws Exception;
+
+    public PdServiceD3Chart getD3ChartData() throws Exception;
 
 }
