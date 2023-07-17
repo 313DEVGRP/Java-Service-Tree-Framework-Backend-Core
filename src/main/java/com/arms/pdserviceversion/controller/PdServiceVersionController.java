@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -79,15 +80,16 @@ public class PdServiceVersionController extends TreeAbstractController<PdService
         return modelAndView;
     }
 
-    @RequestMapping(value="/updateVersionNode.do", method= RequestMethod.POST)
-    public ModelAndView updateVersionNode(PdServiceVersionDTO pdServiceVersionDTO,
+    @RequestMapping(value="/updateVersionNode.do", method= RequestMethod.PUT)
+    public ModelAndView updateVersionNode(@RequestBody PdServiceVersionDTO pdServiceVersionDTO,
                                           BindingResult bindingResult) throws Exception {
 
         log.info("PdServiceVersionController :: updateVersionNode");
         PdServiceVersionEntity pdServiceVersionEntity = modelMapper.map(pdServiceVersionDTO, PdServiceVersionEntity.class);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", pdServiceVersion.updateNode(pdServiceVersionEntity));
+
+        modelAndView.addObject("result", pdServiceVersion.updateVersionNode(pdServiceVersionEntity));
 
         return modelAndView;
     }

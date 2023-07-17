@@ -11,16 +11,22 @@
  */
 package com.arms.pdserviceversion.service;
 
+import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.egovframework.javaservice.treeframework.util.StringUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service("pdServiceVersion")
 public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVersion{
@@ -48,6 +54,15 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         logger.info("UserPdServiceVersionController ::  getVersions :: pdServiceVersionDTOS = " + pdServiceVersionEntities.size());
 
         return pdServiceVersionEntities;
+    }
+
+    @Override
+    @Transactional
+    public PdServiceVersionEntity updateVersionNode(PdServiceVersionEntity pdServiceVersionEntity) throws Exception {
+
+        this.updateNode(pdServiceVersionEntity);
+
+        return pdServiceVersionEntity;
     }
 
 }
