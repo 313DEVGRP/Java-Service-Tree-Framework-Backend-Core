@@ -12,6 +12,7 @@
 package com.arms.reqadd.model;
 
 import com.arms.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.reqpriority.model.ReqPriorityEntity;
 import com.arms.reqstate.model.ReqStateEntity;
@@ -53,6 +54,37 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     }
 
     //@Getter @Setter
+
+    // -- 1:1 Row 단방향 연계 - PdService
+    private PdServiceEntity pdServiceEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_pdservice_link", referencedColumnName = "c_id")
+    public PdServiceEntity getPdServiceEntity() {
+        return pdServiceEntity;
+    }
+
+    public void setPdServiceEntity(PdServiceEntity pdServiceEntity) {
+        this.pdServiceEntity = pdServiceEntity;
+    }
+
+    // -- 1:N table 연계
+    private Set<PdServiceVersionEntity> pdServiceVersionEntities;
+
+    @Transient
+    public Set<PdServiceVersionEntity> getPdServiceVersionEntities() {
+        return pdServiceVersionEntities;
+    }
+
+    public void setPdServiceVersionEntities(Set<PdServiceVersionEntity> pdServiceVersionEntities) {
+        this.pdServiceVersionEntities = pdServiceVersionEntities;
+    }
+
+    @Column(name = "c_req_pdservice_versionset_link")
+    @Type(type="text")
+    private String c_req_pdservice_versionset_link;
 
     @Column(name = "c_req_reviewer01")
     @Type(type="text")
@@ -101,49 +133,40 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_create_date;
 
-    @Column(name = "c_req_priority_link")
-    private Long c_req_priority_link;
+//    @Column(name = "c_req_priority_link")
+//    private Long c_req_priority_link;
+//
+//    @Column(name = "c_req_state_link")
+//    private Long c_req_state_link;
 
-    @Column(name = "c_req_state_link")
-    private Long c_req_state_link;
-
+    //내용
     @Lob
     @Column(name = "c_req_contents")
-    @Type(type="text")
     private String c_req_contents;
 
-    @Column(name = "c_req_etc")
+    //설명
+    @Column(name = "c_req_desc")
     @Type(type="text")
+    private String c_req_desc;
+
+    //비고
+    @Column(name = "c_req_etc")
     private String c_req_etc;
 
     // -- 1:1 table 연계
-    // 동적 테이블 이기때문에 글로벌 트리맵에 joinColumns 에 추가하기엔 너무 큰 리소스 코드가 들어가서
+    // 동적 테이블 이기때문에 글로벌 트리맵에 joinColumns 에 추가하기엔
+    // 중복 req c_id 때문에 처리가 불가능하다.
     // 프로그래밍 적인 코드 릴레이션을 처리한다.
     // 대신에 onetoone 처리도 잘 되는걸 확인했다.
     // 글로벌 트리맵에서 관리하도록 하자.
 
-    //
-    //    @LazyCollection(LazyCollectionOption.FALSE)
-    //    @JsonManagedReference
-    //    @OneToOne
-    //    @JoinTable(
-    //            name = "GLOBAL_TREE_MAP",
-    //            joinColumns = @JoinColumn(name = "reqadd_link"),
-    //            inverseJoinColumns = @JoinColumn(name = "reqpriority_link")
-    //    )
-    //    @WhereJoinTable( clause = "reqpriority_link is not null and pdservice_link = 10" )
-    //    public ReqPriorityEntity getReqPriorityEntity() {
-    //        return reqPriorityEntity;
-    //    }
-    //
-    //    public void setReqPriorityEntity(ReqPriorityEntity reqPriorityEntity) {
-    //        this.reqPriorityEntity = reqPriorityEntity;
-    //    }
-
     // -- 1:1 Row 단방향 연계
     private ReqPriorityEntity reqPriorityEntity;
 
-    @Transient
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
     public ReqPriorityEntity getReqPriorityEntity() {
         return reqPriorityEntity;
     }
@@ -152,10 +175,14 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
         this.reqPriorityEntity = reqPriorityEntity;
     }
 
+
     // -- 1:1 Row 단방향 연계
     private ReqStateEntity reqStateEntity;
 
-    @Transient
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_state_link", referencedColumnName = "c_id")
     public ReqStateEntity getReqStateEntity() {
         return reqStateEntity;
     }

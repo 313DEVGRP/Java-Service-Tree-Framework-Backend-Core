@@ -20,11 +20,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
     `jiraissuepriority_link`                bigint(20) default NULL COMMENT '지라 이슈 우선순위',
     `jiraissueresolution_link`              bigint(20) default NULL COMMENT '지라 이슈 해결책',
     `jiraissuestatus_link`                  bigint(20) default NULL COMMENT '지라 이슈 상태',
-    `jiraissuetype_link`                    bigint(20) default NULL COMMENT '지라 이슈 타입',
-
-    `reqadd_link`                           bigint(20) default NULL COMMENT '요구사항',
-    `reqpriority_link`                      bigint(20) default NULL COMMENT '요구사항 우선순위',
-    `reqstate_link`                        bigint(20) default NULL COMMENT '요구사항 상태값'
+    `jiraissuetype_link`                    bigint(20) default NULL COMMENT '지라 이슈 타입'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='트리 맵';
 
@@ -1092,6 +1088,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
     `c_date`                    date NULL COMMENT '노드 변경 시',
 
+    `c_req_pdservice_link`              bigint(20) NULL,
+    `c_req_pdservice_versionset_link`   text NULL,
+
     `c_req_reviewer01`          text NULL,
     `c_req_reviewer01_status`   text NULL,
     `c_req_reviewer02`          text NULL,
@@ -1105,9 +1104,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
     `c_req_writer`              text NULL,
     `c_req_create_date`         text NULL,
     `c_req_priority_link`       bigint(20) NULL,
-    `c_req_contents`            longtext NULL,
-    `c_req_etc`                 text NULL,
-    `c_req_state_link`          bigint(20) NULL
+    `c_req_state_link`          bigint(20) NULL,
+
+    `c_req_etc`                 varchar(255)    COMMENT '비고',
+    `c_req_desc`                text            COMMENT '설명',
+    `c_req_contents`            longtext        COMMENT '내용'
+
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 트리거 로그';
 
@@ -1123,6 +1125,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD` (
     `c_title`                   VARCHAR(255) COMMENT '노드 명',
     `c_type`                    VARCHAR(255) COMMENT '노드 타입',
 
+    `c_req_pdservice_link`              bigint(20) NULL,
+    `c_req_pdservice_versionset_link`   text NULL,
+
     `c_req_reviewer01`          text NULL,
     `c_req_reviewer01_status`   text NULL,
     `c_req_reviewer02`          text NULL,
@@ -1136,9 +1141,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD` (
     `c_req_writer`              text NULL,
     `c_req_create_date`         text NULL,
     `c_req_priority_link`       bigint(20) NULL,
-    `c_req_contents`            longtext NULL,
-    `c_req_etc`                 text NULL,
-    `c_req_state_link`          bigint(20) NULL
+    `c_req_state_link`          bigint(20) NULL,
+
+    `c_req_etc`                 varchar(255)    COMMENT '비고',
+    `c_req_desc`                text            COMMENT '설명',
+    `c_req_contents`            longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항';
 
