@@ -80,18 +80,4 @@ public class PdServiceVersionController extends TreeAbstractController<PdService
         return modelAndView;
     }
 
-    @RequestMapping(value="/updateVersionNode.do", method= RequestMethod.PUT)
-    public ModelAndView updateVersionNode(@RequestBody PdServiceVersionDTO pdServiceVersionDTO,
-                                          BindingResult bindingResult) throws Exception {
-
-        log.info("PdServiceVersionController :: updateVersionNode");
-        PdServiceVersionEntity pdServiceVersionEntity = modelMapper.map(pdServiceVersionDTO, PdServiceVersionEntity.class);
-
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-
-        modelAndView.addObject("result", pdServiceVersion.updateVersionNode(pdServiceVersionEntity));
-
-        return modelAndView;
-    }
-
 }

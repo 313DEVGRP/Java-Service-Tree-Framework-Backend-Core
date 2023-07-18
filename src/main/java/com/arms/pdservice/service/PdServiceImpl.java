@@ -172,6 +172,29 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
     @Override
     @Transactional
+    public PdServiceEntity updatePdServiceVersion(Long pdservice_link, PdServiceVersionEntity pdServiceVersionEntity) throws Exception {
+
+        PdServiceEntity searchNode = new PdServiceEntity();
+        searchNode.setC_id(pdservice_link);
+        PdServiceEntity savedNode = this.getNode(searchNode);
+
+        Set<PdServiceVersionEntity> versionEntityList = savedNode.getPdServiceVersionEntities();
+        for ( PdServiceVersionEntity versionEntity : versionEntityList){
+            if(versionEntity.getC_id().equals(pdServiceVersionEntity.getC_id())){
+                versionEntity.setC_pds_version_start_date(pdServiceVersionEntity.getC_pds_version_start_date());
+                versionEntity.setC_pds_version_end_date(pdServiceVersionEntity.getC_pds_version_end_date());
+                versionEntity.setC_pds_version_etc(pdServiceVersionEntity.getC_pds_version_etc());
+                versionEntity.setC_pds_version_contents(pdServiceVersionEntity.getC_pds_version_contents());
+                pdServiceVersion.updateNode(versionEntity);
+            }
+        }
+
+
+        return savedNode;
+    }
+
+    @Override
+    @Transactional
     public Set<FileRepositoryEntity> uploadFileForPdServiceNode(Long pdservice_link, MultipartHttpServletRequest multiRequest) throws Exception {
 
         Set<FileRepositoryEntity> fileEntitySet = upload(multiRequest, fileRepository);

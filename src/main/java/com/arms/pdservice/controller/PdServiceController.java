@@ -84,6 +84,23 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return ResponseEntity.ok(CommonResponse.success(pdService.addPdServiceVersion(pdServiceEntity)));
     }
 
+    @RequestMapping(value="/updateVersionToNode.do", method= RequestMethod.PUT)
+    public ModelAndView updateVersionNode(@RequestBody PdServiceVersionDTO pdServiceVersionDTO,
+                                          BindingResult bindingResult, HttpServletRequest request) throws Exception {
+
+        log.info("PdServiceVersionController :: updateVersionNode");
+        PdServiceVersionEntity pdServiceVersionEntity = modelMapper.map(pdServiceVersionDTO, PdServiceVersionEntity.class);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+
+        ParameterParser parser = new ParameterParser(request);
+        long pdservice_link = parser.getLong("pdservice_link");
+
+        modelAndView.addObject("result", pdService.updatePdServiceVersion(pdservice_link, pdServiceVersionEntity));
+
+        return modelAndView;
+    }
+
     @ResponseBody
     @RequestMapping(value = "/addEndNodeByRoot.do", method = RequestMethod.POST)
     public ResponseEntity<?> addEndNodeByRoot(@RequestBody PdServiceDTO pdServiceDTO,
