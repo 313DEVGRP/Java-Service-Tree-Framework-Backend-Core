@@ -56,13 +56,4 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         return pdServiceVersionEntities;
     }
 
-    @Override
-    @Transactional
-    public PdServiceVersionEntity updateVersionNode(PdServiceVersionEntity pdServiceVersionEntity) throws Exception {
-
-        this.updateNode(pdServiceVersionEntity);
-
-        return pdServiceVersionEntity;
-    }
-
 }
