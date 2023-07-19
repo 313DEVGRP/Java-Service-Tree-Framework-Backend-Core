@@ -15,6 +15,9 @@ import javax.persistence.Lob;
 @AllArgsConstructor
 public class ReqAddDTO extends TreeBaseDTO {
 
+    private Long c_req_pdservice_link;
+    
+    private String c_req_pdservice_versionset_link;
 
     private String c_req_reviewer01;
 
@@ -45,6 +48,8 @@ public class ReqAddDTO extends TreeBaseDTO {
     private Long c_req_state_link;
 
     private String c_req_contents;
+
+    private String c_req_desc;
 
     private String c_req_etc;
 }
