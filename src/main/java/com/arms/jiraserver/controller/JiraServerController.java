@@ -13,19 +13,25 @@ package com.arms.jiraserver.controller;
 
 import com.arms.jiraserver.model.JiraServerDTO;
 import com.arms.jiraserverlog.model.JiraServerLogEntity;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import com.arms.jiraserver.model.JiraServerEntity;
 import com.arms.jiraserver.service.JiraServer;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @Controller
@@ -44,4 +50,12 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/miningDataToaRMS.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> miningDataToaRMS(ModelMap model, HttpServletRequest request) throws Exception {
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.miningDataToaRMS()));
+    }
 }
