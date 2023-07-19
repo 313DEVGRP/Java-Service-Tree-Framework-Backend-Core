@@ -85,7 +85,7 @@ public class JiraIssueStatusImpl extends TreeServiceImpl implements JiraIssueSta
 			}
 		}
 
-		return "Jira issue Resolution Data Mining Complete";
+		return "Jira issue Status Data Mining Complete";
 	}
 
 }
