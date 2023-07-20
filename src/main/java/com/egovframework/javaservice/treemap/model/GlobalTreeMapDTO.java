@@ -46,9 +46,4 @@ public class GlobalTreeMapDTO {
 
     private Long jiraissuetype_link;
 
-    private Long reqadd_link;
-
-    private Long reqpriority_link;
-
-    private Long reqstate_link;
 }

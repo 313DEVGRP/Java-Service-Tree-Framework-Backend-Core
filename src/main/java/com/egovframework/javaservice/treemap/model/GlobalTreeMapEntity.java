@@ -67,13 +67,4 @@ public class GlobalTreeMapEntity implements Serializable {
     @Column(name = "jiraissuetype_link")
     private Long jiraissuetype_link;
 
-    @Column(name = "reqadd_link")
-    private Long reqadd_link;
-
-    @Column(name = "reqpriority_link")
-    private Long reqpriority_link;
-
-    @Column(name = "reqstate_link")
-    private Long reqstate_link;
-
 }
