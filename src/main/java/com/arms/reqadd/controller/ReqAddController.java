@@ -11,6 +11,8 @@
  */
 package com.arms.reqadd.controller;
 
+import com.arms.pdservice.model.PdServiceEntity;
+import com.arms.pdservice.service.PdService;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.pdsreqjiraissuelog.model.PdsReqJiraIssueLogEntity;
 import com.arms.reqadd.model.ReqAddDTO;
@@ -18,6 +20,8 @@ import com.arms.reqadd.model.ReqAddEntity;
 import com.arms.reqadd.service.ReqAdd;
 import com.arms.reqpriority.model.ReqPriorityEntity;
 import com.arms.reqpriority.service.ReqPriority;
+import com.arms.reqstate.model.ReqStateEntity;
+import com.arms.reqstate.service.ReqState;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -52,6 +56,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     @Qualifier("reqAdd")
     private ReqAdd reqAdd;
+
+    @Autowired
+    @Qualifier("pdService")
+    private PdService pdService;
 
     @PostConstruct
     public void initialize() {
@@ -118,6 +126,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Qualifier("reqPriority")
     private ReqPriority reqPriority;
 
+    @Autowired
+    @Qualifier("reqState")
+    private ReqState reqState;
+
     @ResponseBody
     @RequestMapping(
             value = {"/{changeReqTableName}/getNode.do"},
@@ -165,6 +177,22 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         log.info("ReqAddController :: addReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        PdServiceEntity pdServiceEntity = new PdServiceEntity();
+        pdServiceEntity.setC_id(reqAddDTO.getC_req_pdservice_link());
+        PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);
+        reqAddEntity.setPdServiceEntity(savedPdService);
+
+        ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
+        reqPriorityEntity.setC_id(3L);
+        ReqPriorityEntity priorityEntity = reqPriority.getNode(reqPriorityEntity);
+        reqAddEntity.setReqPriorityEntity(priorityEntity);
+
+        ReqStateEntity reqStateEntity = new ReqStateEntity();
+        reqStateEntity.setC_id(3L);
+        ReqStateEntity stateEntity = reqState.getNode(reqStateEntity);
+        reqAddEntity.setReqStateEntity(stateEntity);
+
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
