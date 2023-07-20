@@ -288,6 +288,7 @@ dependencies {
     implementation 'com.atlassian.httpclient:atlassian-httpclient-library:2.0.0'
     implementation 'com.atlassian.sal:sal-api:3.0.7'
 
+    implementation 'com.atlassian.jira:jira-rest-java-client-app:5.1.6'
     implementation 'com.atlassian.jira:jira-rest-java-client-api:5.1.6'
     implementation("com.atlassian.jira:jira-rest-java-client-core:5.1.6")
     compileOnly("io.atlassian.fugue:fugue:4.7.2")
