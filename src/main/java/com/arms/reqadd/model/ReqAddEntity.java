@@ -70,7 +70,7 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
         this.pdServiceEntity = pdServiceEntity;
     }
 
-    // -- 1:N table 연계
+    // -- 1:N table 연계는 Java Service Tree Framework 에서 파티셔닝 엔티티를 대상으로는 지원하지 않으므로. 개별 처리 대상
     private Set<PdServiceVersionEntity> pdServiceVersionEntities;
 
     @Transient

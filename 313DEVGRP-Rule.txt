@@ -116,3 +116,189 @@ boolean타입의 변수는 접두사로 is를 사용한다 Ex) isCheck
 이 시스템 인프라의 총 모듈 개수는 2개이다.
 
 컴포넌트의 경우 실제 동작하고 있는 엔티티를 의미하므로 총 101개가 된다.
+
+Entity 간의 릴레이션 관리 방안
+
+
+DB 정규화에 의하여, OneToMany 를 사용 해야한다면.
+아래와 같이 GLOBAL_TREE_MAP을 JoinTable로 사용하여, 연결하도록 한다. ( 단방향, 양방향 )
+
+
+
+// -- 1:N table 연계
+private Set<PdServiceVersionEntity> pdServiceVersionEntities;
+
+@LazyCollection(LazyCollectionOption.FALSE)
+@JsonManagedReference
+@OneToMany(cascade = CascadeType.ALL)
+@JoinTable(
+        name = "GLOBAL_TREE_MAP",
+        joinColumns = @JoinColumn(name = "pdservice_link"),
+        inverseJoinColumns = @JoinColumn(name = "pdserviceversion_link")
+)
+@WhereJoinTable( clause = "pdserviceversion_link is not null")
+public Set<PdServiceVersionEntity> getPdServiceVersionEntities() {
+    return pdServiceVersionEntities;
+}
+
+public void setPdServiceVersionEntities(Set<PdServiceVersionEntity> pdServiceVersionEntities) {
+    this.pdServiceVersionEntities = pdServiceVersionEntities;
+}
+
+
+
+
+동일한 Domain Data 인데, DB 정규화에 의하여, OneToOne 을 사용해야 한다면. 다음을 고려해야 한다.
+이 경우의 OneToOne은 매우 드물며, 설계 자체를 다시 점검해 볼 필요가 있다.
+
+
+두 엔티티가 동일한 Domain Data의 경우이며 OneToOne 을 사용하지 마십시오. 재검토 하십시오
+
+서로 다른 Domain Data 간의 연결 관계를 성립해야 할 때,
+Java Server Tree Framework 기반에서 OneToOne을 사용해야 한다면.
+아래와 같이 설정 할 수 있다.
+이 경우는 Entity 컬럼에 연결할 Key를 저장하는 방식이고
+이 방식은 사용하지 마십시오. 아래 GLOBAL_TREE_MAP을 사용하여 연결하는 방식을 사용하십시오.
+이유는 포스트 끝에 설명하겠습니다.
+
+
+
+ // -- 1:1 Row 단방향 연계
+private ReqPriorityEntity reqPriorityEntity;
+
+@LazyCollection(LazyCollectionOption.FALSE)
+@JsonManagedReference
+@OneToOne
+@JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
+public ReqPriorityEntity getReqPriorityEntity() {
+    return reqPriorityEntity;
+}
+
+public void setReqPriorityEntity(ReqPriorityEntity reqPriorityEntity) {
+    this.reqPriorityEntity = reqPriorityEntity;
+}
+
+GLOBAL_TREE_MAP을 사용하여 연결하는 방식은 아래와 같다.
+
+
+
+
+@Entity
+@Table(name = "employee")
+public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private Long id;
+
+    //...
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "emp_workstation",
+      joinColumns =
+        { @JoinColumn(name = "employee_id", referencedColumnName = "id") },
+      inverseJoinColumns =
+        { @JoinColumn(name = "workstation_id", referencedColumnName = "id") })
+    private WorkStation workStation;
+
+    //... getters and setters
+}
+
+@Entity
+@Table(name = "workstation")
+public class WorkStation {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private Long id;
+
+    //...
+
+    @OneToOne(mappedBy = "workStation")
+    private Employee employee;
+
+    //... getters and setters
+}
+
+
+동일한 Domain Data 인데, DB 정규화에 의하여, ManyToOne를 사용 해야한다면.
+아래와 같이 GLOBAL_TREE_MAP을 JoinTable로 사용하여, 연결하도록 한다. ( 양방향 )
+이경우는 OneToMany를 설정한 Parent Entity에 의한 설정이므로 양방향 설정을 의미하기도 한다.
+
+
+private PdServiceEntity pdServiceEntity;
+
+@ManyToOne
+@JsonBackReference
+@JoinTable(
+        name = "GLOBAL_TREE_MAP",
+        joinColumns = @JoinColumn(name = "pdserviceversion_link"),
+        inverseJoinColumns = @JoinColumn(name = "pdservice_link")
+)
+@WhereJoinTable( clause = "pdservice_link is not null")
+public PdServiceEntity getPdServiceEntity() {
+    return pdServiceEntity;
+}
+
+public void setPdServiceEntity(PdServiceEntity pdServiceEntity) {
+    this.pdServiceEntity = pdServiceEntity;
+}
+
+
+동일한 Domain Data 인데, DB 정규화에 의하여, ManyToMany를 사용 해야한다면.
+이 경우 역시 ManyToMany 관계는 매우 드물지만, 발생 할 가능성이 있다. ( 보통 서로다른 Domain Data )
+( 조직도를 생각할 때, 하나의 팀장이 특수한 사람을 포함하는 관계에서 다른팀에도 속하는 경우 )
+따라서, GLOBAL_TREE_MAP을 JoinTable로 사용하여, 연결하도록 한다. ( 양방향 )
+다만, 특수한 케이스이기 때문에 아래를 참고하여 구현하도록 한다.
+
+
+
+employee_project 는 GLOBAL_TREE_MAP으로 대치할 것
+
+
+@Entity
+@Table(name = "Employee")
+public class Employee {
+    // 단방향
+
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+        name = "Employee_Project",
+        joinColumns = { @JoinColumn(name = "employee_id") },
+        inverseJoinColumns = { @JoinColumn(name = "project_id") }
+    )
+    Set<Project> projects = new HashSet<>();
+
+    // standard constructor/getters/setters
+}
+
+@Entity
+@Table(name = "Project")
+public class Project {
+    // 양방향
+
+    @ManyToMany(mappedBy = "projects")
+    private Set<Employee> employees = new HashSet<>();
+
+    // standard constructors/getters/setters
+}
+
+
+Java Service Tree Framework 는 PLE 개발 방식을 준수하기 위해 노력하고 있습니다.
+
+Entity 간에 연결 관계를 Global Tree Map 하나로 처리하는 것은 성능에 영향을 주는 문제를 야기 할 수 있습니다. 네. 알고 있습니다. 다만, Global Tree Map Manager 가 ( 유틸리티 ) 현재 하나의 테이블을 기준으로 작성되어 있으므로, 메니저의 기능이 강화하면 분리된 테이블 형태로 관리 할 수 있도록 가이드를 업데이트 하겠습니다.
+
+상기 Entity 릴레이션 처리 방안은 Normal 한 Case . 즉 Java Service Tree Framework 를 활용한
+
+데이터 엔티티를 대상으로 하며, 예외 케이스가 존재합니다.
+
+바로, 동적으로 테이블을 확장하는 방식인 파티셔닝 테이블을 구성했을 때.
+
+Java Service Tree Framework는 해당 파티셔닝 테이블을 대상으로 하는 엔티티는
+
+Global Tree Map 범주에서 제외합니다.
+
+따라서, 지원할 수 있는 범주는. OneToOne 그것도 @JoinColumn 만을 지원하오니
+
+이점 참고하여 유의 해 주시기 바랍니다.

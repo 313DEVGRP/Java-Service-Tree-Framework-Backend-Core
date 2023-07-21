@@ -184,15 +184,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setPdServiceEntity(savedPdService);
 
         ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
-        reqPriorityEntity.setC_id(3L);
+        reqPriorityEntity.setC_id(reqAddDTO.getC_req_priority_link());
         ReqPriorityEntity priorityEntity = reqPriority.getNode(reqPriorityEntity);
         reqAddEntity.setReqPriorityEntity(priorityEntity);
 
         ReqStateEntity reqStateEntity = new ReqStateEntity();
-        reqStateEntity.setC_id(3L);
+        reqStateEntity.setC_id(reqAddDTO.getC_req_state_link());
         ReqStateEntity stateEntity = reqState.getNode(reqStateEntity);
         reqAddEntity.setReqStateEntity(stateEntity);
-
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
