@@ -31,6 +31,18 @@ public class Chat {
 		Global.chat = this;
 	}
 
+	public String sendMessageByEngine(String message) {
+
+		Browser.withAllSessions(new Runnable() {
+			@Override
+			public void run() {
+				ScriptSessions.addFunctionCall("dwr_callback","engine","engine", message,time());
+			}
+		});
+
+		return Global.SUCCESS;
+	}
+
 	@RemoteMethod
 	public String sendMessage(String message) {
 

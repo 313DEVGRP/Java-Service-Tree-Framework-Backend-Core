@@ -14,6 +14,7 @@ package com.egovframework.javaservice.treeframework.controller;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
+import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -27,13 +28,12 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +49,9 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
 
     @Autowired
     protected ModelMapper modelMapper;
+
+    @Autowired
+    private Chat chat;
 
     public void setTreeService(T treeService) {
         this.treeService = treeService;
@@ -299,6 +302,13 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
         return modelAndView;
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/send-message")
+    public ResponseEntity<?> sendMessage(@RequestParam("message") String message)  {
+        chat.sendMessageByEngine(message);
+        return ResponseEntity.ok(CommonResponse.success("OK"));
     }
 
 }
