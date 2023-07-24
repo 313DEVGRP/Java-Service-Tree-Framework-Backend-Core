@@ -68,6 +68,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         log.info("PdServiceController :: addPdServiceNode");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
 
+        chat.sendMessageByEngine("제품(서비스)가 추가되었습니다.");
+
         return ResponseEntity.ok(CommonResponse.success(pdService.addPdServiceAndVersion(pdServiceEntity)));
     }
 
@@ -80,6 +82,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
 
         log.info("PdServiceController :: addVersionToNode");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
+
+        chat.sendMessageByEngine("버전이 추가되었습니다.");
 
         return ResponseEntity.ok(CommonResponse.success(pdService.addPdServiceVersion(pdServiceEntity)));
     }

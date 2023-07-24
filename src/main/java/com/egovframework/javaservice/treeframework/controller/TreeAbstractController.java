@@ -51,7 +51,7 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
     protected ModelMapper modelMapper;
 
     @Autowired
-    private Chat chat;
+    protected Chat chat;
 
     public void setTreeService(T treeService) {
         this.treeService = treeService;
@@ -305,7 +305,7 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
     }
 
     @ResponseBody
-    @PostMapping(value = "/send-message")
+    @GetMapping(value = "/send-message")
     public ResponseEntity<?> sendMessage(@RequestParam("message") String message)  {
         chat.sendMessageByEngine(message);
         return ResponseEntity.ok(CommonResponse.success("OK"));
