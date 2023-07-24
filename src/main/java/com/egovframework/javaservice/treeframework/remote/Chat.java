@@ -36,7 +36,19 @@ public class Chat {
 		Browser.withAllSessions(new Runnable() {
 			@Override
 			public void run() {
-				ScriptSessions.addFunctionCall("dwr_callback","engine","engine", message,time());
+				ScriptSessions.addFunctionCall("dwr_callback","engine","engine", "[Engine] " + message + " " + time(),time());
+			}
+		});
+
+		return Global.SUCCESS;
+	}
+
+	public String sendMessageByServer(String message) {
+
+		Browser.withAllSessions(new Runnable() {
+			@Override
+			public void run() {
+				ScriptSessions.addFunctionCall("dwr_callback","engine","engine", "[Server] " + message + " " + time(),time());
 			}
 		});
 
