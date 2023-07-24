@@ -208,7 +208,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
             globalTreeMap.setFilerepository_link(file.getC_id());
             List<GlobalTreeMapEntity> searchList = globalTreeMapService.findAllBy(globalTreeMap);
             if ( searchList == null || searchList.isEmpty() ){
-                GlobalTreeMapEntity savedMap = globalTreeMapService.save(globalTreeMap);
+                GlobalTreeMapEntity savedMap = globalTreeMapService.saveOne(globalTreeMap);
                 fileCids.add(savedMap.getFilerepository_link());
             } else {
                 logger.info("already registe PdService = " + pdservice_link + " & FileRepo = " + globalTreeMap.getFilerepository_link());

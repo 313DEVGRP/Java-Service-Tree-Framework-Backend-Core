@@ -1,14 +1,11 @@
 package com.egovframework.javaservice.treemap.dao;
 
 import com.egovframework.javaservice.treemap.model.GlobalTreeMapEntity;
+import java.util.List;
+import javax.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
-
-import javax.persistence.EntityNotFoundException;
-import java.util.List;
 
 @Repository
 @AllArgsConstructor
@@ -16,14 +13,17 @@ public class GlobalTreeMapRepository {
 
     private final GlobalTreeMapJpaRepository globalTreeMapJpaRepository;
 
-    public GlobalTreeMapEntity save(GlobalTreeMapEntity globalTreeMapEntity) {
-        GlobalTreeMapEntity savedGlobalTreeMapEntity = globalTreeMapJpaRepository.save(globalTreeMapEntity);
-        return savedGlobalTreeMapEntity;
+    public List<GlobalTreeMapEntity> saveAll(List<GlobalTreeMapEntity> globalTreeMapEntity) {
+        return globalTreeMapJpaRepository.saveAll(globalTreeMapEntity);
     }
 
-    public Long delete(Long map_key) {
-        globalTreeMapJpaRepository.deleteById(map_key);
-        return map_key;
+    public void deleteAll(List<GlobalTreeMapEntity> globalTreeMapEntity) {
+        globalTreeMapJpaRepository.deleteAll(globalTreeMapEntity);
+    }
+
+
+    public void delete(Long map_key) {
+       globalTreeMapJpaRepository.deleteById(map_key);
     }
 
     public GlobalTreeMapEntity findById(Long map_key) {
@@ -35,7 +35,7 @@ public class GlobalTreeMapRepository {
         return globalTreeMapJpaRepository.findAll(specification);
     }
 
-    public Page<GlobalTreeMapEntity> findAllBy(Specification<GlobalTreeMapEntity> specification, Pageable pageable){
-        return globalTreeMapJpaRepository.findAll(specification,pageable);
+    public GlobalTreeMapEntity save(GlobalTreeMapEntity globalTreeMapEntities) {
+        return globalTreeMapJpaRepository.save(globalTreeMapEntities);
     }
 }

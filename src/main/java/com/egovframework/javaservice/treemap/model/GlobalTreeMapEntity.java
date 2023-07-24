@@ -1,26 +1,22 @@
 package com.egovframework.javaservice.treemap.model;
 
 import lombok.*;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
-@Entity
 @Getter
-@Setter
+@Entity
 @Builder
-@Table(name = "GLOBAL_TREE_MAP")
-@SelectBeforeUpdate(value=true)
-@DynamicInsert(value=true)
-@DynamicUpdate(value=true)
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONE)
-@NoArgsConstructor
+@Data
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-public class GlobalTreeMapEntity implements Serializable {
+@Table(name = "GLOBAL_TREE_MAP")
+@DynamicInsert
+@DynamicUpdate
+@EqualsAndHashCode(of={"map_key"})
+public class GlobalTreeMapEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

@@ -1,11 +1,7 @@
 package com.egovframework.javaservice.treemap.model;
 
+import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 @Getter
 @Setter
@@ -13,7 +9,8 @@ import javax.persistence.Id;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class GlobalTreeMapDTO {
+public class GlobalTreeMapDTO extends TreeBaseDTO {
+
 
 
     private Long map_key;
