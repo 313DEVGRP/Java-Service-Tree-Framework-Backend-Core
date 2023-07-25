@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequestMapping(value = {"/api/arms/globaltreemap"})
+@RequestMapping(value = {"/arms/globaltreemap"})
 @RestController
 public class GlobalTreeMapController extends TreeMapAbstractController {
 
