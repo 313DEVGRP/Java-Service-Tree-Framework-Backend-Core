@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RequestMapping(value = {"/api/mad/global-tree-map"})
+@RequestMapping(value = {"/api/arms/globaltreemap"})
 @RestController
 @AllArgsConstructor
 @Slf4j
