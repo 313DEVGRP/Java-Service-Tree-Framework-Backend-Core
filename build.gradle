@@ -103,6 +103,7 @@ ext {
     minorVersion = 05
     //patchVersion = auto generation
 
+    //mac 사용자 아래 114까지 주석처리!!
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         println "*** Windows is not support build "
     }else {
@@ -276,8 +277,8 @@ dependencies {
     implementation('org.springframework.cloud:spring-cloud-starter-zipkin')
 
     // redis - session
-    implementation('org.springframework.boot:spring-boot-starter-data-redis')
-    implementation('org.springframework.session:spring-session-data-redis')
+//    implementation('org.springframework.boot:spring-boot-starter-data-redis')
+//    implementation('org.springframework.session:spring-session-data-redis')
 
     // flyway
     implementation 'org.flywaydb:flyway-core'

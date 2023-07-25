@@ -1,8 +1,8 @@
 spring:
   profiles:
     active: live
-  session:
-    store-type: redis
-  redis:
-    host: 313.co.kr
-    port: 6379
+#  session:
+#    store-type: redis
+#  redis:
+#    host: 313.co.kr
+#    port: 6379

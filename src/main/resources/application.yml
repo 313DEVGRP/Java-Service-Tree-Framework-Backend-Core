@@ -4,11 +4,11 @@ spring:
   mvc:
     async:
       request-timeout: 300
-  zipkin:
-    enabled: true
-    service.name: zipkin-service
-    sender.type: web
-    base-url: http://313.co.kr:9411
+#  zipkin:
+#    enabled: true
+#    service.name: zipkin-service
+#    sender.type: web
+#    base-url: http://313.co.kr:9411
   sleuth:
     enabled: true
     sampler:
