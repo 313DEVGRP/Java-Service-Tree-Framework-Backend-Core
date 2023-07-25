@@ -41,6 +41,19 @@ public class GlobalTreeMapServiceImpl implements GlobalTreeMapService {
     }
 
     @Override
+    @Transactional(transactionManager = "transactionJpaManager")
+    public GlobalTreeMapEntity update(GlobalTreeMapEntity globalTreeMapEntity) {
+        return globalTreeMapRepository.save(globalTreeMapEntity);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionJpaManager")
+    public Long delete(GlobalTreeMapEntity globalTreeMapEntity) {
+        globalTreeMapRepository.delete(globalTreeMapEntity.getMap_key());
+        return globalTreeMapEntity.getMap_key();
+    }
+
+    @Override
     @Transactional
     public GlobalTreeMapEntity saveOne(GlobalTreeMapEntity globalTreeMapEntity) {
 

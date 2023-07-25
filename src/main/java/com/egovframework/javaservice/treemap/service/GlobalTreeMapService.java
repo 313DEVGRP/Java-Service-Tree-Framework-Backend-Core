@@ -13,6 +13,10 @@ public interface GlobalTreeMapService {
     @Transactional
     GlobalTreeMapEntity saveOne(GlobalTreeMapEntity globalTreeMapEntity);
 
+    GlobalTreeMapEntity update(GlobalTreeMapEntity globalTreeMapEntity);
+
+    Long delete(GlobalTreeMapEntity globalTreeMapEntity);
+
     void delete(Long map_key);
 
     void deleteAllByMapKey(List<Long> map_keys);
