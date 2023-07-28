@@ -11,6 +11,8 @@
  */
 package com.arms.reqadd.controller;
 
+import com.arms.filerepository.model.FileRepositoryDTO;
+import com.arms.filerepository.model.FileRepositoryEntity;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdservice.service.PdService;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
@@ -26,15 +28,20 @@ import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
+import com.egovframework.javaservice.treeframework.util.StringUtils;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -42,11 +49,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.unitils.util.CollectionUtils;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Controller
@@ -167,6 +179,61 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/getReqAddListByFilter.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getReqAddListByFilter(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName
+            ,ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+
+        log.info("[ ReqAddController :: getSwitchDBNode ]");
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+
+        String[] versionStrArr = StringUtils.split(reqAddEntity.getC_req_pdservice_versionset_link(), ",");
+
+        if ( versionStrArr == null || versionStrArr.length == 0){
+            ModelAndView modelAndView = new ModelAndView("jsonView");
+            modelAndView.addObject("result", "result is empty");
+            return modelAndView;
+        }else{
+            Disjunction orCondition = Restrictions.disjunction();
+            for ( String versionStr : versionStrArr ){
+                versionStr = "\\\"" + versionStr + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
+            }
+            reqAddEntity.getCriterions().add(orCondition);
+
+            List<ReqAddEntity> savedList = reqAdd.getChildNode(reqAddEntity);
+
+            for ( ReqAddEntity entity : savedList ){
+
+//            String[] checkStr = StringUtils.split(entity.getC_req_pdservice_versionset_link(), ",");
+//
+//            if(checkStr == null || checkStr.length < 1){
+//
+//            }
+
+            }
+
+//        ReqAddEntity returnVO = reqAdd.getNode(reqAddEntity);
+//
+//        ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
+//        reqPriorityEntity.setC_id(3L);
+//        ReqPriorityEntity savedObj = reqPriority.getNode(reqPriorityEntity);
+//
+//        returnVO.setReqPriorityEntity(savedObj);
+            SessionUtil.removeAttribute("getReqAddListByFilter");
+            ModelAndView modelAndView = new ModelAndView("jsonView");
+            modelAndView.addObject("result", savedList);
+            return modelAndView;
+        }
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/addNode.do"},
             method = {RequestMethod.POST}
     )
@@ -198,6 +265,36 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
 
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/uploadFileToNode.do", method = RequestMethod.POST)
+    public ModelAndView uploadFileToNode(final MultipartHttpServletRequest multiRequest,
+                                         HttpServletRequest request, Model model) throws Exception {
+
+        ParameterParser parser = new ParameterParser(request);
+        long pdservice_link = parser.getLong("pdservice_link");
+
+        HashMap<String, Set<FileRepositoryEntity>> map = new HashMap();
+
+        Set<FileRepositoryEntity> entitySet = Collections.emptySet();
+        map.put("files", entitySet);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", map);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getFilesByNode.do", method = RequestMethod.GET)
+    public ModelAndView getFilesByNode(FileRepositoryDTO fileRepositoryDTO, HttpServletRequest request) throws Exception {
+
+        ParameterParser parser = new ParameterParser(request);
+        HashMap<String, Set<FileRepositoryEntity>> returnMap = new HashMap();
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", returnMap);
+
+        return modelAndView;
     }
 
 }

@@ -75,6 +75,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("getHistory");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+                if(StringUtils.contains(servletPath,"getReqAddListByFilter.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("getReqAddListByFilter");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
             }else if(StringUtils.contains(servletPath,"T_ARMS_REQSTATUS_")){
                 if(StringUtils.contains(servletPath,"getStatusMonitor.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("getStatusMonitor");
