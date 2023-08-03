@@ -32,7 +32,7 @@ public class SessionUtil {
     public static Object getAttribute(String name) throws Exception {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
-            return (Object) requestAttributes.getAttribute(name, RequestAttributes.SCOPE_REQUEST);
+            return (Object) requestAttributes.getAttribute(name, RequestAttributes.SCOPE_SESSION);
         } else {
             throw new RuntimeException("SessionUtil :: getAttribute - requestAttributes is null");
         }
@@ -44,7 +44,7 @@ public class SessionUtil {
     public static void setAttribute(String name, Object object) throws Exception {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
-            requestAttributes.setAttribute(name, object, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.setAttribute(name, object, RequestAttributes.SCOPE_SESSION);
         } else {
             throw new RuntimeException("SessionUtil :: getAttribute - requestAttributes is null");
         }
@@ -57,7 +57,7 @@ public class SessionUtil {
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
-            requestAttributes.removeAttribute(name, RequestAttributes.SCOPE_REQUEST);
+            requestAttributes.removeAttribute(name, RequestAttributes.SCOPE_SESSION);
         } else {
             throw new RuntimeException("SessionUtil :: getAttribute - requestAttributes is null");
         }

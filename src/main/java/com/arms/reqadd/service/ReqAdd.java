@@ -15,8 +15,12 @@ import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.reqadd.model.ReqAddEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface ReqAdd extends TreeService {
 
     public ReqAddEntity addReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
+
+    public ReqAddEntity moveReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception;
 
 }

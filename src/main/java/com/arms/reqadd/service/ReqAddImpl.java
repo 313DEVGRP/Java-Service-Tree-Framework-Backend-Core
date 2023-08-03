@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @AllArgsConstructor
 @Service("reqAdd")
@@ -31,8 +33,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Override
 	@Transactional
 	public ReqAddEntity addReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
-
-		reqAddEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
 
 		SessionUtil.setAttribute("addNode",changeReqTableName);
 
@@ -52,8 +52,18 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		//이슈가 이미 있는지 확인? <- 이게 필요할까?
 		//각 연결정보의 프로젝트에 이슈를 생성한다.
 
+		return savedReqAddEntity;
+	}
 
+	@Override
+	@Transactional
+	public ReqAddEntity moveReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception {
 
+		SessionUtil.setAttribute("moveNode",changeReqTableName);
+
+		ReqAddEntity savedReqAddEntity = this.moveNode(reqAddEntity, request);
+
+		SessionUtil.removeAttribute("moveNode");
 
 		return savedReqAddEntity;
 	}
