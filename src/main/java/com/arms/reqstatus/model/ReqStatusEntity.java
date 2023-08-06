@@ -57,35 +57,35 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
 
     //-- 제품 서비스 버전
     @Column(name = "c_pds_version_link")
-    private Long c_version_link;
+    private Long c_pds_version_link;
 
     @Column(name = "c_pds_version_name")
     @Type(type="text")
     private String c_pds_version_name;
 
+    //-- 제품 서비스 연결 지라 server
+    @Column(name = "c_jira_server_link")
+    private Long c_jira_server_link;
+
+    @Column(name = "c_jira_server_name")
+    @Type(type="text")
+    private String c_jira_server_name;
+
+    @Column(name = "c_jira_server_url")
+    @Type(type="text")
+    private String c_jira_server_url;
+
     //-- 제품 서비스 연결 지라 프로젝트
-    @Column(name = "c_jira_link")
-    private Long c_jira_link;
+    @Column(name = "c_jira_project_link")
+    private Long c_jira_project_link;
 
-    @Column(name = "c_jira_key")
+    @Column(name = "c_jira_project_key")
     @Type(type="text")
-    private String c_jira_key;
+    private String c_jira_project_key;
 
-    @Column(name = "c_jira_url")
+    @Column(name = "c_jira_project_url")
     @Type(type="text")
-    private String c_jira_url;
-
-    //-- 제품 서비스 연결 지라 프로젝트 버전
-    @Column(name = "c_jira_version_link")
-    private Long c_jira_version_link;
-
-    @Column(name = "c_jira_version_name")
-    @Type(type="text")
-    private String c_jira_version_name;
-
-    @Column(name = "c_jira_version_url")
-    @Type(type="text")
-    private String c_jira_version_url;
+    private String c_jira_project_url;
 
     //-- 요구사항
     @Column(name = "c_req_link")
@@ -119,14 +119,9 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_key;
 
-    @Column(name = "c_issue_summery")
-    @Type(type="text")
-    private String c_issue_summery;
-
     @Column(name = "c_issue_url")
     @Type(type="text")
     private String c_issue_url;
-
 
     //-- 요구사항 이슈 우선순위
     @Column(name = "c_issue_priority_link")
@@ -136,11 +131,6 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_priority_name;
 
-    @Column(name = "c_issue_priority_url")
-    @Type(type="text")
-    private String c_issue_priority_url;
-
-
     //-- 요구사항 이슈 상태
     @Column(name = "c_issue_status_link")
     private Long c_issue_status_link;
@@ -149,10 +139,6 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_status_name;
 
-    @Column(name = "c_issue_status_url")
-    @Type(type="text")
-    private String c_issue_status_url;
-
     //-- 요구사항 이슈 해결책
     @Column(name = "c_issue_resolution_link")
     private Long c_issue_resolution_link;
@@ -160,20 +146,6 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_issue_resolution_name")
     @Type(type="text")
     private String c_issue_resolution_name;
-
-    @Column(name = "c_issue_resolution_url")
-    @Type(type="text")
-    private String c_issue_resolution_url;
-
-    //-- 요구사항 리뷰 상황
-    @Column(name = "c_req_review_status")
-    @Type(type="text")
-    private String c_req_review_status;
-
-    //-- 요구사항 생성자
-    @Column(name = "c_writer")
-    @Type(type="text")
-    private String c_writer;
 
     @Column(name = "c_create_date")
     private Date c_create_date;

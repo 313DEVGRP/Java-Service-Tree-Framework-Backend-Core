@@ -26,21 +26,17 @@ public class GlobalTreeMapEntity {
     @Column(name = "filerepository_link")
     private Long filerepository_link;
 
-
-    @Column(name = "jiraserver_link")
-    private Long jiraserver_link;
-
-
     @Column(name = "pdservice_link")
     private Long pdservice_link;
 
     @Column(name = "pdserviceversion_link")
     private Long pdserviceversion_link;
 
+    @Column(name = "jiraserver_link")
+    private Long jiraserver_link;
 
     @Column(name = "jiraproject_link")
     private Long jiraproject_link;
-
 
     @Column(name = "jiraissue_link")
     private Long jiraissue_link;

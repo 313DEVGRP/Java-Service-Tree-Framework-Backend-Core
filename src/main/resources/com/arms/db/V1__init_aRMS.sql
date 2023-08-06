@@ -7,11 +7,10 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
 
     `filerepository_link`                   bigint(20) default NULL COMMENT '파일링크',
 
-    `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버 접속 정보',
-
     `pdservice_link`                        bigint(20) default NULL COMMENT '제품(서비스)',
     `pdserviceversion_link`                 bigint(20) default NULL COMMENT '제품(서비스) 버전',
 
+    `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버 접속 정보',
     `jiraproject_link`                      bigint(20) default NULL COMMENT '지라 프로젝트',
 
     `jiraissue_link`                        bigint(20) default NULL COMMENT '지라 이슈',
@@ -1577,15 +1576,15 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_pds_version_link`            bigint(20) NULL,
     `c_pds_version_name`            text NULL,
 
-    -- 제품 서비스 연결 지라 프로젝트
-    `c_jira_link`                   bigint(20) NULL,
-    `c_jira_key`                    text NULL,
-    `c_jira_url`                    text NULL,
+    -- 제품 서비스 연결 지라 server
+    `c_jira_server_link`                   bigint(20) NULL,
+    `c_jira_server_name`                    text NULL,
+    `c_jira_server_url`                    text NULL,
 
-    -- 제품 서비스 연결 지라 프로젝트 버전
-    `c_jira_verison_link`           bigint(20) NULL,
-    `c_jira_verison_name`           text NULL,
-    `c_jira_verison_url`            text NULL,
+    -- 제품 서비스 연결 지라 프로젝트
+    `c_jira_project_link`           bigint(20) NULL,
+    `c_jira_project_key`           text NULL,
+    `c_jira_project_url`            text NULL,
 
     -- 요구사항
     `c_req_link`                    bigint(20) NULL,
@@ -1602,29 +1601,21 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     -- 요구사항 이슈
     `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
-    `c_issue_summery`               text NULL,
     `c_issue_url`                   text NULL,
 
     -- 요구사항 이슈 우선순위
     `c_issue_priority_link`         bigint(20) NULL,
     `c_issue_priority_name`         text NULL,
-    `c_issue_priority_url`          text NULL,
 
     -- 요구사항 이슈 상태
     `c_issue_status_link`           bigint(20) NULL,
     `c_issue_status_name`           text NULL,
-    `c_issue_status_url`            text NULL,
 
     -- 요구사항 이슈 해결책
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
-    `c_issue_resolution_url`        text NULL,
-
-    -- 요구사항 리뷰 상황
-    `c_req_review_status`           text NULL,
 
     -- 요구사항 생성자
-    `c_writer`                      text NULL,
     `c_create_date`                 date NUlL,
 
     -- 요구사항 이슈 연관, 서브 이슈 서머리
@@ -1657,15 +1648,15 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_pds_version_link`            bigint(20) NULL,
     `c_pds_version_name`            text NULL,
 
-    -- 제품 서비스 연결 지라 프로젝트
-    `c_jira_link`                   bigint(20) NULL,
-    `c_jira_key`                    text NULL,
-    `c_jira_url`                    text NULL,
+    -- 제품 서비스 연결 지라 server
+    `c_jira_server_link`                   bigint(20) NULL,
+    `c_jira_server_name`                    text NULL,
+    `c_jira_server_url`                    text NULL,
 
-    -- 제품 서비스 연결 지라 프로젝트 버전
-    `c_jira_verison_link`           bigint(20) NULL,
-    `c_jira_verison_name`           text NULL,
-    `c_jira_verison_url`            text NULL,
+    -- 제품 서비스 연결 지라 프로젝트
+    `c_jira_project_link`           bigint(20) NULL,
+    `c_jira_project_key`           text NULL,
+    `c_jira_project_url`            text NULL,
 
     -- 요구사항
     `c_req_link`                    bigint(20) NULL,
@@ -1682,29 +1673,21 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     -- 요구사항 이슈
     `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
-    `c_issue_summery`               text NULL,
     `c_issue_url`                   text NULL,
 
     -- 요구사항 이슈 우선순위
     `c_issue_priority_link`         bigint(20) NULL,
     `c_issue_priority_name`         text NULL,
-    `c_issue_priority_url`          text NULL,
 
     -- 요구사항 이슈 상태
     `c_issue_status_link`           bigint(20) NULL,
     `c_issue_status_name`           text NULL,
-    `c_issue_status_url`            text NULL,
 
     -- 요구사항 이슈 해결책
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
-    `c_issue_resolution_url`        text NULL,
-
-    -- 요구사항 리뷰 상황
-    `c_req_review_status`           text NULL,
 
     -- 요구사항 생성자
-    `c_writer`                      text NULL,
     `c_create_date`                 date NUlL,
 
     -- 요구사항 이슈 연관, 서브 이슈 서머리

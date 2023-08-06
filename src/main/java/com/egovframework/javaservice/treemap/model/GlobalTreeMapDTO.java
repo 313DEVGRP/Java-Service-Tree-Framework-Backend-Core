@@ -18,13 +18,12 @@ public class GlobalTreeMapDTO extends TreeBaseDTO {
     private Long filerepository_link;
 
 
-    private Long jiraserver_link;
-
-
     private Long pdservice_link;
 
     private Long pdserviceversion_link;
 
+
+    private Long jiraserver_link;
 
     private Long jiraproject_link;
 
