@@ -19,10 +19,6 @@ import java.util.Set;
 public class PdServiceDTO extends TreeBaseDTO {
 
     //@Getter @Setter
-    private String c_pdservice_contents;
-
-    private String c_pdservice_etc;
-
     private String c_pdservice_owner;
 
     private String c_pdservice_reviewer01;
@@ -37,6 +33,14 @@ public class PdServiceDTO extends TreeBaseDTO {
 
     private String c_pdservice_writer;
 
+    //내용
+    private String c_pdservice_contents;
+
+    //설명
+    private String c_pdservice_desc;
+
+    //비고
+    private String c_pdservice_etc;
     private Set<PdServiceVersionEntity> pdServiceVersionEntities;
 
 }

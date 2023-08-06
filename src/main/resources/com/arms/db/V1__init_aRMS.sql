@@ -231,16 +231,17 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICE_LOG` (
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
     `c_date`                    date NULL COMMENT '노드 변경 시',
 
-    `c_pdservice_contents`      longtext NULL,
-    `c_pdservice_etc`           text NULL,
-
     `c_pdservice_owner`         text NULL,
     `c_pdservice_reviewer01`    text NULL,
     `c_pdservice_reviewer02`    text NULL,
     `c_pdservice_reviewer03`    text NULL,
     `c_pdservice_reviewer04`    text NULL,
     `c_pdservice_reviewer05`    text NULL,
-    `c_pdservice_writer`        text NULL
+    `c_pdservice_writer`        text NULL,
+
+    `c_pdservice_etc`         varchar(255)    COMMENT '비고',
+    `c_pdservice_desc`        text            COMMENT '설명',
+    `c_pdservice_contents`    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='제품(서비스) 트리거 로그';
 
@@ -256,16 +257,17 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICE` (
     `c_title`                   VARCHAR(255) COMMENT '노드 명',
     `c_type`                    VARCHAR(255) COMMENT '노드 타입',
 
-    `c_pdservice_contents`      longtext NULL,
-    `c_pdservice_etc`           text NULL,
-
     `c_pdservice_owner`         text NULL,
     `c_pdservice_reviewer01`    text NULL,
     `c_pdservice_reviewer02`    text NULL,
     `c_pdservice_reviewer03`    text NULL,
     `c_pdservice_reviewer04`    text NULL,
     `c_pdservice_reviewer05`    text NULL,
-    `c_pdservice_writer`        text NULL
+    `c_pdservice_writer`        text NULL,
+
+    `c_pdservice_etc`         varchar(255)    COMMENT '비고',
+    `c_pdservice_desc`        text            COMMENT '설명',
+    `c_pdservice_contents`    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='제품(서비스)';
 

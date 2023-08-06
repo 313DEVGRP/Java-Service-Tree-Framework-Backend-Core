@@ -50,14 +50,6 @@ public class PdServiceEntity extends TreeSearchEntity implements Serializable {
     }
 
     //@Getter @Setter
-    @Lob
-    @Column(name="c_pdservice_contents")
-    private String c_pdservice_contents;
-
-    @Column(name="c_pdservice_etc")
-    @Type(type="text")
-    private String c_pdservice_etc;
-
     @Column(name="c_pdservice_owner")
     @Type(type="text")
     private String c_pdservice_owner;
@@ -84,6 +76,20 @@ public class PdServiceEntity extends TreeSearchEntity implements Serializable {
     @Column(name="c_pdservice_writer")
     @Type(type="text")
     private String c_pdservice_writer;
+
+    //내용
+    @Lob
+    @Column(name="c_pdservice_contents")
+    private String c_pdservice_contents;
+
+    //설명
+    @Type(type="text")
+    @Column(name = "c_pdservice_desc")
+    private String c_pdservice_desc;
+
+    //비고
+    @Column(name = "c_pdservice_etc")
+    private String c_pdservice_etc;
 
     // -- 1:N table 연계
     private Set<PdServiceVersionEntity> pdServiceVersionEntities;
