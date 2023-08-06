@@ -19,7 +19,12 @@ public class PdServiceVersionDTO extends TreeBaseDTO {
 
     private String c_pds_version_end_date;
 
+    //내용
     private String c_pds_version_contents;
-    
+
+    //설명
+    private String c_pds_version_desc;
+
+    //비고
     private String c_pds_version_etc;
 }

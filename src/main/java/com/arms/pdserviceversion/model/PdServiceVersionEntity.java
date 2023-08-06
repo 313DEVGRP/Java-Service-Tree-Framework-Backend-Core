@@ -74,11 +74,17 @@ public class PdServiceVersionEntity extends TreeSearchEntity implements Serializ
     @Column(name = "c_pds_version_end_date")
     private String c_pds_version_end_date;
 
+    //내용
     @Lob
     @Column(name="c_pds_version_contents")
     private String c_pds_version_contents;
 
+    //설명
     @Type(type="text")
+    @Column(name = "c_pds_version_desc")
+    private String c_pds_version_desc;
+
+    //비고
     @Column(name = "c_pds_version_etc")
     private String c_pds_version_etc;
 

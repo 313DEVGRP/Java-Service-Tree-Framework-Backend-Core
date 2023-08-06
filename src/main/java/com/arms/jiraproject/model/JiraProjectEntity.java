@@ -50,22 +50,6 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
 
     //@Getter @Setter
 
-    @Lob
-    @Column(name = "c_jira_contents")
-    private String c_jira_contents;
-
-    @Column(name = "c_jira_etc")
-    @Type(type="text")
-    private String c_jira_etc;
-
-    @Column(name = "c_jira_url")
-    @Type(type="text")
-    private String c_jira_url;
-
-    @Column(name = "c_jira_id")
-    @Type(type="text")
-    private String c_jira_id;
-
     @Column(name = "c_jira_key")
     @Type(type="text")
     private String c_jira_key;
@@ -74,40 +58,23 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     @Type(type="text")
     private String c_jira_name;
 
-
-    @Column(name = "c_jira_avatar_48")
+    @Column(name = "c_jira_url")
     @Type(type="text")
-    private String c_jira_avatar_48;
+    private String c_jira_url;
 
-    @Column(name = "c_jira_avatar_32")
+    //내용
+    @Lob
+    @Column(name = "c_jira_contents")
+    private String c_jira_contents;
+
+    //설명
+    @Column(name = "c_jira_desc")
     @Type(type="text")
-    private String c_jira_avatar_32;
+    private String c_jira_desc;
 
-    @Column(name = "c_jira_avatar_24")
-    @Type(type="text")
-    private String c_jira_avatar_24;
-
-    @Column(name = "c_jira_avatar_16")
-    @Type(type="text")
-    private String c_jira_avatar_16;
-
-    @Column(name = "c_jira_category_url")
-    @Type(type="text")
-    private String c_jira_category_url;
-
-    @Column(name = "c_jira_category_id")
-    @Type(type="text")
-    private String c_jira_category_id;
-
-    @Column(name = "c_jira_category_name")
-    @Type(type="text")
-    private String c_jira_category_name;
-
-    @Column(name = "c_jira_category_desc")
-    @Type(type="text")
-    private String c_jira_category_desc;
-
-
+    //비고
+    @Column(name = "c_jira_etc")
+    private String c_jira_etc;
     /*
      * Extend Bean Field
      */

@@ -73,7 +73,6 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject{
 				JiraProjectEntity jiraProject = new JiraProjectEntity();
 				jiraProject.setC_title(projectDetail.getName());
 
-				jiraProject.setC_jira_id(projectDetail.getLead().getName());
 				jiraProject.setC_jira_url(projectDetail.getSelf().toString());
 				jiraProject.setC_jira_key(projectDetail.getKey());
 				jiraProject.setC_jira_name(projectDetail.getName());

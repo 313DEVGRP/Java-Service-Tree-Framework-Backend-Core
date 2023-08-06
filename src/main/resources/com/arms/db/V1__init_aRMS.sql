@@ -140,11 +140,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICEVERSION_LOG` (
 
     `c_pdservice_link`          bigint(20) NULL,
 
-    `c_pds_version_contents`    longtext NULL,
-    `c_pds_version_etc`         text NULL,
-
     `c_pds_version_start_date`  text NULL,
-    `c_pds_version_end_date`    text NULL
+    `c_pds_version_end_date`    text NULL,
+
+    `c_pds_version_etc`         varchar(255)    COMMENT '비고',
+    `c_pds_version_desc`        text            COMMENT '설명',
+    `c_pds_version_contents`    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='제품(서비스) 버전 트리거 로그';
 
@@ -162,11 +163,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICEVERSION` (
 
     `c_pdservice_link`          bigint(20) NULL,
 
-    `c_pds_version_contents`    longtext NULL,
-    `c_pds_version_etc`         text NULL,
-
     `c_pds_version_start_date`  text NULL,
-    `c_pds_version_end_date`    text NULL
+    `c_pds_version_end_date`    text NULL,
+
+    `c_pds_version_etc`         varchar(255)    COMMENT '비고',
+    `c_pds_version_desc`        text            COMMENT '설명',
+    `c_pds_version_contents`    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='제품(서비스) 버전';
 
@@ -325,23 +327,13 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAPROJECT_LOG` (
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
     `c_date`                    date NULL COMMENT '노드 변경 시',
 
-    `c_jira_contents`           longtext NULL,
-    `c_jira_etc`                text NULL,
-
     `c_jira_url`                text NULL,
-    `c_jira_id`                 text NULL,
     `c_jira_key`                text NULL,
     `c_jira_name`               text NULL,
 
-    `c_jira_avatar_48`          text NULL,
-    `c_jira_avatar_32`          text NULL,
-    `c_jira_avatar_24`          text NULL,
-    `c_jira_avatar_16`          text NULL,
-
-    `c_jira_category_url`       text NULL,
-    `c_jira_category_id`        text NULL,
-    `c_jira_category_name`      text NULL,
-    `c_jira_category_desc`      text NULL
+    `c_jira_contents`           longtext NULL,
+    `c_jira_desc`                text NULL,
+    `c_jira_etc`                text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 프로젝트 트리거 로그';
 
@@ -357,23 +349,13 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAPROJECT` (
     `c_title`                   VARCHAR(255) COMMENT '노드 명',
     `c_type`                    VARCHAR(255) COMMENT '노드 타입',
 
-    `c_jira_contents`           longtext NULL,
-    `c_jira_etc`                text NULL,
-
     `c_jira_url`                text NULL,
-    `c_jira_id`                 text NULL,
     `c_jira_key`                text NULL,
     `c_jira_name`               text NULL,
 
-    `c_jira_avatar_48`          text NULL,
-    `c_jira_avatar_32`          text NULL,
-    `c_jira_avatar_24`          text NULL,
-    `c_jira_avatar_16`          text NULL,
-
-    `c_jira_category_url`       text NULL,
-    `c_jira_category_id`        text NULL,
-    `c_jira_category_name`      text NULL,
-    `c_jira_category_desc`      text NULL
+    `c_jira_contents`           longtext NULL,
+    `c_jira_desc`                text NULL,
+    `c_jira_etc`                text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 프로젝트';
 
@@ -1290,7 +1272,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQCOMMENT_LOG` (
 
     `c_req_comment_sender`      text NULL,
     `c_req_comment_date`        text NULL,
-    `c_req_comment_contents`    text NULL,
+    `c_req_comment_contents`    longtext NULL,
     `c_req_comment_etc`         text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 커멘트 트리거 로그';
@@ -1313,7 +1295,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQCOMMENT` (
 
     `c_req_comment_sender`      text NULL,
     `c_req_comment_date`        text NULL,
-    `c_req_comment_contents`    text NULL,
+    `c_req_comment_contents`    longtext NULL,
     `c_req_comment_etc`         text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 커멘트';
@@ -1484,7 +1466,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQREVIEWCOMMENT_LOG` (
 
     `c_req_review_comment_sender`      text NULL,
     `c_req_review_comment_date`        text NULL,
-    `c_req_review_comment_contents`    text NULL,
+    `c_req_review_comment_contents`    longtext NULL,
     `c_req_review_comment_etc`         text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 리뷰 커멘트 트리거 로그';
@@ -1508,7 +1490,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQREVIEWCOMMENT` (
 
     `c_req_review_comment_sender`      text NULL,
     `c_req_review_comment_date`        text NULL,
-    `c_req_review_comment_contents`    text NULL,
+    `c_req_review_comment_contents`    longtext NULL,
     `c_req_review_comment_etc`         text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 리뷰 커멘트 트리거 로그';
@@ -1626,7 +1608,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
 
     -- 기타
     `c_req_status_etc`              text NULL,
-    `c_req_status_contents`         text NULL
+    `c_req_status_contents`         longtext NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표 트리거 로그';
 
@@ -1698,7 +1680,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
 
     -- 기타
     `c_req_status_etc`              text NULL,
-    `c_req_status_contents`         text NULL
+    `c_req_status_contents`         longtext NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표';
 
