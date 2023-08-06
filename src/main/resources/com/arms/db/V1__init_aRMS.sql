@@ -435,13 +435,14 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRASERVER_LOG` (
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
     `c_date`                    date NULL COMMENT '노드 변경 시',
 
-    `c_jira_server_contents`    longtext NULL,
-    `c_jira_server_etc`         text NULL,
-
+    `c_jira_server_name`        text NULL,
     `c_jira_server_base_url`    text NULL,
     `c_jira_server_type`        text NULL,
     `c_jira_server_connect_id`  text NULL,
-    `c_jira_server_connect_pw`  text NULL
+    `c_jira_server_connect_pw`  text NULL,
+
+    `c_jira_server_contents`    longtext NULL,
+    `c_jira_server_etc`         text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 서버 정보 트리거 로그';
 
@@ -457,13 +458,14 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRASERVER` (
     `c_title`                   VARCHAR(255) COMMENT '노드 명',
     `c_type`                    VARCHAR(255) COMMENT '노드 타입',
 
-    `c_jira_server_contents`    longtext NULL,
-    `c_jira_server_etc`         text NULL,
-
+    `c_jira_server_name`        text NULL,
     `c_jira_server_base_url`    text NULL,
     `c_jira_server_type`        text NULL,
     `c_jira_server_connect_id`  text NULL,
-    `c_jira_server_connect_pw`  text NULL
+    `c_jira_server_connect_pw`  text NULL,
+
+    `c_jira_server_contents`    longtext NULL,
+    `c_jira_server_etc`         text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 서버 정보';
 

@@ -15,9 +15,8 @@ import javax.persistence.Lob;
 @AllArgsConstructor
 public class JiraServerDTO extends TreeBaseDTO {
 
-    private String c_jira_server_contents;
 
-    private String c_jira_server_etc;
+    private String c_jira_server_name;
 
     private String c_jira_server_base_url;
 
@@ -26,5 +25,9 @@ public class JiraServerDTO extends TreeBaseDTO {
     private String c_jira_server_connect_id;
 
     private String c_jira_server_connect_pw;
+
+    private String c_jira_server_contents;
+
+    private String c_jira_server_etc;
 
 }
