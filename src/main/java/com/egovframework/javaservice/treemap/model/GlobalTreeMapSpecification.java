@@ -12,10 +12,6 @@ public class GlobalTreeMapSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("filerepository_link"), filerepository_link);
     }
 
-    public static Specification<GlobalTreeMapEntity> equalJiraconnectinfo_link(Long jiraconnectinfo_link) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("jiraconnectinfo_link"), jiraconnectinfo_link);
-    }
-
     public static Specification<GlobalTreeMapEntity> equalJiraissue_link(Long jiraissue_link) {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("jiraissue_link"), jiraissue_link);
     }

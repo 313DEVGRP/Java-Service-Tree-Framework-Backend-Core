@@ -20,8 +20,6 @@ public class GlobalTreeMapDTO extends TreeBaseDTO {
 
     private Long jiraserver_link;
 
-    private Long jiraconnectinfo_link;
-
 
     private Long pdservice_link;
 

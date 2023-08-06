@@ -30,9 +30,6 @@ public class GlobalTreeMapEntity {
     @Column(name = "jiraserver_link")
     private Long jiraserver_link;
 
-    @Column(name = "jiraconnectinfo_link")
-    private Long jiraconnectinfo_link;
-
 
     @Column(name = "pdservice_link")
     private Long pdservice_link;
