@@ -7,8 +7,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
 
     `filerepository_link`                   bigint(20) default NULL COMMENT '파일링크',
 
-    `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버',
-    `jiraconnectinfo_link`                  bigint(20) default NULL COMMENT '지라 접속 정보',
+    `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버 접속 정보',
 
     `pdservice_link`                        bigint(20) default NULL COMMENT '제품(서비스)',
     `pdserviceversion_link`                 bigint(20) default NULL COMMENT '제품(서비스) 버전',
@@ -539,9 +538,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRASERVER_LOG` (
     `c_jira_server_etc`         text NULL,
 
     `c_jira_server_base_url`    text NULL,
-    `c_jira_server_version`     text NULL,
-    `c_jira_server_build`       text NULL,
-    `c_jira_server_title`       text NULL
+    `c_jira_server_type`        text NULL,
+    `c_jira_server_connect_id`  text NULL,
+    `c_jira_server_connect_pw`  text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 서버 정보 트리거 로그';
 
@@ -561,9 +560,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRASERVER` (
     `c_jira_server_etc`         text NULL,
 
     `c_jira_server_base_url`    text NULL,
-    `c_jira_server_version`     text NULL,
-    `c_jira_server_build`       text NULL,
-    `c_jira_server_title`       text NULL
+    `c_jira_server_type`        text NULL,
+    `c_jira_server_connect_id`  text NULL,
+    `c_jira_server_connect_pw`  text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 서버 정보';
 

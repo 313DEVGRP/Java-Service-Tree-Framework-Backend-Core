@@ -59,17 +59,17 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_jira_server_base_url;
 
-    @Column(name = "c_jira_server_version")
+    @Column(name = "c_jira_server_type")
     @Type(type="text")
-    private String c_jira_server_version;
+    private String c_jira_server_type;
 
-    @Column(name = "c_jira_server_build")
+    @Column(name = "c_jira_server_connect_id")
     @Type(type="text")
-    private String c_jira_server_build;
+    private String c_jira_server_connect_id;
 
-    @Column(name = "c_jira_server_title")
+    @Column(name = "c_jira_server_connect_pw")
     @Type(type="text")
-    private String c_jira_server_title;
+    private String c_jira_server_connect_pw;
 
     /*
      * Extend Bean Field
