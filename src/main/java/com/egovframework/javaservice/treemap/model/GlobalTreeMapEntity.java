@@ -41,9 +41,6 @@ public class GlobalTreeMapEntity {
     @Column(name = "jiraproject_link")
     private Long jiraproject_link;
 
-    @Column(name = "jiraprojectversion_link")
-    private Long jiraprojectversion_link;
-
 
     @Column(name = "jiraissue_link")
     private Long jiraissue_link;

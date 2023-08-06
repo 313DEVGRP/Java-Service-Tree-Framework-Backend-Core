@@ -15,8 +15,6 @@ import com.arms.filerepository.model.FileRepositoryDTO;
 import com.arms.filerepository.model.FileRepositoryEntity;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdservice.service.PdService;
-import com.arms.pdserviceversion.model.PdServiceVersionEntity;
-import com.arms.pdsreqjiraissuelog.model.PdsReqJiraIssueLogEntity;
 import com.arms.reqadd.model.ReqAddDTO;
 import com.arms.reqadd.model.ReqAddEntity;
 import com.arms.reqadd.service.ReqAdd;

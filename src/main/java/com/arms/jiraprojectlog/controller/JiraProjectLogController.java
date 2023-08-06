@@ -12,7 +12,6 @@
 package com.arms.jiraprojectlog.controller;
 
 import com.arms.jiraprojectlog.model.JiraProjectLogDTO;
-import com.arms.jiraprojectversion.model.JiraProjectVersionEntity;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

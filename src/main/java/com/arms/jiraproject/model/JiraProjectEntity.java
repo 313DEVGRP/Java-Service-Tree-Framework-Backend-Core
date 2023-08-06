@@ -11,7 +11,6 @@
  */
 package com.arms.jiraproject.model;
 
-import com.arms.jiraprojectversion.model.JiraProjectVersionEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -108,26 +107,6 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     @Type(type="text")
     private String c_jira_category_desc;
 
-
-    // -- 1:N table 연계
-    private Set<JiraProjectVersionEntity> jiraProjectVersionEntities;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "GLOBAL_TREE_MAP",
-            joinColumns = @JoinColumn(name = "jiraproject_link"),
-            inverseJoinColumns = @JoinColumn(name = "jiraprojectversion_link")
-    )
-    @WhereJoinTable( clause = "pdserviceversion_link is not null")
-    public Set<JiraProjectVersionEntity> getJiraProjectVersionEntities() {
-        return jiraProjectVersionEntities;
-    }
-
-    public void setJiraProjectVersionEntities(Set<JiraProjectVersionEntity> jiraProjectVersionEntities) {
-        this.jiraProjectVersionEntities = jiraProjectVersionEntities;
-    }
 
     /*
      * Extend Bean Field
