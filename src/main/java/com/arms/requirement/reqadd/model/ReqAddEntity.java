@@ -11,8 +11,8 @@
  */
 package com.arms.requirement.reqadd.model;
 
-import com.arms.pdservice.model.PdServiceEntity;
-import com.arms.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.product.pdservice.model.PdServiceEntity;
+import com.arms.product.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.requirement.reqstate.model.ReqStateEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
