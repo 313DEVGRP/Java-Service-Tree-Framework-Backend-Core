@@ -11,7 +11,7 @@
  */
 package com.arms.pdservice.service;
 
-import com.arms.filerepository.model.FileRepositoryEntity;
+import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.pdservice.model.PdServiceD3Chart;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;

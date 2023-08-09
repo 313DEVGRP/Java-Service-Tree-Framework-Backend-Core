@@ -38,7 +38,7 @@ under the License.
  |
  |                 -gs /path/to/global/settings.xml
  |
- | The sections in this sample file are intended to give you a running start at
+ | The sections in this example file are intended to give you a running start at
  | getting the most out of your Maven installation. Where appropriate, the default
  | values (values used when the setting is not specified) are provided.
  |
@@ -123,7 +123,7 @@ under the License.
     </server>
     -->
 
-    <!-- Another sample, using keys to authenticate.-->
+    <!-- Another example, using keys to authenticate.-->
     <server>
       <id>ple-releases</id>
       <username>admin</username>

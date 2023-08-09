@@ -11,7 +11,7 @@
  */
 package com.arms.pdservice.controller;
 
-import com.arms.filerepository.model.FileRepositoryEntity;
+import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.pdservice.model.PdServiceDTO;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdservice.service.PdService;

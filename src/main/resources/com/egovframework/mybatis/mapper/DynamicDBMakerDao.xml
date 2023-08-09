@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.arms.dynamicdbmaker.mapper.DynamicDBMakerDao">
+<mapper namespace="com.arms.util.dynamicdbmaker.mapper.DynamicDBMakerDao">
 
-    <update id="ddlLogExecute" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="ddlLogExecute" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
 
         CREATE TABLE IF NOT EXISTS ${c_title}_LOG (
 
@@ -44,7 +44,7 @@
 
     </update>
 
-    <update id="ddlOrgExecute" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="ddlOrgExecute" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
 
         CREATE TABLE IF NOT EXISTS ${c_title} (
 
@@ -83,17 +83,17 @@
     </update>
 
 
-    <update id="dmlOrgExecute1" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="dmlOrgExecute1" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
         Insert into ${c_title} (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
         Values (1, 0, 0, 1, 4, 0, 'REQADD Table', 'root');
     </update>
-    <update id="dmlOrgExecute2" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="dmlOrgExecute2" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
         Insert into ${c_title} (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
         Values (2, 1, 0, 2, 3, 1, '요구사항', 'drive');
     </update>
 
 
-    <update id="triggerInsertExecute" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="triggerInsertExecute" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
         CREATE TRIGGER TG_INSERT_${c_title}
             BEFORE  INSERT ON ${c_title}
             FOR EACH ROW
@@ -103,7 +103,7 @@
         END;
     </update>
 
-    <update id="triggerUpdateExecute" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="triggerUpdateExecute" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
         CREATE TRIGGER TG_UPDATE_${c_title}
             BEFORE  UPDATE ON ${c_title}
             FOR EACH ROW
@@ -115,7 +115,7 @@
         END;
     </update>
 
-    <update id="triggerDeleteExecute" parameterType="com.arms.dynamicdbmaker.model.DynamicDBMakerEntity">
+    <update id="triggerDeleteExecute" parameterType="com.arms.util.dynamicdbmaker.model.DynamicDBMakerEntity">
         CREATE TRIGGER TG_DELETE_${c_title}
             BEFORE  DELETE ON ${c_title}
             FOR EACH ROW

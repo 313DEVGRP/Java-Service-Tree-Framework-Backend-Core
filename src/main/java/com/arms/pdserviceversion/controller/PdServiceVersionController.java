@@ -11,9 +11,7 @@
  */
 package com.arms.pdserviceversion.controller;
 
-import com.arms.jiraissue.model.JiraIssueEntity;
 import com.arms.pdservice.service.PdService;
-import com.arms.pdservicelog.model.PdServiceLogEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionDTO;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.pdserviceversion.service.PdServiceVersion;
@@ -27,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;

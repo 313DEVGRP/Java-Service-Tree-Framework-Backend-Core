@@ -7,7 +7,7 @@
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/filebeat/index.html
 
-# For more available modules and options, please see the filebeat.reference.yml sample
+# For more available modules and options, please see the filebeat.reference.yml example
 # configuration file.
 
 #=========================== Filebeat inputs =============================
@@ -100,7 +100,7 @@ setup.template.settings:
 
 
 #============================== Dashboards =====================================
-# These settings control loading the sample dashboards to the Kibana index. Loading
+# These settings control loading the example dashboards to the Kibana index. Loading
 # the dashboards is disabled by default and can be enabled either by setting the
 # options here or by using the `setup` command.
 #setup.dashboards.enabled: false

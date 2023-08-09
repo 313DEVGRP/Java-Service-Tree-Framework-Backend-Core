@@ -11,9 +11,9 @@
  */
 package com.arms.pdservice.service;
 
-import com.arms.dynamicdbmaker.service.DynamicDBMaker;
-import com.arms.filerepository.model.FileRepositoryEntity;
-import com.arms.filerepository.service.FileRepository;
+import com.arms.util.dynamicdbmaker.service.DynamicDBMaker;
+import com.arms.util.filerepository.model.FileRepositoryEntity;
+import com.arms.util.filerepository.service.FileRepository;
 import com.arms.pdservice.model.PdServiceD3Chart;
 import com.arms.pdservice.model.PdServiceEntity;
 import com.arms.pdserviceversion.model.PdServiceVersionEntity;
