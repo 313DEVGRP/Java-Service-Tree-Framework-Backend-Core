@@ -151,9 +151,9 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JoinTable(
             name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
-            inverseJoinColumns = @JoinColumn(name = "jiraissuestype_link")
+            inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
     )
-    @WhereJoinTable( clause = "jiraissuestype_link is not null")
+    @WhereJoinTable( clause = "jiraissuetype_link is not null")
     public Set<JiraIssueTypeEntity> getJiraIssueTypeEntities() {
         return jiraIssueTypeEntities;
     }
