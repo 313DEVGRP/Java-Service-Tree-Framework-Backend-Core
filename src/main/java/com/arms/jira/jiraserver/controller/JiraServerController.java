@@ -12,19 +12,28 @@
 package com.arms.jira.jiraserver.controller;
 
 import com.arms.jira.jiraserver.model.JiraServerDTO;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @Controller
@@ -42,5 +51,34 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     }
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @ResponseBody
+    @RequestMapping(
+            value = { "/addJiraServerNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> addJiraServerNode(@Validated({AddNode.class}) JiraServerDTO jiraServerDTO,
+                                            BindingResult bindingResult, ModelMap model) throws  Exception {
+
+        log.info("JiraServerController :: addJiraServerNode");
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        chat.sendMessageByEngine("지라(서버)가 추가되었습니다.");
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.addJiraServer(jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value= { "/getJiraServerMonitor.do"},
+            method= {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraServerMonitor(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("JiraServerController :: getJiraServerMonitor");
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.getNodesWithoutRoot(jiraServerEntity)));
+    }
 
 }

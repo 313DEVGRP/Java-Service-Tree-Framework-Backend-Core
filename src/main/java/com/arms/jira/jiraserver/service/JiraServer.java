@@ -11,8 +11,15 @@
  */
 package com.arms.jira.jiraserver.service;
 
+import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
+import java.util.List;
+
 public interface JiraServer extends TreeService {
+
+    public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception;
+
+    public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception;
 
 }
