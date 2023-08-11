@@ -11,7 +11,7 @@
  */
 package com.arms.util.filerepository.model;
 
-import com.arms.product.pdservice.model.PdServiceEntity;
+import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;

@@ -13,8 +13,8 @@ package com.arms.requirement.reqadd.controller;
 
 import com.arms.util.filerepository.model.FileRepositoryDTO;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
-import com.arms.product.pdservice.model.PdServiceEntity;
-import com.arms.product.pdservice.service.PdService;
+import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.product_service.pdservice.service.PdService;
 import com.arms.requirement.reqadd.model.ReqAddDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqadd.service.ReqAdd;

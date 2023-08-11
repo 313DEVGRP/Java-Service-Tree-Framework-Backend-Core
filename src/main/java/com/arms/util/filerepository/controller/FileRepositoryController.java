@@ -14,7 +14,7 @@ package com.arms.util.filerepository.controller;
 import com.arms.util.filerepository.model.FileRepositoryDTO;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.util.filerepository.service.FileRepository;
-import com.arms.product.pdservice.service.PdService;
+import com.arms.product_service.pdservice.service.PdService;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.util.PropertiesReader;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
