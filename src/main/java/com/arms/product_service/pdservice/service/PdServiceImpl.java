@@ -136,35 +136,24 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     public PdServiceEntity addPdServiceVersion(PdServiceEntity pdServiceEntity) throws Exception {
 
         PdServiceEntity pdServiceNode = this.getNode(pdServiceEntity);
-        Set<PdServiceVersionEntity> versionNodes = pdServiceNode.getPdServiceVersionEntities();
-        //Set<FileRepositoryEntity> fileNodes = pdServiceNode.getFiles();
+        Set<PdServiceVersionEntity> 디비_버전들 = pdServiceNode.getPdServiceVersionEntities();
 
-        //pdServiceNode.setFiles(fileNodes);
-        pdServiceNode.setPdServiceVersionEntities(new HashSet<>());
-        this.updateNode(pdServiceNode);
+        Set<PdServiceVersionEntity> 요청받은_버전들 = pdServiceEntity.getPdServiceVersionEntities();
 
-        Set<PdServiceVersionEntity> targetVersionNode = pdServiceEntity.getPdServiceVersionEntities();
-        Set<PdServiceVersionEntity> addedNode = new HashSet<>();
-        for( PdServiceVersionEntity versionEntity : targetVersionNode ){
-
-            String compareTitle = versionEntity.getC_title();
-            Optional<PdServiceVersionEntity> searching = versionNodes.stream().filter(node -> StringUtils.equalsIgnoreCase(compareTitle, node.getC_title())).findFirst();
-
-            if( searching.isEmpty()){
-                PdServiceVersionEntity addedVersion = pdServiceVersion.addNode(versionEntity);
-                addedNode.add(addedVersion);
+        for ( PdServiceVersionEntity 요청버전 : 요청받은_버전들 ){
+            PdServiceVersionEntity 검색결과 = 디비_버전들.stream()
+                    .filter(디비버전 -> StringUtils.equalsIgnoreCase(요청버전.getC_title(), 디비버전.getC_title()))
+                    .findAny()
+                    .orElse(null);
+            if(검색결과 == null){
+                PdServiceVersionEntity 추가된버전 = pdServiceVersion.addNode(요청버전);
+                디비_버전들.add(추가된버전);
+            }else{
+                logger.info("이미 존재하는 버전 = " + 요청버전);
             }
-
         }
 
-        Set<PdServiceVersionEntity> mergedSet = new HashSet<>();
-        mergedSet.addAll(versionNodes);
-        mergedSet.addAll(addedNode);
-
-
-        //pdServiceNode.setFiles(fileNodes);
-        pdServiceNode.setPdServiceVersionEntities(mergedSet);
-
+        pdServiceEntity.setPdServiceVersionEntities(디비_버전들);
         this.updateNode(pdServiceNode);
 
         return pdServiceNode;
