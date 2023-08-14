@@ -11,14 +11,11 @@
  */
 package com.arms.jira.jiraserver.service;
 
-import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
-import com.arms.jira.jiraissueresolution.model.JiraIssueResolutionEntity;
-import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
-import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
-import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
+import com.arms.to_engine.JiraInfoDTO;
+import com.arms.to_engine.JiraInfoEntity;
+import com.arms.to_engine.엔진통신기;
 import com.egovframework.javaservice.treeframework.TreeConstant;
-import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
 import org.hibernate.criterion.Criterion;
@@ -26,14 +23,13 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 @AllArgsConstructor
@@ -41,6 +37,9 @@ import java.util.Set;
 public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	@Autowired
+	private 엔진통신기 엔진통신기;
 
 	@Override
 	public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception {
@@ -65,6 +64,19 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		jiraServerEntity.setC_title(Util_TitleChecker.StringReplace(jiraServerEntity.getC_title()));
 
 		JiraServerEntity addedNodeEntity = this.addNode(jiraServerEntity);
+
+		JiraInfoDTO jiraInfoDTO = new JiraInfoDTO();
+		jiraInfoDTO.setConnectId(addedNodeEntity.getC_id().toString());
+		jiraInfoDTO.setUri(addedNodeEntity.getC_jira_server_base_url());
+		jiraInfoDTO.setUserId(addedNodeEntity.getC_jira_server_connect_id());
+		jiraInfoDTO.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
+		JiraInfoEntity 등록결과 = 엔진통신기.지라서버_등록(jiraInfoDTO);
+
+
+		logger.info(등록결과.getConnectId());
+		logger.info(등록결과.getSelf());
+		logger.info(등록결과.getConnectId());
+		logger.info(등록결과.getPasswordOrToken());
 
 		return addedNodeEntity;
 	}
