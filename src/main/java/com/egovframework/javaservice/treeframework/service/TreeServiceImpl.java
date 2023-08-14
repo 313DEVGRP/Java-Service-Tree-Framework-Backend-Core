@@ -386,6 +386,8 @@ public class TreeServiceImpl implements TreeService {
             }
 
         }
+
+        treeDao.merge(alterTargetNode);
         treeDao.update(alterTargetNode);
 
         return 1;
