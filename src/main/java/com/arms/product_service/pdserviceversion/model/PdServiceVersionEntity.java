@@ -57,7 +57,7 @@ public class PdServiceVersionEntity extends TreeSearchEntity implements Serializ
             joinColumns = @JoinColumn(name = "pdserviceversion_link"),
             inverseJoinColumns = @JoinColumn(name = "pdservice_link")
     )
-    @WhereJoinTable( clause = "pdservice_jira_map = 0") // 서로 다른 엔티티를 연결하는 값은 1, 그 외 0
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 서로 다른 엔티티를 연결하는 값은 1, 그 외 0
     public PdServiceEntity getPdServiceEntity() {
         return pdServiceEntity;
     }

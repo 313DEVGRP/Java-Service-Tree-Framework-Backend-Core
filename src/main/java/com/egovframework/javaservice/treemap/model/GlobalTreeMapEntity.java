@@ -23,6 +23,9 @@ public class GlobalTreeMapEntity {
     @Column(name = "map_key")
     private Long map_key;
 
+    @Column(name = "treeframework_map_flag")
+    private Long treeframework_map_flag;
+
     @Column(name = "filerepository_link")
     private Long filerepository_link;
 

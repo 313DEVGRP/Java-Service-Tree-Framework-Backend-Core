@@ -93,7 +93,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuepriority_link")
     )
-    @WhereJoinTable( clause = "jiraissuepriority_link is not null")
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public Set<JiraIssuePriorityEntity> getJiraIssuePriorityEntities() {
         return jiraIssuePriorityEntities;
     }
@@ -113,7 +113,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissueresolution_link")
     )
-    @WhereJoinTable( clause = "jiraissueresolution_link is not null")
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public Set<JiraIssueResolutionEntity> getJiraIssueResolutionEntities() {
         return jiraIssueResolutionEntities;
     }
@@ -133,7 +133,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuestatus_link")
     )
-    @WhereJoinTable( clause = "jiraissuestatus_link is not null")
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public Set<JiraIssueStatusEntity> getJiraIssueStatusEntities() {
         return jiraIssueStatusEntities;
     }
@@ -153,7 +153,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
     )
-    @WhereJoinTable( clause = "jiraissuetype_link is not null")
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public Set<JiraIssueTypeEntity> getJiraIssueTypeEntities() {
         return jiraIssueTypeEntities;
     }
@@ -173,7 +173,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraproject_link")
     )
-    @WhereJoinTable( clause = "jiraproject_link is not null")
+    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public Set<JiraProjectEntity> getJiraProjectEntities() {
         return jiraProjectEntities;
     }
