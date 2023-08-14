@@ -99,7 +99,6 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
         for( String jiraProject : jiraProjectList ){
 
             GlobalTreeMapEntity saveTarget = new GlobalTreeMapEntity();
-            saveTarget.setTreeframework_map_flag(1L);
             saveTarget.setPdservice_link(globalTreeMapEntity.getPdservice_link());
             saveTarget.setPdserviceversion_link(globalTreeMapEntity.getPdserviceversion_link());
             saveTarget.setJiraproject_link(Long.parseLong(jiraProject));

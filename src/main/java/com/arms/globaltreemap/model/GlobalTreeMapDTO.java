@@ -15,8 +15,6 @@ public class GlobalTreeMapDTO extends TreeBaseDTO {
 
     private Long map_key;
 
-    private Long treeframework_map_flag;
-
     private Long filerepository_link;
 
 

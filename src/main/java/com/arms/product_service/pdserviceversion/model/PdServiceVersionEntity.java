@@ -53,11 +53,10 @@ public class PdServiceVersionEntity extends TreeSearchEntity implements Serializ
     @ManyToOne
     @JsonBackReference
     @JoinTable(
-            name = "GLOBAL_TREE_MAP",
+            name = "TREEMAP_PDSERVICE_VERSION",
             joinColumns = @JoinColumn(name = "pdserviceversion_link"),
             inverseJoinColumns = @JoinColumn(name = "pdservice_link")
     )
-    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 서로 다른 엔티티를 연결하는 값은 1, 그 외 0
     public PdServiceEntity getPdServiceEntity() {
         return pdServiceEntity;
     }

@@ -5,8 +5,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
 
     `map_key`                               bigint(20) AUTO_INCREMENT primary key COMMENT '키',
 
-    `treeframework_map_flag`                bigint(20) default 0 COMMENT '트리프레임워크 관리 = 0, 글로벌트리맵 관리 = 1',
-
     `filerepository_link`                   bigint(20) default NULL COMMENT '파일링크',
 
     `pdservice_link`                        bigint(20) default NULL COMMENT '제품(서비스)',
@@ -22,7 +20,37 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='트리 맵';
 
+--
+-- Table structure for table `TREEMAP_PDSERVICE_VERSION`
+--
+CREATE TABLE IF NOT EXISTS `aRMS`.`TREEMAP_PDSERVICE_VERSION` (
 
+    `map_key`                               bigint(20) AUTO_INCREMENT primary key COMMENT '키',
+
+    `filerepository_link`                   bigint(20) default NULL COMMENT '파일링크',
+    `pdservice_link`                        bigint(20) default NULL COMMENT '제품(서비스)',
+    `pdserviceversion_link`                 bigint(20) default NULL COMMENT '제품(서비스) 버전'
+
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='트리 맵';
+
+--
+-- Table structure for table `TREEMAP_JIRASERVER_PROJECT`
+--
+CREATE TABLE IF NOT EXISTS `aRMS`.`TREEMAP_JIRASERVER_PROJECT` (
+
+    `map_key`                               bigint(20) AUTO_INCREMENT primary key COMMENT '키',
+
+    `filerepository_link`                   bigint(20) default NULL COMMENT '파일링크',
+
+    `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버 접속 정보',
+    `jiraproject_link`                      bigint(20) default NULL COMMENT '지라 프로젝트',
+
+    `jiraissuepriority_link`                bigint(20) default NULL COMMENT '지라 이슈 우선순위',
+    `jiraissueresolution_link`              bigint(20) default NULL COMMENT '지라 이슈 해결책',
+    `jiraissuestatus_link`                  bigint(20) default NULL COMMENT '지라 이슈 상태',
+    `jiraissuetype_link`                    bigint(20) default NULL COMMENT '지라 이슈 타입'
+
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='트리 맵';
 
 --
 -- Table structure for table `T_ARMS_FILEREPOSITORY`

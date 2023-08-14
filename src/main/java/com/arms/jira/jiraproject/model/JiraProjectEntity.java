@@ -80,11 +80,10 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     @ManyToOne
     @JsonBackReference
     @JoinTable(
-            name = "GLOBAL_TREE_MAP",
+            name = "TREEMAP_JIRASERVER_PROJECT",
             joinColumns = @JoinColumn(name = "jiraproject_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraserver_link")
     )
-    @WhereJoinTable( clause = "treeframework_map_flag = 0") // 트리프레임워크로 관리 0, 글로벌트리 프레임워크 관리 1
     public JiraServerEntity getJiraServerEntity() {
         return jiraServerEntity;
     }
