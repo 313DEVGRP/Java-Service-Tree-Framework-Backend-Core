@@ -1,6 +1,6 @@
-package com.arms.example.samplemybastis.controller;
+package com.arms.util.samplemybastis.controller;
 
-import com.arms.example.samplemybastis.service.MyBatisService;
+import com.arms.util.samplemybastis.service.MyBatisService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

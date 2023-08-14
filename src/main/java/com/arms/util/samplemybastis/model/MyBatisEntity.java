@@ -1,4 +1,4 @@
-package com.arms.example.samplemybastis.model;
+package com.arms.util.samplemybastis.model;
 
 import lombok.Data;
 

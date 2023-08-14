@@ -1,6 +1,6 @@
-package com.arms.example.samplemybastis.service;
+package com.arms.util.samplemybastis.service;
 
-import com.arms.example.samplemybastis.model.MyBatisEntity;
+import com.arms.util.samplemybastis.model.MyBatisEntity;
 
 import java.util.List;
 

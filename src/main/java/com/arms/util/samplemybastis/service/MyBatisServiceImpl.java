@@ -1,7 +1,7 @@
-package com.arms.example.samplemybastis.service;
+package com.arms.util.samplemybastis.service;
 
-import com.arms.example.samplemybastis.mapper.MyBatisDao;
-import com.arms.example.samplemybastis.model.MyBatisEntity;
+import com.arms.util.samplemybastis.mapper.MyBatisDao;
+import com.arms.util.samplemybastis.model.MyBatisEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

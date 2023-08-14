@@ -1,6 +1,6 @@
-package com.arms.example.samplemybastis.mapper;
+package com.arms.util.samplemybastis.mapper;
 
-import com.arms.example.samplemybastis.model.MyBatisEntity;
+import com.arms.util.samplemybastis.model.MyBatisEntity;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

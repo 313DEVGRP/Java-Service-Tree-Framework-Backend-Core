@@ -15,7 +15,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan(basePackages = {"com.egovframework.javaservice.treeframework.mapper","com.arms.**.mapper"},
+@MapperScan(basePackages = {"com.arms.util.samplemybatis.**.mapper"},
         sqlSessionFactoryRef = "sqlSessionFactory",
         sqlSessionTemplateRef = "sqlSessionTemplate")
 public class MybatisConfig {
