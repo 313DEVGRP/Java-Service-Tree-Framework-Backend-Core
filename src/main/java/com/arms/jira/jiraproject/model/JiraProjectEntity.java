@@ -11,8 +11,11 @@
  */
 package com.arms.jira.jiraproject.model;
 
+import com.arms.jira.jiraserver.model.JiraServerEntity;
+import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -46,7 +49,6 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     }
 
     //@Getter @Setter
-
     @Column(name = "c_jira_key")
     @Type(type="text")
     private String c_jira_key;
@@ -72,6 +74,25 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     //비고
     @Column(name = "c_jira_etc")
     private String c_jira_etc;
+
+    private JiraServerEntity jiraServerEntity;
+
+    @ManyToOne
+    @JsonBackReference
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraproject_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraserver_link")
+    )
+    @WhereJoinTable( clause = "jiraproject_link is not null")
+    public JiraServerEntity getJiraServerEntity() {
+        return jiraServerEntity;
+    }
+
+    public void setJiraServerEntity(JiraServerEntity jiraServerEntity) {
+        this.jiraServerEntity = jiraServerEntity;
+    }
+
     /*
      * Extend Bean Field
      */

@@ -1,7 +1,10 @@
 package com.arms.jira.jiraserver.model;
 
+import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,5 +28,8 @@ public class JiraServerDTO extends TreeBaseDTO {
     private String c_jira_server_contents;
 
     private String c_jira_server_etc;
+
+    private Set<JiraProjectEntity> jiraProjectEntities;
+
 
 }
