@@ -1,7 +1,7 @@
-package com.egovframework.javaservice.treemap.dao;
+package com.arms.globaltreemap.dao;
 
 
-import com.egovframework.javaservice.treemap.model.GlobalTreeMapEntity;
+import com.arms.globaltreemap.model.GlobalTreeMapEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 

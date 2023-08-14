@@ -1,8 +1,8 @@
-package com.egovframework.javaservice.treemap.service;
+package com.arms.globaltreemap.service;
 
 import com.egovframework.javaservice.treeframework.errors.exception.DuplicateFoundException;
-import com.egovframework.javaservice.treemap.dao.GlobalTreeMapRepository;
-import com.egovframework.javaservice.treemap.model.GlobalTreeMapEntity;
+import com.arms.globaltreemap.dao.GlobalTreeMapRepository;
+import com.arms.globaltreemap.model.GlobalTreeMapEntity;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

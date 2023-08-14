@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableJpaAuditing
 @EnableJpaRepositories(
-        basePackages = {"com.egovframework.javaservice.treemap.*"}
+        basePackages = {"com.arms.globaltreemap.*"}
         ,entityManagerFactoryRef = "entityManagerJpaFactory"
         ,transactionManagerRef =  "transactionJpaManager"
 )
@@ -44,7 +44,7 @@ public class SpringDataConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerJpaFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(onlyJpaDataSource);
-        em.setPackagesToScan(new String[] { "com.egovframework.javaservice.treemap.**"});
+        em.setPackagesToScan(new String[] { "com.arms.globaltreemap.**"});
         em.setJpaPropertyMap(jpaProperties.getProperties());
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return em;
@@ -61,7 +61,7 @@ public class SpringDataConfig {
     public LocalSessionFactoryBean sessionJpaFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(onlyJpaDataSource);
-        sessionFactory.setPackagesToScan(new String[] { "com.egovframework.javaservice.treemap.**"});
+        sessionFactory.setPackagesToScan(new String[] { "com.arms.globaltreemap.**"});
         Map<String, Object> hibernateProps
                 = hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(), new HibernateSettings());
 

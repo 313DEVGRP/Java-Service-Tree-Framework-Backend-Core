@@ -1,6 +1,6 @@
-package com.egovframework.javaservice.treemap.service;
+package com.arms.globaltreemap.service;
 
-import com.egovframework.javaservice.treemap.model.GlobalTreeMapEntity;
+import com.arms.globaltreemap.model.GlobalTreeMapEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

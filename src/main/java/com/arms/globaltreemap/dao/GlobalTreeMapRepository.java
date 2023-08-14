@@ -1,6 +1,6 @@
-package com.egovframework.javaservice.treemap.dao;
+package com.arms.globaltreemap.dao;
 
-import com.egovframework.javaservice.treemap.model.GlobalTreeMapEntity;
+import com.arms.globaltreemap.model.GlobalTreeMapEntity;
 import java.util.List;
 import javax.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;

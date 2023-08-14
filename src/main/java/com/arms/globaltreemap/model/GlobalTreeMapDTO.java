@@ -1,4 +1,4 @@
-package com.egovframework.javaservice.treemap.model;
+package com.arms.globaltreemap.model;
 
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
