@@ -281,9 +281,12 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
             }
         }
 
-        pdService.setPdServiceVersionEntities(versionSet);
-
         this.updateNode(pdService);
+
+        PdServiceVersionEntity 삭제대상버전 = new PdServiceVersionEntity();
+        삭제대상버전.setC_id(versionID);
+        pdServiceVersion.removeNode(삭제대상버전);
+
         return pdService;
     }
 
