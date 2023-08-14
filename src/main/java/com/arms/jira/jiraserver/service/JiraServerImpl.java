@@ -105,6 +105,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 					지라프로젝트_저장.setC_jira_key(지라프로젝트.getKey());
 					지라프로젝트_저장.setC_jira_etc(지라프로젝트.getId());
 					지라프로젝트_저장.setC_jira_url(지라프로젝트.getSelf());
+					지라프로젝트_저장.setC_title(지라프로젝트.getName());
 					지라프로젝트_저장.setRef(TreeConstant.First_Node_CID);
 					지라프로젝트_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 					JiraProjectEntity 저장된_프로젝트 = jiraProject.addNode(지라프로젝트_저장);
