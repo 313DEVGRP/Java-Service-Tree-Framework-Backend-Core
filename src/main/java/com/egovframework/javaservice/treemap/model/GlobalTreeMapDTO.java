@@ -29,9 +29,6 @@ public class GlobalTreeMapDTO extends TreeBaseDTO {
 
     private Long jiraproject_link;
 
-
-    private Long jiraissue_link;
-
     private Long jiraissuepriority_link;
 
     private Long jiraissueresolution_link;
