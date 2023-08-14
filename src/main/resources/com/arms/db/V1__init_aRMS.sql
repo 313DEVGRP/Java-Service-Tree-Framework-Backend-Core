@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
     `pdservice_link`                        bigint(20) default NULL COMMENT '제품(서비스)',
     `pdserviceversion_link`                 bigint(20) default NULL COMMENT '제품(서비스) 버전',
 
+    `pdservice_jira_map`                    bigint(20) default 0 COMMENT '제품(서비스)-JIRA 연결일땐 1, 연결 아닐땐 0',
+
     `jiraserver_link`                       bigint(20) default NULL COMMENT '지라 서버 접속 정보',
     `jiraproject_link`                      bigint(20) default NULL COMMENT '지라 프로젝트',
 
