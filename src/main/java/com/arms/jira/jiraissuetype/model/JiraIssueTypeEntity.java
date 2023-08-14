@@ -11,8 +11,11 @@
  */
 package com.arms.jira.jiraissuetype.model;
 
+import com.arms.jira.jiraserver.model.JiraServerEntity;
+import com.arms.jira.jiraserver.service.JiraServer;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -63,6 +66,16 @@ public class JiraIssueTypeEntity extends TreeSearchEntity implements Serializabl
     @Type(type="text")
     private String c_issue_type_url;
 
+    private JiraServerEntity jiraServerEntity;
+
+    @ManyToOne
+    @JsonBackReference
+    @JoinTable(
+            name = "TREEMAP_JIRASERVER_PROJECT",
+            joinColumns = @JoinColumn(name= "jiraissuetype_link"),
+            inverseJoinColumns = @JoinColumn(name="jiraserver_link")
+    )
+    public JiraServerEntity getJiraServerEntity() { return jiraServerEntity; }
     /*
      * Extend Bean Field
      */
