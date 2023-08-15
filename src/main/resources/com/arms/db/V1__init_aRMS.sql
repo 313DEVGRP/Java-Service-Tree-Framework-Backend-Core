@@ -362,9 +362,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAPROJECT_LOG` (
     `c_jira_key`                text NULL,
     `c_jira_name`               text NULL,
 
-    `c_jira_contents`           longtext NULL,
-    `c_jira_desc`                text NULL,
-    `c_jira_etc`                text NULL
+    `c_contents`           longtext NULL,
+    `c_desc`                text NULL,
+    `c_etc`                text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 프로젝트 트리거 로그';
 
@@ -384,9 +384,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAPROJECT` (
     `c_jira_key`                text NULL,
     `c_jira_name`               text NULL,
 
-    `c_jira_contents`           longtext NULL,
-    `c_jira_desc`                text NULL,
-    `c_jira_etc`                text NULL
+    `c_contents`           longtext NULL,
+    `c_desc`               text NULL,
+    `c_etc`                text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 프로젝트';
 
@@ -545,7 +545,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUETYPE_LOG` (
     `c_issue_type_id`           text NULL,
     `c_issue_type_desc`         text NULL,
     `c_issue_type_name`         text NULL,
-    `c_issue_type_url`          text NULL
+    `c_issue_type_url`          text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 타입 트리거 로그';
 
@@ -564,7 +568,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUETYPE` (
     `c_issue_type_id`           text NULL,
     `c_issue_type_desc`         text NULL,
     `c_issue_type_name`         text NULL,
-    `c_issue_type_url`          text NULL
+    `c_issue_type_url`          text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 타입';
 

@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.net.URI;
 
 @Entity
 @Getter
@@ -50,21 +51,49 @@ public class JiraIssueTypeEntity extends TreeSearchEntity implements Serializabl
     
     //@Getter @Setter
 
+    //온프라미스 대응 : private final Long id;
+    //클라우드 대응 : private String id;
     @Column(name = "c_issue_type_id")
     @Type(type="text")
     private String c_issue_type_id;
 
+    //온프라미스 대응 : private final String description;
+    //클라우드 대응 : private String description;
     @Column(name = "c_issue_type_desc")
     @Type(type="text")
     private String c_issue_type_desc;
 
+    //온프라미스 대응 : private final String name;
+    //클라우드 대응 : private String name;
     @Column(name = "c_issue_type_name")
     @Type(type="text")
     private String c_issue_type_name;
 
+    //온프라미스 대응 : private final URI self;
+    //클라우드 대응 : private String self;
     @Column(name = "c_issue_type_url")
     @Type(type="text")
     private String c_issue_type_url;
+
+    //내용
+    //온프라미스 대응 : private String type; // 표준 이슈 유형(standard), 하위 작업 이슈 유형(subtask)
+    //클라우드 대응 : private Integer hierarchyLevel;
+    @Lob
+    @Column(name = "c_contents")
+    private String c_contents;
+
+    //설명
+    //온프라미스 대응 : private final boolean isSubtask;
+    //클라우드 대응 : private Boolean subtask;
+    @Column(name = "c_desc")
+    @Type(type="text")
+    private String c_desc;
+
+    //비고
+    //온프라미스 대응 : private final URI iconUri;
+    //클라우드 대응 : private String untranslatedName;
+    @Column(name = "c_etc")
+    private String c_etc;
 
     private JiraServerEntity jiraServerEntity;
 

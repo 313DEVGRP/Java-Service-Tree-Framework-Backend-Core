@@ -49,31 +49,39 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     }
 
     //@Getter @Setter
+    //클라우드 대응 : private String key;
+    //온프라미스 대응 : private String key;
     @Column(name = "c_jira_key")
     @Type(type="text")
     private String c_jira_key;
 
+    //클라우드 대응 : private String name;
+    //온프라미스 대응 : private String name;
     @Column(name = "c_jira_name")
     @Type(type="text")
     private String c_jira_name;
 
+    //클라우드 대응 : private String self;
+    //온프라미스 대응 : private String self;
     @Column(name = "c_jira_url")
     @Type(type="text")
     private String c_jira_url;
 
     //내용
     @Lob
-    @Column(name = "c_jira_contents")
-    private String c_jira_contents;
+    @Column(name = "c_contents")
+    private String c_contents;
 
+    //클라우드 대응 : private String id;
+    //온프라미스 대응 : private String id;
     //설명
-    @Column(name = "c_jira_desc")
+    @Column(name = "c_desc")
     @Type(type="text")
-    private String c_jira_desc;
+    private String c_desc;
 
     //비고
-    @Column(name = "c_jira_etc")
-    private String c_jira_etc;
+    @Column(name = "c_etc")
+    private String c_etc;
 
     private JiraServerEntity jiraServerEntity;
 
