@@ -904,8 +904,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
     `c_req_create_date`         text NULL,
-    `c_req_priority_link`       bigint(20) NULL,
-    `c_req_state_link`          bigint(20) NULL,
+    `c_req_update_date`         text NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',
@@ -941,8 +940,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD` (
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
     `c_req_create_date`         text NULL,
-    `c_req_priority_link`       bigint(20) NULL,
-    `c_req_state_link`          bigint(20) NULL,
+    `c_req_update_date`         text NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',

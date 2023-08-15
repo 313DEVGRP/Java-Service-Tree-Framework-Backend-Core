@@ -18,10 +18,6 @@ import com.arms.product_service.pdservice.service.PdService;
 import com.arms.requirement.reqadd.model.ReqAddDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqadd.service.ReqAdd;
-import com.arms.requirement.reqpriority.model.ReqPriorityEntity;
-import com.arms.requirement.reqpriority.service.ReqPriority;
-import com.arms.requirement.reqstate.model.ReqStateEntity;
-import com.arms.requirement.reqstate.service.ReqState;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -132,13 +128,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         }
     }
 
-    @Autowired
-    @Qualifier("reqPriority")
-    private ReqPriority reqPriority;
-
-    @Autowired
-    @Qualifier("reqState")
-    private ReqState reqState;
 
     @ResponseBody
     @RequestMapping(
@@ -162,11 +151,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
             ReqAddEntity returnVO = reqAdd.getNode(reqAddEntity);
 
-            ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
-            reqPriorityEntity.setC_id(3L);
-            ReqPriorityEntity savedObj = reqPriority.getNode(reqPriorityEntity);
-
-            returnVO.setReqPriorityEntity(savedObj);
             SessionUtil.removeAttribute("getNode");
 
             ModelAndView modelAndView = new ModelAndView("jsonView");
@@ -247,16 +231,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         pdServiceEntity.setC_id(reqAddDTO.getC_req_pdservice_link());
         PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);
         reqAddEntity.setPdServiceEntity(savedPdService);
-
-        ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
-        reqPriorityEntity.setC_id(reqAddDTO.getC_req_priority_link());
-        ReqPriorityEntity priorityEntity = reqPriority.getNode(reqPriorityEntity);
-        reqAddEntity.setReqPriorityEntity(priorityEntity);
-
-        ReqStateEntity reqStateEntity = new ReqStateEntity();
-        reqStateEntity.setC_id(reqAddDTO.getC_req_state_link());
-        ReqStateEntity stateEntity = reqState.getNode(reqStateEntity);
-        reqAddEntity.setReqStateEntity(stateEntity);
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 

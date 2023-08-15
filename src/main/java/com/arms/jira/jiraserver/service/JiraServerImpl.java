@@ -16,7 +16,7 @@ import com.arms.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
-import com.arms.외부연동.*;
+import com.arms.util.external_communicate.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;

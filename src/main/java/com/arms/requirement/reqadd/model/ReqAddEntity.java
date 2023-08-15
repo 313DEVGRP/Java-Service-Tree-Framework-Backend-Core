@@ -13,8 +13,6 @@ package com.arms.requirement.reqadd.model;
 
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
-import com.arms.requirement.reqpriority.model.ReqPriorityEntity;
-import com.arms.requirement.reqstate.model.ReqStateEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,7 +41,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class ReqAddEntity extends TreeSearchEntity implements Serializable {
 
- 	@Override
+    @Override
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name = "c_id")
@@ -80,6 +78,14 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
         this.pdServiceVersionEntities = pdServiceVersionEntities;
     }
 
+
+    //제품(서비스) 버전 링크를 글로벌 트리맵에서 조회하면
+    //어떤 JIRA 프로젝트와 연결되어 있는지 알수 있다.
+    //그럼 어떤 JIRA 서버와 연결되어 있는지도 알수 있다 ( 양방향 )
+    //따라서, 이 정보를 취합해서 REQSTATUS 에 정보를 기입한다.
+
+    //REQADD는 요구사항을 관리하는 테이블이고
+    //REQSTATUS는 요구사항이 지라에 전달외어 수집된 정보를 기록하는 것이다.
     @Column(name = "c_req_pdservice_versionset_link")
     @Type(type="text")
     private String c_req_pdservice_versionset_link;
@@ -131,11 +137,9 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_create_date;
 
-//    @Column(name = "c_req_priority_link")
-//    private Long c_req_priority_link;
-//
-//    @Column(name = "c_req_state_link")
-//    private Long c_req_state_link;
+    @Column(name = "c_req_update_date")
+    @Type(type="text")
+    private String c_req_update_date;
 
     //내용
     @Lob
@@ -151,52 +155,15 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_etc")
     private String c_req_etc;
 
-    // -- 1:1 table 연계
-    // 동적 테이블 이기때문에 글로벌 트리맵에 joinColumns 에 추가하기엔
-    // 중복 req c_id 때문에 처리가 불가능하다.
-    // 프로그래밍 적인 코드 릴레이션을 처리한다.
-    // 대신에 onetoone 처리도 잘 되는걸 확인했다.
-    // 글로벌 트리맵에서 관리하도록 하자.
-
-    // -- 1:1 Row 단방향 연계
-    private ReqPriorityEntity reqPriorityEntity;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
-    public ReqPriorityEntity getReqPriorityEntity() {
-        return reqPriorityEntity;
-    }
-
-    public void setReqPriorityEntity(ReqPriorityEntity reqPriorityEntity) {
-        this.reqPriorityEntity = reqPriorityEntity;
-    }
-
-
-    // -- 1:1 Row 단방향 연계
-    private ReqStateEntity reqStateEntity;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_req_state_link", referencedColumnName = "c_id")
-    public ReqStateEntity getReqStateEntity() {
-        return reqStateEntity;
-    }
-
-    public void setReqStateEntity(ReqStateEntity reqStateEntity) {
-        this.reqStateEntity = reqStateEntity;
-    }
 
     /*
      * Extend Bean Field
      */
-	@JsonIgnore
+    @JsonIgnore
     private Boolean copyBooleanValue;
 
     @Transient
-	@ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = true)
     public Boolean getCopyBooleanValue() {
         copyBooleanValue = false;
         if (this.getCopy() == 0) {

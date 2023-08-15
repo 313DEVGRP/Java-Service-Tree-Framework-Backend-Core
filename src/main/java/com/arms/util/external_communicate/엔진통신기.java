@@ -1,4 +1,4 @@
-package com.arms.외부연동;
+package com.arms.util.external_communicate;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
