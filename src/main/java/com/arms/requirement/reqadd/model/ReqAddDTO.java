@@ -39,9 +39,7 @@ public class ReqAddDTO extends TreeBaseDTO {
 
     private String c_req_create_date;
 
-    private Long c_req_priority_link;
-
-    private Long c_req_state_link;
+    private String c_req_update_date;
 
     private String c_req_contents;
 

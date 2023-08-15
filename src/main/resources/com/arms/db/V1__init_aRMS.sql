@@ -1517,9 +1517,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     -- 요구사항 생성자
     `c_create_date`                 date NUlL,
 
-    -- 요구사항 이슈 연관, 서브 이슈 서머리
-    `c_issue_link_issue_summary`    text NULL,
-    `c_issue_sub_issue_summary`     text NULL,
+    -- 요구사항 이슈이면 비우고, 하위 이슈이면 요구사항 이슈 아이디 적어주고, 이슈 타입이 뭔지 기록
+    `c_parent_issue_id`             bigint(20) NULL,
+    `c_this_issue_type`             text NULL,
 
     -- 기타
     `c_req_status_etc`              text NULL,
@@ -1589,9 +1589,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     -- 요구사항 생성자
     `c_create_date`                 date NUlL,
 
-    -- 요구사항 이슈 연관, 서브 이슈 서머리
-    `c_issue_link_issue_summary`    text NULL,
-    `c_issue_sub_issue_summary`     text NULL,
+    -- 요구사항 이슈이면 비우고, 하위 이슈이면 요구사항 이슈 아이디 적어주고, 이슈 타입이 뭔지 기록
+    `c_parent_issue_id`             bigint(20) NULL,
+    `c_this_issue_type`             text NULL,
 
     -- 기타
     `c_req_status_etc`              text NULL,

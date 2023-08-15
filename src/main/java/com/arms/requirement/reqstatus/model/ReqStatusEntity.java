@@ -11,9 +11,12 @@
  */
 package com.arms.requirement.reqstatus.model;
 
+import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.annotations.Cache;
@@ -95,17 +98,39 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_name;
 
-    //-- 요구사항 우선 순위
-    @Column(name = "c_req_priority_link")
-    private Long c_req_priority_link;
+    //-- 요구사항 우선 순위 ( 이슈 우선순위 적용 : 지라 서버에 등록된 JIRA Issue priority
+    private JiraIssuePriorityEntity reqIssuePriorityEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
+    public JiraIssuePriorityEntity getReqIssuePriorityEntity() {
+        return reqIssuePriorityEntity;
+    }
+
+    public void setReqIssuePriorityEntity(JiraIssuePriorityEntity reqIssuePriorityEntity) {
+        this.reqIssuePriorityEntity = reqIssuePriorityEntity;
+    }
 
     @Column(name = "c_req_priority_name")
     @Type(type="text")
     private String c_req_priority_name;
 
-    //-- 요구사항 상태
-    @Column(name = "c_req_status_link")
-    private Long c_req_status_link;
+    //-- 요구사항 상태 ( 지라 서버에 등록된 JIRA Issue status
+    private JiraIssueStatusEntity reqIssueStatusEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_status_link", referencedColumnName = "c_id")
+    public JiraIssueStatusEntity getReqIssueStatusEntity() {
+        return reqIssueStatusEntity;
+    }
+
+    public void setReqIssueStatusEntity(JiraIssueStatusEntity reqIssueStatusEntity) {
+        this.reqIssueStatusEntity = reqIssueStatusEntity;
+    }
 
     @Column(name = "c_req_status_name")
     @Type(type="text")
@@ -123,17 +148,40 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_url;
 
+
     //-- 요구사항 이슈 우선순위
-    @Column(name = "c_issue_priority_link")
-    private Long c_issue_priority_link;
+    private JiraIssuePriorityEntity jiraIssuePriorityEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_issue_priority_link", referencedColumnName = "c_id")
+    public JiraIssuePriorityEntity getJiraIssuePriorityEntity() {
+        return jiraIssuePriorityEntity;
+    }
+
+    public void setJiraIssuePriorityEntity(JiraIssuePriorityEntity jiraIssuePriorityEntity) {
+        this.jiraIssuePriorityEntity = jiraIssuePriorityEntity;
+    }
 
     @Column(name = "c_issue_priority_name")
     @Type(type="text")
     private String c_issue_priority_name;
 
     //-- 요구사항 이슈 상태
-    @Column(name = "c_issue_status_link")
-    private Long c_issue_status_link;
+    private JiraIssueStatusEntity jiraIssueStatusEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_issue_status_link", referencedColumnName = "c_id")
+    public JiraIssueStatusEntity getJiraIssueStatusEntity() {
+        return jiraIssueStatusEntity;
+    }
+
+    public void setJiraIssueStatusEntity(JiraIssueStatusEntity jiraIssueStatusEntity) {
+        this.jiraIssueStatusEntity = jiraIssueStatusEntity;
+    }
 
     @Column(name = "c_issue_status_name")
     @Type(type="text")
@@ -151,13 +199,13 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     private Date c_create_date;
 
     //-- 요구사항 이슈 연관, 서브 이슈 서머리
-    @Column(name = "c_issue_link_issue_summary")
+    @Column(name = "c_parent_issue_id")
     @Type(type="text")
-    private String c_issue_link_issue_summary;
+    private Long c_parent_issue_id;
 
-    @Column(name = "c_issue_sub_issue_summary")
+    @Column(name = "c_this_issue_type")
     @Type(type="text")
-    private String c_issue_sub_issue_summary;
+    private String c_this_issue_type;
 
     //-- 기타
     @Column(name = "c_req_status_etc")

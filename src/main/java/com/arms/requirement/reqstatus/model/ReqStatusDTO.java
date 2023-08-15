@@ -77,9 +77,9 @@ public class ReqStatusDTO extends TreeBaseDTO {
     private Date c_create_date;
 
     //-- 요구사항 이슈 연관, 서브 이슈 서머리
-    private String c_issue_link_issue_summary;
+    private Long c_parent_issue_id;
 
-    private String c_issue_sub_issue_summary;
+    private String c_this_issue_type;
 
     //-- 기타
     private String c_req_status_etc;
