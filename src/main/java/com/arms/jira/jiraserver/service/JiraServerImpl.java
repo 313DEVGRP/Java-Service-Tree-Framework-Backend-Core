@@ -92,7 +92,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		Set<JiraProjectEntity> 지라서버에_붙일_프로젝트_리스트 = new HashSet<>();
 		Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈타입_리스트 = new HashSet<>();
 		if ( 등록결과 != null) {
-			//.cloud
+			//cloud
 			if (jiraServerEntity.getC_jira_server_type().equals("cloud")) {
 
 				List<CloudJiraProjectDTO> 클라우드_지라_프로젝트목록 = 엔진통신기.클라우드_지라_프로젝트_리스트_가져오기(등록결과.getConnectId().toString());
@@ -127,16 +127,18 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				List<IssueType> 엔진_지라이슈타입목록 = 엔진통신기.클라우드_지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
 
 				for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
-					JiraIssueTypeEntity 지라이슈_검색 = new JiraIssueTypeEntity();
-					지라이슈_검색.setWhere("c_issue_type_id", 이슈타입.getId()); // atlassian의 IssueType id와
-					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈_검색);
+					JiraIssueTypeEntity 지라이슈타입_검색 = new JiraIssueTypeEntity();
+					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId().toString());
+					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈타입_검색);
 
 					if( 검색결과 == null) {
 						JiraIssueTypeEntity 지라이슈타입_저장 = new JiraIssueTypeEntity();
 						지라이슈타입_저장.setC_issue_type_id(이슈타입.getId().toString());
 						지라이슈타입_저장.setC_issue_type_name(이슈타입.getName());
 						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf().toString());
-						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription());
+						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription()); // String description
+						지라이슈타입_저장.setC_etc(이슈타입.getIconUri().toString()); 	  // URI iconUri
+						지라이슈타입_저장.setC_desc(String.valueOf(이슈타입.isSubtask())); // boolean isSubtask
 						// isSubtasks, iconURi 처리?
 						지라이슈타입_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈타입_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
@@ -152,7 +154,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 			}//.cloud
 
-			if (jiraServerEntity.getC_jira_server_type().equals("on-premise")) { // on-premise
+			// on-premise
+			if (jiraServerEntity.getC_jira_server_type().equals("on-premise")) {
 				// 지라 프로젝트 목록
 				List<OnPremiseJiraProjectDTO> 지라프로젝트목록 = 엔진통신기.지라_프로젝트_리스트_가져오기(등록결과.getConnectId().toString());
 
@@ -185,18 +188,21 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				// 지라 이슈타입 목록
 				List<IssueType> 엔진_지라이슈타입목록 = 엔진통신기.지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
 
-				for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
-					JiraIssueTypeEntity 지라이슈_검색 = new JiraIssueTypeEntity();
-					지라이슈_검색.setWhere("c_issue_type_id", 이슈타입.getId()); // atlassian의 IssueType id와
-					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈_검색);
+				//for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
+				for (int i = 0; i < 엔진_지라이슈타입목록.size(); i++){
+					IssueType 이슈타입 = 엔진_지라이슈타입목록.get(i);
+					JiraIssueTypeEntity 지라이슈타입_검색 = new JiraIssueTypeEntity();
+					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId().toString());
+					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈타입_검색);
 
 					if( 검색결과 == null) {
 						JiraIssueTypeEntity 지라이슈타입_저장 = new JiraIssueTypeEntity();
 						지라이슈타입_저장.setC_issue_type_id(이슈타입.getId().toString());
 						지라이슈타입_저장.setC_issue_type_name(이슈타입.getName());
 						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf().toString());
-						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription());
-						// isSubtasks, iconURi 처리?
+						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription()); // String description
+						지라이슈타입_저장.setC_etc(이슈타입.getIconUri().toString()); 	  // URI iconUri
+						지라이슈타입_저장.setC_desc(String.valueOf(이슈타입.isSubtask())); // boolean isSubtask
 						지라이슈타입_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈타입_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 
@@ -208,7 +214,6 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						지라서버에_붙일_이슈타입_리스트.add(검색결과);
 					}
 				}
-
 			}//.on-premise
 
 			if(지라서버에_붙일_프로젝트_리스트.size() > 0){
@@ -217,7 +222,6 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if(지라서버에_붙일_이슈타입_리스트.size() > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈타입_리스트);
 			}
-
 			this.updateNode(addedNodeEntity);
 		}
 
