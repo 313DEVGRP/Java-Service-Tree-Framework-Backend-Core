@@ -870,7 +870,7 @@ END $$
 DELIMITER ;
 
 
-
+-- ----------------------------------- requirement -----------------------------------
 --
 -- Table structure for table `T_ARMS_REQADD`
 --
