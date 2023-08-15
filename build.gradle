@@ -246,7 +246,6 @@ dependencies {
     // Caused by: java.lang.ClassNotFoundException: org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken
     implementation group: 'org.keycloak', name: 'keycloak-spring-security-adapter', version: '12.0.4'
 
-
     // hibernate
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.6.15.Final'
@@ -258,13 +257,12 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
     // dwr
-    //implementation group: 'org.directwebremoting', name: 'dwr', version: '3.0.2-RELEASE'
     implementation '313devgrp:dwr:3.1.3:RELEASE'
 
-    //mybatis
+    // mybatis
     implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.3'
 
-    //mysql
+    // mysql
     implementation 'mysql:mysql-connector-java:8.0.32'
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 
@@ -274,29 +272,8 @@ dependencies {
 
     // flyway
     implementation 'org.flywaydb:flyway-core'
-    
-    //jira
-    implementation 'com.atlassian.event:atlassian-event:3.0.0'
-    implementation 'com.atlassian.httpclient:atlassian-httpclient-api:2.0.0'
-    implementation 'com.atlassian.httpclient:atlassian-httpclient-library:2.0.0'
-    implementation 'com.atlassian.sal:sal-api:3.0.7'
 
-    implementation 'com.atlassian.jira:jira-rest-java-client-app:5.1.6'
-    implementation 'com.atlassian.jira:jira-rest-java-client-api:5.1.6'
-    implementation("com.atlassian.jira:jira-rest-java-client-core:5.1.6")
-    implementation("io.atlassian.fugue:fugue:4.7.2")
-
-    implementation 'io.atlassian.util.concurrent:atlassian-util-concurrent:4.0.1'
-    implementation group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.16'
-    implementation 'org.apache.httpcomponents:httpasyncclient:4.1.5'
-    implementation 'org.apache.httpcomponents:httpclient-cache:4.5.14'
-    implementation 'org.apache.httpcomponents:httpasyncclient-cache:4.1.5'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
-    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
-    implementation 'org.glassfish.jersey.core:jersey-common:2.39.1'
-    implementation 'org.codehaus.jettison:jettison:1.5.4'
-    implementation 'joda-time:joda-time:2.10.14'
-
+    // openfeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     // poi

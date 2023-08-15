@@ -16,11 +16,11 @@ import com.arms.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
-import com.arms.to_engine.*;
-import com.atlassian.jira.rest.client.api.domain.IssueType;
+import com.arms.외부연동.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
+import lombok.AllArgsConstructor;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import lombok.AllArgsConstructor;
 
 import javax.transaction.Transactional;
 import java.util.HashSet;

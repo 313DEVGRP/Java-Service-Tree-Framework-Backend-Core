@@ -49,13 +49,4 @@ public class JiraIssuePriorityController extends TreeAbstractController<JiraIssu
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/miningDataToaRMS.do"},
-            method = {RequestMethod.GET}
-    )
-    public ResponseEntity<?> miningDataToaRMS(ModelMap model, HttpServletRequest request) throws Exception {
-        return ResponseEntity.ok(CommonResponse.success(jiraIssuePriority.miningDataToaRMS()));
-    }
-
 }

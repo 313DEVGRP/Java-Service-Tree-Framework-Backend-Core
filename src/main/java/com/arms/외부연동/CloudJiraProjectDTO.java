@@ -1,4 +1,4 @@
-package com.arms.to_engine;
+package com.arms.외부연동;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

@@ -1,6 +1,5 @@
-package com.arms.to_engine;
+package com.arms.외부연동;
 
-import com.atlassian.jira.rest.client.api.domain.IssueType;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
