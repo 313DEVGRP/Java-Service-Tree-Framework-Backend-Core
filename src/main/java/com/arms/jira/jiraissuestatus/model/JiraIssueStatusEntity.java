@@ -46,21 +46,31 @@ public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializa
     }
 
     //@Getter @Setter
+
+    //온프레미스 대응 : private String id
+    //클라우드 대응 :
     @Column(name = "c_issue_status_id")
     @Type(type="text")
     private String c_issue_status_id;
 
+    //온프레미스 대응 : private String description
+    //클라우드 대응 :
     @Column(name = "c_issue_status_desc")
     @Type(type="text")
     private String c_issue_status_desc;
 
+    //온프레미스 대응 : private String name
+    //클라우드 대응 :
     @Column(name = "c_issue_status_name")
     @Type(type="text")
     private String c_issue_status_name;
 
+    //온프레미스 대응 : private String self
+    //클라우드 대응 :
     @Column(name = "c_issue_status_url")
     @Type(type="text")
     private String c_issue_status_url;
+
     /*
      * Extend Bean Field
      */

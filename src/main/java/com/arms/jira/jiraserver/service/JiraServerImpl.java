@@ -11,12 +11,19 @@
  */
 package com.arms.jira.jiraserver.service;
 
+import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.jira.jiraissuepriority.service.JiraIssuePriority;
+import com.arms.jira.jiraissueresolution.model.JiraIssueResolutionEntity;
+import com.arms.jira.jiraissueresolution.service.JiraIssueResolution;
+import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
+import com.arms.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.util.external_communicate.*;
+import com.arms.util.external_communicate.dto.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -52,6 +59,18 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Autowired
 	@Qualifier("jiraIssueType")
 	private JiraIssueType jiraIssueType;
+
+	@Autowired
+	@Qualifier("jiraIssuePriority")
+	private JiraIssuePriority jiraIssuePriority;
+
+	@Autowired
+	@Qualifier("jiraIssueResolution")
+	private JiraIssueResolution jiraIssueResolution;
+
+	@Autowired
+	@Qualifier("jiraIssueStatus")
+	private JiraIssueStatus jiraIssueStatus;
 
 	@Override
 	public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception {
@@ -91,6 +110,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		Set<JiraProjectEntity> 지라서버에_붙일_프로젝트_리스트 = new HashSet<>();
 		Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈타입_리스트 = new HashSet<>();
+		Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈우선순위_리스트 = new HashSet<>();
+		Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈해결책_리스트 = new HashSet<>();
+		Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈상태_리스트 = new HashSet<>();
 		if ( 등록결과 != null) {
 			//cloud
 			if (jiraServerEntity.getC_jira_server_type().equals("cloud")) {
@@ -123,7 +145,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 				}
 
-				// 지라 이슈타입 목록
+				// 지라 이슈타입 목록 - 클라우드는 dto 관련 업데이트 되는대로 변경 예정
 				List<IssueType> 엔진_지라이슈타입목록 = 엔진통신기.클라우드_지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
 
 				for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
@@ -186,23 +208,23 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				} //.for Loop
 
 				// 지라 이슈타입 목록
-				List<IssueType> 엔진_지라이슈타입목록 = 엔진통신기.지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
+				List<OnPremiseJiraIssueTypeDto> 엔진_지라이슈타입목록 = 엔진통신기.지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId());
 
 				//for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
 				for (int i = 0; i < 엔진_지라이슈타입목록.size(); i++){
-					IssueType 이슈타입 = 엔진_지라이슈타입목록.get(i);
+					OnPremiseJiraIssueTypeDto 이슈타입 = 엔진_지라이슈타입목록.get(i);
 					JiraIssueTypeEntity 지라이슈타입_검색 = new JiraIssueTypeEntity();
-					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId().toString());
+					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId());
 					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈타입_검색);
 
 					if( 검색결과 == null) {
 						JiraIssueTypeEntity 지라이슈타입_저장 = new JiraIssueTypeEntity();
-						지라이슈타입_저장.setC_issue_type_id(이슈타입.getId().toString());
+						지라이슈타입_저장.setC_issue_type_id(이슈타입.getId());
 						지라이슈타입_저장.setC_issue_type_name(이슈타입.getName());
-						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf().toString());
+						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf());
 						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription()); // String description
-						지라이슈타입_저장.setC_etc(이슈타입.getIconUri().toString()); 	  // URI iconUri
-						지라이슈타입_저장.setC_desc(String.valueOf(이슈타입.isSubtask())); // boolean isSubtask
+						지라이슈타입_저장.setC_etc(이슈타입.getIconUri()); 	  // URI iconUri
+						지라이슈타입_저장.setC_desc(이슈타입.getIsSubtask()); // boolean isSubtask
 						지라이슈타입_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈타입_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 
@@ -210,10 +232,92 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						지라서버에_붙일_이슈타입_리스트.add(저장할_지라이슈타입);
 
 					} else {
-						logger.info("이미 존재하는 프로젝트 입니다. -> " + 검색결과.getC_issue_type_id());
+						logger.info("이미 존재하는 이슈타입 입니다. -> " + 검색결과.getC_issue_type_id());
 						지라서버에_붙일_이슈타입_리스트.add(검색결과);
 					}
 				}
+
+				// 지라이슈 우선순위 목록
+				List<OnPremiseJiraPriorityDTO> 엔진_지라이슈우선순위_목록 = 엔진통신기.지라_이슈_우선순위_가져오기(jiraInfoDTO.getConnectId());
+
+				for ( OnPremiseJiraPriorityDTO 이슈우선순위 : 엔진_지라이슈우선순위_목록) {
+					//Validation
+					JiraIssuePriorityEntity 지라이슈우선순위_검색 = new JiraIssuePriorityEntity();
+					지라이슈우선순위_검색.setWhere("c_issue_priority_id", 이슈우선순위.getId().toString());
+					JiraIssuePriorityEntity 검색결과 = jiraIssuePriority.getNode(지라이슈우선순위_검색);
+
+					if (검색결과 == null ) {
+						JiraIssuePriorityEntity 지라이슈우선순위_저장 = new JiraIssuePriorityEntity();
+						지라이슈우선순위_저장.setC_issue_priority_id(이슈우선순위.getId().toString());   //Long
+						지라이슈우선순위_저장.setC_issue_priority_name(이슈우선순위.getName());
+						지라이슈우선순위_저장.setC_issue_priority_url(이슈우선순위.getSelf().toString());//URI
+						지라이슈우선순위_저장.setC_issue_priority_desc(이슈우선순위.getDescription());
+						지라이슈우선순위_저장.setC_contents(이슈우선순위.getStatusColor());
+						지라이슈우선순위_저장.setC_etc(이슈우선순위.getIconUri().toString()); // URI
+						지라이슈우선순위_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈우선순위_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssuePriorityEntity 저장할_지라이슈우선순위 = jiraIssuePriority.addNode(지라이슈우선순위_저장);
+						지라서버에_붙일_이슈우선순위_리스트.add(저장할_지라이슈우선순위);
+					} else {
+						logger.info("이미 존재하는 이슈우선순위 입니다. -> " + 검색결과.getC_issue_priority_id());
+						지라서버에_붙일_이슈우선순위_리스트.add(검색결과);
+					}
+				}
+
+				// 지라이슈 해결책 목록
+				List<OnPremiseJiraResolutionDTO> 엔진_지라이슈해결책_목록 = 엔진통신기.지라_이슈_해결책_가져오기(jiraInfoDTO.getConnectId());
+
+				for( OnPremiseJiraResolutionDTO 이슈해결책 : 엔진_지라이슈해결책_목록 ) {
+					//Validataion
+					JiraIssueResolutionEntity 지라이슈해결책_검색 = new JiraIssueResolutionEntity();
+					지라이슈해결책_검색.setWhere("c_issue_resolution_id", 이슈해결책.getId());
+					JiraIssueResolutionEntity 검색결과 = jiraIssuePriority.getNode(지라이슈해결책_검색);
+
+					if (검색결과 == null ) {
+						JiraIssueResolutionEntity 지라이슈해결책_저장 = new JiraIssueResolutionEntity();
+						지라이슈해결책_저장.setC_issue_resolution_id(이슈해결책.getId());
+						지라이슈해결책_저장.setC_issue_resolution_name(이슈해결책.getName());
+						지라이슈해결책_저장.setC_issue_resolution_url(이슈해결책.getSelf());
+						지라이슈해결책_저장.setC_issue_resolution_desc(이슈해결책.getDescription());
+						지라이슈해결책_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈해결책_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssueResolutionEntity 저장할_지라이슈해결책 = jiraIssueResolution.addNode(지라이슈해결책_저장);
+						지라서버에_붙일_이슈해결책_리스트.add(저장할_지라이슈해결책);
+					} else {
+						logger.info("이미 존재하는 이슈해결책 입니다. -> " + 검색결과.getC_issue_resolution_id());
+						지라서버에_붙일_이슈해결책_리스트.add(검색결과);
+					}
+				}
+				
+				// 지라이슈 상태 목록
+				List<OnPremiseJiraStatusDTO> 엔진_지라이슈상태_목록 = 엔진통신기.지라_이슈_상태_가져오기(jiraInfoDTO.getConnectId());
+
+				for ( OnPremiseJiraStatusDTO 이슈상태 : 엔진_지라이슈상태_목록) {
+					//Validation
+					JiraIssueStatusEntity 지라이슈상태_검색 = new JiraIssueStatusEntity();
+					지라이슈상태_검색.setWhere("c_issue_status_id", 이슈상태.getId());
+					JiraIssueStatusEntity 검색결과 = jiraIssueStatus.getNode(지라이슈상태_검색);
+					
+					if (검색결과 == null ) {
+						JiraIssueStatusEntity 지라이슈상태_저장 = new JiraIssueStatusEntity();
+						지라이슈상태_저장.setC_issue_status_id(이슈상태.getId());
+						지라이슈상태_저장.setC_issue_status_name(이슈상태.getName());
+						지라이슈상태_저장.setC_issue_status_url(이슈상태.getSelf());
+						지라이슈상태_저장.setC_issue_status_desc(이슈상태.getDescription());
+						지라이슈상태_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈상태_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssueStatusEntity 저장할_지라이슈상태 = jiraIssueStatus.addNode(지라이슈상태_저장);
+						지라서버에_붙일_이슈상태_리스트.add(저장할_지라이슈상태);
+					} else {
+						logger.info("이미 존재하는 이슈상태 입니다. -> {}", 검색결과.getC_issue_status_id());
+						지라서버에_붙일_이슈상태_리스트.add(검색결과);
+					}
+				}
+
+
 			}//.on-premise
 
 			if(지라서버에_붙일_프로젝트_리스트.size() > 0){
@@ -221,6 +325,15 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 			if(지라서버에_붙일_이슈타입_리스트.size() > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈타입_리스트);
+			}
+			if(지라서버에_붙일_이슈우선순위_리스트.size() > 0) {
+				addedNodeEntity.setJiraIssuePriorityEntities(지라서버에_붙일_이슈우선순위_리스트);
+			}
+			if(지라서버에_붙일_이슈해결책_리스트.size() > 0) {
+				addedNodeEntity.setJiraIssueResolutionEntities(지라서버에_붙일_이슈해결책_리스트);
+			}
+			if(지라서버에_붙일_이슈상태_리스트.size() > 0) {
+				addedNodeEntity.setJiraIssueStatusEntities(지라서버에_붙일_이슈상태_리스트);
 			}
 			this.updateNode(addedNodeEntity);
 		}

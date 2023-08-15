@@ -1,5 +1,6 @@
 package com.arms.util.external_communicate;
 
+import com.arms.util.external_communicate.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +21,17 @@ public interface 엔진통신기 {
     @GetMapping("/{connectId}/onpremise/jira/project/list")
     List<OnPremiseJiraProjectDTO> 지라_프로젝트_리스트_가져오기(@PathVariable("connectId") String connectId);
 
-    // 이슈타입
     @GetMapping("/{connectId}/onpremise/jira/issuetype/list")
-    List<IssueType> 지라_이슈_타입_가져오기(@PathVariable("connectId") String connectId);
+    List<OnPremiseJiraIssueTypeDto> 지라_이슈_타입_가져오기(@PathVariable("connectId") String connectId);
 
+    @GetMapping("/{connectId}/onpremise/jira/priority/list")
+    List<OnPremiseJiraPriorityDTO> 지라_이슈_우선순위_가져오기(@PathVariable("connectId") String connectId);
 
+    @GetMapping("/{connectId}/onpremise/jira/resolution/list")
+    List<OnPremiseJiraResolutionDTO> 지라_이슈_해결책_가져오기(@PathVariable("connectId") String connectId);
 
+    @GetMapping("/{connectId}/onpremise/jira/status")
+    List<OnPremiseJiraStatusDTO> 지라_이슈_상태_가져오기(@PathVariable("connectId") String connectId); // return 확인.
 
     /*
      * 클라우드

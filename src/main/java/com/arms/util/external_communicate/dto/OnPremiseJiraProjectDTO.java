@@ -1,4 +1,4 @@
-package com.arms.util.external_communicate;
+package com.arms.util.external_communicate.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

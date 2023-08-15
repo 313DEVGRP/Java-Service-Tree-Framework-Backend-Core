@@ -47,18 +47,26 @@ public class JiraIssueResolutionEntity extends TreeSearchEntity implements Seria
     
     //@Getter @Setter
 
+    //온프레미스 대응 : private final Long id;
+    //클라우드 :
     @Column(name = "c_issue_resolution_id")
     @Type(type="text")
     private String c_issue_resolution_id;
 
+    //온프레미스 대응 :  private final String description;
+    //클라우드 :
     @Column(name = "c_issue_resolution_desc")
     @Type(type="text")
     private String c_issue_resolution_desc;
 
+    //온프레미스 대응 : private final String name;
+    //클라우드 :
     @Column(name = "c_issue_resolution_name")
     @Type(type="text")
     private String c_issue_resolution_name;
 
+    //온프레미스 대응 : protected final URI self;
+    //클라우드 :
     @Column(name = "c_issue_resolution_url")
     @Type(type="text")
     private String c_issue_resolution_url;
