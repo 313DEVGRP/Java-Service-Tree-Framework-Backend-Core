@@ -1,8 +1,6 @@
 package com.arms.util.external_communicate;
 
-import com.arms.util.external_communicate.dto.cloud.CloudJiraIssueTypeDTO;
-import com.arms.util.external_communicate.dto.cloud.CloudJiraPriorityDTO;
-import com.arms.util.external_communicate.dto.cloud.CloudJiraProjectDTO;
+import com.arms.util.external_communicate.dto.cloud.*;
 import com.arms.util.external_communicate.dto.onpremise.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +44,13 @@ public interface 엔진통신기 {
     List<CloudJiraIssueTypeDTO> 클라우드_지라_이슈_타입_가져오기(@PathVariable("connectId") String connectId);
 
     @GetMapping("/{connectId}/cloud/jira/issuepriority/list")
-    List<CloudJiraPriorityDTO> 클라우드_지라_우선순위_가져오기(@PathVariable("connectId") String connectId);
+    PrioritySearchDTO 클라우드_지라_우선순위_가져오기(@PathVariable("connectId") String connectId);
+
+    @GetMapping("/{connectId}/cloud/jira/issueresolution/list")
+    ResolutionSearchDTO 클라우드_지라_해결책_가져오기(@PathVariable("connectId") String connectId);
+
+    @GetMapping("/{connectId}/cloud/jira/issuestatus/list")
+    StatusSearchDTO 클라우드_지라_상태_가져오기(@PathVariable("connectId") String connectId);
+
 
 }

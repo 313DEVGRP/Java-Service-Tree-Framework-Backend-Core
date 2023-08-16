@@ -23,8 +23,7 @@ import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.util.external_communicate.*;
-import com.arms.util.external_communicate.dto.cloud.CloudJiraIssueTypeDTO;
-import com.arms.util.external_communicate.dto.cloud.CloudJiraProjectDTO;
+import com.arms.util.external_communicate.dto.cloud.*;
 import com.arms.util.external_communicate.dto.onpremise.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
@@ -151,6 +150,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				List<CloudJiraIssueTypeDTO> 엔진_지라이슈타입목록 = 엔진통신기.클라우드_지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
 
 				for ( CloudJiraIssueTypeDTO 이슈타입 : 엔진_지라이슈타입목록) {
+
+					//validation
 					JiraIssueTypeEntity 지라이슈타입_검색 = new JiraIssueTypeEntity();
 					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId().toString());
 					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈타입_검색);
@@ -177,12 +178,95 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 					}
 				}
 
+				// 지라이슈 우선순위 목록
+				//PrioritySearchDTO 클라우드_지라_우선순위_가져오기 = 엔진통신기.클라우드_지라_우선순위_가져오기(등록결과.getConnectId());
+				List<Priority> 클라우드_지라_우선순위_목록 = 엔진통신기.클라우드_지라_우선순위_가져오기(등록결과.getConnectId()).getValues();
+
+				for (Priority 이슈우선순위 : 클라우드_지라_우선순위_목록 ) {
+
+					//validation
+					JiraIssuePriorityEntity 지라이슈우선순위_검색 = new JiraIssuePriorityEntity();
+					지라이슈우선순위_검색.setWhere("c_issue_priority_id", 이슈우선순위.getId());
+					JiraIssuePriorityEntity 검색결과 = jiraIssuePriority.getNode(지라이슈우선순위_검색);
+
+					if (검색결과 == null) {
+						JiraIssuePriorityEntity 지라이슈우선순위_저장 = new JiraIssuePriorityEntity();
+						지라이슈우선순위_저장.setC_issue_priority_id(이슈우선순위.getId());
+						지라이슈우선순위_저장.setC_issue_priority_name(이슈우선순위.getName());
+						지라이슈우선순위_저장.setC_issue_priority_url(이슈우선순위.getSelf());
+						지라이슈우선순위_저장.setC_issue_priority_desc(이슈우선순위.getDescription());
+						//지라이슈우선순위_저장.setC_desc.valueOf(이슈우선순위.isDefault());
+						지라이슈우선순위_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈우선순위_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssuePriorityEntity 저장할_지라이슈우선순위 = jiraIssuePriority.addNode(지라이슈우선순위_저장);
+						지라서버에_붙일_이슈우선순위_리스트.add(저장할_지라이슈우선순위);
+					} else {
+						logger.info("이미 존재하는 이슈우선순위 입니다. -> " + 검색결과.getC_issue_priority_id());
+						지라서버에_붙일_이슈우선순위_리스트.add(검색결과);
+					}
+				}
+
+				// 지라이슈 해결책 목록
+				List<Resolution> 클라우드_지라_해결책_목록 = 엔진통신기.클라우드_지라_해결책_가져오기(등록결과.getConnectId()).getValues();
+
+				for (Resolution 이슈해결책 : 클라우드_지라_해결책_목록 ) {
+
+					//validation
+					JiraIssueResolutionEntity 지라이슈해결책_검색 = new JiraIssueResolutionEntity();
+					지라이슈해결책_검색.setWhere("c_issue_resolution_id", 이슈해결책.getId());
+					JiraIssueResolutionEntity 검색결과 = jiraIssuePriority.getNode(지라이슈해결책_검색);
+
+					if (검색결과 == null) {
+						JiraIssueResolutionEntity 지라이슈해결책_저장 = new JiraIssueResolutionEntity();
+						지라이슈해결책_저장.setC_issue_resolution_id(이슈해결책.getId());
+						지라이슈해결책_저장.setC_issue_resolution_name(이슈해결책.getName());
+						지라이슈해결책_저장.setC_issue_resolution_url(이슈해결책.getSelf());
+						지라이슈해결책_저장.setC_issue_resolution_desc(이슈해결책.getDescription());
+						//지라이슈해결책_저장.setC_desc(String.valueOf(이슈해결책.isDefault()));
+						지라이슈해결책_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈해결책_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssueResolutionEntity 저장할_지라이슈해결책 = jiraIssueResolution.addNode(지라이슈해결책_저장);
+						지라서버에_붙일_이슈해결책_리스트.add(검색결과);
+					} else {
+						logger.info("이미 존재하는 이슈해결책 입니다. -> " + 검색결과.getC_issue_resolution_id());
+						지라서버에_붙일_이슈해결책_리스트.add(검색결과);
+					}
+				}
+				// 지라이슈 상태 목록
+				List<Status> 클라우드_지라_상태_목록 = 엔진통신기.클라우드_지라_상태_가져오기(등록결과.getConnectId()).getValues();
+
+				for (Status 이슈상태 : 클라우드_지라_상태_목록 ) {
+
+					//validation
+					JiraIssueStatusEntity 지라이슈상태_검색 = new JiraIssueStatusEntity();
+					지라이슈상태_검색.setWhere("c_issue_status_id", 이슈상태.getId());
+					JiraIssueStatusEntity 검색결과 = jiraIssueStatus.getNode(지라이슈상태_검색);
+
+					if (검색결과 == null) {
+						JiraIssueStatusEntity 지라이슈상태_저장 = new JiraIssueStatusEntity();
+						지라이슈상태_저장.setC_issue_status_id(이슈상태.getId());
+						지라이슈상태_저장.setC_issue_status_name(이슈상태.getName());
+						지라이슈상태_저장.setC_issue_status_url(이슈상태.getSelf());
+						지라이슈상태_저장.setC_issue_status_desc(이슈상태.getDescription());
+						지라이슈상태_저장.setRef(TreeConstant.First_Node_CID);
+						지라이슈상태_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+						JiraIssueStatusEntity 저장할_지라이슈상태 = jiraIssueStatus.addNode(지라이슈상태_저장);
+						지라서버에_붙일_이슈상태_리스트.add(저장할_지라이슈상태);
+					} else {
+						logger.info("이미 존재하는 이슈상태 입니다. -> {}", 검색결과.getC_issue_status_id());
+						지라서버에_붙일_이슈상태_리스트.add(검색결과);
+					}
+				}
+
 			}//.cloud
 
 			// on-premise
 			if (jiraServerEntity.getC_jira_server_type().equals("on-premise")) {
 				// 지라 프로젝트 목록
-				List<OnPremiseJiraProjectDTO> 지라프로젝트목록 = 엔진통신기.지라_프로젝트_리스트_가져오기(등록결과.getConnectId().toString());
+				List<OnPremiseJiraProjectDTO> 지라프로젝트목록 = 엔진통신기.지라_프로젝트_리스트_가져오기(등록결과.getConnectId());
 
 				for ( OnPremiseJiraProjectDTO 지라프로젝트 : 지라프로젝트목록 ){
 					//validation
