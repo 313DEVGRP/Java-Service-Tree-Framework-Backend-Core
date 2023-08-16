@@ -23,7 +23,9 @@ import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.util.external_communicate.*;
-import com.arms.util.external_communicate.dto.*;
+import com.arms.util.external_communicate.dto.cloud.CloudJiraIssueTypeDTO;
+import com.arms.util.external_communicate.dto.cloud.CloudJiraProjectDTO;
+import com.arms.util.external_communicate.dto.onpremise.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -146,9 +148,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				}
 
 				// 지라 이슈타입 목록 - 클라우드는 dto 관련 업데이트 되는대로 변경 예정
-				List<IssueType> 엔진_지라이슈타입목록 = 엔진통신기.클라우드_지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
+				List<CloudJiraIssueTypeDTO> 엔진_지라이슈타입목록 = 엔진통신기.클라우드_지라_이슈_타입_가져오기(jiraInfoDTO.getConnectId().toString());
 
-				for ( IssueType 이슈타입 : 엔진_지라이슈타입목록) {
+				for ( CloudJiraIssueTypeDTO 이슈타입 : 엔진_지라이슈타입목록) {
 					JiraIssueTypeEntity 지라이슈타입_검색 = new JiraIssueTypeEntity();
 					지라이슈타입_검색.setWhere("c_issue_type_id", 이슈타입.getId().toString());
 					JiraIssueTypeEntity 검색결과 = jiraIssueType.getNode(지라이슈타입_검색);
@@ -159,8 +161,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						지라이슈타입_저장.setC_issue_type_name(이슈타입.getName());
 						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf().toString());
 						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription()); // String description
-						지라이슈타입_저장.setC_etc(이슈타입.getIconUri().toString()); 	  // URI iconUri
-						지라이슈타입_저장.setC_desc(String.valueOf(이슈타입.isSubtask())); // boolean isSubtask
+						지라이슈타입_저장.setC_etc(이슈타입.getUntranslatedName());
+						지라이슈타입_저장.setC_desc(이슈타입.getSubtask().toString()); // boolean subtask
+						지라이슈타입_저장.setC_contents(이슈타입.getHierarchyLevel().toString()); // Integer
 						// isSubtasks, iconURi 처리?
 						지라이슈타입_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈타입_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
@@ -222,9 +225,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						지라이슈타입_저장.setC_issue_type_id(이슈타입.getId());
 						지라이슈타입_저장.setC_issue_type_name(이슈타입.getName());
 						지라이슈타입_저장.setC_issue_type_url(이슈타입.getSelf());
-						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription()); // String description
-						지라이슈타입_저장.setC_etc(이슈타입.getIconUri()); 	  // URI iconUri
-						지라이슈타입_저장.setC_desc(이슈타입.getIsSubtask()); // boolean isSubtask
+						지라이슈타입_저장.setC_issue_type_desc(이슈타입.getDescription());
+						지라이슈타입_저장.setC_desc(이슈타입.getSubtask().toString()); //Boolean
 						지라이슈타입_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈타입_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 
@@ -243,17 +245,15 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				for ( OnPremiseJiraPriorityDTO 이슈우선순위 : 엔진_지라이슈우선순위_목록) {
 					//Validation
 					JiraIssuePriorityEntity 지라이슈우선순위_검색 = new JiraIssuePriorityEntity();
-					지라이슈우선순위_검색.setWhere("c_issue_priority_id", 이슈우선순위.getId().toString());
+					지라이슈우선순위_검색.setWhere("c_issue_priority_id", 이슈우선순위.getId());
 					JiraIssuePriorityEntity 검색결과 = jiraIssuePriority.getNode(지라이슈우선순위_검색);
 
 					if (검색결과 == null ) {
 						JiraIssuePriorityEntity 지라이슈우선순위_저장 = new JiraIssuePriorityEntity();
-						지라이슈우선순위_저장.setC_issue_priority_id(이슈우선순위.getId().toString());   //Long
+						지라이슈우선순위_저장.setC_issue_priority_id(이슈우선순위.getId());
 						지라이슈우선순위_저장.setC_issue_priority_name(이슈우선순위.getName());
-						지라이슈우선순위_저장.setC_issue_priority_url(이슈우선순위.getSelf().toString());//URI
+						지라이슈우선순위_저장.setC_issue_priority_url(이슈우선순위.getSelf());
 						지라이슈우선순위_저장.setC_issue_priority_desc(이슈우선순위.getDescription());
-						지라이슈우선순위_저장.setC_contents(이슈우선순위.getStatusColor());
-						지라이슈우선순위_저장.setC_etc(이슈우선순위.getIconUri().toString()); // URI
 						지라이슈우선순위_저장.setRef(TreeConstant.First_Node_CID);
 						지라이슈우선순위_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 

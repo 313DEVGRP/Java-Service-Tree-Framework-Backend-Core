@@ -83,7 +83,7 @@ public class JiraIssueTypeEntity extends TreeSearchEntity implements Serializabl
     private String c_contents;
 
     //설명
-    //온프라미스 대응 : private final boolean isSubtask;
+    //온프라미스 대응 : private Boolean subtask;
     //클라우드 대응 : private Boolean subtask;
     @Column(name = "c_desc")
     @Type(type="text")
