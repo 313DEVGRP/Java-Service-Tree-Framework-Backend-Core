@@ -259,8 +259,11 @@ dependencies {
     // dwr
     implementation '313devgrp:dwr:3.1.3:RELEASE'
 
+    // TreeFramework
+    implementation '313devgrp:Java-Service-Tree-Framework-Core-Lib:23.5.0'
+
     // mybatis
-    implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.3'
+    implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.3.1'
 
     // mysql
     implementation 'mysql:mysql-connector-java:8.0.32'
