@@ -11,15 +11,8 @@ import java.net.URI;
 @AllArgsConstructor
 public class OnPremiseJiraPriorityDTO {
 
-    private URI self;    // AddressableNamedEntity
-
-    private Long id;    // extends BasicPriority
-
-    private String name; // AddressableNamedEntity
-
-    private String statusColor;
-
+    private String self;
+    private String id;
+    private String name;
     private String description;
-
-    private URI iconUri;
 }
