@@ -1,4 +1,4 @@
-package com.arms.util.external_communicate;
+package com.arms.util.external_communicate.dto.cloud;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.net.URI;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IssueType {
+public class CloudJiraIssueTypeDTO {
 
     private URI self;
     private Long id;

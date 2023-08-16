@@ -1,4 +1,4 @@
-package com.arms.util.external_communicate;
+package com.arms.util.external_communicate.dto.cloud;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -10,12 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CloudJiraProjectDTO {
-    private String self;
-
+public class Status {
     private String id;
-
-    private String key;
-
     private String name;
+    private String description;
+    private String self;
 }

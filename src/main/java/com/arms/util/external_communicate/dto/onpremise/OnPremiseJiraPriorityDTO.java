@@ -1,4 +1,4 @@
-package com.arms.util.external_communicate.dto;
+package com.arms.util.external_communicate.dto.onpremise;
 
 import lombok.*;
 

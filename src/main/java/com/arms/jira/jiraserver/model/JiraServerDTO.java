@@ -29,7 +29,7 @@ public class JiraServerDTO extends TreeBaseDTO {
 
     private String c_jira_server_etc;
 
-    private Set<JiraProjectEntity> jiraProjectEntities;
+    private Set<JiraProjectEntity> jiraProjectEntities;   // 추가됨
 
 
 }

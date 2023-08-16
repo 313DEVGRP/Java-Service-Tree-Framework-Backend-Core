@@ -1,4 +1,4 @@
-package com.arms.util.external_communicate.dto;
+package com.arms.util.external_communicate.dto.onpremise;
 
 import lombok.*;
 
@@ -7,13 +7,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OnPremiseJiraStatusDTO {
+public class OnPremiseJiraIssueTypeDto {
 
     private String self;
-
     private String id;
-
     private String name;
-
+    private String isSubtask;
     private String description;
+    private String iconUri;
 }
