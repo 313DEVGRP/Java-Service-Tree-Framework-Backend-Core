@@ -132,7 +132,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						JiraProjectEntity 지라프로젝트_저장 = new JiraProjectEntity();
 						지라프로젝트_저장.setC_jira_name(지라프로젝트.getName());
 						지라프로젝트_저장.setC_jira_key(지라프로젝트.getKey());
-						지라프로젝트_저장.setC_etc(지라프로젝트.getId());
+						지라프로젝트_저장.setC_desc(지라프로젝트.getId());
 						지라프로젝트_저장.setC_jira_url(지라프로젝트.getSelf());
 						지라프로젝트_저장.setC_title(지라프로젝트.getName());
 						지라프로젝트_저장.setRef(TreeConstant.First_Node_CID);
@@ -195,7 +195,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 						JiraProjectEntity 지라프로젝트_저장 = new JiraProjectEntity();
 						지라프로젝트_저장.setC_jira_name(지라프로젝트.getName());
 						지라프로젝트_저장.setC_jira_key(지라프로젝트.getKey());
-						지라프로젝트_저장.setC_etc(지라프로젝트.getId());
+						지라프로젝트_저장.setC_desc(지라프로젝트.getId());
 						지라프로젝트_저장.setC_jira_url(지라프로젝트.getSelf());
 						지라프로젝트_저장.setC_title(지라프로젝트.getName());
 						지라프로젝트_저장.setRef(TreeConstant.First_Node_CID);

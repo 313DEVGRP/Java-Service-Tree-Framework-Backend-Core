@@ -27,13 +27,13 @@ public interface 엔진통신기 {
     @GetMapping("/{connectId}/onpremise/jira/issuetype/list")
     List<OnPremiseJiraIssueTypeDto> 지라_이슈_타입_가져오기(@PathVariable("connectId") String connectId);
 
-    @GetMapping("/{connectId}/onpremise/jira/priority/list")
+    @GetMapping("/{connectId}/onpremise/jira/issuepriority/list")
     List<OnPremiseJiraPriorityDTO> 지라_이슈_우선순위_가져오기(@PathVariable("connectId") String connectId);
 
-    @GetMapping("/{connectId}/onpremise/jira/resolution/list")
+    @GetMapping("/{connectId}/onpremise/jira/issueresolution/list")
     List<OnPremiseJiraResolutionDTO> 지라_이슈_해결책_가져오기(@PathVariable("connectId") String connectId);
 
-    @GetMapping("/{connectId}/onpremise/jira/status")
+    @GetMapping("/{connectId}/onpremise/jira/issuestatus/list")
     List<OnPremiseJiraStatusDTO> 지라_이슈_상태_가져오기(@PathVariable("connectId") String connectId); // return 확인.
 
     /*
