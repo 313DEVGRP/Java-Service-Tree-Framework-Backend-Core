@@ -11,11 +11,12 @@ import java.net.URI;
 @AllArgsConstructor
 public class CloudJiraIssueTypeDTO {
 
-    private URI self;
-    private Long id;
-    private String name;
-    private boolean isSubtask;
+    private String self;
+    private String id;
     private String description;
-    private URI iconUri;
+    private String name;
+    private String untranslatedName;
+    private Boolean subtask;
+    private Integer hierarchyLevel;
 
 }
