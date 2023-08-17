@@ -48,28 +48,43 @@ public class JiraIssuePriorityEntity extends TreeSearchEntity implements Seriali
     //@Getter @Setter
 
     //온프라미스 대응 : private final Long id;
-    //클라우드 :
+    //클라우드 : private String id;
     @Column(name = "c_issue_priority_id")
     @Type(type="text")
     private String c_issue_priority_id;
 
     //온프레미스 대응: private final String description;
-    //클라우드 :
+    //클라우드 : private String description;
     @Column(name = "c_issue_priority_desc")
     @Type(type="text")
     private String c_issue_priority_desc;
 
     //온프라미스 대응 : private final String name;
-    //클라우드 :
+    //클라우드 : private String name;
     @Column(name = "c_issue_priority_name")
     @Type(type="text")
     private String c_issue_priority_name;
 
     //온프라미스 대응 : private final URI self;
-    //클라우드 :
+    //클라우드 : private String self;
     @Column(name = "c_issue_priority_url")
     @Type(type="text")
     private String c_issue_priority_url;
+
+    //내용
+    @Lob
+    @Column(name = "c_contents")
+    private String c_contents;
+
+    //설명
+    @Column(name = "c_desc")
+    @Type(type="text")
+    private String c_desc;
+
+    //클라우드 대응 : private boolean isDefault;
+    //비고
+    @Column(name = "c_etc")
+    private String c_etc;
 
     /*
      * Extend Bean Field

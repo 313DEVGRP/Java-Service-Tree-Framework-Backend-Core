@@ -638,7 +638,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUEPRIORITY_LOG` (
     `c_issue_priority_id`       text NULL,
     `c_issue_priority_desc`     text NULL,
     `c_issue_priority_name`     text NULL,
-    `c_issue_priority_url`      text NULL
+    `c_issue_priority_url`      text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 우선순위 트리거 로그';
 
@@ -657,7 +661,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUEPRIORITY` (
     `c_issue_priority_id`       text NULL,
     `c_issue_priority_desc`     text NULL,
     `c_issue_priority_name`     text NULL,
-    `c_issue_priority_url`      text NULL
+    `c_issue_priority_url`      text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 우선순위';
 
@@ -807,7 +815,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUERESOLUTION_LOG` (
     `c_issue_resolution_id`     text NULL,
     `c_issue_resolution_desc`   text NULL,
     `c_issue_resolution_name`   text NULL,
-    `c_issue_resolution_url`    text NULL
+    `c_issue_resolution_url`    text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 해결책 트리거 로그';
 
@@ -826,7 +838,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUERESOLUTION` (
     `c_issue_resolution_id`     text NULL,
     `c_issue_resolution_desc`   text NULL,
     `c_issue_resolution_name`   text NULL,
-    `c_issue_resolution_url`    text NULL
+    `c_issue_resolution_url`    text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 해결책';
 
