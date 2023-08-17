@@ -1498,6 +1498,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
 
     -- 제품 서비스 연결 지라 프로젝트
     `c_jira_project_link`           bigint(20) NULL,
+    `c_jira_project_name`           text NULL,
     `c_jira_project_key`           text NULL,
     `c_jira_project_url`            text NULL,
 
@@ -1505,41 +1506,34 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_req_link`                    bigint(20) NULL,
     `c_req_name`                    text NULL,
 
-    -- 요구사항 우선 순위
-    `c_req_priority_link`           bigint(20) NULL,
-    `c_req_priority_name`           text NULL,
-
-    -- 요구사항 상태
-    `c_req_status_link`             bigint(20) NULL,
-    `c_req_status_name`             text NULL,
-
-    -- 요구사항 이슈
+    -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
     `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
-    -- 요구사항 이슈 우선순위
+    -- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_priority_link`         bigint(20) NULL,
     `c_issue_priority_name`         text NULL,
 
-    -- 요구사항 이슈 상태
+    -- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_status_link`           bigint(20) NULL,
     `c_issue_status_name`           text NULL,
 
-    -- 요구사항 이슈 해결책
+    -- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    -- 요구사항 생성자
-    `c_create_date`                 date NUlL,
-
-    -- 요구사항 이슈이면 비우고, 하위 이슈이면 요구사항 이슈 아이디 적어주고, 이슈 타입이 뭔지 기록
+    -- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
     `c_parent_issue_id`             bigint(20) NULL,
-    `c_this_issue_type`             text NULL,
+    `c_issue_assignee`             text NULL,
 
     -- 기타
-    `c_req_status_etc`              text NULL,
-    `c_req_status_contents`         longtext NULL
+    `c_issue_create_date`              date NUlL,
+    `c_issue_update_date`               date NUlL,
+
+    `c_etc`                 varchar(255)    COMMENT '비고',
+    `c_desc`                text            COMMENT '설명',
+    `c_contents`            longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표 트리거 로그';
 
@@ -1570,6 +1564,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
 
     -- 제품 서비스 연결 지라 프로젝트
     `c_jira_project_link`           bigint(20) NULL,
+    `c_jira_project_name`           text NULL,
     `c_jira_project_key`           text NULL,
     `c_jira_project_url`            text NULL,
 
@@ -1577,41 +1572,34 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_req_link`                    bigint(20) NULL,
     `c_req_name`                    text NULL,
 
-    -- 요구사항 우선 순위
-    `c_req_priority_link`           bigint(20) NULL,
-    `c_req_priority_name`           text NULL,
-
-    -- 요구사항 상태
-    `c_req_status_link`             bigint(20) NULL,
-    `c_req_status_name`             text NULL,
-
-    -- 요구사항 이슈
+    -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
     `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
-    -- 요구사항 이슈 우선순위
+    -- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_priority_link`         bigint(20) NULL,
     `c_issue_priority_name`         text NULL,
 
-    -- 요구사항 이슈 상태
+    -- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_status_link`           bigint(20) NULL,
     `c_issue_status_name`           text NULL,
 
-    -- 요구사항 이슈 해결책
+    -- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    -- 요구사항 생성자
-    `c_create_date`                 date NUlL,
-
-    -- 요구사항 이슈이면 비우고, 하위 이슈이면 요구사항 이슈 아이디 적어주고, 이슈 타입이 뭔지 기록
+    -- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
     `c_parent_issue_id`             bigint(20) NULL,
-    `c_this_issue_type`             text NULL,
+    `c_issue_assignee`             text NULL,
 
     -- 기타
-    `c_req_status_etc`              text NULL,
-    `c_req_status_contents`         longtext NULL
+    `c_issue_create_date`              date NUlL,
+    `c_issue_update_date`               date NUlL,
+
+    `c_etc`                 varchar(255)    COMMENT '비고',
+    `c_desc`                text            COMMENT '설명',
+    `c_contents`            longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표';
 

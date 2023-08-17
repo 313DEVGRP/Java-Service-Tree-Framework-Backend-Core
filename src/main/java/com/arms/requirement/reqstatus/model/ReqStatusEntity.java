@@ -82,6 +82,9 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_jira_project_link")
     private Long c_jira_project_link;
 
+    @Column(name = "c_jira_project_name")
+    private Long c_jira_project_name;
+
     @Column(name = "c_jira_project_key")
     @Type(type="text")
     private String c_jira_project_key;
@@ -98,45 +101,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_name;
 
-    //-- 요구사항 우선 순위 ( 이슈 우선순위 적용 : 지라 서버에 등록된 JIRA Issue priority
-    private JiraIssuePriorityEntity reqIssuePriorityEntity;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
-    public JiraIssuePriorityEntity getReqIssuePriorityEntity() {
-        return reqIssuePriorityEntity;
-    }
-
-    public void setReqIssuePriorityEntity(JiraIssuePriorityEntity reqIssuePriorityEntity) {
-        this.reqIssuePriorityEntity = reqIssuePriorityEntity;
-    }
-
-    @Column(name = "c_req_priority_name")
-    @Type(type="text")
-    private String c_req_priority_name;
-
-    //-- 요구사항 상태 ( 지라 서버에 등록된 JIRA Issue status
-    private JiraIssueStatusEntity reqIssueStatusEntity;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_req_status_link", referencedColumnName = "c_id")
-    public JiraIssueStatusEntity getReqIssueStatusEntity() {
-        return reqIssueStatusEntity;
-    }
-
-    public void setReqIssueStatusEntity(JiraIssueStatusEntity reqIssueStatusEntity) {
-        this.reqIssueStatusEntity = reqIssueStatusEntity;
-    }
-
-    @Column(name = "c_req_status_name")
-    @Type(type="text")
-    private String c_req_status_name;
-
-    //-- 요구사항 이슈
+    //-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
     @Column(name = "c_issue_link")
     private Long c_issue_link;
 
@@ -149,7 +114,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     private String c_issue_url;
 
 
-    //-- 요구사항 이슈 우선순위
+    //-- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     private JiraIssuePriorityEntity jiraIssuePriorityEntity;
 
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -168,7 +133,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_priority_name;
 
-    //-- 요구사항 이슈 상태
+    //-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     private JiraIssueStatusEntity jiraIssueStatusEntity;
 
     @LazyCollection(LazyCollectionOption.FALSE)
@@ -187,7 +152,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_status_name;
 
-    //-- 요구사항 이슈 해결책
+    //-- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
     @Column(name = "c_issue_resolution_link")
     private Long c_issue_resolution_link;
 
@@ -195,26 +160,34 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_resolution_name;
 
-    @Column(name = "c_create_date")
-    private Date c_create_date;
-
-    //-- 요구사항 이슈 연관, 서브 이슈 서머리
+    //-- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
     @Column(name = "c_parent_issue_id")
     @Type(type="text")
     private Long c_parent_issue_id;
 
-    @Column(name = "c_this_issue_type")
+    @Column(name = "c_issue_assignee")
     @Type(type="text")
-    private String c_this_issue_type;
+    private String c_issue_assignee;
 
-    //-- 기타
-    @Column(name = "c_req_status_etc")
-    @Type(type="text")
-    private String c_req_status_etc;
+    @Column(name = "c_issue_create_date")
+    private Date c_issue_create_date;
 
+    @Column(name = "c_issue_update_date")
+    private Date c_issue_update_date;
+
+    //내용
     @Lob
-    @Column(name = "c_req_status_contents")
-    private String c_req_status_contents;
+    @Column(name = "c_contents")
+    private String c_contents;
+
+    //설명
+    @Column(name = "c_desc")
+    @Type(type="text")
+    private String c_desc;
+
+    //비고
+    @Column(name = "c_etc")
+    private String c_etc;
 
     /*
      * Extend Bean Field
