@@ -1523,8 +1523,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    -- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
-    `c_parent_issue_id`             bigint(20) NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타
@@ -1589,8 +1587,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    -- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
-    `c_parent_issue_id`             bigint(20) NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타

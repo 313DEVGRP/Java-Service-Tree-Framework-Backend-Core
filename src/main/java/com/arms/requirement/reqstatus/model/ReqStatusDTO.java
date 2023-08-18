@@ -69,10 +69,6 @@ public class ReqStatusDTO extends TreeBaseDTO {
 
     private String c_issue_resolution_name;
 
-
-    //-- 부모 이슈가 없으면 요구사항 자신, 있으면 지라에 생성된 요구사항 이슈의 연결된 이슈
-    private Long c_parent_issue_id;
-
     private String c_issue_assignee;
 
     private Date c_issue_create_date;
