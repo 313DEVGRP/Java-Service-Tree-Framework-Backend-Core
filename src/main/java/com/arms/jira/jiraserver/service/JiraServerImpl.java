@@ -39,9 +39,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @AllArgsConstructor
@@ -92,13 +90,16 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Override
 	@Transactional
 	public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception {
+		Random rand = new Random();
+		String randomConnectId = String.valueOf(rand.nextLong());
 
 		jiraServerEntity.setC_title(Util_TitleChecker.StringReplace(jiraServerEntity.getC_title()));
+		jiraServerEntity.setC_jira_server_etc(randomConnectId); // Engine에 보낼 connectId
 
 		JiraServerEntity addedNodeEntity = this.addNode(jiraServerEntity);
 
 		JiraInfoDTO jiraInfoDTO = new JiraInfoDTO();
-		jiraInfoDTO.setConnectId(addedNodeEntity.getC_id().toString());
+		jiraInfoDTO.setConnectId(randomConnectId);
 		jiraInfoDTO.setUri(addedNodeEntity.getC_jira_server_base_url());
 		jiraInfoDTO.setUserId(addedNodeEntity.getC_jira_server_connect_id());
 		jiraInfoDTO.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
