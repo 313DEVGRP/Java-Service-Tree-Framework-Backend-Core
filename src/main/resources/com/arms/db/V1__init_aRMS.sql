@@ -731,7 +731,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUESTATUS_LOG` (
     `c_issue_status_id`       text NULL,
     `c_issue_status_desc`     text NULL,
     `c_issue_status_name`     text NULL,
-    `c_issue_status_url`      text NULL
+    `c_issue_status_url`      text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 상태값 트리거 로그';
 
@@ -750,7 +754,11 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUESTATUS` (
     `c_issue_status_id`       text NULL,
     `c_issue_status_desc`     text NULL,
     `c_issue_status_name`     text NULL,
-    `c_issue_status_url`      text NULL
+    `c_issue_status_url`      text NULL,
+
+    `c_contents`                longtext NULL,
+    `c_desc`                    text NULL,
+    `c_etc`                     text NULL
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='지라 이슈 상태값';
 

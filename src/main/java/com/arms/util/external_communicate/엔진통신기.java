@@ -3,10 +3,7 @@ package com.arms.util.external_communicate;
 import com.arms.util.external_communicate.dto.cloud.*;
 import com.arms.util.external_communicate.dto.onpremise.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +16,9 @@ public interface 엔진통신기 {
     /*
      * 온프레미스
      */
+    @GetMapping("/{connectId}/onpremise/jira/issue")
+    List<OnPremiseJiraProjectDTO> 온프라미스에_요구사항이슈_생성하기(@PathVariable("connectId") String connectId, @RequestBody OnPremiseJiraIssueInputDTO onPremiseJiraIssueInputDTO);
+
     @GetMapping("/{connectId}/onpremise/jira/project/list")
     List<OnPremiseJiraProjectDTO> 지라_프로젝트_리스트_가져오기(@PathVariable("connectId") String connectId);
 
@@ -37,6 +37,9 @@ public interface 엔진통신기 {
     /*
      * 클라우드
      */
+    @GetMapping("/{connectId}/cloud/jira/issue")
+    CloudJiraIssueDTO 클라우드에_요구사항이슈_생성하기(@PathVariable("connectId") String connectId, @RequestBody CloudJiraIssueInputDTO cloudJiraIssueInputDTO);
+
     @GetMapping("/{connectId}/cloud/jira/project/list")
     List<CloudJiraProjectDTO> 클라우드_지라_프로젝트_리스트_가져오기(@PathVariable("connectId") String connectId);
 
@@ -51,6 +54,8 @@ public interface 엔진통신기 {
 
     @GetMapping("/{connectId}/cloud/jira/issuestatus/list")
     StatusSearchDTO 클라우드_지라_상태_가져오기(@PathVariable("connectId") String connectId);
+
+
 
 
 }
