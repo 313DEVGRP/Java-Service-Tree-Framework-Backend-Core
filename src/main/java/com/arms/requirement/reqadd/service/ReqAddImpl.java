@@ -78,32 +78,27 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		String 추가된_요구사항의_제품서비스_버전리스트 = savedReqAddEntity.getC_req_pdservice_versionset_link();
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<String> 가져온_제품서비스_버전리스트 = Arrays.asList(objectMapper.readValue(추가된_요구사항의_제품서비스_버전리스트, String[].class));
+		List<String> 디비에저장된_제품서비스_하위의_버전리스트 = Arrays.asList(objectMapper.readValue(추가된_요구사항의_제품서비스_버전리스트, String[].class));
 
 		List<GlobalTreeMapEntity> 제품서비스_버전에_연결된정보들 = new ArrayList<GlobalTreeMapEntity>();
 
-		for( String 제품서비스_버전 : 가져온_제품서비스_버전리스트 ){
+		for( String 디비에저장된_제품서비스하위_버전 : 디비에저장된_제품서비스_하위의_버전리스트 ){
 			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
 			globalTreeMap.setPdservice_link(추가된_요구사항의_제품서비스.getC_id());
-			globalTreeMap.setPdserviceversion_link(Long.parseLong(제품서비스_버전));
+			globalTreeMap.setPdserviceversion_link(Long.parseLong(디비에저장된_제품서비스하위_버전));
 			제품서비스_버전에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap);
 		}
 
 		for( GlobalTreeMapEntity 연결정보 : 제품서비스_버전에_연결된정보들 ){
 
-			// 제품서비스 아이디를 알 수 있다.
-			// 제품서비스 버전을 알 수 있다.
-			// 연결된 지라 프로젝트를 알 수 있다.
-			// 고로 양방향에 의한 지라 서버를 알 수 있다.
-
 			if( 연결정보.getJiraproject_link() != null ){
 
 				Long 연결된_제품서비스_아이디 = 연결정보.getPdservice_link();
-				Long 연결된_제품서비스_버전 = 연결정보.getPdserviceversion_link();
+				Long 연결된_제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
 
-				Long 연결된_지라프로젝트_아이디 = 연결정보.getJiraproject_link();
+				Long 제품서비스_버전에_연결된_지라프로젝트_아이디 = 연결정보.getJiraproject_link();
 				JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
-				지라프로젝트_검색용_엔티티.setC_id(연결된_지라프로젝트_아이디);
+				지라프로젝트_검색용_엔티티.setC_id(제품서비스_버전에_연결된_지라프로젝트_아이디);
 				JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
 
 				JiraServerEntity 검색된_지라서버 = 검색된_지라프로젝트.getJiraServerEntity();
@@ -114,32 +109,32 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
 				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
 						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()  // 첫 번째로 매칭되는 객체 반환
-						.orElse(null);  // 매칭되는 객체가 없을 경우 null 반환
+						.findFirst()
+						.orElse(null);
 
 				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
 				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
 						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()  // 첫 번째로 매칭되는 객체 반환
-						.orElse(null);  // 매칭되는 객체가 없을 경우 null 반환
+						.findFirst()
+						.orElse(null);
 
 				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
 				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
 						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()  // 첫 번째로 매칭되는 객체 반환
-						.orElse(null);  // 매칭되는 객체가 없을 경우 null 반환
+						.findFirst()
+						.orElse(null);
 
 				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
 				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
 						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()  // 첫 번째로 매칭되는 객체 반환
-						.orElse(null);  // 매칭되는 객체가 없을 경우 null 반환
+						.findFirst()
+						.orElse(null);
 
 				//준비된 파라미터.
 				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
 
 				logger.info("연결된_제품서비스_아이디 = " + 연결된_제품서비스_아이디);
-				logger.info("연결된_제품서비스_버전 = " + 연결된_제품서비스_버전);
+				logger.info("연결된_제품서비스_버전_아이디 = " + 연결된_제품서비스_버전_아이디);
 
 				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_title());
 				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_title());
@@ -149,7 +144,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_title());
 				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_title());
 
-				logger.info("요구사항_이슈_내용 제품아이디 링크 URL = " + 연결된_제품서비스_아이디);
 				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
 			}
 
