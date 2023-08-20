@@ -12,6 +12,8 @@ public class JiraInfoEntity {
 
     private String connectId;
 
+    private String type;
+
     private String userId;
 
     private String passwordOrToken;

@@ -10,7 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 public class JiraInfoDTO {
     private String connectId;
+
+    private String type;
+
     private String userId;
+
     private String passwordOrToken;
+
     private String uri;
 }

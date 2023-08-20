@@ -21,5 +21,4 @@ public interface JiraServer extends TreeService {
     public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception;
 
     public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception;
-
 }

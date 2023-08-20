@@ -91,7 +91,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Transactional
 	public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception {
 		Random rand = new Random();
-		String randomConnectId = String.valueOf(rand.nextLong());
+		String randomConnectId = String.valueOf(Math.abs(rand.nextLong()));
 
 		jiraServerEntity.setC_title(Util_TitleChecker.StringReplace(jiraServerEntity.getC_title()));
 		jiraServerEntity.setC_jira_server_etc(randomConnectId); // Engine에 보낼 connectId
@@ -100,12 +100,14 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		JiraInfoDTO jiraInfoDTO = new JiraInfoDTO();
 		jiraInfoDTO.setConnectId(randomConnectId);
+		jiraInfoDTO.setType(addedNodeEntity.getC_jira_server_type());
 		jiraInfoDTO.setUri(addedNodeEntity.getC_jira_server_base_url());
 		jiraInfoDTO.setUserId(addedNodeEntity.getC_jira_server_connect_id());
 		jiraInfoDTO.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
 		JiraInfoEntity 등록결과 = 엔진통신기.지라서버_등록(jiraInfoDTO);
 
 		logger.info(등록결과.getConnectId());
+		logger.info(등록결과.getType());
 		logger.info(등록결과.getSelf());
 		logger.info(등록결과.getConnectId());
 		logger.info(등록결과.getPasswordOrToken());
@@ -118,14 +120,14 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		if ( 등록결과 != null) {
 			//1. 엔진에서 엔티티 목록을 가져오기 -> 2. 가져온 엔티티들을 기존에 등록된 엔티티인지 검색 후, 없으면 추가 있으면 통과.
-			if (jiraServerEntity.getC_jira_server_type().equals("cloud")) { //cloud
+			if (jiraServerEntity.getC_jira_server_type().equals("클라우드")) { //cloud
 				서버_엔티티에_클라우드_지라_프로젝트_매핑(지라서버에_붙일_프로젝트_리스트, 엔진통신기.클라우드_지라_프로젝트_리스트_가져오기(등록결과.getConnectId().toString()));
 				서버_엔티티에_클라우드_지라_이슈타입_매핑(지라서버에_붙일_이슈타입_리스트, 엔진통신기.클라우드_지라_이슈타입_가져오기(등록결과.getConnectId().toString()));
 				서버_엔티티에_클라우드_지라_이슈우선순위_매핑(지라서버에_붙일_이슈우선순위_리스트, 엔진통신기.클라우드_지라_이슈우선순위_가져오기(등록결과.getConnectId()).getValues());
 				서버_엔티티에_클라우드_지라_이슈해결책_매핑(지라서버에_붙일_이슈해결책_리스트, 엔진통신기.클라우드_지라_이슈해결책_가져오기(등록결과.getConnectId()).getValues());
 				서버_엔티티에_클라우드_지라_이슈상태_매핑(지라서버에_붙일_이슈상태_리스트, 엔진통신기.클라우드_지라_이슈상태_가져오기(등록결과.getConnectId()).getValues());
 			}
-			if (jiraServerEntity.getC_jira_server_type().equals("on-premise")) { // on-premise
+			if (jiraServerEntity.getC_jira_server_type().equals("온프라미스")) { // on-premise
 				서버_엔티티에_지라_프로젝트_매핑(지라서버에_붙일_프로젝트_리스트, 엔진통신기.지라_프로젝트_리스트_가져오기(등록결과.getConnectId()));
 				서버_엔티티에_지라_이슈타입_매핑(지라서버에_붙일_이슈타입_리스트, 엔진통신기.지라_이슈타입_가져오기(등록결과.getConnectId()));
 				서버_엔티티에_지라_이슈우선순위_매핑(지라서버에_붙일_이슈우선순위_리스트, 엔진통신기.지라_이슈우선순위_가져오기(등록결과.getConnectId()));
