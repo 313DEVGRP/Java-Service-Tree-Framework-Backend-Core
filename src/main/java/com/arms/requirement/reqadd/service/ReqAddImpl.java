@@ -101,50 +101,50 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				지라프로젝트_검색용_엔티티.setC_id(제품서비스_버전에_연결된_지라프로젝트_아이디);
 				JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
 
-				JiraServerEntity 검색된_지라서버 = 검색된_지라프로젝트.getJiraServerEntity();
-				Long 연결된_지라서버_아이디 = 검색된_지라서버.getC_id();
-				String 지라서버_커넥트아이디 = 검색된_지라서버.getC_jira_server_connect_id();
-				String 지라서버_타입 = 검색된_지라서버.getC_jira_server_type();
-				
-				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
-				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()
-						.orElse(null);
-
-				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
-				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()
-						.orElse(null);
-
-				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()
-						.orElse(null);
-
-				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-						.filter(entity -> entity.getC_desc().equals("req"))
-						.findFirst()
-						.orElse(null);
-
-				//준비된 파라미터.
-				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
-
-				logger.info("연결된_제품서비스_아이디 = " + 연결된_제품서비스_아이디);
-				logger.info("연결된_제품서비스_버전_아이디 = " + 연결된_제품서비스_버전_아이디);
-
-				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_title());
-				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_title());
-
-				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_title());
-				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_title());
-				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_title());
-				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_title());
-
-				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
+//				JiraServerEntity 검색된_지라서버 = 검색된_지라프로젝트.getJiraServerEntity();
+//				Long 연결된_지라서버_아이디 = 검색된_지라서버.getC_id();
+//				String 지라서버_커넥트아이디 = 검색된_지라서버.getC_jira_server_connect_id();
+//				String 지라서버_타입 = 검색된_지라서버.getC_jira_server_type();
+//
+//				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
+//				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
+//						.filter(entity -> entity.getC_desc().equals("req"))
+//						.findFirst()
+//						.orElse(null);
+//
+//				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
+//				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
+//						.filter(entity -> entity.getC_desc().equals("req"))
+//						.findFirst()
+//						.orElse(null);
+//
+//				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
+//				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+//						.filter(entity -> entity.getC_desc().equals("req"))
+//						.findFirst()
+//						.orElse(null);
+//
+//				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
+//				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+//						.filter(entity -> entity.getC_desc().equals("req"))
+//						.findFirst()
+//						.orElse(null);
+//
+//				//준비된 파라미터.
+//				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
+//
+//				logger.info("연결된_제품서비스_아이디 = " + 연결된_제품서비스_아이디);
+//				logger.info("연결된_제품서비스_버전_아이디 = " + 연결된_제품서비스_버전_아이디);
+//
+//				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_title());
+//				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_title());
+//
+//				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_title());
+//				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_title());
+//				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_title());
+//				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_title());
+//
+//				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
 			}
 
 		}

@@ -83,23 +83,6 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     @Column(name = "c_etc")
     private String c_etc;
 
-    private JiraServerEntity jiraServerEntity;
-
-    @ManyToOne
-    @JsonBackReference
-    @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
-            joinColumns = @JoinColumn(name = "jiraproject_link"),
-            inverseJoinColumns = @JoinColumn(name = "jiraserver_link")
-    )
-    public JiraServerEntity getJiraServerEntity() {
-        return jiraServerEntity;
-    }
-
-    public void setJiraServerEntity(JiraServerEntity jiraServerEntity) {
-        this.jiraServerEntity = jiraServerEntity;
-    }
-
     /*
      * Extend Bean Field
      */

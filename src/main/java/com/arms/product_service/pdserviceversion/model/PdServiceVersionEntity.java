@@ -48,23 +48,6 @@ public class PdServiceVersionEntity extends TreeSearchEntity implements Serializ
     }
 
     //@Getter @Setter
-    private PdServiceEntity pdServiceEntity;
-
-    @ManyToOne
-    @JsonBackReference
-    @JoinTable(
-            name = "TREEMAP_PDSERVICE_VERSION",
-            joinColumns = @JoinColumn(name = "pdserviceversion_link"),
-            inverseJoinColumns = @JoinColumn(name = "pdservice_link")
-    )
-    public PdServiceEntity getPdServiceEntity() {
-        return pdServiceEntity;
-    }
-
-    public void setPdServiceEntity(PdServiceEntity pdServiceEntity) {
-        this.pdServiceEntity = pdServiceEntity;
-    }
-
     @Type(type="text")
     @Column(name = "c_pds_version_start_date")
     private String c_pds_version_start_date;
