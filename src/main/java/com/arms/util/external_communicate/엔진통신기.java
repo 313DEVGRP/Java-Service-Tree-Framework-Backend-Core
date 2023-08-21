@@ -1,9 +1,8 @@
 package com.arms.util.external_communicate;
 
+import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.cloud.*;
 import com.arms.util.external_communicate.dto.onpremise.*;
-import com.arms.util.external_communicate.dto.지라_이슈_데이터_전송_객체;
-import com.arms.util.external_communicate.dto.지라_이슈_생성_데이터_전송_객체;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -24,43 +23,19 @@ public interface 엔진통신기 {
     public 지라_이슈_데이터_전송_객체 이슈_생성하기(@PathVariable("connectId") Long 연결_아이디,
                                    @RequestBody 지라_이슈_생성_데이터_전송_객체 지라_이슈_생성_데이터_전송_객체);
 
-    /*
-     * 온프레미스
-     */
-    @GetMapping("/{connectId}/onpremise/jira/project/list")
-    List<OnPremiseJiraProjectDTO> 지라_프로젝트_리스트_가져오기(@PathVariable("connectId") String connectId);
+    @GetMapping("/{connectId}/jira/project/list")
+    public List<지라_프로젝트_데이터_전송_객체> 지라_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
 
-    @GetMapping("/{connectId}/onpremise/jira/issuetype/list")
-    List<OnPremiseJiraIssueTypeDto> 지라_이슈타입_가져오기(@PathVariable("connectId") String connectId);
+    @GetMapping("/{connectId}/jira/issuetype/list")
+    public List<지라_이슈_유형_데이터_전송_객체> 지라_이슈_유형_가져오기 (@PathVariable("connectId") String 연결_아이디);
 
-    @GetMapping("/{connectId}/onpremise/jira/issuepriority/list")
-    List<OnPremiseJiraPriorityDTO> 지라_이슈우선순위_가져오기(@PathVariable("connectId") String connectId);
+    @GetMapping("/{connectId}/jira/issuepriority/list")
+    public List<지라_이슈_우선순위_데이터_전송_객체> 지라_이슈_우선순위_가져오기 (@PathVariable("connectId") String 연결_아이디);
 
-    @GetMapping("/{connectId}/onpremise/jira/issueresolution/list")
-    List<OnPremiseJiraResolutionDTO> 지라_이슈해결책_가져오기(@PathVariable("connectId") String connectId);
+    @GetMapping("/{connectId}/jira/issueresolution/list")
+    public List<지라_이슈_해결책_데이터_전송_객체> 지라_이슈_해결책_가져오기 (@PathVariable("connectId") String 연결_아이디);
 
-    @GetMapping("/{connectId}/onpremise/jira/issuestatus/list")
-    List<OnPremiseJiraStatusDTO> 지라_이슈상태_가져오기(@PathVariable("connectId") String connectId); // return 확인.
-
-    /*
-     * 클라우드
-     */
-    @GetMapping("/{connectId}/cloud/jira/project/list")
-    List<CloudJiraProjectDTO> 클라우드_지라_프로젝트_리스트_가져오기(@PathVariable("connectId") String connectId);
-
-    @GetMapping("/{connectId}/cloud/jira/issuetype/list")
-    List<CloudJiraIssueTypeDTO> 클라우드_지라_이슈타입_가져오기(@PathVariable("connectId") String connectId);
-
-    @GetMapping("/{connectId}/cloud/jira/issuepriority/list")
-    PrioritySearchDTO 클라우드_지라_이슈우선순위_가져오기(@PathVariable("connectId") String connectId);
-
-    @GetMapping("/{connectId}/cloud/jira/issueresolution/list")
-    ResolutionSearchDTO 클라우드_지라_이슈해결책_가져오기(@PathVariable("connectId") String connectId);
-
-    @GetMapping("/{connectId}/cloud/jira/issuestatus/list")
-    StatusSearchDTO 클라우드_지라_이슈상태_가져오기(@PathVariable("connectId") String connectId);
-
-
-
+    @GetMapping("/{connectId}/jira/issuestatus/list")
+    public List<지라_이슈_상태_데이터_전송_객체> 지라_이슈_상태_가져오기(@PathVariable("connectId") String 연결_아이디);
 
 }
