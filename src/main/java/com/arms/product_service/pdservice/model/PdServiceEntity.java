@@ -98,7 +98,7 @@ public class PdServiceEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_PDSERVICE_VERSION",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "pdservice_link"),
             inverseJoinColumns = @JoinColumn(name = "pdserviceversion_link")
     )

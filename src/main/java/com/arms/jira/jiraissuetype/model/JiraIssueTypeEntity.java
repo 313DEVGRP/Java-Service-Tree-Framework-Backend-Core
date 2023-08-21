@@ -95,16 +95,6 @@ public class JiraIssueTypeEntity extends TreeSearchEntity implements Serializabl
     @Column(name = "c_etc")
     private String c_etc;
 
-    private JiraServerEntity jiraServerEntity;
-
-    @ManyToOne
-    @JsonBackReference
-    @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
-            joinColumns = @JoinColumn(name= "jiraissuetype_link"),
-            inverseJoinColumns = @JoinColumn(name="jiraserver_link")
-    )
-    public JiraServerEntity getJiraServerEntity() { return jiraServerEntity; }
     /*
      * Extend Bean Field
      */

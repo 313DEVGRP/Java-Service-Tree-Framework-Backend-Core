@@ -89,7 +89,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuepriority_link")
     )
@@ -108,7 +108,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissueresolution_link")
     )
@@ -127,7 +127,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuestatus_link")
     )
@@ -146,7 +146,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
     )
@@ -165,7 +165,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
-            name = "TREEMAP_JIRASERVER_PROJECT",
+            name = "GLOBAL_TREE_MAP",
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraproject_link")
     )

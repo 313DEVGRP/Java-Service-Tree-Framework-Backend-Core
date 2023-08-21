@@ -91,6 +91,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		for( GlobalTreeMapEntity 연결정보 : 제품서비스_버전에_연결된정보들 ){
 
+			logger.info("지라 프로젝트 링크 = " + 연결정보.getPdservice_link());
+			logger.info("지라 프로젝트 링크 = " + 연결정보.getPdserviceversion_link());
+			logger.info("지라 프로젝트 링크 = " + 연결정보.getJiraserver_link());
+			logger.info("지라 프로젝트 링크 = " + 연결정보.getJiraproject_link());
+
 			if( 연결정보.getJiraproject_link() != null ){
 
 				Long 연결된_제품서비스_아이디 = 연결정보.getPdservice_link();
