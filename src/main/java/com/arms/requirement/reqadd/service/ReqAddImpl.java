@@ -24,6 +24,7 @@ import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
+import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.cloud.FieldsDTO;
 import com.arms.util.external_communicate.dto.onpremise.OnPremiseJiraIssueInputDTO;
 import com.arms.util.external_communicate.엔진통신기;
@@ -167,6 +168,37 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
 
 				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
+
+				지라_이슈_필드_데이터_전송_객체.프로젝트 프로젝트 = 지라_이슈_필드_데이터_전송_객체.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
+						.key(검색된_지라프로젝트.getC_jira_key())
+						.name(검색된_지라프로젝트.getC_jira_name())
+						.self(검색된_지라프로젝트.getC_jira_url())
+						.build();
+
+				지라_이슈_우선순위_데이터_전송_객체 우선순위 = new 지라_이슈_우선순위_데이터_전송_객체();
+				우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
+				우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
+				우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
+
+				지라_이슈_유형_데이터_전송_객체 유형 = new 지라_이슈_유형_데이터_전송_객체();
+				유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+				유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+				유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+
+
+				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체.builder()
+																.project(프로젝트)
+																.issuetype(유형)
+																.summary(savedReqAddEntity.getC_title())
+																.description(savedReqAddEntity.getC_req_contents())
+																.build();
+
+				지라_이슈_생성_데이터_전송_객체 요구사항_이슈 = 지라_이슈_생성_데이터_전송_객체
+																.builder()
+																.fields(요구사항이슈_필드)
+																.build();
+
+				엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()),요구사항_이슈);
 			}
 
 		}
