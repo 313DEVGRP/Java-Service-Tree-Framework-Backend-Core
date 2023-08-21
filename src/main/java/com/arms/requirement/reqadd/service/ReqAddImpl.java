@@ -21,6 +21,7 @@ import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraproject.service.JiraProjectImpl;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
+import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.util.external_communicate.dto.cloud.FieldsDTO;
@@ -40,10 +41,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @AllArgsConstructor
@@ -61,6 +60,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Autowired
 	@Qualifier("jiraProject")
 	private JiraProject jiraProject;
+
+	@Autowired
+	@Qualifier("jiraServer")
+	private JiraServer jiraServer;
 
 	@Override
 	@Transactional
@@ -91,65 +94,79 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		for( GlobalTreeMapEntity 연결정보 : 제품서비스_버전에_연결된정보들 ){
 
-			logger.info("지라 프로젝트 링크 = " + 연결정보.getPdservice_link());
-			logger.info("지라 프로젝트 링크 = " + 연결정보.getPdserviceversion_link());
-			logger.info("지라 프로젝트 링크 = " + 연결정보.getJiraserver_link());
-			logger.info("지라 프로젝트 링크 = " + 연결정보.getJiraproject_link());
-
 			if( 연결정보.getJiraproject_link() != null ){
 
-				Long 연결된_제품서비스_아이디 = 연결정보.getPdservice_link();
-				Long 연결된_제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
+				Long 제품서비스_아이디 = 연결정보.getPdservice_link();
+				Long 제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
+				Long 지라_프로젝트_아이디 = 연결정보.getJiraproject_link();
 
-				Long 제품서비스_버전에_연결된_지라프로젝트_아이디 = 연결정보.getJiraproject_link();
+				GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
+				globalTreeMap.setJiraproject_link(지라_프로젝트_아이디);
+				List<GlobalTreeMapEntity> 지라프로젝트에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap);
+
+				GlobalTreeMapEntity 지라서버_글로벌트리맵 = 지라프로젝트에_연결된정보들.stream()
+						.filter(글로벌트리맵 -> 글로벌트리맵.getJiraserver_link() != null) // 특정값이 null이 아닌 엔티티들로 필터링
+						.findFirst() // 첫 번째로 찾은 엔티티를 반환 (단일 값)
+						.orElse(null); // 만약 찾은 엔티티가 없으면 null 반환
+				
+				Long 지라서버_아이디 = 지라서버_글로벌트리맵.getJiraserver_link();
+
+				logger.info("제품 서비스 링크 = " + 제품서비스_아이디);
+				logger.info("제품 서비스 버전 링크 = " + 제품서비스_버전_아이디);
+				logger.info("지라 서버 링크 = " + 지라서버_아이디);
+				logger.info("지라 프로젝트 링크 = " + 지라_프로젝트_아이디);
+				
 				JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
-				지라프로젝트_검색용_엔티티.setC_id(제품서비스_버전에_연결된_지라프로젝트_아이디);
+				지라프로젝트_검색용_엔티티.setC_id(지라_프로젝트_아이디);
 				JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
 
-//				JiraServerEntity 검색된_지라서버 = 검색된_지라프로젝트.getJiraServerEntity();
-//				Long 연결된_지라서버_아이디 = 검색된_지라서버.getC_id();
-//				String 지라서버_커넥트아이디 = 검색된_지라서버.getC_jira_server_connect_id();
-//				String 지라서버_타입 = 검색된_지라서버.getC_jira_server_type();
-//
-//				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
-//				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-//						.filter(entity -> entity.getC_desc().equals("req"))
-//						.findFirst()
-//						.orElse(null);
-//
-//				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
-//				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-//						.filter(entity -> entity.getC_desc().equals("req"))
-//						.findFirst()
-//						.orElse(null);
-//
-//				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-//				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-//						.filter(entity -> entity.getC_desc().equals("req"))
-//						.findFirst()
-//						.orElse(null);
-//
-//				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-//				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-//						.filter(entity -> entity.getC_desc().equals("req"))
-//						.findFirst()
-//						.orElse(null);
-//
-//				//준비된 파라미터.
-//				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
-//
-//				logger.info("연결된_제품서비스_아이디 = " + 연결된_제품서비스_아이디);
-//				logger.info("연결된_제품서비스_버전_아이디 = " + 연결된_제품서비스_버전_아이디);
-//
-//				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_title());
-//				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_title());
-//
-//				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_title());
-//				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_title());
-//				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_title());
-//				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_title());
-//
-//				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
+				JiraServerEntity 지라서버_검색용_엔티티 = new JiraServerEntity();
+				지라서버_검색용_엔티티.setC_id(지라서버_아이디);
+				JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
+
+				String 지라서버_커넥트아이디 = 검색된_지라서버.getC_jira_server_connect_id();
+				String 지라서버_타입 = 검색된_지라서버.getC_jira_server_type();
+
+				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
+				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
+						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						.findFirst()
+						.orElse(null);
+
+				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
+				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
+						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						.findFirst()
+						.orElse(null);
+
+				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
+				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						.findFirst()
+						.orElse(null);
+
+				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
+				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						.findFirst()
+						.orElse(null);
+
+
+				//준비된 파라미터.
+				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
+
+				logger.info("제품서비스_아이디 = " + 제품서비스_아이디);
+				logger.info("제품서비스_버전_아이디 = " + 제품서비스_버전_아이디);
+
+				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_jira_server_base_url());
+				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_jira_name());
+
+				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
+				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_issue_resolution_name());
+				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_issue_status_name());
+				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
+
+				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
 			}
 
 		}
