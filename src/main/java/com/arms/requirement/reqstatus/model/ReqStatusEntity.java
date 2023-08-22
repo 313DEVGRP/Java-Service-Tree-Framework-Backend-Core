@@ -143,9 +143,11 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_assignee;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_issue_create_date")
     private Date c_issue_create_date;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_issue_update_date")
     private Date c_issue_update_date;
 

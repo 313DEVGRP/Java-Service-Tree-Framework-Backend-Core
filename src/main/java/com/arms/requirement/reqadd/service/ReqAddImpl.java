@@ -19,24 +19,19 @@ import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
-import com.arms.jira.jiraproject.service.JiraProjectImpl;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.util.external_communicate.dto.*;
-import com.arms.util.external_communicate.dto.cloud.FieldsDTO;
-import com.arms.util.external_communicate.dto.onpremise.OnPremiseJiraIssueInputDTO;
-import com.arms.util.external_communicate.엔진통신기;
-import com.arms.util.external_communicate.dto.cloud.CloudJiraIssueInputDTO;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.egovframework.javaservice.treeframework.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +41,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @AllArgsConstructor
@@ -238,10 +233,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_issue_key(생성된_요구사항_이슈.getKey());
 				reqStatusDTO.setC_issue_url(생성된_요구사항_이슈.getSelf());
 
-				// Calendar를 사용하여 현재 시간 (시, 분, 초 포함) 생성
-				Calendar calendar = Calendar.getInstance();
-				Date currentTime = calendar.getTime();   // Date 객체 생성
-				reqStatusDTO.setC_issue_create_date(currentTime);
+				reqStatusDTO.setC_issue_create_date(new Date());
 				//reqStatusDTO.setC_issue_priority_link(생성된_요구사항_이슈.get);
 				//reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
 

@@ -17,7 +17,7 @@
 
             `c_method`                  text NULL COMMENT '노드 변경 행위',
             `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-            `c_date`                    date NULL COMMENT '노드 변경 시',
+            `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
             `c_req_pdservice_link`              bigint(20) NULL,
             `c_req_pdservice_versionset_link`   text NULL,
@@ -33,8 +33,8 @@
             `c_req_reviewer05`          text NULL,
             `c_req_reviewer05_status`   text NULL,
             `c_req_writer`              text NULL,
-            `c_req_create_date`         text NULL,
-            `c_req_update_date`         text NULL,
+            `c_req_create_date`         DATETIME NULL,
+            `c_req_update_date`         DATETIME NULL,
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -70,8 +70,8 @@
             `c_req_reviewer05`          text NULL,
             `c_req_reviewer05_status`   text NULL,
             `c_req_writer`              text NULL,
-            `c_req_create_date`         text NULL,
-            `c_req_update_date`         text NULL,
+            `c_req_create_date`         DATETIME NULL,
+            `c_req_update_date`         DATETIME NULL,
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -162,7 +162,7 @@
 
             `c_method`                  text NULL COMMENT '노드 변경 행위',
             `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-            `c_date`                    date NULL COMMENT '노드 변경 시',
+            `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
             -- 제품 서비스
             `c_pdservice_link`              bigint(20) NULL,
@@ -207,8 +207,8 @@
             `c_issue_assignee`             text NULL,
 
             -- 기타
-            `c_issue_create_date`              date NUlL,
-            `c_issue_update_date`               date NUlL,
+            `c_issue_create_date`              DATETIME NUlL,
+            `c_issue_update_date`               DATETIME NUlL,
 
             `c_etc`                 varchar(255)    COMMENT '비고',
             `c_desc`                text            COMMENT '설명',
@@ -275,8 +275,8 @@
             `c_issue_assignee`             text NULL,
 
             -- 기타
-            `c_issue_create_date`              date NUlL,
-            `c_issue_update_date`               date NUlL,
+            `c_issue_create_date`              DATETIME NUlL,
+            `c_issue_update_date`               DATETIME NUlL,
 
             `c_etc`                 varchar(255)    COMMENT '비고',
             `c_desc`                text            COMMENT '설명',

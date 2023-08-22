@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -133,13 +134,13 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_writer;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_create_date")
-    @Type(type="text")
-    private String c_req_create_date;
+    private Date c_req_create_date;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_update_date")
-    @Type(type="text")
-    private String c_req_update_date;
+    private Date c_req_update_date;
 
     //내용
     @Lob
