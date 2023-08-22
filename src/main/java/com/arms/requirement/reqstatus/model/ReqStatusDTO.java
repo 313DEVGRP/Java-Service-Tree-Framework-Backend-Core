@@ -36,7 +36,7 @@ public class ReqStatusDTO extends TreeBaseDTO {
     //-- 제품 서비스 연결 지라 프로젝트
     private Long c_jira_project_link;
 
-    private Long c_jira_project_name;
+    private String c_jira_project_name;
 
     private String c_jira_project_key;
 
@@ -46,9 +46,6 @@ public class ReqStatusDTO extends TreeBaseDTO {
     private Long c_req_link;
 
     private String c_req_name;
-
-    //-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    private Long c_issue_link;
 
     private String c_issue_key;
 
@@ -68,6 +65,8 @@ public class ReqStatusDTO extends TreeBaseDTO {
     private Long c_issue_resolution_link;
 
     private String c_issue_resolution_name;
+
+    private String c_issue_reporter;
 
     private String c_issue_assignee;
 

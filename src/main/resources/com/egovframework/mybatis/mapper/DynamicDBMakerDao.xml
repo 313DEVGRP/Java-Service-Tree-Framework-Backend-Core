@@ -188,7 +188,6 @@
             `c_req_name`                    text NULL,
 
             -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-            `c_issue_link`                  bigint(20) NULL,
             `c_issue_key`                   text NULL,
             `c_issue_url`                   text NULL,
 
@@ -204,6 +203,7 @@
             `c_issue_resolution_link`       bigint(20) NULL,
             `c_issue_resolution_name`       text NULL,
 
+            `c_issue_reporter`             text NULL,
             `c_issue_assignee`             text NULL,
 
             -- 기타
@@ -256,7 +256,6 @@
             `c_req_name`                    text NULL,
 
             -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-            `c_issue_link`                  bigint(20) NULL,
             `c_issue_key`                   text NULL,
             `c_issue_url`                   text NULL,
 
@@ -272,6 +271,7 @@
             `c_issue_resolution_link`       bigint(20) NULL,
             `c_issue_resolution_name`       text NULL,
 
+            `c_issue_reporter`             text NULL,
             `c_issue_assignee`             text NULL,
 
             -- 기타

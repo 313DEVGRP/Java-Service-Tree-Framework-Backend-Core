@@ -22,6 +22,8 @@ import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.util.external_communicate.dto.*;
@@ -59,6 +61,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 	@Autowired
 	private GlobalTreeMapService globalTreeMapService;
+
+	@Autowired
+	@Qualifier("pdServiceVersion")
+	private PdServiceVersion pdServiceVersion;
 
 	@Autowired
 	@Qualifier("jiraProject")
@@ -106,6 +112,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				Long 제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
 				Long 지라_프로젝트_아이디 = 연결정보.getJiraproject_link();
 
+				PdServiceVersionEntity 제품서비스_버전_검색전용 = new PdServiceVersionEntity();
+				제품서비스_버전_검색전용.setC_id(제품서비스_버전_아이디);
+				PdServiceVersionEntity 제품서비스_버전 = pdServiceVersion.getNode(제품서비스_버전_검색전용);
+
 				GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
 				globalTreeMap.setJiraproject_link(지라_프로젝트_아이디);
 				List<GlobalTreeMapEntity> 지라프로젝트에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap);
@@ -121,14 +131,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("제품 서비스 버전 링크 = " + 제품서비스_버전_아이디);
 				logger.info("지라 서버 링크 = " + 지라서버_아이디);
 				logger.info("지라 프로젝트 링크 = " + 지라_프로젝트_아이디);
-				
-				JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
-				지라프로젝트_검색용_엔티티.setC_id(지라_프로젝트_아이디);
-				JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
 
 				JiraServerEntity 지라서버_검색용_엔티티 = new JiraServerEntity();
 				지라서버_검색용_엔티티.setC_id(지라서버_아이디);
 				JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
+				
+				JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
+				지라프로젝트_검색용_엔티티.setC_id(지라_프로젝트_아이디);
+				JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
 
 				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
 				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
@@ -218,17 +228,26 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 				reqStatusDTO.setC_title(savedReqAddEntity.getC_title());
 				//-- 제품 서비스
-				reqStatusDTO.setC_pdservice_link(제품서비스_아이디);
+				reqStatusDTO.setC_pdservice_link(추가된_요구사항의_제품서비스.getC_id());
+				reqStatusDTO.setC_pdservice_name(추가된_요구사항의_제품서비스.getC_title());
 				//-- 제품 서비스 버전
-				reqStatusDTO.setC_pds_version_link(제품서비스_버전_아이디);
+				reqStatusDTO.setC_pds_version_link(제품서비스_버전.getC_id());
+				reqStatusDTO.setC_pds_version_name(제품서비스_버전.getC_title());
 				//-- 제품 서비스 연결 지라 server
-				reqStatusDTO.setC_jira_server_link(지라서버_아이디);
+				reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
+				reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+				reqStatusDTO.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
 				//-- 제품 서비스 연결 지라 프로젝트
-				reqStatusDTO.setC_jira_project_link(지라_프로젝트_아이디);
+				reqStatusDTO.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+				reqStatusDTO.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+				reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+				reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
 
 				//-- 요구사항
 				reqStatusDTO.setC_req_link(savedReqAddEntity.getC_id());
+				reqStatusDTO.setC_req_name(savedReqAddEntity.getC_title());
+
 				//-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
 				reqStatusDTO.setC_issue_key(생성된_요구사항_이슈.getKey());
 				reqStatusDTO.setC_issue_url(생성된_요구사항_이슈.getSelf());
