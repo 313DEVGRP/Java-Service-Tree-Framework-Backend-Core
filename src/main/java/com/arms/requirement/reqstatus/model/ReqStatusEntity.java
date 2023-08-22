@@ -115,38 +115,17 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
 
 
     //-- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-    private JiraIssuePriorityEntity jiraIssuePriorityEntity;
 
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_issue_priority_link", referencedColumnName = "c_id")
-    public JiraIssuePriorityEntity getJiraIssuePriorityEntity() {
-        return jiraIssuePriorityEntity;
-    }
-
-    public void setJiraIssuePriorityEntity(JiraIssuePriorityEntity jiraIssuePriorityEntity) {
-        this.jiraIssuePriorityEntity = jiraIssuePriorityEntity;
-    }
+    @Column(name = "c_issue_priority_link")
+    private Long c_issue_priority_link;
 
     @Column(name = "c_issue_priority_name")
     @Type(type="text")
     private String c_issue_priority_name;
 
     //-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-    private JiraIssueStatusEntity jiraIssueStatusEntity;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToOne
-    @JoinColumn(name = "c_issue_status_link", referencedColumnName = "c_id")
-    public JiraIssueStatusEntity getJiraIssueStatusEntity() {
-        return jiraIssueStatusEntity;
-    }
-
-    public void setJiraIssueStatusEntity(JiraIssueStatusEntity jiraIssueStatusEntity) {
-        this.jiraIssueStatusEntity = jiraIssueStatusEntity;
-    }
+    @Column(name = "c_issue_status_link")
+    private Long c_issue_status_link;
 
     @Column(name = "c_issue_status_name")
     @Type(type="text")

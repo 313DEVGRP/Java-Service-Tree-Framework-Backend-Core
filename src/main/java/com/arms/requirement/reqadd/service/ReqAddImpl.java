@@ -24,12 +24,15 @@ import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
+import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.cloud.FieldsDTO;
 import com.arms.util.external_communicate.dto.onpremise.OnPremiseJiraIssueInputDTO;
 import com.arms.util.external_communicate.엔진통신기;
 import com.arms.util.external_communicate.dto.cloud.CloudJiraIssueInputDTO;
+import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -38,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +60,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	private com.arms.util.external_communicate.엔진통신기 엔진통신기;
 
 	@Autowired
+	private com.arms.util.external_communicate.내부통신기 내부통신기;
+
+	@Autowired
 	private GlobalTreeMapService globalTreeMapService;
 
 	@Autowired
@@ -65,6 +72,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Autowired
 	@Qualifier("jiraServer")
 	private JiraServer jiraServer;
+
+	@Autowired
+	protected Chat chat;
 
 	@Override
 	@Transactional
@@ -125,30 +135,27 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				지라서버_검색용_엔티티.setC_id(지라서버_아이디);
 				JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
 
-				String 지라서버_커넥트아이디 = 검색된_지라서버.getC_jira_server_connect_id();
-				String 지라서버_타입 = 검색된_지라서버.getC_jira_server_type();
-
 				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
 				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
 						.findFirst()
 						.orElse(null);
 
 				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
 				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
 						.findFirst()
 						.orElse(null);
 
 				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
 				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
 						.findFirst()
 						.orElse(null);
 
 				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
 				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-						.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
 						.findFirst()
 						.orElse(null);
 
@@ -186,7 +193,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
 
 
-				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체.builder()
+
+				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체
+																.builder()
 																.project(프로젝트)
 																.issuetype(유형)
 																.summary(savedReqAddEntity.getC_title())
@@ -198,7 +207,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 																.fields(요구사항이슈_필드)
 																.build();
 
-				엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()),요구사항_이슈);
+				지라_이슈_데이터_전송_객체 생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+
+				ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+				reqStatusDTO.setRef(TreeConstant.First_Node_CID);
+				reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
+				reqStatusDTO.setC_title(savedReqAddEntity.getC_title());
+				reqStatusDTO.setC_pdservice_link(제품서비스_아이디);
+				reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+
+				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+				if(결과.getStatusCode().isError()){
+					chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
+				}
+
 			}
 
 		}
