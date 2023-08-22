@@ -192,12 +192,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				유형.setName(요구사항_이슈_타입.getC_issue_type_name());
 				유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
 
+				지라_이슈_필드_데이터_전송_객체.보고자 암스서버보고자 = new 지라_이슈_필드_데이터_전송_객체.보고자();
+				암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+				암스서버보고자.setEmailAddress("313cokr@gmail.com");
 
+				지라_이슈_필드_데이터_전송_객체.담당자 암스서버담당자 = new 지라_이슈_필드_데이터_전송_객체.담당자();
+				암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+				암스서버담당자.setEmailAddress("313cokr@gmail.com");
 
 				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체
 																.builder()
 																.project(프로젝트)
 																.issuetype(유형)
+																.priority(우선순위)
+																.reporter(암스서버보고자)
+																.assignee(암스서버담당자)
 																.summary(savedReqAddEntity.getC_title())
 																.description(savedReqAddEntity.getC_req_contents())
 																.build();
@@ -213,9 +222,28 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setRef(TreeConstant.First_Node_CID);
 				reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 				reqStatusDTO.setC_title(savedReqAddEntity.getC_title());
+				//-- 제품 서비스
 				reqStatusDTO.setC_pdservice_link(제품서비스_아이디);
-				reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
-				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				//-- 제품 서비스 버전
+				reqStatusDTO.setC_pds_version_link(제품서비스_버전_아이디);
+				//-- 제품 서비스 연결 지라 server
+				reqStatusDTO.setC_jira_server_link(지라서버_아이디);
+				//-- 제품 서비스 연결 지라 프로젝트
+				reqStatusDTO.setC_jira_project_link(지라_프로젝트_아이디);
+
+
+				//-- 요구사항
+				reqStatusDTO.setC_req_link(savedReqAddEntity.getC_id());
+				//-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
+				reqStatusDTO.setC_issue_key(생성된_요구사항_이슈.getKey());
+				reqStatusDTO.setC_issue_url(생성된_요구사항_이슈.getSelf());
+
+				// Calendar를 사용하여 현재 시간 (시, 분, 초 포함) 생성
+				Calendar calendar = Calendar.getInstance();
+				Date currentTime = calendar.getTime();   // Date 객체 생성
+				reqStatusDTO.setC_issue_create_date(currentTime);
+				//reqStatusDTO.setC_issue_priority_link(생성된_요구사항_이슈.get);
+				//reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
 
 				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 				if(결과.getStatusCode().isError()){
