@@ -1394,7 +1394,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_req_name`                    text NULL,
 
     -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
@@ -1410,6 +1409,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
+    `c_issue_reporter`             text NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타
@@ -1458,7 +1458,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_req_name`                    text NULL,
 
     -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
@@ -1474,6 +1473,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
+    `c_issue_reporter`             text NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타

@@ -83,7 +83,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     private Long c_jira_project_link;
 
     @Column(name = "c_jira_project_name")
-    private Long c_jira_project_name;
+    private String c_jira_project_name;
 
     @Column(name = "c_jira_project_key")
     @Type(type="text")
@@ -100,10 +100,6 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_name")
     @Type(type="text")
     private String c_req_name;
-
-    //-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    @Column(name = "c_issue_link")
-    private Long c_issue_link;
 
     @Column(name = "c_issue_key")
     @Type(type="text")
@@ -138,6 +134,10 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_issue_resolution_name")
     @Type(type="text")
     private String c_issue_resolution_name;
+
+    @Column(name = "c_issue_reporter")
+    @Type(type="text")
+    private String c_issue_reporter;
 
     @Column(name = "c_issue_assignee")
     @Type(type="text")
