@@ -11,15 +11,29 @@
  */
 package com.arms.requirement.reqstatus.controller;
 
+import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.jira.jiraissuepriority.service.JiraIssuePriority;
+import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
+import com.arms.jira.jiraissuestatus.service.JiraIssueStatus;
+import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.requirement.reqadd.model.ReqAddDTO;
+import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 
@@ -35,6 +49,14 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     @Qualifier("reqStatus")
     private ReqStatus reqStatus;
 
+    @Autowired
+    @Qualifier("jiraIssuePriority")
+    private JiraIssuePriority jiraIssuePriority;
+
+    @Autowired
+    @Qualifier("jiraIssueStatus")
+    private JiraIssueStatus jiraIssueStatus;
+
     @PostConstruct
     public void initialize() {
         setTreeService(reqStatus);
@@ -43,4 +65,26 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/addStatusNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> 요구사항_이슈_저장하기(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @RequestBody ReqStatusDTO reqStatusDTO) throws Exception {
+
+        log.info("ReqStatusController :: addStatusNode");
+        ReqStatusEntity reqStatusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+
+        SessionUtil.setAttribute("addStatusNode",changeReqTableName);
+
+        ReqStatusEntity savedNode = reqStatus.addNode(reqStatusEntity);
+
+        SessionUtil.removeAttribute("addStatusNode");
+
+        log.info("ReqStatusController :: addStatusNode");
+        return ResponseEntity.ok(CommonResponse.success(savedNode));
+
+    }
 }

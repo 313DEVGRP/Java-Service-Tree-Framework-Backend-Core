@@ -49,10 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -227,6 +224,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: addReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
+        reqAddEntity.setC_req_create_date(new Date());
         PdServiceEntity pdServiceEntity = new PdServiceEntity();
         pdServiceEntity.setC_id(reqAddDTO.getC_req_pdservice_link());
         PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);

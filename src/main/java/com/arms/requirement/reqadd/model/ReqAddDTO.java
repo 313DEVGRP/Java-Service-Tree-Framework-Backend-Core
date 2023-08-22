@@ -3,6 +3,8 @@ package com.arms.requirement.reqadd.model;
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @Builder
@@ -37,9 +39,9 @@ public class ReqAddDTO extends TreeBaseDTO {
 
     private String c_req_writer;
 
-    private String c_req_create_date;
+    private Date c_req_create_date;
 
-    private String c_req_update_date;
+    private Date c_req_update_date;
 
     private String c_req_contents;
 

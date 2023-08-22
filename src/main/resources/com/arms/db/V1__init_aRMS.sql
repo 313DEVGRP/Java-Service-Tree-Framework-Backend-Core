@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_FILEREPOSITORY_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_file_name`                    text NULL,
     `c_file_content_type`            text NULL,
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICEVERSION_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_link`          bigint(20) NULL,
 
@@ -226,7 +226,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_PDSERVICE_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_owner`         text NULL,
     `c_pdservice_reviewer01`    text NULL,
@@ -324,7 +324,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAPROJECT_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_jira_url`                text NULL,
     `c_jira_key`                text NULL,
@@ -414,7 +414,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRASERVER_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_jira_server_name`        text NULL,
     `c_jira_server_base_url`    text NULL,
@@ -508,7 +508,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUETYPE_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_issue_type_id`           text NULL,
     `c_issue_type_desc`         text NULL,
@@ -601,7 +601,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUEPRIORITY_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_issue_priority_id`       text NULL,
     `c_issue_priority_desc`     text NULL,
@@ -694,7 +694,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUESTATUS_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_issue_status_id`       text NULL,
     `c_issue_status_desc`     text NULL,
@@ -786,7 +786,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUERESOLUTION_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_issue_resolution_id`     text NULL,
     `c_issue_resolution_desc`   text NULL,
@@ -879,7 +879,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_req_pdservice_link`              bigint(20) NULL,
     `c_req_pdservice_versionset_link`   text NULL,
@@ -895,8 +895,8 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
     `c_req_reviewer05`          text NULL,
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
-    `c_req_create_date`         text NULL,
-    `c_req_update_date`         text NULL,
+    `c_req_create_date`         DATETIME NULL,
+    `c_req_update_date`         DATETIME NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',
@@ -931,8 +931,8 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD` (
     `c_req_reviewer05`          text NULL,
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
-    `c_req_create_date`         text NULL,
-    `c_req_update_date`         text NULL,
+    `c_req_create_date`         DATETIME NULL,
+    `c_req_update_date`         DATETIME NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',
@@ -996,7 +996,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQPRIORITY_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_etc`                     text NULL,
     `c_contents`                longtext NULL
@@ -1066,95 +1066,6 @@ END $$
 DELIMITER ;
 
 
-
---
--- Table structure for table `T_ARMS_REQSTATE`
---
-CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATE_LOG` (
-
-    `c_id`                      bigint(20) NOT NULL COMMENT '노드 아이디',
-    `c_parentid`                bigint(20) NOT NULL COMMENT '부모 노드 아이디',
-    `c_position`                bigint(20) NOT NULL COMMENT '노드 포지션',
-    `c_left`                    bigint(20) NOT NULL COMMENT '노드 좌측 끝 포인트',
-    `c_right`                   bigint(20) NOT NULL COMMENT '노드 우측 끝 포인트',
-    `c_level`                   bigint(20) NOT NULL COMMENT '노드 DEPTH',
-    `c_title`                   VARCHAR(255) COMMENT '노드 명',
-    `c_type`                    VARCHAR(255) COMMENT '노드 타입',
-
-    `c_method`                  text NULL COMMENT '노드 변경 행위',
-    `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
-
-    `c_etc`                     text NULL,
-    `c_contents`                longtext NULL
-
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 상태 트리거 로그';
-
-
-CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATE` (
-
-    `c_id`                      bigint(20) AUTO_INCREMENT primary key COMMENT '노드 아이디',
-    `c_parentid`                bigint(20) NOT NULL COMMENT '부모 노드 아이디',
-    `c_position`                bigint(20) NOT NULL COMMENT '노드 포지션',
-    `c_left`                    bigint(20) NOT NULL COMMENT '노드 좌측 끝 포인트',
-    `c_right`                   bigint(20) NOT NULL COMMENT '노드 우측 끝 포인트',
-    `c_level`                   bigint(20) NOT NULL COMMENT '노드 DEPTH',
-    `c_title`                   VARCHAR(255) COMMENT '노드 명',
-    `c_type`                    VARCHAR(255) COMMENT '노드 타입',
-
-    `c_etc`                     text NULL,
-    `c_contents`                longtext NULL
-
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 상태값';
-
-
-Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (1, 0, 0, 1, 10, 0, 'T_ARMS_REQSTATE', 'root');
-Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (2, 1, 0, 2, 9, 1, '요구사항 상태값', 'drive');
-Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (3, 2, 0, 3, 4, 2, '요구사항 생성', 'default');
-Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (4, 2, 1, 5, 6, 2, '요구사항 업데이트', 'default');
-Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (5, 2, 2, 7, 8, 2, '요구사항 종료', 'default');
-
-
-DELIMITER $$
-CREATE TRIGGER TG_INSERT_T_ARMS_REQSTATE
-    BEFORE  INSERT ON T_ARMS_REQSTATE
-    FOR EACH ROW
-BEGIN
-    insert into T_ARMS_REQSTATE_LOG (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE, C_METHOD, C_STATE, C_DATE)
-    values (NEW.C_ID,NEW.C_PARENTID,NEW.C_POSITION,NEW.C_LEFT,NEW.C_RIGHT,NEW.C_LEVEL,NEW.C_TITLE,NEW.C_TYPE,'update','변경이전데이터',now());
-END $$
-DELIMITER ;
-
-DELIMITER $$
-CREATE TRIGGER TG_UPDATE_T_ARMS_REQSTATE
-    BEFORE  UPDATE ON T_ARMS_REQSTATE
-    FOR EACH ROW
-BEGIN
-    insert into T_ARMS_REQSTATE_LOG (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE, C_METHOD, C_STATE, C_DATE)
-    values (OLD.C_ID,OLD.C_PARENTID,OLD.C_POSITION,OLD.C_LEFT,OLD.C_RIGHT,OLD.C_LEVEL,OLD.C_TITLE,OLD.C_TYPE,'update','변경이전데이터',now());
-    insert into T_ARMS_REQSTATE_LOG (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE, C_METHOD, C_STATE, C_DATE)
-    values (NEW.C_ID,NEW.C_PARENTID,NEW.C_POSITION,NEW.C_LEFT,NEW.C_RIGHT,NEW.C_LEVEL,NEW.C_TITLE,NEW.C_TYPE,'update','변경이후데이터',now());
-END $$
-DELIMITER ;
-
-DELIMITER $$
-CREATE TRIGGER TG_DELETE_T_ARMS_REQSTATE
-    BEFORE  DELETE ON T_ARMS_REQSTATE
-    FOR EACH ROW
-BEGIN
-    insert into T_ARMS_REQSTATE_LOG (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE, C_METHOD, C_STATE, C_DATE)
-    values (OLD.C_ID,OLD.C_PARENTID,OLD.C_POSITION,OLD.C_LEFT,OLD.C_RIGHT,OLD.C_LEVEL,OLD.C_TITLE,OLD.C_TYPE,'delete','삭제된데이터',now());
-END $$
-DELIMITER ;
-
-
-
-
 --
 -- Table structure for table `T_ARMS_REQCOMMENT`
 --
@@ -1171,7 +1082,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQCOMMENT_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_link`          bigint(20) NULL,
     `c_version_link`            bigint(20) NULL,
@@ -1263,7 +1174,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQREVIEW_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_link`          bigint(20) NULL,
     `c_version_link`            bigint(20) NULL,
@@ -1293,7 +1204,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQREVIEW` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_link`          bigint(20) NULL,
     `c_version_link`            bigint(20) NULL,
@@ -1364,7 +1275,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQREVIEWCOMMENT_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     `c_pdservice_link`          bigint(20) NULL,
     `c_version_link`            bigint(20) NULL,
@@ -1457,7 +1368,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
 
     `c_method`                  text NULL COMMENT '노드 변경 행위',
     `c_state`                   text NULL COMMENT '노드 상태값 ( 이전인지. 이후인지)',
-    `c_date`                    date NULL COMMENT '노드 변경 시',
+    `c_date`                    DATETIME NULL COMMENT '노드 변경 시',
 
     -- 제품 서비스
     `c_pdservice_link`              bigint(20) NULL,
@@ -1483,7 +1394,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_req_name`                    text NULL,
 
     -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
@@ -1499,11 +1409,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
+    `c_issue_reporter`             text NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타
-    `c_issue_create_date`              date NUlL,
-    `c_issue_update_date`               date NUlL,
+    `c_issue_create_date`              DATETIME NUlL,
+    `c_issue_update_date`               DATETIME NUlL,
 
     `c_etc`                 varchar(255)    COMMENT '비고',
     `c_desc`                text            COMMENT '설명',
@@ -1547,7 +1458,6 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_req_name`                    text NULL,
 
     -- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
-    `c_issue_link`                  bigint(20) NULL,
     `c_issue_key`                   text NULL,
     `c_issue_url`                   text NULL,
 
@@ -1563,11 +1473,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
+    `c_issue_reporter`             text NULL,
     `c_issue_assignee`             text NULL,
 
     -- 기타
-    `c_issue_create_date`              date NUlL,
-    `c_issue_update_date`               date NUlL,
+    `c_issue_create_date`              DATETIME NUlL,
+    `c_issue_update_date`               DATETIME NUlL,
 
     `c_etc`                 varchar(255)    COMMENT '비고',
     `c_desc`                text            COMMENT '설명',
