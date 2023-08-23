@@ -1,7 +1,11 @@
 package com.arms.jira.jiraproject.model;
 
+import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
+import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -33,5 +37,10 @@ public class JiraProjectDTO extends TreeBaseDTO {
 
     //비고
     private String c_etc;
+
+    //클라우드 - 프로젝트별 이슈 유형들
+    private Set<JiraIssueTypeEntity> jiraIssueTypeEntities;
+    //클라우드 - 프로젝트별 이슈 상태들
+    private Set<JiraIssueStatusEntity> jiraIssueStatusEntities;
 
 }

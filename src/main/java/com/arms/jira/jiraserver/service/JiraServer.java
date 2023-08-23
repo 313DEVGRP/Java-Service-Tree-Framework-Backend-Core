@@ -11,6 +11,7 @@
  */
 package com.arms.jira.jiraserver.service;
 
+import com.arms.jira.jiraserver.model.JiraServerDTO;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
@@ -21,4 +22,6 @@ public interface JiraServer extends TreeService {
     public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception;
 
     public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception;
+
+    public JiraServerEntity 서버_엔티티_이슈_상태_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception;
 }

@@ -11,21 +11,23 @@
  */
 package com.arms.jira.jiraproject.model;
 
-import com.arms.jira.jiraserver.model.JiraServerEntity;
-import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
+import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.*;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -82,6 +84,40 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
     //비고
     @Column(name = "c_etc")
     private String c_etc;
+
+
+    // 1:N table 연계
+    private Set<JiraIssueTypeEntity> jiraIssueTypeEntities;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraproject_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
+    )
+    public Set<JiraIssueTypeEntity> getJiraIssueTypeEntities() { return jiraIssueTypeEntities; }
+
+    public void setJiraIssueTypeEntities(Set<JiraIssueTypeEntity> jiraIssueTypeEntities) {
+        this.jiraIssueTypeEntities = jiraIssueTypeEntities;
+    }
+
+    private Set<JiraIssueStatusEntity> jiraIssueStatusEntities;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraproject_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraissuestatus_link")
+    )
+    public Set<JiraIssueStatusEntity> getJiraIssueStatusEntities() { return jiraIssueStatusEntities; }
+
+    public void setJiraIssueStatusEntities(Set<JiraIssueStatusEntity> jiraIssueStatusEntities) {
+        this.jiraIssueStatusEntities = jiraIssueStatusEntities;
+    }
 
     /*
      * Extend Bean Field

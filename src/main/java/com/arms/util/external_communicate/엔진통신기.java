@@ -38,4 +38,15 @@ public interface 엔진통신기 {
     @GetMapping("/{connectId}/jira/issuestatus/list")
     public List<지라_이슈_상태_데이터_전송_객체> 지라_이슈_상태_가져오기(@PathVariable("connectId") String 연결_아이디);
 
+    /*
+     * 클라우드
+     */
+    @GetMapping("/{connectId}/jira/issuetype/project/{projectId}")
+    public List<지라_이슈_유형_데이터_전송_객체> 클라우드_프로젝트별_이슈_유형_목록(@PathVariable("connectId") String 연결_아이디,
+                                                                         @PathVariable("projectId") String 프로젝트_아이디);
+    @GetMapping("/{connectId}/jira/issuestatus/project/{projectId}")
+    public List<지라_이슈_상태_데이터_전송_객체> 클라우드_프로젝트별_이슈_상태_목록(@PathVariable("connectId") String 연결_아이디,
+                                                                         @PathVariable("projectId") String 프로젝트_아이디);
+
+
 }
