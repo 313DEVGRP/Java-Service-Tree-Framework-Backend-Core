@@ -11,6 +11,8 @@
  */
 package com.arms.product_service.pdservice.service;
 
+import com.arms.globaltreemap.dao.GlobalTreeMapRepository;
+import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.util.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.util.filerepository.service.FileRepository;
@@ -24,6 +26,7 @@ import com.egovframework.javaservice.treeframework.util.*;
 import com.arms.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.globaltreemap.service.GlobalTreeMapService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -36,7 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @AllArgsConstructor
 @Service("pdService")
 public class PdServiceImpl extends TreeServiceImpl implements PdService {
@@ -58,16 +63,20 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Autowired
     private GlobalTreeMapService globalTreeMapService;
 
+    @Autowired
+    private GlobalTreeMapRepository globalTreeMapRepository;
+
+
     @Override
     public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception {
         pdServiceEntity.setOrder(Order.desc("c_id"));
         Criterion criterion = Restrictions.not(
                 // replace "id" below with property name, depending on what you're filtering against
-                Restrictions.in("c_id", new Object[] {TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
+                Restrictions.in("c_id", new Object[]{TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
         );
         pdServiceEntity.getCriterions().add(criterion);
         List<PdServiceEntity> list = this.getChildNode(pdServiceEntity);
-        for (PdServiceEntity dto: list) {
+        for (PdServiceEntity dto : list) {
             dto.setC_pdservice_contents("force empty");
         }
         return list;
@@ -140,15 +149,15 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
         Set<PdServiceVersionEntity> 요청받은_버전들 = pdServiceEntity.getPdServiceVersionEntities();
 
-        for ( PdServiceVersionEntity 요청버전 : 요청받은_버전들 ){
+        for (PdServiceVersionEntity 요청버전 : 요청받은_버전들) {
             PdServiceVersionEntity 검색결과 = 디비_버전들.stream()
                     .filter(디비버전 -> StringUtils.equalsIgnoreCase(요청버전.getC_title(), 디비버전.getC_title()))
                     .findAny()
                     .orElse(null);
-            if(검색결과 == null){
+            if (검색결과 == null) {
                 PdServiceVersionEntity 추가된버전 = pdServiceVersion.addNode(요청버전);
                 디비_버전들.add(추가된버전);
-            }else{
+            } else {
                 logger.info("이미 존재하는 버전 = " + 요청버전);
             }
         }
@@ -168,8 +177,8 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         PdServiceEntity savedNode = this.getNode(searchNode);
 
         Set<PdServiceVersionEntity> versionEntityList = savedNode.getPdServiceVersionEntities();
-        for ( PdServiceVersionEntity versionEntity : versionEntityList){
-            if(versionEntity.getC_id().equals(pdServiceVersionEntity.getC_id())){
+        for (PdServiceVersionEntity versionEntity : versionEntityList) {
+            if (versionEntity.getC_id().equals(pdServiceVersionEntity.getC_id())) {
                 versionEntity.setC_pds_version_start_date(pdServiceVersionEntity.getC_pds_version_start_date());
                 versionEntity.setC_pds_version_end_date(pdServiceVersionEntity.getC_pds_version_end_date());
                 versionEntity.setC_pds_version_etc(pdServiceVersionEntity.getC_pds_version_etc());
@@ -190,13 +199,13 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
         Set<Long> fileCids = new HashSet<>();
 
-        for ( FileRepositoryEntity file : fileEntitySet ){
+        for (FileRepositoryEntity file : fileEntitySet) {
 
             GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
             globalTreeMap.setPdservice_link(pdservice_link);
             globalTreeMap.setFilerepository_link(file.getC_id());
             List<GlobalTreeMapEntity> searchList = globalTreeMapService.findAllBy(globalTreeMap);
-            if ( searchList == null || searchList.isEmpty() ){
+            if (searchList == null || searchList.isEmpty()) {
                 GlobalTreeMapEntity savedMap = globalTreeMapService.saveOne(globalTreeMap);
                 fileCids.add(savedMap.getFilerepository_link());
             } else {
@@ -207,7 +216,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         }
 
         Set<FileRepositoryEntity> returnSet = new HashSet<>();
-        for (Long fileCid : fileCids ) {
+        for (Long fileCid : fileCids) {
 
             FileRepositoryEntity entity = new FileRepositoryEntity();
             entity.setC_id(fileCid);
@@ -219,7 +228,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     }
 
     public Set<FileRepositoryEntity> upload(MultipartHttpServletRequest multiRequest,
-                                                   FileRepository fileRepository) throws Exception {
+                                            FileRepository fileRepository) throws Exception {
 
         // Spring multipartResolver 사용시
         PropertiesReader propertiesReader = new PropertiesReader("com/egovframework/property/globals.properties");
@@ -275,8 +284,8 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         PdServiceEntity savedPdServiceNode = this.getNode(pdService);
 
         Set<PdServiceVersionEntity> versionSet = savedPdServiceNode.getPdServiceVersionEntities();
-        for( PdServiceVersionEntity versionEntity : versionSet ){
-            if(versionEntity.getC_id().equals(versionID)){
+        for (PdServiceVersionEntity versionEntity : versionSet) {
+            if (versionEntity.getC_id().equals(versionID)) {
                 versionSet.remove(versionEntity);
             }
         }
@@ -290,23 +299,55 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         return pdService;
     }
 
+
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
+
         PdServiceEntity pdServiceEntity = new PdServiceEntity();
         List<PdServiceEntity> pdServiceEntityList = this.getNodesWithoutRoot(pdServiceEntity);
+
+        GlobalTreeMapEntity globalTreeMapEntity = new GlobalTreeMapEntity();
+        List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllBy(globalTreeMapEntity);
+
+        JiraProjectEntity jiraProject = new JiraProjectEntity();
+        List<JiraProjectEntity> nodesWithoutRoot = this.getNodesWithoutRoot(jiraProject);
+
 
         if (!pdServiceEntityList.isEmpty()) {
             List<PdServiceD3Chart> returnList = new ArrayList<>();
             for (PdServiceEntity entity : pdServiceEntityList) {
                 Set<PdServiceVersionEntity> versionEntitySet = entity.getPdServiceVersionEntities();
+
                 List<PdServiceD3Chart> versionEntityList = new ArrayList<>();
+                List<PdServiceD3Chart> jiraProjectEntityList = new ArrayList<>();
 
                 if (!versionEntitySet.isEmpty()) {
                     for (PdServiceVersionEntity versionEntity : versionEntitySet) {
+//                        Specification<GlobalTreeMapEntity> spec = GlobalTreeMapSpecification.equalPdserviceversion_link(versionEntity.getC_id());
+//                        spec = Specification.where(spec);
+
+                        for (GlobalTreeMapEntity treeMapEntity : globalTreeMapEntities) {
+                            if (treeMapEntity.getPdservice_link() != null && treeMapEntity.getPdserviceversion_link() != null  && treeMapEntity.getJiraproject_link() != null) {
+                                List<JiraProjectEntity> filteredList = nodesWithoutRoot.stream()
+                                        .filter(jiraNode -> treeMapEntity.getJiraproject_link().equals(jiraNode.getC_id()))
+                                        .collect(Collectors.toList());
+
+                                filteredList.forEach(jiraNode -> {
+                                    //  실행될 로직 !
+                                    jiraProjectEntityList.add(
+                                            PdServiceD3Chart.builder()
+                                                    .type("jira")
+                                                    .name(jiraNode.getC_title())
+                                                    .build()
+                                    );
+                                });
+                            }
+                        }
                         versionEntityList.add(
                                 PdServiceD3Chart.builder()
                                         .type("Version")
                                         .name(versionEntity.getC_title())
+                                        .children(jiraProjectEntityList)
                                         .build()
                         );
                     }

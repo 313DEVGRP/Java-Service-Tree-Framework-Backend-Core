@@ -205,6 +205,19 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
 				암스서버담당자.setEmailAddress("313cokr@gmail.com");
 
+				String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
+						"✔ 본 이슈는 자동으로 관리되므로,\n" +
+						"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
+						"✔ 현황 통계에서 배제되어 불이익을 받을 수 있습니다.\n" +
+						"✔ 아래 링크에서 요구사항을 내용을 확인 할 수 있습니다.\n\n" +
+						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
+						"요구사항 내용 확인 ⇒ http://www.a-rms.net/arms/template.html?page=reqDetail&pdService=" + 제품서비스_아이디 +
+						"&pdServiceVersion=" + 제품서비스_버전_아이디 + "&reqAdd=" + 추가된_요구사항의_아이디 +
+						"&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라_프로젝트_아이디 + "\n" +
+						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
+						"※ 『 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나 』\n" +
+						"※ 『 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다. 』";
+
 				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체
 																.builder()
 																.project(프로젝트)
@@ -213,7 +226,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 																.reporter(암스서버보고자)
 																.assignee(암스서버담당자)
 																.summary(savedReqAddEntity.getC_title())
-																.description(savedReqAddEntity.getC_req_contents())
+																.description(이슈내용)
 																.build();
 
 				지라_이슈_생성_데이터_전송_객체 요구사항_이슈 = 지라_이슈_생성_데이터_전송_객체
@@ -252,9 +265,22 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_issue_key(생성된_요구사항_이슈.getKey());
 				reqStatusDTO.setC_issue_url(생성된_요구사항_이슈.getSelf());
 
+				//-- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
+				reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+				reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+
+				//-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
+				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+
+				//-- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
+				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
+
+				reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
+				reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
+
 				reqStatusDTO.setC_issue_create_date(new Date());
-				//reqStatusDTO.setC_issue_priority_link(생성된_요구사항_이슈.get);
-				//reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
 
 				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 				if(결과.getStatusCode().isError()){
