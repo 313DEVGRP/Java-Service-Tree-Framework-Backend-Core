@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
@@ -81,4 +82,15 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         return ResponseEntity.ok(CommonResponse.success(jiraServer.getNodesWithoutRoot(jiraServerEntity)));
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value={"{renewTarget}/renewNode.do"},
+            method = {RequestMethod.PUT }
+    )
+    public ResponseEntity<?> 지라_서버_항목별_갱신(
+            @PathVariable String renewTarget, JiraServerDTO jiraServerDTO) throws Exception{
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_이슈_상태_갱신(renewTarget, jiraServerEntity)));
+    }
 }
