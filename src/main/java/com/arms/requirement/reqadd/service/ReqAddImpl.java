@@ -152,18 +152,39 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						.findFirst()
 						.orElse(null);
 
-				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-				JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-						.findFirst()
-						.orElse(null);
+				JiraIssueTypeEntity 요구사항_이슈_타입 = new JiraIssueTypeEntity();
+				JiraIssueStatusEntity 요구사항_이슈_상태 = new JiraIssueStatusEntity();
+				if( 검색된_지라서버.getC_jira_server_type().equals("클라우드")){
 
-				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-				JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-						.findFirst()
-						.orElse(null);
+					Set<JiraIssueTypeEntity> 클라우드_지라서버_이슈타입_리스트 = 검색된_지라프로젝트.getJiraIssueTypeEntities();
+					요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							.findFirst()
+							.orElse(null);
 
+					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
+					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							.findFirst()
+							.orElse(null);
+
+				}else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
+
+					Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
+					요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							.findFirst()
+							.orElse(null);
+
+					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
+					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							.findFirst()
+							.orElse(null);
+				}else {
+					logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
+					throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
+				}
 
 				//준비된 파라미터.
 				logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
@@ -223,8 +244,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 																.project(프로젝트)
 																.issuetype(유형)
 																.priority(우선순위)
-																.reporter(암스서버보고자)
-																.assignee(암스서버담당자)
+																//.reporter(암스서버보고자)
+																//.assignee(암스서버담당자)
 																.summary(savedReqAddEntity.getC_title())
 																.description(이슈내용)
 																.build();
