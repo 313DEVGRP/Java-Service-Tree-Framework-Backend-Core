@@ -11,9 +11,15 @@
  */
 package com.arms.jira.jiraproject.service;
 
+import com.arms.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
+import java.util.List;
+
 public interface JiraProject extends TreeService {
+
+    public List<JiraProjectEntity> getConnectionInfo(ReqAddEntity reqAddEntity) throws Exception;
 
 
 }
