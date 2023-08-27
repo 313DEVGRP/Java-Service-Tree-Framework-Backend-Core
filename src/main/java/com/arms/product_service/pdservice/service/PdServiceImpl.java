@@ -13,6 +13,7 @@ package com.arms.product_service.pdservice.service;
 
 import com.arms.globaltreemap.dao.GlobalTreeMapRepository;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.util.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.util.filerepository.service.FileRepository;
@@ -303,14 +304,14 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
 
-        PdServiceEntity pdServiceEntity = new PdServiceEntity();
-        List<PdServiceEntity> pdServiceEntityList = this.getNodesWithoutRoot(pdServiceEntity);
-
         GlobalTreeMapEntity globalTreeMapEntity = new GlobalTreeMapEntity();
         List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllBy(globalTreeMapEntity);
 
-        JiraProjectEntity jiraProject = new JiraProjectEntity();
-        List<JiraProjectEntity> nodesWithoutRoot = this.getNodesWithoutRoot(jiraProject);
+        PdServiceEntity pdServiceEntity = new PdServiceEntity();
+        List<PdServiceEntity> pdServiceEntityList = this.getNodesWithoutRoot(pdServiceEntity);
+
+        JiraProjectEntity jiraProjectEntity = new JiraProjectEntity();
+        List<JiraProjectEntity> jiraProjectEntityList = this.getNodesWithoutRoot(jiraProjectEntity);
 
 
         if (!pdServiceEntityList.isEmpty()) {
@@ -319,27 +320,28 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                 Set<PdServiceVersionEntity> versionEntitySet = entity.getPdServiceVersionEntities();
 
                 List<PdServiceD3Chart> versionEntityList = new ArrayList<>();
-                List<PdServiceD3Chart> jiraProjectEntityList = new ArrayList<>();
+                List<PdServiceD3Chart> jiraProjectList = new ArrayList<>();
 
                 if (!versionEntitySet.isEmpty()) {
                     for (PdServiceVersionEntity versionEntity : versionEntitySet) {
-//                        Specification<GlobalTreeMapEntity> spec = GlobalTreeMapSpecification.equalPdserviceversion_link(versionEntity.getC_id());
-//                        spec = Specification.where(spec);
-
                         for (GlobalTreeMapEntity treeMapEntity : globalTreeMapEntities) {
-                            if (treeMapEntity.getPdservice_link() != null && treeMapEntity.getPdserviceversion_link() != null  && treeMapEntity.getJiraproject_link() != null) {
-                                List<JiraProjectEntity> filteredList = nodesWithoutRoot.stream()
+                            if (treeMapEntity.getPdservice_link() != null &&
+                                    treeMapEntity.getPdserviceversion_link() != null  &&
+                                    treeMapEntity.getJiraproject_link() != null) {
+
+                                List<JiraProjectEntity> filteredList = jiraProjectEntityList.stream()
                                         .filter(jiraNode -> treeMapEntity.getJiraproject_link().equals(jiraNode.getC_id()))
                                         .collect(Collectors.toList());
 
-                                filteredList.forEach(jiraNode -> {
-                                    //  실행될 로직 !
-                                    jiraProjectEntityList.add(
-                                            PdServiceD3Chart.builder()
-                                                    .type("jira")
-                                                    .name(jiraNode.getC_title())
-                                                    .build()
-                                    );
+                                filteredList.forEach(jiraProject -> {
+                                    if (versionEntity.getC_id().equals(treeMapEntity.getPdserviceversion_link())) {
+                                        jiraProjectList.add(
+                                                PdServiceD3Chart.builder()
+                                                        .type("jira")
+                                                        .name(jiraProject.getC_title())
+                                                        .build()
+                                        );
+                                    }
                                 });
                             }
                         }
@@ -347,7 +349,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                 PdServiceD3Chart.builder()
                                         .type("Version")
                                         .name(versionEntity.getC_title())
-                                        .children(jiraProjectEntityList)
+                                        .children(jiraProjectList)
                                         .build()
                         );
                     }
