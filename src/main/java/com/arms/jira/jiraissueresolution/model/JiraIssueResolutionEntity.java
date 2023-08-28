@@ -71,6 +71,10 @@ public class JiraIssueResolutionEntity extends TreeSearchEntity implements Seria
     @Type(type="text")
     private String c_issue_resolution_url;
 
+    //값으로 : true, false 를 가질 수 있다.
+    @Column(name = "c_check")
+    private String c_check;
+
     //내용
     @Lob
     @Column(name = "c_contents")

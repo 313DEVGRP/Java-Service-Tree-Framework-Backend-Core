@@ -24,6 +24,9 @@ public class JiraIssueResolutionDTO extends TreeBaseDTO {
 
     private String c_issue_resolution_url;
 
+    //값으로 : true, false 를 가질 수 있다.
+    private String c_check;
+
     //내용
     private String c_contents;
 
