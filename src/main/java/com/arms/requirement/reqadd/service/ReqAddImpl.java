@@ -255,6 +255,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 																.fields(요구사항이슈_필드)
 																.build();
 
+				logger.info("ReqAddImpl = engine parameter :: " + objectMapper.writeValueAsString(요구사항_이슈));
+
 				지라_이슈_데이터_전송_객체 생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 
 				ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
