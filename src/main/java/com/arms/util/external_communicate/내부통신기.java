@@ -21,4 +21,5 @@ public interface 내부통신기 {
     ResponseEntity<?> 요구사항_이슈_저장하기(@PathVariable(value ="changeReqTableName") String changeReqTableName,
                                    @RequestBody ReqStatusDTO reqStatusDTO);
 
+
 }

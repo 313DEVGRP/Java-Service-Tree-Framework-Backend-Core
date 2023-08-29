@@ -303,6 +303,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 				reqStatusDTO.setC_issue_create_date(new Date());
 
+				logger.info("ReqAddImpl = reqStatusDTO :: " + objectMapper.writeValueAsString(reqStatusDTO));
+
 				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 				if(결과.getStatusCode().isError()){
 					chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
