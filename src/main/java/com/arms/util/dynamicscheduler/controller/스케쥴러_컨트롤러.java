@@ -13,12 +13,16 @@ package com.arms.util.dynamicscheduler.controller;
 
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
+import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.requirement.reqstatus.service.ReqStatus;
 import com.arms.util.dynamicscheduler.service.스케쥴러;
+import com.egovframework.javaservice.treeframework.remote.Chat;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +47,16 @@ public class 스케쥴러_컨트롤러{
     @Qualifier("pdService")
     private PdService pdService;
 
+    @Autowired
+    @Qualifier("reqStatus")
+    private ReqStatus reqStatus;
+
+    @Autowired
+    private com.arms.util.external_communicate.내부통신기 내부통신기;
+
+    @Autowired
+    protected Chat chat;
+
 
     @ResponseBody
     @RequestMapping(
@@ -59,6 +73,12 @@ public class 스케쥴러_컨트롤러{
         for( PdServiceEntity 제품서비스 : 제품서비스_리스트 ){
 
             Long 제품서비스_아이디 = 제품서비스.getC_id();
+
+            ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+            ResponseEntity<?> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+            if(결과.getStatusCode().isError()){
+                chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
+            }
 
 
         }

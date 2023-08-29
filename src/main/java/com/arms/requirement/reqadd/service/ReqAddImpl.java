@@ -158,7 +158,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 					Set<JiraIssueTypeEntity> 클라우드_지라서버_이슈타입_리스트 = 검색된_지라프로젝트.getJiraIssueTypeEntities();
 					요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
-							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							.filter(entity -> Objects.equals(entity.getC_issue_type_name(), "arms-requirement"))
 							.findFirst()
 							.orElse(null);
 
@@ -232,7 +232,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"✔ 현황 통계에서 배제되어 불이익을 받을 수 있습니다.\n" +
 						"✔ 아래 링크에서 요구사항을 내용을 확인 할 수 있습니다.\n\n" +
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
-						"요구사항 내용 확인 ⇒ http://www.a-rms.net/arms/template.html?page=reqDetail&pdService=" + 제품서비스_아이디 +
+						"요구사항 내용 확인 ⇒ http://www.a-rms.net/313devgrp/arms/template.html?page=reqDetail&pdService=" + 제품서비스_아이디 +
 						"&pdServiceVersion=" + 제품서비스_버전_아이디 + "&reqAdd=" + 추가된_요구사항의_아이디 +
 						"&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라_프로젝트_아이디 + "\n" +
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
