@@ -172,7 +172,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 					Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
 					요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "arms-requirement"))
 							.findFirst()
 							.orElse(null);
 
