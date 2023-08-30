@@ -75,6 +75,10 @@ public class JiraIssueTypeEntity extends TreeSearchEntity implements Serializabl
     @Type(type="text")
     private String c_issue_type_url;
 
+    //값으로 : true, false 를 가질 수 있다.
+    @Column(name = "c_check")
+    private String c_check;
+
     //내용
     //온프라미스 대응 : private String type; // 표준 이슈 유형(standard), 하위 작업 이슈 유형(subtask)
     //클라우드 대응 : private Integer hierarchyLevel;

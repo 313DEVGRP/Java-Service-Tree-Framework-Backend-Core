@@ -11,7 +11,6 @@
  */
 package com.arms.jira.jiraserver.service;
 
-import com.arms.globaltreemap.service.GlobalTreeMapService;
 import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
 import com.arms.jira.jiraissuepriority.service.JiraIssuePriority;
 import com.arms.jira.jiraissueresolution.model.JiraIssueResolutionEntity;
@@ -25,8 +24,6 @@ import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.util.external_communicate.*;
 import com.arms.util.external_communicate.dto.*;
-import com.arms.util.external_communicate.dto.cloud.*;
-import com.arms.util.external_communicate.dto.onpremise.*;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -38,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -91,7 +87,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 	@Override
 	@Transactional
-	public JiraServerEntity 서버_엔티티_이슈_상태_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception {
+	public JiraServerEntity 서버_엔티티_항목별_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception {
 		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
 		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
 

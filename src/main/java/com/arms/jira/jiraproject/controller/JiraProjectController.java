@@ -12,6 +12,9 @@
 package com.arms.jira.jiraproject.controller;
 
 import com.arms.jira.jiraproject.model.JiraProjectDTO;
+import com.arms.product_service.pdservice.service.PdService;
+import com.arms.requirement.reqadd.model.ReqAddDTO;
+import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,8 @@ import javax.servlet.http.HttpServletRequest;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 
+import java.util.List;
+
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/jiraProject"})
@@ -41,6 +46,10 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
     @Qualifier("jiraProject")
     private JiraProject jiraProject;
 
+    @Autowired
+    @Qualifier("pdService")
+    private PdService pdService;
+
     @PostConstruct
     public void initialize() {
         setTreeService(jiraProject);
@@ -48,5 +57,19 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
     }
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+
+    @ResponseBody
+    @RequestMapping(value = "/getConnectionInfo.do", method = RequestMethod.GET)
+    public ResponseEntity<?> getConnectionInfo(ReqAddDTO reqAddDTO) throws Exception {
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+        System.out.println("ReqAddController :: getConnectionInfo");
+
+
+        List<JiraProjectEntity> connectionInfo = jiraProject.getConnectionInfo(reqAddEntity);
+        logger.info("connectionInfo::" + connectionInfo);
+        return ResponseEntity.ok(CommonResponse.success(connectionInfo));
+    }
 
 }

@@ -21,4 +21,9 @@ public interface 내부통신기 {
     ResponseEntity<?> 요구사항_이슈_저장하기(@PathVariable(value ="changeReqTableName") String changeReqTableName,
                                    @RequestBody ReqStatusDTO reqStatusDTO);
 
+    @PostMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
+    ResponseEntity<?> 제품별_요구사항_이슈_조회(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+                                   @RequestBody ReqStatusDTO reqStatusDTO);
+
+
 }

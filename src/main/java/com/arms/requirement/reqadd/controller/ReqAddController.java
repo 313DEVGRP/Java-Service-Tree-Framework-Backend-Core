@@ -25,6 +25,7 @@ import com.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.egovframework.javaservice.treeframework.util.StringUtils;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import com.egovframework.javaservice.treeframework.validation.group.MoveNode;
+import com.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -234,6 +235,30 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/updateNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> updateReqNode(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
+            BindingResult bindingResult, ModelMap model) throws Exception {
+
+        log.info("ReqAddController :: updateReqNode");
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        SessionUtil.setAttribute("updateNode",changeReqTableName);
+
+        int savedReqAddEntity = reqAdd.updateNode(reqAddEntity);
+
+        SessionUtil.removeAttribute("updateNode");
+
+        log.info("ReqAddController :: updateReqNode");
+        return ResponseEntity.ok(CommonResponse.success(savedReqAddEntity));
 
     }
 

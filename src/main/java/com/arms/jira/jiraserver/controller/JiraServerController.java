@@ -91,6 +91,6 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             @PathVariable String renewTarget, JiraServerDTO jiraServerDTO) throws Exception{
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_이슈_상태_갱신(renewTarget, jiraServerEntity)));
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(renewTarget, jiraServerEntity)));
     }
 }

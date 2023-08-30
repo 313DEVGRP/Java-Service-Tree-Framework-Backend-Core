@@ -515,6 +515,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUETYPE_LOG` (
     `c_issue_type_name`         text NULL,
     `c_issue_type_url`          text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -538,6 +539,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUETYPE` (
     `c_issue_type_name`         text NULL,
     `c_issue_type_url`          text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -608,6 +610,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUEPRIORITY_LOG` (
     `c_issue_priority_name`     text NULL,
     `c_issue_priority_url`      text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -631,6 +634,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUEPRIORITY` (
     `c_issue_priority_name`     text NULL,
     `c_issue_priority_url`      text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -701,6 +705,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUESTATUS_LOG` (
     `c_issue_status_name`     text NULL,
     `c_issue_status_url`      text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -724,6 +729,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUESTATUS` (
     `c_issue_status_name`     text NULL,
     `c_issue_status_url`      text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -793,6 +799,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUERESOLUTION_LOG` (
     `c_issue_resolution_name`   text NULL,
     `c_issue_resolution_url`    text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL
@@ -816,6 +823,7 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_JIRAISSUERESOLUTION` (
     `c_issue_resolution_name`   text NULL,
     `c_issue_resolution_url`    text NULL,
 
+    `c_check`                   text NULL,
     `c_contents`                longtext NULL,
     `c_desc`                    text NULL,
     `c_etc`                     text NULL

@@ -24,6 +24,7 @@ import com.egovframework.javaservice.treeframework.controller.TreeAbstractContro
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import com.arms.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.requirement.reqstatus.service.ReqStatus;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -86,5 +91,29 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         log.info("ReqStatusController :: addStatusNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
 
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getStatusMonitor.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getMonitor(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusEntity reqStatusEntity, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: getMonitor");
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusEntity, ReqStatusEntity.class);
+
+        SessionUtil.setAttribute("getStatusMonitor",changeReqTableName);
+
+        statusEntity.setOrder(Order.asc("c_left"));
+        List<ReqStatusEntity> list = reqStatus.getChildNode(statusEntity);
+
+        SessionUtil.removeAttribute("getStatusMonitor");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", list);
+        return modelAndView;
     }
 }
