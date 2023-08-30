@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -70,6 +71,54 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
         List<JiraProjectEntity> connectionInfo = jiraProject.getConnectionInfo(reqAddEntity);
         logger.info("connectionInfo::" + connectionInfo);
         return ResponseEntity.ok(CommonResponse.success(connectionInfo));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getProjectIssueType.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getProjectIssueTypeList(JiraProjectDTO jiraProjectDTO) throws Exception {
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+        System.out.println("JiraProjectController :: getProjectIssueTypeList");
+
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_이슈유형_리스트_조회(jiraProjectEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getProjectIssueStatus.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getProjectIssueStatusList(JiraProjectDTO jiraProjectDTO) throws Exception {
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+        System.out.println("JiraProjectController :: getProjectIssueStatusList");
+
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_이슈상태_리스트_조회(jiraProjectEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/makeDefaultIssueType.do/{targetCid}}"},
+            method = {RequestMethod.PUT}
+    )
+    public ResponseEntity<?> makeDefaultIssueType(JiraProjectDTO jiraProjectDTO,
+                                                  @PathVariable Long targetCid) throws Exception {
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+        System.out.println("JiraProjectController :: makeDefaultIssueType");
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.이슈유형_기본값_설정(jiraProjectEntity,targetCid)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/makeDefaultIssueStatus.do/{targetCid}"},
+            method = {RequestMethod.PUT}
+    )
+    public ResponseEntity<?> makeDefaultIssueStatus(JiraProjectDTO jiraProjectDTO,
+                                                    @PathVariable Long targetCid) throws Exception {
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+        System.out.println("JiraProjectController :: makeDefaultIssueStatus");
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.이슈상태_기본값_설정(jiraProjectEntity,targetCid)));
     }
 
 }

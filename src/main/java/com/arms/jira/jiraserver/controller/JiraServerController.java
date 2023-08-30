@@ -93,4 +93,82 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(renewTarget, jiraServerEntity)));
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraproject.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraprojectList(JiraServerDTO jiraServerDTO) throws Exception {
+
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_프로젝트_가져오기(jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraIssueType.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraIssueTypeList(JiraServerDTO jiraServerDTO) throws Exception {
+
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈유형_가져오기(jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraIssueStatus.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraIssueStatusList(JiraServerDTO jiraServerDTO) throws Exception {
+
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈상태_가져오기(jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraIssuePriority.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraIssuePriorityList(JiraServerDTO jiraServerDTO) throws Exception {
+
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈우선순위_가져오기(jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraIssueResolution.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraIssueResolutionList(JiraServerDTO jiraServerDTO) throws Exception {
+
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈해결책_가져오기(jiraServerEntity)));
+    }
+
+
+
+
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{defaultTarget}/makeDefault.do/{targetCid}"},
+            method = {RequestMethod.PUT}
+    )
+    public ResponseEntity<?> 온프레미스_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
+                                                      @PathVariable(name="targetCid") Long 항목_c_id,
+                                                      JiraServerDTO jiraServerDTO) throws Exception{
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(설정할_항목,항목_c_id,jiraServerEntity)));
+    }
+
 }

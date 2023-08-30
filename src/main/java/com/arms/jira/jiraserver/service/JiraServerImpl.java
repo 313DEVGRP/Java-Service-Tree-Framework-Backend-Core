@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @AllArgsConstructor
@@ -85,6 +86,119 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		}
 		return list;
 	}
+
+	@Override
+	@Transactional
+	public JiraServerEntity 서버_항목별_기본값_설정(String 설정할_항목, Long 항목_c_id, JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		String 서버유형 = 검색된_지라_서버.getC_jira_server_type();
+
+		// url에서 가져오므로
+		//이슈 유형
+		if(설정할_항목.equals("이슈유형")) {
+			Set<JiraIssueTypeEntity> 이슈_유형_목록 = 검색된_지라_서버.getJiraIssueTypeEntities();
+			if(이슈_유형_목록.size() != 0) {
+				for (JiraIssueTypeEntity 이슈_유형 : 이슈_유형_목록) {
+					if (이슈_유형.getC_id() == 항목_c_id) {
+						이슈_유형.setC_check("true");
+					} else {
+						이슈_유형.setC_check("false");
+					}
+					jiraIssueType.updateNode(이슈_유형);
+				}
+			}
+		}
+		//이슈 상태
+		if(설정할_항목.equals("이슈상태")) {
+			Set<JiraIssueStatusEntity> 이슈_상태_목록 = 검색된_지라_서버.getJiraIssueStatusEntities();
+			if(이슈_상태_목록.size() != 0 ) {
+				for (JiraIssueStatusEntity 이슈_상태 : 이슈_상태_목록) {
+					if (이슈_상태.getC_id() == 항목_c_id) {
+						이슈_상태.setC_check("true");
+					} else {
+						이슈_상태.setC_check("false");
+					}
+					jiraIssueStatus.updateNode(이슈_상태);
+				}
+			}
+		}
+		//이슈 해결책
+		if(설정할_항목.equals("이슈해결책")) {
+			Set<JiraIssueResolutionEntity> 이슈_해결책_목록 = 검색된_지라_서버.getJiraIssueResolutionEntities();
+			if(이슈_해결책_목록.size() != 0) {
+				for (JiraIssueResolutionEntity 이슈_해결책 : 이슈_해결책_목록) {
+					if (이슈_해결책.getC_id() == 항목_c_id) {
+						이슈_해결책.setC_check("true");
+					} else {
+						이슈_해결책.setC_check("false");
+					}
+					jiraIssueResolution.updateNode(이슈_해결책);
+				}
+			}
+		}
+		//이슈 우선순위
+		if(설정할_항목.equals("이슈우선순위")) {
+			Set<JiraIssuePriorityEntity> 이슈_우선순위_목록 = 검색된_지라_서버.getJiraIssuePriorityEntities();
+			if(이슈_우선순위_목록.size() != 0) {
+				for (JiraIssuePriorityEntity 이슈_우선순위 : 이슈_우선순위_목록) {
+					if (이슈_우선순위.getC_id() == 항목_c_id) {
+						이슈_우선순위.setC_check("true");
+					} else {
+						이슈_우선순위.setC_check("false");
+					}
+					jiraIssuePriority.updateNode(이슈_우선순위);
+				}
+			}
+		}
+
+		this.updateNode(검색된_지라_서버);
+		return 검색된_지라_서버;
+	}
+
+	@Override
+	public List<JiraProjectEntity> 서버_프로젝트_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+
+		return 검색된_지라_서버.getJiraProjectEntities().stream().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<JiraIssueTypeEntity> 서버_이슈유형_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		return 검색된_지라_서버.getJiraIssueTypeEntities().stream().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<JiraIssueStatusEntity> 서버_이슈상태_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		return 검색된_지라_서버.getJiraIssueStatusEntities().stream().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<JiraIssuePriorityEntity> 서버_이슈우선순위_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		return 검색된_지라_서버.getJiraIssuePriorityEntities().stream().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<JiraIssueResolutionEntity> 서버_이슈해결책_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
+		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
+		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		return 검색된_지라_서버.getJiraIssueResolutionEntities().stream().collect(Collectors.toList());
+	}
+
 	@Override
 	@Transactional
 	public JiraServerEntity 서버_엔티티_항목별_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception {
