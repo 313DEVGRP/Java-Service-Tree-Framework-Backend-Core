@@ -202,7 +202,7 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
                                 "pdserviceversion_link IS NULL and " +
                                 "jiraissuepriority_link IS NULL and " +
                                 "jiraissueresolution_link IS NULL and " +
-                                "jiraissuestatus_link IS NULL and" +
+                                "jiraissuestatus_link IS NULL and " +
                                 "jiraissuetype_link IS NULL")
     public Set<JiraProjectEntity> getJiraProjectEntities() {
         return jiraProjectEntities;
