@@ -97,6 +97,13 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
             joinColumns = @JoinColumn(name = "jiraproject_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
     )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+                                "pdservice_link IS NULL and " +
+                                "pdserviceversion_link IS NULL and " +
+                                "jiraserver_link IS NULL and " +
+                                "jiraissuepriority_link IS NULL and " +
+                                "jiraissueresolution_link IS NULL and " +
+                                "jiraissuestatus_link IS NULL")
     public Set<JiraIssueTypeEntity> getJiraIssueTypeEntities() { return jiraIssueTypeEntities; }
 
     public void setJiraIssueTypeEntities(Set<JiraIssueTypeEntity> jiraIssueTypeEntities) {
@@ -113,6 +120,13 @@ public class JiraProjectEntity extends TreeSearchEntity implements Serializable 
             joinColumns = @JoinColumn(name = "jiraproject_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraissuestatus_link")
     )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+                                "pdservice_link IS NULL and " +
+                                "pdserviceversion_link IS NULL and " +
+                                "jiraserver_link IS NULL and " +
+                                "jiraissuepriority_link IS NULL and " +
+                                "jiraissueresolution_link IS NULL and " +
+                                "jiraissuetype_link IS NULL")
     public Set<JiraIssueStatusEntity> getJiraIssueStatusEntities() { return jiraIssueStatusEntities; }
 
     public void setJiraIssueStatusEntities(Set<JiraIssueStatusEntity> jiraIssueStatusEntities) {

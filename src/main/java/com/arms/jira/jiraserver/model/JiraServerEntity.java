@@ -197,6 +197,13 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
             joinColumns = @JoinColumn(name = "jiraserver_link"),
             inverseJoinColumns = @JoinColumn(name = "jiraproject_link")
     )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+                                "pdservice_link IS NULL and " +
+                                "pdserviceversion_link IS NULL and " +
+                                "jiraissuepriority_link IS NULL and " +
+                                "jiraissueresolution_link IS NULL and " +
+                                "jiraissuestatus_link IS NULL and" +
+                                "jiraissuetype_link IS NULL")
     public Set<JiraProjectEntity> getJiraProjectEntities() {
         return jiraProjectEntities;
     }
