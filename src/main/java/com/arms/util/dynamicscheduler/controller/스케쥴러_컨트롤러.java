@@ -66,7 +66,6 @@ public class 스케쥴러_컨트롤러{
     public String 각_제품서비스_별_요구사항이슈_조회_및_ES저장(ModelMap model, HttpServletRequest request) throws Exception {
 
         //제품을 조회해 온다.
-
         PdServiceEntity 제품서비스_조회 = new PdServiceEntity();
         List<PdServiceEntity> 제품서비스_리스트 = pdService.getNodesWithoutRoot(제품서비스_조회);
 
@@ -79,7 +78,6 @@ public class 스케쥴러_컨트롤러{
             if(결과.getStatusCode().isError()){
                 chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
             }
-
 
         }
 

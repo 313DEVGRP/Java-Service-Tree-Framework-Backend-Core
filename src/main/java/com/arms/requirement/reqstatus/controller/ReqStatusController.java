@@ -19,12 +19,15 @@ import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +105,14 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             ReqStatusEntity reqStatusEntity, ModelMap model, HttpServletRequest request) throws Exception {
 
-        log.info("ReqStatusController :: getMonitor");
+        log.info("ReqStatusController :: getStatusMonitor");
         ReqStatusEntity statusEntity = modelMapper.map(reqStatusEntity, ReqStatusEntity.class);
 
         SessionUtil.setAttribute("getStatusMonitor",changeReqTableName);
 
         statusEntity.setOrder(Order.asc("c_left"));
-        List<ReqStatusEntity> list = reqStatus.getChildNode(statusEntity);
+
+        List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
 
         SessionUtil.removeAttribute("getStatusMonitor");
 
