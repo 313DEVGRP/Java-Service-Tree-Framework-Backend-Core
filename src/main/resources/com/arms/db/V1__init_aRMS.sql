@@ -16,7 +16,17 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`GLOBAL_TREE_MAP` (
     `jiraissuepriority_link`                bigint(20) default NULL COMMENT '지라 이슈 우선순위',
     `jiraissueresolution_link`              bigint(20) default NULL COMMENT '지라 이슈 해결책',
     `jiraissuestatus_link`                  bigint(20) default NULL COMMENT '지라 이슈 상태',
-    `jiraissuetype_link`                    bigint(20) default NULL COMMENT '지라 이슈 타입'
+    `jiraissuetype_link`                    bigint(20) default NULL COMMENT '지라 이슈 타입',
+
+    KEY `filerepository_link` (`filerepository_link`),
+    KEY `pdservice_link` (`pdservice_link`),
+    KEY `pdserviceversion_link` (`pdserviceversion_link`),
+    KEY `jiraserver_link` (`jiraserver_link`),
+    KEY `jiraproject_link` (`jiraproject_link`),
+    KEY `jiraissuepriority_link` (`jiraissuepriority_link`),
+    KEY `jiraissueresolution_link` (`jiraissueresolution_link`),
+    KEY `jiraissuestatus_link` (`jiraissuestatus_link`),
+    KEY `jiraissuetype_link` (`jiraissuetype_link`)
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='트리 맵';
 
@@ -903,13 +913,16 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD_LOG` (
     `c_req_reviewer05`          text NULL,
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
+    `c_req_owner`               text NULL,
+
     `c_req_create_date`         DATETIME NULL,
     `c_req_update_date`         DATETIME NULL,
+    `c_req_start_date`          DATETIME NULL,
+    `c_req_end_date`            DATETIME NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',
     `c_req_contents`            longtext        COMMENT '내용'
-
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 트리거 로그';
 
@@ -939,8 +952,12 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQADD` (
     `c_req_reviewer05`          text NULL,
     `c_req_reviewer05_status`   text NULL,
     `c_req_writer`              text NULL,
+    `c_req_owner`               text NULL,
+
     `c_req_create_date`         DATETIME NULL,
     `c_req_update_date`         DATETIME NULL,
+    `c_req_start_date`          DATETIME NULL,
+    `c_req_end_date`            DATETIME NULL,
 
     `c_req_etc`                 varchar(255)    COMMENT '비고',
     `c_req_desc`                text            COMMENT '설명',
@@ -1030,15 +1047,9 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQPRIORITY` (
 
 
 Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (1, 0, 0, 1, 10, 0, 'T_ARMS_REQPRIORITY', 'root');
+Values (1, 0, 0, 1, 4, 0, 'T_ARMS_REQPRIORITY', 'root');
 Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (2, 1, 0, 2, 9, 1, '요구사항 우선순위', 'drive');
-Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (3, 2, 0, 3, 4, 2, '낮음', 'default');
-Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (4, 2, 1, 5, 6, 2, '중간', 'default');
-Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (5, 2, 2, 7, 8, 2, '높음', 'default');
+Values (2, 1, 0, 2, 3, 1, '요구사항 우선순위', 'drive');
 
 
 DELIMITER $$
@@ -1387,14 +1398,14 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_pds_version_name`            text NULL,
 
     -- 제품 서비스 연결 지라 server
-    `c_jira_server_link`                   bigint(20) NULL,
-    `c_jira_server_name`                    text NULL,
-    `c_jira_server_url`                    text NULL,
+    `c_jira_server_link`            bigint(20) NULL,
+    `c_jira_server_name`            text NULL,
+    `c_jira_server_url`             text NULL,
 
     -- 제품 서비스 연결 지라 프로젝트
     `c_jira_project_link`           bigint(20) NULL,
     `c_jira_project_name`           text NULL,
-    `c_jira_project_key`           text NULL,
+    `c_jira_project_key`            text NULL,
     `c_jira_project_url`            text NULL,
 
     -- 요구사항
@@ -1417,16 +1428,20 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS_LOG` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    `c_issue_reporter`             text NULL,
-    `c_issue_assignee`             text NULL,
+    `c_req_owner`                   text NULL,
+    `c_issue_reporter`              text NULL,
+    `c_issue_assignee`              text NULL,
 
     -- 기타
-    `c_issue_create_date`              DATETIME NUlL,
-    `c_issue_update_date`               DATETIME NUlL,
+    `c_issue_create_date`           DATETIME NUlL,
+    `c_issue_update_date`           DATETIME NUlL,
 
-    `c_etc`                 varchar(255)    COMMENT '비고',
-    `c_desc`                text            COMMENT '설명',
-    `c_contents`            longtext        COMMENT '내용'
+    `c_req_start_date`              DATETIME NULL,
+    `c_req_end_date`                DATETIME NULL,
+
+    `c_etc`                         varchar(255)    COMMENT '비고',
+    `c_desc`                        text            COMMENT '설명',
+    `c_contents`                    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표 트리거 로그';
 
@@ -1451,14 +1466,14 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_pds_version_name`            text NULL,
 
     -- 제품 서비스 연결 지라 server
-    `c_jira_server_link`                   bigint(20) NULL,
-    `c_jira_server_name`                    text NULL,
-    `c_jira_server_url`                    text NULL,
+    `c_jira_server_link`            bigint(20) NULL,
+    `c_jira_server_name`            text NULL,
+    `c_jira_server_url`             text NULL,
 
     -- 제품 서비스 연결 지라 프로젝트
     `c_jira_project_link`           bigint(20) NULL,
     `c_jira_project_name`           text NULL,
-    `c_jira_project_key`           text NULL,
+    `c_jira_project_key`            text NULL,
     `c_jira_project_url`            text NULL,
 
     -- 요구사항
@@ -1481,16 +1496,20 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATUS` (
     `c_issue_resolution_link`       bigint(20) NULL,
     `c_issue_resolution_name`       text NULL,
 
-    `c_issue_reporter`             text NULL,
-    `c_issue_assignee`             text NULL,
+    `c_req_owner`                   text NULL,
+    `c_issue_reporter`              text NULL,
+    `c_issue_assignee`              text NULL,
 
     -- 기타
-    `c_issue_create_date`              DATETIME NUlL,
-    `c_issue_update_date`               DATETIME NUlL,
+    `c_issue_create_date`           DATETIME NUlL,
+    `c_issue_update_date`           DATETIME NUlL,
 
-    `c_etc`                 varchar(255)    COMMENT '비고',
-    `c_desc`                text            COMMENT '설명',
-    `c_contents`            longtext        COMMENT '내용'
+    `c_req_start_date`              DATETIME NULL,
+    `c_req_end_date`                DATETIME NULL,
+
+    `c_etc`                         varchar(255)    COMMENT '비고',
+    `c_desc`                        text            COMMENT '설명',
+    `c_contents`                    longtext        COMMENT '내용'
 
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 - 이슈 결과 장표';
 

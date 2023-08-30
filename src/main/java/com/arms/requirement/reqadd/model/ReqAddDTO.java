@@ -2,7 +2,11 @@ package com.arms.requirement.reqadd.model;
 
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.Date;
 
 @Getter
@@ -39,9 +43,15 @@ public class ReqAddDTO extends TreeBaseDTO {
 
     private String c_req_writer;
 
+    private String c_req_owner;
+
     private Date c_req_create_date;
 
     private Date c_req_update_date;
+
+    private Date c_req_start_date;
+
+    private Date c_req_end_date;
 
     private String c_req_contents;
 

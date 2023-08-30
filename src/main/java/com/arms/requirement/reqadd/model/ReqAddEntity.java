@@ -134,6 +134,10 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_writer;
 
+    @Column(name = "c_req_owner")
+    @Type(type="text")
+    private String c_req_owner;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_create_date")
     private Date c_req_create_date;
@@ -141,6 +145,14 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_update_date")
     private Date c_req_update_date;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_req_start_date")
+    private Date c_req_start_date;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_req_end_date")
+    private Date c_req_end_date;
 
     //내용
     @Lob

@@ -135,6 +135,10 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_issue_resolution_name;
 
+    @Column(name = "c_req_owner")
+    @Type(type="text")
+    private String c_req_owner;
+
     @Column(name = "c_issue_reporter")
     @Type(type="text")
     private String c_issue_reporter;
@@ -150,6 +154,14 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_issue_update_date")
     private Date c_issue_update_date;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_req_start_date")
+    private Date c_req_start_date;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_req_end_date")
+    private Date c_req_end_date;
 
     //내용
     @Lob

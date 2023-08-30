@@ -33,8 +33,13 @@
             `c_req_reviewer05`          text NULL,
             `c_req_reviewer05_status`   text NULL,
             `c_req_writer`              text NULL,
+            `c_req_owner`               text NULL,
+
             `c_req_create_date`         DATETIME NULL,
             `c_req_update_date`         DATETIME NULL,
+            `c_req_start_date`          DATETIME NULL,
+            `c_req_end_date`            DATETIME NULL,
+
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -70,8 +75,13 @@
             `c_req_reviewer05`          text NULL,
             `c_req_reviewer05_status`   text NULL,
             `c_req_writer`              text NULL,
+            `c_req_owner`               text NULL,
+
             `c_req_create_date`         DATETIME NULL,
             `c_req_update_date`         DATETIME NULL,
+            `c_req_start_date`          DATETIME NULL,
+            `c_req_end_date`            DATETIME NULL,
+
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -173,14 +183,14 @@
             `c_pds_version_name`            text NULL,
 
             -- 제품 서비스 연결 지라 server
-            `c_jira_server_link`                   bigint(20) NULL,
-            `c_jira_server_name`                    text NULL,
-            `c_jira_server_url`                    text NULL,
+            `c_jira_server_link`            bigint(20) NULL,
+            `c_jira_server_name`            text NULL,
+            `c_jira_server_url`             text NULL,
 
             -- 제품 서비스 연결 지라 프로젝트
             `c_jira_project_link`           bigint(20) NULL,
             `c_jira_project_name`           text NULL,
-            `c_jira_project_key`           text NULL,
+            `c_jira_project_key`            text NULL,
             `c_jira_project_url`            text NULL,
 
             -- 요구사항
@@ -203,17 +213,19 @@
             `c_issue_resolution_link`       bigint(20) NULL,
             `c_issue_resolution_name`       text NULL,
 
-            `c_issue_reporter`             text NULL,
-            `c_issue_assignee`             text NULL,
+            `c_req_owner`                   text NULL,
+            `c_issue_reporter`              text NULL,
+            `c_issue_assignee`              text NULL,
 
             -- 기타
-            `c_issue_create_date`              DATETIME NUlL,
-            `c_issue_update_date`               DATETIME NUlL,
+            `c_issue_create_date`           DATETIME NUlL,
+            `c_issue_update_date`           DATETIME NUlL,
+            `c_req_start_date`              DATETIME NULL,
+            `c_req_end_date`                DATETIME NULL,
 
-            `c_etc`                 varchar(255)    COMMENT '비고',
-            `c_desc`                text            COMMENT '설명',
-            `c_contents`            longtext        COMMENT '내용'
-
+            `c_etc`                         varchar(255)    COMMENT '비고',
+            `c_desc`                        text            COMMENT '설명',
+            `c_contents`                    longtext        COMMENT '내용'
 
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 상태 테이블 로그';
 
@@ -241,14 +253,14 @@
             `c_pds_version_name`            text NULL,
 
             -- 제품 서비스 연결 지라 server
-            `c_jira_server_link`                   bigint(20) NULL,
-            `c_jira_server_name`                    text NULL,
-            `c_jira_server_url`                    text NULL,
+            `c_jira_server_link`            bigint(20) NULL,
+            `c_jira_server_name`            text NULL,
+            `c_jira_server_url`             text NULL,
 
             -- 제품 서비스 연결 지라 프로젝트
             `c_jira_project_link`           bigint(20) NULL,
             `c_jira_project_name`           text NULL,
-            `c_jira_project_key`           text NULL,
+            `c_jira_project_key`            text NULL,
             `c_jira_project_url`            text NULL,
 
             -- 요구사항
@@ -271,12 +283,15 @@
             `c_issue_resolution_link`       bigint(20) NULL,
             `c_issue_resolution_name`       text NULL,
 
-            `c_issue_reporter`             text NULL,
-            `c_issue_assignee`             text NULL,
+            `c_req_owner`                   text NULL,
+            `c_issue_reporter`              text NULL,
+            `c_issue_assignee`              text NULL,
 
             -- 기타
-            `c_issue_create_date`              DATETIME NUlL,
-            `c_issue_update_date`               DATETIME NUlL,
+            `c_issue_create_date`           DATETIME NUlL,
+            `c_issue_update_date`           DATETIME NUlL,
+            `c_req_start_date`              DATETIME NULL,
+            `c_req_end_date`                DATETIME NULL,
 
             `c_etc`                 varchar(255)    COMMENT '비고',
             `c_desc`                text            COMMENT '설명',

@@ -66,6 +66,8 @@ public class ReqStatusDTO extends TreeBaseDTO {
 
     private String c_issue_resolution_name;
 
+    private String c_req_owner;
+
     private String c_issue_reporter;
 
     private String c_issue_assignee;
@@ -73,6 +75,10 @@ public class ReqStatusDTO extends TreeBaseDTO {
     private Date c_issue_create_date;
 
     private Date c_issue_update_date;
+
+    private Date c_req_start_date;
+
+    private Date c_req_end_date;
 
     //내용
     private String c_contents;
