@@ -48,5 +48,7 @@ public interface 엔진통신기 {
     public List<지라_이슈_상태_데이터_전송_객체> 클라우드_프로젝트별_이슈_상태_목록(@PathVariable("connectId") String 연결_아이디,
                                                                          @PathVariable("projectId") String 프로젝트_아이디);
 
+    @GetMapping("/engine/jira/{connectId}/issue/loadToES/bulk/{issueKey}")
+    public int 이슈_검색엔진_벌크_저장( @PathVariable("connectId") Long 지라서버_아이디, @PathVariable("issueKey") String 이슈_키);
 
 }

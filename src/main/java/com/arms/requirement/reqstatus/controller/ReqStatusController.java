@@ -99,7 +99,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     @ResponseBody
     @RequestMapping(
             value = {"/{changeReqTableName}/getStatusMonitor.do"},
-            method = {RequestMethod.GET}
+            method = {RequestMethod.GET, RequestMethod.POST}
     )
     public ModelAndView getMonitor(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,

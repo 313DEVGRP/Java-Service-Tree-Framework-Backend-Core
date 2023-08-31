@@ -40,7 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @AllArgsConstructor
@@ -304,76 +306,62 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
 
-        GlobalTreeMapEntity globalTreeMapEntity = new GlobalTreeMapEntity();
-        List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllBy(globalTreeMapEntity);
+        List<PdServiceEntity> 서비스_리스트 = this.getNodesWithoutRoot(new PdServiceEntity());
+        List<JiraProjectEntity> 지라프로젝트_리스트 = this.getNodesWithoutRoot(new JiraProjectEntity());
 
-        PdServiceEntity pdServiceEntity = new PdServiceEntity();
-        List<PdServiceEntity> pdServiceEntityList = this.getNodesWithoutRoot(pdServiceEntity);
-
-        JiraProjectEntity jiraProjectEntity = new JiraProjectEntity();
-        List<JiraProjectEntity> jiraProjectEntityList = this.getNodesWithoutRoot(jiraProjectEntity);
+        if (서비스_리스트.isEmpty()) {
+            return null;
+        }
 
 
-        if (!pdServiceEntityList.isEmpty()) {
-            List<PdServiceD3Chart> returnList = new ArrayList<>();
-            for (PdServiceEntity entity : pdServiceEntityList) {
-                Set<PdServiceVersionEntity> versionEntitySet = entity.getPdServiceVersionEntities();
+        Map<Long, JiraProjectEntity> 검색할_지라프로젝트 = 지라프로젝트_리스트.stream()
+                .collect(Collectors.toMap(JiraProjectEntity::getC_id, Function.identity()));
 
-                List<PdServiceD3Chart> versionEntityList = new ArrayList<>();
-                List<PdServiceD3Chart> jiraProjectList = new ArrayList<>();
+        List<PdServiceD3Chart> returnList = 서비스_리스트.parallelStream() // 병렬 처리
+                .map(서비스 -> {
 
-                if (!versionEntitySet.isEmpty()) {
-                    for (PdServiceVersionEntity versionEntity : versionEntitySet) {
-                        for (GlobalTreeMapEntity treeMapEntity : globalTreeMapEntities) {
-                            if (treeMapEntity.getPdservice_link() != null &&
-                                    treeMapEntity.getPdserviceversion_link() != null  &&
-                                    treeMapEntity.getJiraproject_link() != null) {
+                    Set<PdServiceVersionEntity> 저장된_버전_정보들 = 서비스.getPdServiceVersionEntities();
+                    List<PdServiceD3Chart> 반환되는_버전리스트 = 저장된_버전_정보들.stream()
+                            .map(버전앤티디 -> {
+                                List<PdServiceD3Chart> 검색된_지라프로젝트 = 지라프로젝트_리스트.parallelStream() // 병렬 처리
+                                        .flatMap(지라프로젝트 -> {
+                                            GlobalTreeMapEntity 검색용_글로벌앤티디 = new GlobalTreeMapEntity();
+                                            검색용_글로벌앤티디.setPdservice_link(서비스.getC_id());
+                                            검색용_글로벌앤티디.setJiraproject_link(지라프로젝트.getC_id());
 
-                                List<JiraProjectEntity> filteredList = jiraProjectEntityList.stream()
-                                        .filter(jiraNode -> treeMapEntity.getJiraproject_link().equals(jiraNode.getC_id()))
+                                            return globalTreeMapService.findAllBy(검색용_글로벌앤티디).stream()
+                                                    .filter(글로벌트리맵 ->
+                                                            글로벌트리맵.getPdserviceversion_link().equals(버전앤티디.getC_id()))  // 글로벌트리맵에 버전링크와 버전엔티디에서 아이디 비교
+                                                    .map(글로벌트리맵 -> {
+                                                        JiraProjectEntity 검색된_지라프로젝트정보 = 검색할_지라프로젝트.get(지라프로젝트.getC_id());
+                                                        return PdServiceD3Chart.builder()
+                                                                .type("Jira")
+                                                                .name(검색된_지라프로젝트정보.getC_title())
+                                                                .build();
+                                                    });
+                                        })
                                         .collect(Collectors.toList());
 
-                                filteredList.forEach(jiraProject -> {
-                                    if (versionEntity.getC_id().equals(treeMapEntity.getPdserviceversion_link())) {
-                                        jiraProjectList.add(
-                                                PdServiceD3Chart.builder()
-                                                        .type("jira")
-                                                        .name(jiraProject.getC_title())
-                                                        .build()
-                                        );
-                                    }
-                                });
-                            }
-                        }
-                        versionEntityList.add(
-                                PdServiceD3Chart.builder()
+                                return PdServiceD3Chart.builder()
                                         .type("Version")
-                                        .name(versionEntity.getC_title())
-                                        .children(jiraProjectList)
-                                        .build()
-                        );
-                    }
-                    returnList.add(
-                            PdServiceD3Chart.builder()
-                                    .type("PdService")
-                                    .name(entity.getC_title())
-                                    .children(versionEntityList)
-                                    .build()
-                    );
-                } else {
-                    returnList.add(
-                            PdServiceD3Chart.builder()
-                                    .type("PdService")
-                                    .name(entity.getC_title())
-                                    .build()
-                    );
-                }
-            }
-            return PdServiceD3Chart.builder()
-                    .name("a-RMS")
-                    .children(returnList)
-                    .build();
-        }
-        return null;
+                                        .name(버전앤티디.getC_title())
+                                        .children(검색된_지라프로젝트)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+
+                    return PdServiceD3Chart.builder()
+                            .type("PdService")
+                            .name(서비스.getC_title())
+                            .children(반환되는_버전리스트)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return PdServiceD3Chart.builder()
+                .name("a-RMS")
+                .children(returnList)
+                .build();
+
     }
 }
