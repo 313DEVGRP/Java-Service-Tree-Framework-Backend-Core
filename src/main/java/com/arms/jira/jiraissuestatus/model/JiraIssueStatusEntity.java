@@ -85,7 +85,7 @@ public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializa
     @Type(type="text")
     private String c_desc;
 
-    //클라우드 대응 : private boolean isDefault;
+
     //비고
     @Column(name = "c_etc")
     private String c_etc;
