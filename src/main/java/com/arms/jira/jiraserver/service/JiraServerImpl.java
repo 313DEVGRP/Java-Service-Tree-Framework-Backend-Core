@@ -482,7 +482,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_유형.setC_issue_type_url(이슈_유형.getSelf());
 		저장할_이슈_유형.setC_issue_type_desc(이슈_유형.getDescription());
 		저장할_이슈_유형.setC_desc(이슈_유형.getSubtask().toString()); //Boolean
-		저장할_이슈_유형.setC_check("false"); //기본값 false 설정
+		if (이슈_유형.getName().equals("arms-requirement")) {
+			저장할_이슈_유형.setC_check("true"); //기본값 false 설정
+		} else {
+			저장할_이슈_유형.setC_check("false"); //기본값 false 설정
+		}
 		저장할_이슈_유형.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_유형.setC_type(TreeConstant.Leaf_Node_TYPE);
 		if ( 서버유형.equals("클라우드") ) {
