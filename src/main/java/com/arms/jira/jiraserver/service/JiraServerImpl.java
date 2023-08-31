@@ -357,6 +357,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_상태.setC_issue_status_name(이슈_상태.getName());
 		저장할_이슈_상태.setC_issue_status_url(이슈_상태.getSelf());
 		저장할_이슈_상태.setC_issue_status_desc(이슈_상태.getDescription());
+		저장할_이슈_상태.setC_check("false");
 		저장할_이슈_상태.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_상태.setC_type(TreeConstant.Leaf_Node_TYPE);
 
@@ -396,6 +397,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_해결책.setC_issue_resolution_url(이슈_해결책.getSelf());
 		저장할_이슈_해결책.setC_issue_resolution_desc(이슈_해결책.getDescription());
 		저장할_이슈_해결책.setC_etc(String.valueOf(이슈_해결책.isDefault()));
+		저장할_이슈_해결책.setC_check("false");
 		저장할_이슈_해결책.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_해결책.setC_type(TreeConstant.Leaf_Node_TYPE);
 
@@ -435,6 +437,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_우선순위.setC_issue_priority_name(이슈_우선순위.getName());
 		저장할_이슈_우선순위.setC_issue_priority_url(이슈_우선순위.getSelf());
 		저장할_이슈_우선순위.setC_issue_priority_desc(이슈_우선순위.getDescription());
+		저장할_이슈_우선순위.setC_check("false");
 		저장할_이슈_우선순위.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_우선순위.setC_type(TreeConstant.Leaf_Node_TYPE);
 		if( 서버유형.equals("클라우드")) {
@@ -479,6 +482,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_유형.setC_issue_type_url(이슈_유형.getSelf());
 		저장할_이슈_유형.setC_issue_type_desc(이슈_유형.getDescription());
 		저장할_이슈_유형.setC_desc(이슈_유형.getSubtask().toString()); //Boolean
+		저장할_이슈_유형.setC_check("false"); //기본값 false 설정
 		저장할_이슈_유형.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_유형.setC_type(TreeConstant.Leaf_Node_TYPE);
 		if ( 서버유형.equals("클라우드") ) {
