@@ -1,6 +1,7 @@
 package com.arms.util.external_communicate;
 
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.cloud.*;
 import com.arms.util.external_communicate.dto.onpremise.*;
@@ -22,8 +23,8 @@ public interface 내부통신기 {
                                    @RequestBody ReqStatusDTO reqStatusDTO);
 
     @PostMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
-    ResponseEntity<?> 제품별_요구사항_이슈_조회(@PathVariable(value ="changeReqTableName") String changeReqTableName,
-                                   @RequestBody ReqStatusDTO reqStatusDTO);
+    List<ReqStatusEntity> 제품별_요구사항_이슈_조회(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+                                         @RequestBody ReqStatusDTO reqStatusDTO);
 
 
 }

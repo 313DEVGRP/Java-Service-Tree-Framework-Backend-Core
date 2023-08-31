@@ -11,11 +11,15 @@
  */
 package com.arms.util.dynamicscheduler.controller;
 
+import com.arms.jira.jiraserver.model.JiraServerEntity;
+import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.requirement.reqstatus.service.ReqStatus;
 import com.arms.util.dynamicscheduler.service.스케쥴러;
+import com.arms.util.external_communicate.엔진통신기;
 import com.egovframework.javaservice.treeframework.remote.Chat;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -48,8 +52,15 @@ public class 스케쥴러_컨트롤러{
     private PdService pdService;
 
     @Autowired
+    private com.arms.util.external_communicate.엔진통신기 엔진통신기;
+
+    @Autowired
     @Qualifier("reqStatus")
     private ReqStatus reqStatus;
+
+    @Autowired
+    @Qualifier("jiraServer")
+    private JiraServer jiraServer;
 
     @Autowired
     private com.arms.util.external_communicate.내부통신기 내부통신기;
@@ -74,9 +85,24 @@ public class 스케쥴러_컨트롤러{
             Long 제품서비스_아이디 = 제품서비스.getC_id();
 
             ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-            ResponseEntity<?> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
-            if(결과.getStatusCode().isError()){
+            List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+
+            if(결과 == null){
                 chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
+            }else {
+
+                for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
+                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
+                    지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
+                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
+
+                    int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(지라서버.getC_id(), 요구사항_이슈_엔티티.getC_issue_key());
+
+                    log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+
+
+                }
+
             }
 
         }
