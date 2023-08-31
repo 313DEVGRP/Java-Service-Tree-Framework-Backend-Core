@@ -96,7 +96,7 @@ public class 스케쥴러_컨트롤러{
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
                     JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
 
-                    int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(지라서버.getC_id(), 요구사항_이슈_엔티티.getC_issue_key());
+                    int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(Long.parseLong(지라서버.getC_jira_server_etc()), 요구사항_이슈_엔티티.getC_issue_key());
 
                     log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
 
