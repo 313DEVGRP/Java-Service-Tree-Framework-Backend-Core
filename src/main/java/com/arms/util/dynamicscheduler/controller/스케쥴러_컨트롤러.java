@@ -96,9 +96,16 @@ public class 스케쥴러_컨트롤러{
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
                     JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
 
-                    int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(Long.parseLong(지라서버.getC_jira_server_etc()), 요구사항_이슈_엔티티.getC_issue_key());
+                    if( 지라서버 == null ){
 
-                    log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                        log.info("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
+
+                    } else {
+                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(Long.parseLong(지라서버.getC_jira_server_etc()), 요구사항_이슈_엔티티.getC_issue_key());
+
+                        log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                    }
+
 
 
                 }
