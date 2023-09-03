@@ -19,10 +19,13 @@ import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.requirement.reqadd.model.ReqAddDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.util.external_communicate.엔진통신기;
 import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.egovframework.javaservice.treeframework.util.ParameterParser;
+import com.egovframework.javaservice.treeframework.util.StringUtils;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
@@ -38,6 +41,12 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -139,10 +148,73 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
 
+        List<Long> versionList = list.stream()
+                .map(ReqStatusEntity::getC_pds_version_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> jiraServerList = list.stream()
+                .map(ReqStatusEntity::getC_jira_server_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> jiraProjectList = list.stream()
+                .map(ReqStatusEntity::getC_jira_project_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> reqList = list.stream()
+                .map(ReqStatusEntity::getC_req_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> issueList = list.stream()
+                .map(ReqStatusEntity::getC_issue_key)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        result.put("version", versionList.size());
+        result.put("jiraServer", jiraServerList.size());
+        result.put("jiraProject", jiraProjectList.size());
+        result.put("req", reqList.size());
+        result.put("issue", issueList.size());
+
         SessionUtil.removeAttribute("getStatistics");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", list);
+        modelAndView.addObject("result", result);
         return modelAndView;
     }
-}
+
+    @Autowired
+    private com.arms.util.external_communicate.엔진통신기 엔진통신기;
+
+    static final long dummy_jira_server = 0L;
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getProgress.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getProgress(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        Long pdService = Long.parseLong(pdServiceStr);
+
+        ParameterParser parser = new ParameterParser(request);
+        Long pds_version = parser.getLong("version");
+        if(pds_version == null){
+            pds_version = 0L;
+        }
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService, pds_version));
+        return modelAndView;
+
+    }
+
+
+
+    }
