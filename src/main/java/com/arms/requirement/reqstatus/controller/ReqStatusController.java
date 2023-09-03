@@ -103,18 +103,43 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     )
     public ModelAndView getMonitor(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
-            ReqStatusEntity reqStatusEntity, ModelMap model, HttpServletRequest request) throws Exception {
+            ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqStatusController :: getStatusMonitor");
-        ReqStatusEntity statusEntity = modelMapper.map(reqStatusEntity, ReqStatusEntity.class);
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
 
         SessionUtil.setAttribute("getStatusMonitor",changeReqTableName);
+
+        statusEntity.setOrder(Order.asc("c_id"));
+
+        List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
+
+        SessionUtil.removeAttribute("getStatusMonitor");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", list);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getStatistics.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getStatistics(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: getStatistics");
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+
+        SessionUtil.setAttribute("getStatistics",changeReqTableName);
 
         statusEntity.setOrder(Order.asc("c_left"));
 
         List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
 
-        SessionUtil.removeAttribute("getStatusMonitor");
+        SessionUtil.removeAttribute("getStatistics");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);

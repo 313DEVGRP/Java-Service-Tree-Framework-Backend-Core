@@ -108,6 +108,8 @@ public class 스케쥴러_컨트롤러{
                                 요구사항_이슈_엔티티.getC_pds_version_link()
                                 );
 
+
+
                         log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
                     }
 
