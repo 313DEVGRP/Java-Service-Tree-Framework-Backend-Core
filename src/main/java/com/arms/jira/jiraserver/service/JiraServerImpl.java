@@ -11,6 +11,8 @@
  */
 package com.arms.jira.jiraserver.service;
 
+import com.arms.globaltreemap.model.GlobalTreeMapEntity;
+import com.arms.globaltreemap.service.GlobalTreeMapService;
 import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
 import com.arms.jira.jiraissuepriority.service.JiraIssuePriority;
 import com.arms.jira.jiraissueresolution.model.JiraIssueResolutionEntity;
@@ -41,6 +43,8 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.egovframework.javaservice.treeframework.remote.Global.chat;
+
 
 @AllArgsConstructor
 @Service("jiraServer")
@@ -70,6 +74,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Autowired
 	@Qualifier("jiraIssueStatus")
 	private JiraIssueStatus jiraIssueStatus;
+
+	@Autowired
+	private GlobalTreeMapService globalTreeMapService;
 
 	@Override
 	public List<JiraServerEntity> getNodesWithoutRoot(JiraServerEntity jiraServerEntity) throws Exception {
@@ -160,43 +167,102 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	@Override
 	public List<JiraProjectEntity> 서버_프로젝트_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
-		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
-		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
-		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
+		GlobalTreeMapEntity 트리맵_검색전용 = new GlobalTreeMapEntity();
+		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
+		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
 
-		return 검색된_지라_서버.getJiraProjectEntities().stream().collect(Collectors.toList());
+		List<JiraProjectEntity> 지라프로젝트_목록 = new ArrayList<>();
+
+		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
+			if (연결정보.getJiraproject_link() != null) {
+				JiraProjectEntity 프로젝트_검색전용 = new JiraProjectEntity();
+				프로젝트_검색전용.setC_id(연결정보.getJiraproject_link());
+				JiraProjectEntity 지라프로젝트 = jiraProject.getNode(프로젝트_검색전용);
+				지라프로젝트_목록.add(지라프로젝트);
+			}
+		}
+
+		return 지라프로젝트_목록;
 	}
 
 	@Override
 	public List<JiraIssueTypeEntity> 서버_이슈유형_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
-		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
-		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
-		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
-		return 검색된_지라_서버.getJiraIssueTypeEntities().stream().collect(Collectors.toList());
+		GlobalTreeMapEntity 트리맵_검색전용 = new GlobalTreeMapEntity();
+		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
+		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
+
+		List<JiraIssueTypeEntity> 지라이슈유형_목록 = new ArrayList<>();
+		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
+			if (연결정보.getJiraissuetype_link() != null) {
+				JiraIssueTypeEntity 이슈유형_검색전용 = new JiraIssueTypeEntity();
+				이슈유형_검색전용.setC_id(연결정보.getJiraissuetype_link());
+				JiraIssueTypeEntity 이슈유형 = jiraIssueType.getNode(이슈유형_검색전용);
+				지라이슈유형_목록.add(이슈유형);
+			}
+		}
+		return 지라이슈유형_목록;
 	}
 
 	@Override
 	public List<JiraIssueStatusEntity> 서버_이슈상태_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
-		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
-		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
-		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
-		return 검색된_지라_서버.getJiraIssueStatusEntities().stream().collect(Collectors.toList());
+		GlobalTreeMapEntity 트리맵_검색전용 = new GlobalTreeMapEntity();
+		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
+		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
+
+		List<JiraIssueStatusEntity> 지라이슈상태_목록 = new ArrayList<>();
+		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
+			if (연결정보.getJiraissuestatus_link() != null) {
+				JiraIssueStatusEntity 이슈상태_검색전용 = new JiraIssueStatusEntity();
+				이슈상태_검색전용.setC_id(연결정보.getJiraissuestatus_link());
+				JiraIssueStatusEntity 이슈상태 = jiraIssueStatus.getNode(이슈상태_검색전용);
+				지라이슈상태_목록.add(이슈상태);
+			}
+		}
+
+		return 지라이슈상태_목록;
 	}
 
 	@Override
 	public List<JiraIssuePriorityEntity> 서버_이슈우선순위_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
-		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
-		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
-		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
-		return 검색된_지라_서버.getJiraIssuePriorityEntities().stream().collect(Collectors.toList());
+		GlobalTreeMapEntity 트리맵_검색전용 = new GlobalTreeMapEntity();
+		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
+		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
+
+		List<JiraIssuePriorityEntity> 지라이슈우선순위_목록 = new ArrayList<>();
+		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
+			if (연결정보.getJiraissuepriority_link() != null) {
+				JiraIssuePriorityEntity 이슈우선순위_검색전용 = new JiraIssuePriorityEntity();
+				이슈우선순위_검색전용.setC_id(연결정보.getJiraissuepriority_link());
+				JiraIssuePriorityEntity 이슈우선순위 = jiraIssueStatus.getNode(이슈우선순위_검색전용);
+				지라이슈우선순위_목록.add(이슈우선순위);
+			}
+		}
+
+		return 지라이슈우선순위_목록;
 	}
 
 	@Override
 	public List<JiraIssueResolutionEntity> 서버_이슈해결책_가져오기(JiraServerEntity jiraServerEntity) throws Exception {
+		GlobalTreeMapEntity 트리맵_검색전용 = new GlobalTreeMapEntity();
+		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
+		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
+
+		List<JiraIssueResolutionEntity> 지라이슈해결책_목록 = new ArrayList<>();
+		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
+			if (연결정보.getJiraissueresolution_link() != null) {
+				JiraIssueResolutionEntity 이슈해결책_검색전용 = new JiraIssueResolutionEntity();
+				이슈해결책_검색전용.setC_id(연결정보.getJiraissueresolution_link());
+				JiraIssueResolutionEntity 이슈해결책 = jiraIssueStatus.getNode(이슈해결책_검색전용);
+				지라이슈해결책_목록.add(이슈해결책);
+			}
+		}
+
+		return 지라이슈해결책_목록;
+/*
 		JiraServerEntity 검색용_서버_엔티티 = new JiraServerEntity();
 		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
 		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
-		return 검색된_지라_서버.getJiraIssueResolutionEntities().stream().collect(Collectors.toList());
+		return 검색된_지라_서버.getJiraIssueResolutionEntities().stream().collect(Collectors.toList());*/
 	}
 
 	@Override
@@ -286,7 +352,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_프로젝트_수 > 0) {
 				addedNodeEntity.setJiraProjectEntities(지라서버에_붙일_프로젝트_리스트);
 			}
-
+			chat.sendMessageByEngine("지라 프로젝트 데이터 연결 완료.");
+			
 			int 연결할_이슈_유형_수 = 0;
 			Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트 = new HashSet<>();
 			if (등록결과.getType().equals("온프레미스")) {
@@ -295,21 +362,24 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_유형_수 > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈_유형_리스트);
 			}
-
+			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
+			
 			int 연결할_이슈_우선순위_수 = 0;
 			Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트 = new HashSet<>();
 			연결할_이슈_우선순위_수 = 지라서버_엔티티에_지라_이슈_우선순위들을_연결(지라서버에_붙일_이슈_우선순위_리스트, 엔진통신기.지라_이슈_우선순위_가져오기(등록결과.getConnectId()), 등록결과.getType());
 			if (연결할_이슈_우선순위_수 > 0) {
 				addedNodeEntity.setJiraIssuePriorityEntities(지라서버에_붙일_이슈_우선순위_리스트);
 			}
-
+			chat.sendMessageByEngine("지라 이슈우선순위 데이터 연결 완료.");
+			
 			int 연결할_이슈_해결책_수 = 0;
 			Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트 = new HashSet<>();
 			연결할_이슈_해결책_수 = 지라서버_엔티티에_지라_이슈_해결책들을_연결(지라서버에_붙일_이슈_해결책_리스트, 엔진통신기.지라_이슈_해결책_가져오기(등록결과.getConnectId()), 등록결과.getType());
 			if (연결할_이슈_해결책_수 > 0) {
 				addedNodeEntity.setJiraIssueResolutionEntities(지라서버에_붙일_이슈_해결책_리스트);
 			}
-
+			chat.sendMessageByEngine("지라 이슈해결책 데이터 연결 완료.");
+			
 			int 연결할_이슈_상태_수 = 0;
 			Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트 = new HashSet<>();
 			if (등록결과.getType().equals("온프레미스")) {
@@ -318,7 +388,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_상태_수 > 0) {
 				addedNodeEntity.setJiraIssueStatusEntities(지라서버에_붙일_이슈_상태_리스트);
 			}
-
+			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
+			
 			this.updateNode(addedNodeEntity);
 		}
 
