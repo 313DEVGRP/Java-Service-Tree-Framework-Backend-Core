@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "engine", url = "${arms.engine.url}")
 public interface 엔진통신기 {
@@ -54,5 +55,10 @@ public interface 엔진통신기 {
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
             @RequestParam("pdServiceVersion") Long 제품서비스_버전_아이디);
+
+    @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
+    public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                       @PathVariable("pdService") Long 제품서비스_아이디,
+                                       @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
 
 }
