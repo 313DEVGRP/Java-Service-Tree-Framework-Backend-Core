@@ -11,6 +11,11 @@
  */
 package com.arms.requirement.reqadd.controller;
 
+import static java.util.Comparator.*;
+import static java.util.stream.Collectors.*;
+
+import com.arms.requirement.reqadd.excelupload.ExcelGantUpload;
+import com.arms.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.util.filerepository.model.FileRepositoryDTO;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
@@ -20,6 +25,7 @@ import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqadd.service.ReqAdd;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.egovframework.javaservice.treeframework.util.StringUtils;
@@ -27,6 +33,14 @@ import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import com.egovframework.javaservice.treeframework.validation.group.MoveNode;
 import com.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -42,15 +56,22 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
+import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Controller
@@ -317,5 +338,38 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         return modelAndView;
     }
+
+    // @ResponseBody
+    // @PostMapping(value = "/excel-upload.do")
+    // public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
+    //
+    //     try(InputStream inputStream = excelFile.getInputStream()) {
+    //
+    //
+    //         Workbook workbook = WorkbookFactory.create(inputStream);
+    //         List reqStatus
+    //             = ExcelUtilsFactory
+    //             .getInstance(inputStream)
+    //             .read(ReqAddDTO.class);
+    //         System.out.println(reqStatus);
+    //     }
+    //     return null;
+    // }
+
+
+    @ResponseBody
+    @PostMapping(value = "/sample/excel-to-list")
+    public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
+        //확인후에 저장을 하기 위한 샘플입니다.
+        return ResponseEntity.ok(CommonResponse.success(
+            new ExcelGantUpload(excelFile.getInputStream())
+                .getGetWebScheduleList()
+                .stream()
+                .sorted(comparing(WbsSchedule::getDepth).reversed())
+                .collect(toList())
+            )
+        );
+    }
+
 
 }
