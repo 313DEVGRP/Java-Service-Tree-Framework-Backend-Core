@@ -39,6 +39,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
@@ -139,10 +145,44 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
 
+        List<Long> versionList = list.stream()
+                .map(ReqStatusEntity::getC_pds_version_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> jiraServerList = list.stream()
+                .map(ReqStatusEntity::getC_jira_server_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> jiraProjectList = list.stream()
+                .map(ReqStatusEntity::getC_jira_project_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Long> reqList = list.stream()
+                .map(ReqStatusEntity::getC_req_link)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> issueList = list.stream()
+                .map(ReqStatusEntity::getC_issue_key)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, Integer> result = new HashMap<String, Integer>();
+        result.put("version", versionList.size());
+        result.put("jiraServer", jiraServerList.size());
+        result.put("jiraProject", jiraProjectList.size());
+        result.put("req", reqList.size());
+        result.put("issue", issueList.size());
+
         SessionUtil.removeAttribute("getStatistics");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", list);
+        modelAndView.addObject("result", result);
         return modelAndView;
     }
+
+
 }
