@@ -16,6 +16,7 @@ import com.arms.jira.jiraissueresolution.model.JiraIssueResolutionEntity;
 import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
@@ -30,6 +31,8 @@ public interface JiraServer extends TreeService {
     public JiraServerEntity 서버_엔티티_항목별_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception;
 
     public List<JiraProjectEntity> 서버_프로젝트_가져오기(JiraServerEntity jiraServerEntity) throws Exception;
+
+    public List<JiraProjectPureEntity> 서버_프로젝트만_가져오기(JiraServerEntity jiraServerEntity) throws Exception;
 
     public List<JiraIssueTypeEntity> 서버_이슈유형_가져오기(JiraServerEntity jiraServerEntity) throws Exception;
 
