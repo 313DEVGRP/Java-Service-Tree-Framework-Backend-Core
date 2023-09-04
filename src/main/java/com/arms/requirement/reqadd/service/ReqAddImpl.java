@@ -24,6 +24,7 @@ import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.requirement.reqadd.model.FollowReqLinkDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.util.external_communicate.dto.*;
@@ -343,4 +344,34 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		return savedReqAddEntity;
 	}
+
+	@Override
+	public ReqAddEntity reqDetail(FollowReqLinkDTO followReqLinkDTO) throws Exception {
+
+		Long targetTableId = followReqLinkDTO.getPdServiceId();
+
+		String targetReqAddTableName = "T_ARMS_REQADD" + "_" + targetTableId;
+
+		SessionUtil.setAttribute("reqDetail",targetReqAddTableName);
+		ReqAddEntity searchReqAddEntity = new ReqAddEntity();
+		searchReqAddEntity.setC_id(followReqLinkDTO.getReqAddId());
+		ReqAddEntity reqAddEntity = this.getNode(searchReqAddEntity);
+		SessionUtil.removeAttribute("reqDetail");
+
+		JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
+		jiraProjectSearchEntity.setC_id(followReqLinkDTO.getJiraProjectId());
+		JiraProjectEntity jiraProjectEntity = jiraProject.getNode(jiraProjectSearchEntity);
+
+		JiraServerEntity searchJiraServerEntity = new JiraServerEntity();
+		searchJiraServerEntity.setC_id(followReqLinkDTO.getJiraServerId());
+		JiraServerEntity jiraServerEntity = jiraServer.getNode(searchJiraServerEntity);
+
+		// http://www.a-rms.net/313devgrp/arms/detail.html?page=reqDetail&pdService=10&pdServiceVersion=10&reqAdd=14&jiraServer=11&jiraProject=10
+
+
+
+
+		return null;
+	}
+
 }

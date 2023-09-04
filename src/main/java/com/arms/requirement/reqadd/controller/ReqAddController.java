@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.*;
 
 import com.arms.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.requirement.reqadd.excelupload.WbsSchedule;
+import com.arms.requirement.reqadd.model.FollowReqLinkDTO;
 import com.arms.util.filerepository.model.FileRepositoryDTO;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
@@ -55,10 +56,12 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -339,24 +342,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         return modelAndView;
     }
 
-    // @ResponseBody
-    // @PostMapping(value = "/excel-upload.do")
-    // public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
-    //
-    //     try(InputStream inputStream = excelFile.getInputStream()) {
-    //
-    //
-    //         Workbook workbook = WorkbookFactory.create(inputStream);
-    //         List reqStatus
-    //             = ExcelUtilsFactory
-    //             .getInstance(inputStream)
-    //             .read(ReqAddDTO.class);
-    //         System.out.println(reqStatus);
-    //     }
-    //     return null;
-    // }
-
-
     @ResponseBody
     @PostMapping(value = "/sample/excel-to-list")
     public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
@@ -369,6 +354,18 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
                 .collect(toList())
             )
         );
+    }
+
+
+    @ResponseBody
+    @GetMapping(value = "/reqDetail.do")
+    public ResponseEntity followReqLink(FollowReqLinkDTO followReqLinkDTO
+        ) throws Exception {
+
+        reqAdd.reqDetail(followReqLinkDTO);
+
+        return null;
+
     }
 
 
