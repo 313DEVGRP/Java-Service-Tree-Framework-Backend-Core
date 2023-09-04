@@ -260,7 +260,7 @@ dependencies {
     implementation '313devgrp:dwr:3.1.3:RELEASE'
 
     // TreeFramework
-    implementation '313devgrp:Java-Service-Tree-Framework-Core-Lib:3.13.7'
+    implementation '313devgrp:Java-Service-Tree-Framework-Core-Lib:3.13.9'
 
     // mybatis
     implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.3.1'
