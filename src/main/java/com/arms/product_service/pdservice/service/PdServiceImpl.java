@@ -13,6 +13,8 @@ package com.arms.product_service.pdservice.service;
 
 import com.arms.globaltreemap.dao.GlobalTreeMapRepository;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.jira.jiraproject_pure.model.JiraProjectPureEntity;
+import com.arms.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.util.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
@@ -69,6 +71,9 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Autowired
     private GlobalTreeMapRepository globalTreeMapRepository;
 
+    @Autowired
+    @Qualifier("jiraProjectPure")
+    private JiraProjectPure jiraProjectPure;
 
     @Override
     public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception {
@@ -302,27 +307,93 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         return pdService;
     }
 
-
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
 
         List<PdServiceEntity> 서비스_리스트 = this.getNodesWithoutRoot(new PdServiceEntity());
-        List<JiraProjectEntity> 지라프로젝트_리스트 = this.getNodesWithoutRoot(new JiraProjectEntity());
 
         if (서비스_리스트.isEmpty()) {
             return null;
         }
 
+        List<PdServiceD3Chart> 레벨2_서비스_리스트 =
+                서비스_리스트.parallelStream().map(
+                    서비스 ->{
+                        Set<PdServiceVersionEntity> 서비스_버전_리스트 = 서비스.getPdServiceVersionEntities();
 
-        Map<Long, JiraProjectEntity> 검색할_지라프로젝트 = 지라프로젝트_리스트.stream()
-                .collect(Collectors.toMap(JiraProjectEntity::getC_id, Function.identity()));
+                        List<PdServiceD3Chart> 레벨3_버전_리스트 = 서비스_버전_리스트.stream()
+                                .map(버전 -> {
+                                    GlobalTreeMapEntity 검색용_글로벌_트리맵 = new GlobalTreeMapEntity();
+                                    검색용_글로벌_트리맵.setPdservice_link(서비스.getC_id());
+                                    검색용_글로벌_트리맵.setPdserviceversion_link(버전.getC_id());
+
+                                    List<Long> 지라프로젝트_아이디_목록 = globalTreeMapService.findAllBy(검색용_글로벌_트리맵).stream()
+                                            .filter(글로벌트리맵 -> 글로벌트리맵.getJiraproject_link() != null)
+                                            .map(GlobalTreeMapEntity::getJiraproject_link).collect(Collectors.toList());
+
+                                    Criterion criterion = Restrictions.in("c_id", 지라프로젝트_아이디_목록);
+                                    JiraProjectPureEntity 지라프로젝트_검색전용 = new JiraProjectPureEntity();
+                                    지라프로젝트_검색전용.getCriterions().add(criterion);
+
+                                    List<JiraProjectPureEntity> 검색된_지라프로젝트_목록 = null;
+                                    try {
+                                        검색된_지라프로젝트_목록 = jiraProjectPure.getChildNode(지라프로젝트_검색전용);
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    List<PdServiceD3Chart> 레벨4_지라프로젝트_리스트 = new ArrayList<>();
+
+                                    for (JiraProjectPureEntity 지라프로젝트 : 검색된_지라프로젝트_목록) {
+                                        레벨4_지라프로젝트_리스트.add( PdServiceD3Chart.builder()
+                                                                        .type("Jira")
+                                                                        .name(지라프로젝트.getC_jira_name())
+                                                                        .build());
+                                    }
+
+                                    return PdServiceD3Chart.builder()
+                                            .type("Version")
+                                            .name(버전.getC_title())
+                                            .children(레벨4_지라프로젝트_리스트)
+                                            .build();
+                                })
+                                .collect(Collectors.toList()); //레벨3
+
+                        return PdServiceD3Chart.builder()
+                                .type("PdService")
+                                .name(서비스.getC_title())
+                                .children(레벨3_버전_리스트)
+                                .build();
+
+                    }).collect(Collectors.toList()); // 레벨2_서비스_리스트
+
+        return PdServiceD3Chart.builder()
+                .name("a-RMS") //레벨1
+                .children(레벨2_서비스_리스트)
+                .build();
+    }
+
+    @Override
+    public PdServiceD3Chart getD3ChartData_old() throws Exception {
+
+        List<PdServiceEntity> 서비스_리스트 = this.getNodesWithoutRoot(new PdServiceEntity());
+        //List<JiraProjectEntity> 지라프로젝트_리스트 = this.getNodesWithoutRoot(new JiraProjectEntity());
+        List<JiraProjectPureEntity> 지라프로젝트_리스트 = this.getNodesWithoutRoot(new JiraProjectPureEntity());
+
+        if (서비스_리스트.isEmpty()) {
+            return null;
+        }
+
+        Map<Long, JiraProjectPureEntity> 검색할_지라프로젝트 = 지라프로젝트_리스트.stream()
+                .collect(Collectors.toMap(JiraProjectPureEntity::getC_id, Function.identity()));
 
         List<PdServiceD3Chart> returnList = 서비스_리스트.parallelStream() // 병렬 처리
                 .map(서비스 -> {
 
                     Set<PdServiceVersionEntity> 저장된_버전_정보들 = 서비스.getPdServiceVersionEntities();
+
                     List<PdServiceD3Chart> 반환되는_버전리스트 = 저장된_버전_정보들.stream()
                             .map(버전앤티디 -> {
+
                                 List<PdServiceD3Chart> 검색된_지라프로젝트 = 지라프로젝트_리스트.parallelStream() // 병렬 처리
                                         .flatMap(지라프로젝트 -> {
                                             GlobalTreeMapEntity 검색용_글로벌앤티디 = new GlobalTreeMapEntity();
@@ -333,14 +404,16 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                                     .filter(글로벌트리맵 ->
                                                             글로벌트리맵.getPdserviceversion_link().equals(버전앤티디.getC_id()))  // 글로벌트리맵에 버전링크와 버전엔티디에서 아이디 비교
                                                     .map(글로벌트리맵 -> {
-                                                        JiraProjectEntity 검색된_지라프로젝트정보 = 검색할_지라프로젝트.get(지라프로젝트.getC_id());
+                                                        JiraProjectPureEntity 검색된_지라프로젝트정보 = 검색할_지라프로젝트.get(지라프로젝트.getC_id());
+
+
                                                         return PdServiceD3Chart.builder()
                                                                 .type("Jira")
                                                                 .name(검색된_지라프로젝트정보.getC_title())
                                                                 .build();
                                                     });
                                         })
-                                        .collect(Collectors.toList());
+                                        .collect(Collectors.toList()); //검색된_지라프로젝트
 
                                 return PdServiceD3Chart.builder()
                                         .type("Version")
@@ -348,7 +421,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                         .children(검색된_지라프로젝트)
                                         .build();
                             })
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toList()); //반환되는_버전리스트
 
                     return PdServiceD3Chart.builder()
                             .type("PdService")
@@ -356,7 +429,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                             .children(반환되는_버전리스트)
                             .build();
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); //returnList
 
         return PdServiceD3Chart.builder()
                 .name("a-RMS")
