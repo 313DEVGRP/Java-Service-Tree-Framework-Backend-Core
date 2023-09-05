@@ -12,51 +12,51 @@
 package com.arms.product_service.pdservice_pure.controller;
 
 import com.arms.product_service.pdservice.model.PdServiceDTO;
-import com.arms.product_service.pdservice.model.PdServiceEntity;
-import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdservice_pure.model.PdServicePureDTO;
 import com.arms.product_service.pdservice_pure.model.PdServicePureEntity;
-import com.arms.product_service.pdserviceversion.model.PdServiceVersionDTO;
-import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
-import com.arms.util.filerepository.model.FileRepositoryEntity;
+import com.arms.product_service.pdservice_pure.service.PdServicePure;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
-import com.egovframework.javaservice.treeframework.util.ParameterParser;
-import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Set;
 
 @Slf4j
 @Controller
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = {"/arms/pdServicePure"})
-public class PdServicePureController extends TreeAbstractController<PdService, PdServicePureDTO, PdServicePureEntity> {
+public class PdServicePureController extends TreeAbstractController<PdServicePure, PdServicePureDTO, PdServicePureEntity> {
 
     @Autowired
-    @Qualifier("pdService")
-    private PdService pdService;
+    @Qualifier("pdServicePure")
+    private PdServicePure pdServicePure;
 
     @PostConstruct
     public void initialize() {
-        setTreeService(pdService);
+        setTreeService(pdServicePure);
         setTreeEntity(PdServicePureEntity.class);
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getPdServiceMonitor.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getPdServiceMonitor(PdServiceDTO pdServiceDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("PdServiceController :: getPdServiceMonitor");
+        PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServiceDTO, PdServicePureEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(pdServicePure.getNodesWithoutRoot(pdServicePureEntity)));
+
+    }
 }
