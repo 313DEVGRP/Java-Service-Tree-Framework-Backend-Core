@@ -22,9 +22,11 @@ import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.util.external_communicate.dto.*;
@@ -32,7 +34,6 @@ import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
-import com.egovframework.javaservice.treeframework.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
+
 import java.util.*;
 
 
@@ -74,6 +75,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Autowired
 	@Qualifier("jiraServer")
 	private JiraServer jiraServer;
+
+	@Autowired
+	@Qualifier("pdService")
+	private PdService pdService;
 
 	@Autowired
 	protected Chat chat;
@@ -346,17 +351,25 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	}
 
 	@Override
-	public ReqAddEntity reqDetail(FollowReqLinkDTO followReqLinkDTO) throws Exception {
+	public ReqAddDetailDTO getDetail(FollowReqLinkDTO followReqLinkDTO, String changeReqTableName) throws Exception {
 
 		Long targetTableId = followReqLinkDTO.getPdServiceId();
 
-		String targetReqAddTableName = "T_ARMS_REQADD" + "_" + targetTableId;
+		String targetReqAddTableName = changeReqTableName + targetTableId;
 
-		SessionUtil.setAttribute("reqDetail",targetReqAddTableName);
+		SessionUtil.setAttribute("getDetail",targetReqAddTableName);
 		ReqAddEntity searchReqAddEntity = new ReqAddEntity();
 		searchReqAddEntity.setC_id(followReqLinkDTO.getReqAddId());
 		ReqAddEntity reqAddEntity = this.getNode(searchReqAddEntity);
-		SessionUtil.removeAttribute("reqDetail");
+		SessionUtil.removeAttribute("getDetail");
+
+		PdServiceEntity searchPdServiceEntity = new PdServiceEntity();
+		searchPdServiceEntity.setC_id(followReqLinkDTO.getPdServiceId());
+		PdServiceEntity pdServiceEntity = pdService.getNode(searchPdServiceEntity);
+
+		PdServiceVersionEntity searchPdServiceVersionEntity = new PdServiceVersionEntity();
+		searchPdServiceVersionEntity.setC_id(followReqLinkDTO.getPdServiceId());
+		PdServiceVersionEntity pdServiceVersionEntity = this.getNode(searchPdServiceVersionEntity);
 
 		JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
 		jiraProjectSearchEntity.setC_id(followReqLinkDTO.getJiraProjectId());
@@ -366,12 +379,20 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		searchJiraServerEntity.setC_id(followReqLinkDTO.getJiraServerId());
 		JiraServerEntity jiraServerEntity = jiraServer.getNode(searchJiraServerEntity);
 
-		// http://www.a-rms.net/313devgrp/arms/detail.html?page=reqDetail&pdService=10&pdServiceVersion=10&reqAdd=14&jiraServer=11&jiraProject=10
-
-
-
-
-		return null;
+		return ReqAddDetailDTO.builder()
+			.pdService_c_title(pdServiceEntity.getC_title())
+			.pdServiceVersion_c_title(pdServiceVersionEntity.getC_title())
+			.pdService_c_id(pdServiceEntity.getC_id())
+			.reqAdd_c_title(reqAddEntity.getC_title())
+			.reqAdd_c_req_writer(reqAddEntity.getC_req_writer())
+			.reqAdd_c_req_create_date(reqAddEntity.getC_req_create_date())
+			.reqAdd_c_req_reviewer01(reqAddEntity.getC_req_reviewer01())
+			.reqAdd_c_req_reviewer02(reqAddEntity.getC_req_reviewer02())
+			.reqAdd_c_req_reviewer03(reqAddEntity.getC_req_reviewer03())
+			.reqAdd_c_req_reviewer04(reqAddEntity.getC_req_reviewer04())
+			.reqAdd_c_req_reviewer05(reqAddEntity.getC_req_reviewer05())
+			.build();
 	}
+
 
 }
