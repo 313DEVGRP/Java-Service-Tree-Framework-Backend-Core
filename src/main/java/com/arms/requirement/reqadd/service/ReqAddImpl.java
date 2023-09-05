@@ -379,6 +379,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		searchJiraServerEntity.setC_id(followReqLinkDTO.getJiraServerId());
 		JiraServerEntity jiraServerEntity = jiraServer.getNode(searchJiraServerEntity);
 
+
 		return ReqAddDetailDTO.builder()
 			.pdService_c_title(pdServiceEntity.getC_title())
 			.pdServiceVersion_c_title(pdServiceVersionEntity.getC_title())
