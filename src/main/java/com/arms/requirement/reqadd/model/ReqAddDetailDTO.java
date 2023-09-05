@@ -6,6 +6,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class ReqAddDetailDTO {
 
 	private String reqAdd_c_req_writer;//작성자
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 	private Date reqAdd_c_req_create_date;//최근 작성일
 
 	private String reqAdd_c_req_reviewer01;//리뷰어1
