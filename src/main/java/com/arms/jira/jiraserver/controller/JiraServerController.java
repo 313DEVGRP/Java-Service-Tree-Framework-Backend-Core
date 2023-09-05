@@ -108,10 +108,10 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
     @ResponseBody
     @RequestMapping(
-            value = {"/getJiraprojectOnly.do"},
+            value = {"/getJiraprojectPure.do"},
             method={RequestMethod.GET}
     )
-    public ResponseEntity<?> getJiraprojectOnly(JiraServerDTO jiraServerDTO) throws Exception {
+    public ResponseEntity<?> getJiraprojectPure(JiraServerDTO jiraServerDTO) throws Exception {
 
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 

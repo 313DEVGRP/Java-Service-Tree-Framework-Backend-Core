@@ -339,7 +339,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                     try {
                                         검색된_지라프로젝트_목록 = jiraProjectPure.getChildNode(지라프로젝트_검색전용);
                                     } catch (Exception e) {
-                                        throw new RuntimeException(e);
+                                        throw new RuntimeException("검색된 지라 프로젝트 목록이 없습니다.");
                                     }
                                     List<PdServiceD3Chart> 레벨4_지라프로젝트_리스트 = new ArrayList<>();
 
