@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.*;
 import com.arms.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.util.filerepository.model.FileRepositoryDTO;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
@@ -356,16 +357,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         );
     }
 
-
     @ResponseBody
-    @GetMapping(value = "/reqDetail.do")
-    public ResponseEntity followReqLink(FollowReqLinkDTO followReqLinkDTO
+    @GetMapping(value = "/{changeReqTableName}/getDetail.do")
+    public ResponseEntity<ReqAddDetailDTO> followReqLink(FollowReqLinkDTO followReqLinkDTO,@PathVariable(value ="changeReqTableName") String changeReqTableName
         ) throws Exception {
 
-        reqAdd.reqDetail(followReqLinkDTO);
-
-        return null;
-
+        return  ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO,changeReqTableName));
     }
 
 

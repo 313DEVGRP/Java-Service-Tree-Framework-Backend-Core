@@ -12,6 +12,7 @@
 package com.arms.requirement.reqadd.service;
 
 import com.arms.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
@@ -22,6 +23,7 @@ public interface ReqAdd extends TreeService {
     public ReqAddEntity addReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
 
     public ReqAddEntity moveReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception;
-    public ReqAddEntity reqDetail(FollowReqLinkDTO followReqLinkDTO) throws Exception;
+
+    public ReqAddDetailDTO getDetail(FollowReqLinkDTO followReqLinkDTO, String changeReqTableName) throws Exception;
 
 }
