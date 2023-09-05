@@ -363,13 +363,12 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		ReqAddEntity reqAddEntity = this.getNode(searchReqAddEntity);
 		SessionUtil.removeAttribute("getDetail");
 
-		PdServiceEntity searchPdServiceEntity = new PdServiceEntity();
-		searchPdServiceEntity.setC_id(followReqLinkDTO.getPdServiceId());
-		PdServiceEntity pdServiceEntity = pdService.getNode(searchPdServiceEntity);
+		PdServiceEntity pdServiceEntity = reqAddEntity.getPdServiceEntity();
 
-		PdServiceVersionEntity searchPdServiceVersionEntity = new PdServiceVersionEntity();
-		searchPdServiceVersionEntity.setC_id(followReqLinkDTO.getPdServiceId());
-		PdServiceVersionEntity pdServiceVersionEntity = this.getNode(searchPdServiceVersionEntity);
+		PdServiceVersionEntity pdServiceVersionEntity = pdServiceEntity.getPdServiceVersionEntities()
+			.stream()
+			.filter(a -> followReqLinkDTO.getPdServiceId().equals(a.getC_id()))
+			.findFirst().orElseGet(() -> new PdServiceVersionEntity());
 
 		JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
 		jiraProjectSearchEntity.setC_id(followReqLinkDTO.getJiraProjectId());
