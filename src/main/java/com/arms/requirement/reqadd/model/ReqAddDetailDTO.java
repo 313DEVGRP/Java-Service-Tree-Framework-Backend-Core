@@ -38,4 +38,8 @@ public class ReqAddDetailDTO {
 
 	private String reqAdd_c_req_reviewer05;//리뷰어5
 
+	private String reqAdd_c_req_contents;//설명
+
+
+
 }

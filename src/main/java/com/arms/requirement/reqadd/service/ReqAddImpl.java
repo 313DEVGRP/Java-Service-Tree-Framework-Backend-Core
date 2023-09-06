@@ -396,6 +396,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			.reqAdd_c_req_reviewer03(reqAddEntity.getC_req_reviewer03())
 			.reqAdd_c_req_reviewer04(reqAddEntity.getC_req_reviewer04())
 			.reqAdd_c_req_reviewer05(reqAddEntity.getC_req_reviewer05())
+			.reqAdd_c_req_contents(reqAddEntity.getC_req_contents())
 			.build();
 	}
 
