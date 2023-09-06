@@ -96,7 +96,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
     @ResponseBody
     @RequestMapping(
-            value = {"/getJiraproject.do"},
+            value = {"/getJiraProject.do"},
             method={RequestMethod.GET}
     )
     public ResponseEntity<?> getJiraprojectList(JiraServerDTO jiraServerDTO) throws Exception {
@@ -108,7 +108,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
     @ResponseBody
     @RequestMapping(
-            value = {"/getJiraprojectPure.do"},
+            value = {"/getJiraProjectPure.do"},
             method={RequestMethod.GET}
     )
     public ResponseEntity<?> getJiraprojectPure(JiraServerDTO jiraServerDTO) throws Exception {

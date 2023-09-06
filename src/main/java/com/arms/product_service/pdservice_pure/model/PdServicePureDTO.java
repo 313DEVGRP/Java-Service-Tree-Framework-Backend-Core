@@ -37,7 +37,4 @@ public class PdServicePureDTO extends TreeBaseDTO {
 
     //비고
     private String c_pdservice_etc;
-    /*
-    private Set<PdServiceVersionEntity> pdServiceVersionEntities;
-    */
 }

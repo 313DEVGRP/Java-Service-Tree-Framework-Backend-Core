@@ -172,18 +172,17 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		트리맵_검색전용.setJiraserver_link(jiraServerEntity.getC_id());
 		List<GlobalTreeMapEntity> 지라서버_연결된_정보들 = globalTreeMapService.findAllBy(트리맵_검색전용);
 
-		List<JiraProjectEntity> 지라프로젝트_목록 = new ArrayList<>();
+		List<Long> 프로젝트_cId_목록 = new ArrayList<>();
 		for (GlobalTreeMapEntity 연결정보 : 지라서버_연결된_정보들) {
 			if (연결정보.getJiraproject_link() != null) {
-				JiraProjectEntity 프로젝트_검색전용 = new JiraProjectEntity();
-				프로젝트_검색전용.setC_id(연결정보.getJiraproject_link());
-				JiraProjectEntity 지라프로젝트 = jiraProject.getNode(프로젝트_검색전용);
-				지라프로젝트_목록.add(지라프로젝트);
+				프로젝트_cId_목록.add(연결정보.getJiraproject_link());
 			}
 		}
+
+		Criterion criterion = Restrictions.in("c_id", 프로젝트_cId_목록);
 		JiraProjectEntity 프로젝트_검색전용 = new JiraProjectEntity();
-		JiraProjectEntity 지라프로젝트 = jiraProject.getNode(프로젝트_검색전용);
-		지라프로젝트_목록.add(지라프로젝트);
+		프로젝트_검색전용.getCriterions().add(criterion);
+		List<JiraProjectEntity> 지라프로젝트_목록 = jiraProject.getChildNode(프로젝트_검색전용);
 		return 지라프로젝트_목록;
 	}
 

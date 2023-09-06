@@ -54,4 +54,16 @@ public class JiraServerPureController extends TreeAbstractController<JiraServer,
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @ResponseBody
+    @RequestMapping(
+            value= { "/getJiraServerMonitor.do"},
+            method= {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraServerMonitor(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("JiraServerController :: getJiraServerMonitor");
+        JiraServerPureEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerPureEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.getNodesWithoutRoot(jiraServerEntity)));
+    }
 }

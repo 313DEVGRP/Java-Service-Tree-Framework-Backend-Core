@@ -11,10 +11,9 @@
  */
 package com.arms.product_service.pdservice_pure.controller;
 
-import com.arms.product_service.pdservice.model.PdServiceDTO;
+import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdservice_pure.model.PdServicePureDTO;
 import com.arms.product_service.pdservice_pure.model.PdServicePureEntity;
-import com.arms.product_service.pdservice_pure.service.PdServicePure;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.AllArgsConstructor;
@@ -34,15 +33,15 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = {"/arms/pdServicePure"})
-public class PdServicePureController extends TreeAbstractController<PdServicePure, PdServicePureDTO, PdServicePureEntity> {
+public class PdServicePureController extends TreeAbstractController<PdService, PdServicePureDTO, PdServicePureEntity> {
 
     @Autowired
-    @Qualifier("pdServicePure")
-    private PdServicePure pdServicePure;
+    @Qualifier("pdService")
+    private PdService pdService;
 
     @PostConstruct
     public void initialize() {
-        setTreeService(pdServicePure);
+        setTreeService(pdService);
         setTreeEntity(PdServicePureEntity.class);
     }
 
@@ -51,12 +50,12 @@ public class PdServicePureController extends TreeAbstractController<PdServicePur
             value = {"/getPdServiceMonitor.do"},
             method = {RequestMethod.GET}
     )
-    public ResponseEntity<?> getPdServiceMonitor(PdServiceDTO pdServiceDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    public ResponseEntity<?> getPdServiceMonitor(PdServicePureDTO pdServicePureDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("PdServiceController :: getPdServiceMonitor");
-        PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServiceDTO, PdServicePureEntity.class);
+        PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServicePureDTO, PdServicePureEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(pdServicePure.getNodesWithoutRoot(pdServicePureEntity)));
+        return ResponseEntity.ok(CommonResponse.success(pdService.getNodesWithoutRoot(pdServicePureEntity)));
 
     }
 }
