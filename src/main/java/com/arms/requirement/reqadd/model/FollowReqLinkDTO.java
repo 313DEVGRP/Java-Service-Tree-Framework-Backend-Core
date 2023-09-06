@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class FollowReqLinkDTO {
 
-	private Long pdServiceId;
-	private Long pdServiceVersionId;
-	private Long reqAddId;
-	private Long jiraServerId;
-	private Long jiraProjectId;
+	private Long pdService;
+	private Long pdServiceVersion;
+	private Long reqAdd;
+	private Long jiraServer;
+	private Long jiraProject;
 }

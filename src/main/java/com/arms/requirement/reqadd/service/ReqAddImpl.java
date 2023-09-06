@@ -353,13 +353,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Override
 	public ReqAddDetailDTO getDetail(FollowReqLinkDTO followReqLinkDTO, String changeReqTableName) throws Exception {
 
-		Long targetTableId = followReqLinkDTO.getPdServiceId();
+		Long targetTableId = followReqLinkDTO.getPdService();
 
 		String targetReqAddTableName = changeReqTableName + targetTableId;
 
 		SessionUtil.setAttribute("getDetail",targetReqAddTableName);
 		ReqAddEntity searchReqAddEntity = new ReqAddEntity();
-		searchReqAddEntity.setC_id(followReqLinkDTO.getReqAddId());
+		searchReqAddEntity.setC_id(followReqLinkDTO.getReqAdd());
 		ReqAddEntity reqAddEntity = this.getNode(searchReqAddEntity);
 		SessionUtil.removeAttribute("getDetail");
 
@@ -367,15 +367,15 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		PdServiceVersionEntity pdServiceVersionEntity = pdServiceEntity.getPdServiceVersionEntities()
 			.stream()
-			.filter(a -> followReqLinkDTO.getPdServiceId().equals(a.getC_id()))
+			.filter(a -> followReqLinkDTO.getPdService().equals(a.getC_id()))
 			.findFirst().orElseGet(() -> new PdServiceVersionEntity());
 
 		JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
-		jiraProjectSearchEntity.setC_id(followReqLinkDTO.getJiraProjectId());
+		jiraProjectSearchEntity.setC_id(followReqLinkDTO.getJiraProject());
 		JiraProjectEntity jiraProjectEntity = jiraProject.getNode(jiraProjectSearchEntity);
 
 		JiraServerEntity searchJiraServerEntity = new JiraServerEntity();
-		searchJiraServerEntity.setC_id(followReqLinkDTO.getJiraServerId());
+		searchJiraServerEntity.setC_id(followReqLinkDTO.getJiraServer());
 		JiraServerEntity jiraServerEntity = jiraServer.getNode(searchJiraServerEntity);
 
 
