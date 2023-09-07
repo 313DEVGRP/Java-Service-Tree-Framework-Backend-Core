@@ -14,7 +14,8 @@ import java.util.Map;
 @FeignClient(name = "engine", url = "${arms.engine.url}")
 public interface 엔진통신기 {
 
-    @PostMapping("/jira/connect/info")
+    //@PostMapping("/jira/connect/info")
+    @PostMapping("/engine/serverinfo")
     JiraInfoEntity 지라서버_등록(@RequestBody JiraInfoDTO jiraInfoDTO);
 
     /*

@@ -26,5 +26,5 @@ public class JiraInfoEntity {
 
     private String self;
 
-
+    private String _class;
 }
