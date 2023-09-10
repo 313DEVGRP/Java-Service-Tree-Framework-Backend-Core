@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -107,45 +108,37 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
 
     @Override
     @Transactional
-    public List<JiraIssueTypeEntity> 이슈유형_기본값_설정(JiraProjectEntity jiraProjectEntity, Long 이슈유형_c_id) throws Exception {
+    public JiraProjectEntity 프로젝트_항목별_기본값_설정(String 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
 
-        Set<JiraIssueTypeEntity> 프로젝트_이슈유형_목록 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities();
-        // 기본값으로 설정할 프로젝트의 이슈유형만 true 로 수정, 나머지는 false로 수정
-        for(JiraIssueTypeEntity 이슈유형 : 프로젝트_이슈유형_목록) {
-            if(이슈유형.getC_id() == 이슈유형_c_id) {
-                이슈유형.setC_check("true");
-            } else {
-                이슈유형.setC_check("false");
+        if(설정할_항목.equals("이슈유형")) {
+            Set<JiraIssueTypeEntity> 이슈_유형_목록 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities();
+            if(이슈_유형_목록.size() != 0) {
+                for (JiraIssueTypeEntity 이슈_유형 : 이슈_유형_목록) {
+                    if (Objects.equals(이슈_유형.getC_id(), 항목_c_id)) {
+                        이슈_유형.setC_check("true");
+                    } else {
+                        이슈_유형.setC_check("false");
+                    }
+                }
             }
-            jiraIssueType.updateNode(이슈유형);
         }
-
-        this.updateNode(검색된_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream().collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public List<JiraIssueStatusEntity> 이슈상태_기본값_설정(JiraProjectEntity jiraProjectEntity, Long 이슈상태_c_id) throws Exception {
-        JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
-        검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
-        JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-
-        Set<JiraIssueStatusEntity> 프로젝트_이슈상태_목록 = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities();
-        for(JiraIssueStatusEntity 이슈상태 : 프로젝트_이슈상태_목록) {
-            if (이슈상태.getC_id() == 이슈상태_c_id) {
-                이슈상태.setC_check("true");
-            } else {
-                이슈상태.setC_check("false");
+        //이슈 상태
+        if(설정할_항목.equals("이슈상태")) {
+            Set<JiraIssueStatusEntity> 이슈_상태_목록 = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities();
+            if(이슈_상태_목록.size() != 0 ) {
+                for (JiraIssueStatusEntity 이슈_상태 : 이슈_상태_목록) {
+                    if (Objects.equals(이슈_상태.getC_id(), 항목_c_id)) {
+                        이슈_상태.setC_check("true");
+                    } else {
+                        이슈_상태.setC_check("false");
+                    }
+                }
             }
-            jiraIssueStatus.updateNode(이슈상태);
         }
-
         this.updateNode(검색된_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream().collect(Collectors.toList());
-
+        return 검색된_프로젝트_엔티티;
     }
 }
