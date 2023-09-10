@@ -36,6 +36,7 @@ import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,10 +164,30 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				if( 검색된_지라서버.getC_jira_server_type().equals("클라우드")){
 
 					Set<JiraIssueTypeEntity> 클라우드_지라서버_이슈타입_리스트 = 검색된_지라프로젝트.getJiraIssueTypeEntities();
-					요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
+					for(JiraIssueTypeEntity 이슈유형 : 클라우드_지라서버_이슈타입_리스트) {
+						if (이슈유형.getC_check().equals("true")) { // 기본값 설정 true 경우, 해당 이슈유형을 세팅
+							요구사항_이슈_타입 = 이슈유형;
+							break;
+						} else { // 기본값 설정이 false
+							요구사항_이슈_타입 = null;
+						}
+					}
+					if (요구사항_이슈_타입 == null) {
+						for(JiraIssueTypeEntity 이슈유형 : 클라우드_지라서버_이슈타입_리스트) {
+							// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
+							if (이슈유형.getC_issue_type_name().equals("arms-requirement")) {
+								요구사항_이슈_타입 = 이슈유형;
+								break;
+							}
+							else { // 기본값은 아니지만 arms-requirement 없음, null 로 세팅
+								요구사항_이슈_타입 = null;
+							}
+						}
+					}
+					/*요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
 							.filter(entity -> Objects.equals(entity.getC_issue_type_name(), "arms-requirement"))
 							.findFirst()
-							.orElse(null);
+							.orElse(null);*/
 
 					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
 					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
@@ -175,12 +196,32 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 							.orElse(null);
 
 				}else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
-
 					Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-					요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-							.filter(entity -> Objects.equals(entity.getC_desc(), "arms-requirement"))
+					for(JiraIssueTypeEntity 이슈유형 : 지라서버_이슈타입_리스트) {
+						if (이슈유형.getC_check().equals("true")) { // 기본값 설정 true 경우, 해당 이슈유형을 세팅
+							요구사항_이슈_타입 = 이슈유형;
+							break;
+						} else { // 기본값 설정이 false
+							요구사항_이슈_타입 = null;
+						}
+					}
+					if (요구사항_이슈_타입 == null) {
+						for(JiraIssueTypeEntity 이슈유형 : 지라서버_이슈타입_리스트) {
+							// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
+							if (이슈유형.getC_issue_type_name().equals("arms-requirement")) {
+								요구사항_이슈_타입 = 이슈유형;
+								break;
+							}
+							else { // 기본값은 아니지만 arms-requirement 없음, null 로 세팅
+								요구사항_이슈_타입 = null;
+							}
+						}
+					}
+					/*요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+							.filter(entity -> StringUtils.equals(entity.getC_issue_type_name(), "arms-requirement"))
+							//.filter(entity -> Objects.equals(entity.getC_desc(), "arms-requirement"))
 							.findFirst()
-							.orElse(null);
+							.orElse(null);*/
 
 					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
 					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
@@ -204,7 +245,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
 				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_issue_resolution_name());
 				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_issue_status_name());
-				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
+				if(요구사항_이슈_타입 == null) {
+					logger.error("요구사항_이슈_타입이 없습니다.");
+				} else {
+					logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
+				}
 
 				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
 
