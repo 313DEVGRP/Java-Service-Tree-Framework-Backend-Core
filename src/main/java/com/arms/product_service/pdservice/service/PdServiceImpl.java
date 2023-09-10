@@ -187,6 +187,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         Set<PdServiceVersionEntity> versionEntityList = savedNode.getPdServiceVersionEntities();
         for (PdServiceVersionEntity versionEntity : versionEntityList) {
             if (versionEntity.getC_id().equals(pdServiceVersionEntity.getC_id())) {
+                versionEntity.setC_title(pdServiceVersionEntity.getC_title());
                 versionEntity.setC_pds_version_start_date(pdServiceVersionEntity.getC_pds_version_start_date());
                 versionEntity.setC_pds_version_end_date(pdServiceVersionEntity.getC_pds_version_end_date());
                 versionEntity.setC_pds_version_etc(pdServiceVersionEntity.getC_pds_version_etc());
