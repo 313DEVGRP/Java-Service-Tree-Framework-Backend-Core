@@ -80,7 +80,7 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
     )
     public ResponseEntity<?> getProjectIssueTypeList(JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
-        System.out.println("JiraProjectController :: getProjectIssueTypeList");
+        logger.info("JiraProjectController :: getProjectIssueTypeList");
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_이슈유형_리스트_조회(jiraProjectEntity)));
     }
@@ -92,33 +92,24 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
     )
     public ResponseEntity<?> getProjectIssueStatusList(JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
-        System.out.println("JiraProjectController :: getProjectIssueStatusList");
+
+        logger.info("JiraProjectController :: getProjectIssueStatusList");
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_이슈상태_리스트_조회(jiraProjectEntity)));
     }
 
     @ResponseBody
     @RequestMapping(
-            value = {"/makeDefaultIssueType.do/{targetCid}}"},
+            value = {"/{defaultTarget}/makeDefault.do/{targetCid}"},
             method = {RequestMethod.PUT}
     )
-    public ResponseEntity<?> makeDefaultIssueType(JiraProjectDTO jiraProjectDTO,
-                                                  @PathVariable Long targetCid) throws Exception {
+    public ResponseEntity<?> 온프레미스_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
+                                              @PathVariable(name="targetCid") Long 항목_c_id,
+                                              JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
-        System.out.println("JiraProjectController :: makeDefaultIssueType");
-        return ResponseEntity.ok(CommonResponse.success(jiraProject.이슈유형_기본값_설정(jiraProjectEntity,targetCid)));
-    }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/makeDefaultIssueStatus.do/{targetCid}"},
-            method = {RequestMethod.PUT}
-    )
-    public ResponseEntity<?> makeDefaultIssueStatus(JiraProjectDTO jiraProjectDTO,
-                                                    @PathVariable Long targetCid) throws Exception {
-        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
-        System.out.println("JiraProjectController :: makeDefaultIssueStatus");
-        return ResponseEntity.ok(CommonResponse.success(jiraProject.이슈상태_기본값_설정(jiraProjectEntity,targetCid)));
-    }
+        logger.info("JiraProjectController :: 온프레미스_항목별_기본값_설정");
 
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_기본값_설정(설정할_항목, 항목_c_id, jiraProjectEntity)));
+    }
 }

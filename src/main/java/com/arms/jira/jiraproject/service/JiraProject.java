@@ -14,6 +14,7 @@ package com.arms.jira.jiraproject.service;
 import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
@@ -27,7 +28,5 @@ public interface JiraProject extends TreeService {
 
     public List<JiraIssueStatusEntity> 프로젝트_이슈상태_리스트_조회(JiraProjectEntity jiraProjectEntity) throws Exception;
 
-    public List<JiraIssueTypeEntity> 이슈유형_기본값_설정(JiraProjectEntity jiraProjectEntity, Long 이슈유형_c_id) throws Exception;
-
-    public List<JiraIssueStatusEntity> 이슈상태_기본값_설정(JiraProjectEntity jiraProjectEntity, Long 이슈상태_c_id) throws Exception;
+    public JiraProjectEntity 프로젝트_항목별_기본값_설정(String 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception;
 }
