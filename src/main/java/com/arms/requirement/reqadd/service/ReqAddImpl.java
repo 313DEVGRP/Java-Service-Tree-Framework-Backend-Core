@@ -106,16 +106,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		for( String 디비에저장된_제품서비스하위_버전 : 디비에저장된_제품서비스_하위의_버전리스트 ){
 			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
-			globalTreeMap.setPdservice_link(추가된_요구사항의_제품서비스.getC_id());
+			//globalTreeMap.setPdservice_link(추가된_요구사항의_제품서비스.getC_id());
 			globalTreeMap.setPdserviceversion_link(Long.parseLong(디비에저장된_제품서비스하위_버전));
-			제품서비스_버전에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap);
+			제품서비스_버전에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap); // 버전또한 유니크하니까, 해당 버전에 연결된 지라프로젝트들 가져온다.
 		}
-
+		Long 제품서비스_아이디 = 추가된_요구사항의_제품서비스.getC_id();
 		for( GlobalTreeMapEntity 연결정보 : 제품서비스_버전에_연결된정보들 ){
 
 			if( 연결정보.getJiraproject_link() != null ){
 
-				Long 제품서비스_아이디 = 연결정보.getPdservice_link();
+				//Long 제품서비스_아이디 = 연결정보.getPdservice_link(); //연결정보 없음
 				Long 제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
 				Long 지라_프로젝트_아이디 = 연결정보.getJiraproject_link();
 
@@ -134,7 +134,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				
 				Long 지라서버_아이디 = 지라서버_글로벌트리맵.getJiraserver_link();
 
-				logger.info("제품 서비스 링크 = " + 제품서비스_아이디);
+				//logger.info("제품 서비스 링크 = " + 제품서비스_아이디);
 				logger.info("제품 서비스 버전 링크 = " + 제품서비스_버전_아이디);
 				logger.info("지라 서버 링크 = " + 지라서버_아이디);
 				logger.info("지라 프로젝트 링크 = " + 지라_프로젝트_아이디);
