@@ -37,7 +37,6 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
         List<GlobalTreeMapEntity> savedList = globalTreeMapService.findAllBy(globalTreeMapEntity);
 
         List<GlobalTreeMapEntity> filteredList = savedList.stream().filter(savedData ->
-                savedData.getPdservice_link() != null &&
                         savedData.getPdserviceversion_link() != null &&
                         savedData.getJiraproject_link() != null
         ).collect(Collectors.toList());
@@ -58,7 +57,7 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
         ParameterParser parser = new ParameterParser(request);
         String[] paramList = StringUtils.jsonStringifyConvert(parser.get("c_pdservice_jira_ids"));
 
-        List<String> jiraProjectList = Arrays.stream(paramList).collect(Collectors.toList());
+        List<String> jiraProjectList = Arrays.stream(paramList).collect(Collectors.toList()); //지라프로젝트들
 
         // 1. pdService 와 pdServiceVersion 으로 리스트를 찾고
         // 2. 찾은 리스트를 중심으로 루프를 돌면서
@@ -66,25 +65,22 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
         // non 매치 리스트는 delete 를 하자.
 
         GlobalTreeMapEntity searchObj = new GlobalTreeMapEntity();
-        searchObj.setPdservice_link(globalTreeMapEntity.getPdservice_link());
         searchObj.setPdserviceversion_link(globalTreeMapEntity.getPdserviceversion_link());
-        List<GlobalTreeMapEntity> searchedObjList = globalTreeMapService.findAllBy(searchObj);
+        List<GlobalTreeMapEntity> searchedObjList = globalTreeMapService.findAllBy(searchObj); // pdservice와 pdserviceVersion으로 트리맵엔티티들 가져옴
 
         // 1. pdService 와 pdServiceVersion 으로 리스트를 찾고
-        List<GlobalTreeMapEntity> filteredList = searchedObjList.stream().filter(data ->
-                data.getPdservice_link() != null &&
+        List<GlobalTreeMapEntity> 트리맵_제품_지라프로젝트_연결정보 = searchedObjList.stream().filter(data ->
                         data.getPdserviceversion_link() != null &&
                         data.getJiraproject_link() != null
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toList()); // 가져온 트리맵엔티티중에서 지라프로젝트도 있는 녀석들만 가져옴
 
         // 2. 찾은 리스트를 중심으로 루프를 돌면서 삭제할거 삭제하고
-        for(GlobalTreeMapEntity data : filteredList){
+        for(GlobalTreeMapEntity data : 트리맵_제품_지라프로젝트_연결정보){
             Long jiraProjectLink = data.getJiraproject_link();
             boolean alreadyRegist = jiraProjectList.stream().anyMatch(dataObj -> jiraProjectLink == NumberUtils.toLong(dataObj) );
 
             if(alreadyRegist){
                 //이미 등록된 데이터.
-                log.info("already registered : getPdservice_link" + data.getPdservice_link());
                 log.info("already registered : getPdserviceversion_link" + data.getPdserviceversion_link());
                 log.info("already registered : getJiraproject_link" + data.getJiraproject_link());
 
@@ -99,14 +95,12 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
         for( String jiraProject : jiraProjectList ){
 
             GlobalTreeMapEntity saveTarget = new GlobalTreeMapEntity();
-            saveTarget.setPdservice_link(globalTreeMapEntity.getPdservice_link());
             saveTarget.setPdserviceversion_link(globalTreeMapEntity.getPdserviceversion_link());
             saveTarget.setJiraproject_link(Long.parseLong(jiraProject));
 
 
             List<GlobalTreeMapEntity> checkList = globalTreeMapService.findAllBy(saveTarget);
             List<GlobalTreeMapEntity> checkDuplicate = checkList.stream().filter(data ->
-                    data.getPdservice_link().equals(saveTarget.getPdservice_link()) &&
                             data.getPdserviceversion_link().equals(saveTarget.getPdserviceversion_link()) &&
                             data.getJiraproject_link().equals(saveTarget.getJiraproject_link())
             ).collect(Collectors.toList());

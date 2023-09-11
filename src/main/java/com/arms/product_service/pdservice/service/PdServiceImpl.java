@@ -170,7 +170,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
             }
         }
 
-        pdServiceEntity.setPdServiceVersionEntities(디비_버전들);
+        pdServiceNode.setPdServiceVersionEntities(디비_버전들);
         this.updateNode(pdServiceNode);
 
         return pdServiceNode;
@@ -320,7 +320,6 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                         List<PdServiceD3Chart> 레벨3_버전_리스트 = 서비스_버전_리스트.stream()
                                 .map(버전 -> {
                                     GlobalTreeMapEntity 검색용_글로벌_트리맵 = new GlobalTreeMapEntity();
-                                    검색용_글로벌_트리맵.setPdservice_link(서비스.getC_id());
                                     검색용_글로벌_트리맵.setPdserviceversion_link(버전.getC_id());
 
                                     List<Long> 지라프로젝트_아이디_목록 = globalTreeMapService.findAllBy(검색용_글로벌_트리맵).stream()
