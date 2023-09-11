@@ -110,12 +110,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			Set<JiraIssueTypeEntity> 이슈_유형_목록 = 검색된_지라_서버.getJiraIssueTypeEntities();
 			if(이슈_유형_목록.size() != 0) {
 				for (JiraIssueTypeEntity 이슈_유형 : 이슈_유형_목록) {
-					if (이슈_유형.getC_id() == 항목_c_id) {
+					if (Objects.equals(이슈_유형.getC_id(), 항목_c_id)) {
 						이슈_유형.setC_check("true");
 					} else {
 						이슈_유형.setC_check("false");
 					}
-					jiraIssueType.updateNode(이슈_유형);
 				}
 			}
 		}
@@ -124,12 +123,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			Set<JiraIssueStatusEntity> 이슈_상태_목록 = 검색된_지라_서버.getJiraIssueStatusEntities();
 			if(이슈_상태_목록.size() != 0 ) {
 				for (JiraIssueStatusEntity 이슈_상태 : 이슈_상태_목록) {
-					if (이슈_상태.getC_id() == 항목_c_id) {
+					if (Objects.equals(이슈_상태.getC_id(), 항목_c_id)) {
 						이슈_상태.setC_check("true");
 					} else {
 						이슈_상태.setC_check("false");
 					}
-					jiraIssueStatus.updateNode(이슈_상태);
 				}
 			}
 		}
@@ -138,12 +136,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			Set<JiraIssueResolutionEntity> 이슈_해결책_목록 = 검색된_지라_서버.getJiraIssueResolutionEntities();
 			if(이슈_해결책_목록.size() != 0) {
 				for (JiraIssueResolutionEntity 이슈_해결책 : 이슈_해결책_목록) {
-					if (이슈_해결책.getC_id() == 항목_c_id) {
+					if (Objects.equals(이슈_해결책.getC_id(), 항목_c_id)) {
 						이슈_해결책.setC_check("true");
 					} else {
 						이슈_해결책.setC_check("false");
 					}
-					jiraIssueResolution.updateNode(이슈_해결책);
 				}
 			}
 		}
@@ -152,12 +149,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			Set<JiraIssuePriorityEntity> 이슈_우선순위_목록 = 검색된_지라_서버.getJiraIssuePriorityEntities();
 			if(이슈_우선순위_목록.size() != 0) {
 				for (JiraIssuePriorityEntity 이슈_우선순위 : 이슈_우선순위_목록) {
-					if (이슈_우선순위.getC_id() == 항목_c_id) {
+					if (Objects.equals(이슈_우선순위.getC_id(), 항목_c_id)) {
 						이슈_우선순위.setC_check("true");
 					} else {
 						이슈_우선순위.setC_check("false");
 					}
-					jiraIssuePriority.updateNode(이슈_우선순위);
 				}
 			}
 		}
@@ -375,7 +371,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_프로젝트_수 > 0) {
 				addedNodeEntity.setJiraProjectEntities(지라서버에_붙일_프로젝트_리스트);
 			}
-			chat.sendMessageByEngine("지라 프로젝트 데이터 연결 완료.");
+			chat.sendMessageByServer("지라 프로젝트 데이터 연결 완료.");
 			
 			int 연결할_이슈_유형_수 = 0;
 			Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트 = new HashSet<>();
@@ -385,7 +381,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_유형_수 > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈_유형_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
+			chat.sendMessageByServer("지라 이슈유형 데이터 연결 완료.");
 			
 			int 연결할_이슈_우선순위_수 = 0;
 			Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트 = new HashSet<>();
@@ -393,7 +389,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_우선순위_수 > 0) {
 				addedNodeEntity.setJiraIssuePriorityEntities(지라서버에_붙일_이슈_우선순위_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈우선순위 데이터 연결 완료.");
+			chat.sendMessageByServer("지라 이슈우선순위 데이터 연결 완료.");
 			
 			int 연결할_이슈_해결책_수 = 0;
 			Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트 = new HashSet<>();
@@ -401,7 +397,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_해결책_수 > 0) {
 				addedNodeEntity.setJiraIssueResolutionEntities(지라서버에_붙일_이슈_해결책_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈해결책 데이터 연결 완료.");
+			chat.sendMessageByServer("지라 이슈해결책 데이터 연결 완료.");
 			
 			int 연결할_이슈_상태_수 = 0;
 			Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트 = new HashSet<>();
@@ -411,7 +407,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_상태_수 > 0) {
 				addedNodeEntity.setJiraIssueStatusEntities(지라서버에_붙일_이슈_상태_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
+			chat.sendMessageByServer("지라 이슈상태 데이터 연결 완료.");
 			
 			this.updateNode(addedNodeEntity);
 		}
