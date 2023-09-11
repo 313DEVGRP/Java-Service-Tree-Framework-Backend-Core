@@ -293,15 +293,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         PdServiceEntity savedPdServiceNode = this.getNode(pdService);
 
         Set<PdServiceVersionEntity> versionSet = savedPdServiceNode.getPdServiceVersionEntities();
-        Iterator<PdServiceVersionEntity> versionSetIterator = versionSet.iterator();
-        while (versionSetIterator.hasNext()) {
-            PdServiceVersionEntity versionEntity = versionSetIterator.next();
-            if (versionID.equals(versionEntity.getC_id())) {
-                versionSetIterator.remove();
-                break;
-            }
-        }
-
+        versionSet.stream().filter(entity -> entity.getC_id().equals(versionID)).findFirst().ifPresent(versionSet::remove);
         this.updateNode(pdService);
 
         PdServiceVersionEntity 삭제대상버전 = new PdServiceVersionEntity();
