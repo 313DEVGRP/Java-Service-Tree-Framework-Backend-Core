@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.egovframework.javaservice.treeframework.remote.Global.chat;
+
 @Slf4j
 @RequestMapping(value = {"/arms/globaltreemap"})
 @RestController
@@ -111,6 +113,7 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
                 log.info(globalTreeMapEntity.toString());
             }
         }
+        chat.sendMessageByEngine("지라 프로젝트가 추가되었습니다.");
 
         return ResponseEntity.ok(CommonResponse.success("test"));
 
