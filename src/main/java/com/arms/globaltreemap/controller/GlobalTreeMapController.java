@@ -113,7 +113,7 @@ public class GlobalTreeMapController extends TreeMapAbstractController {
                 log.info(globalTreeMapEntity.toString());
             }
         }
-        chat.sendMessageByEngine("지라 프로젝트가 추가되었습니다.");
+        chat.sendMessageByEngine("지라 프로젝트가 연결되었습니다.");
 
         return ResponseEntity.ok(CommonResponse.success("test"));
 

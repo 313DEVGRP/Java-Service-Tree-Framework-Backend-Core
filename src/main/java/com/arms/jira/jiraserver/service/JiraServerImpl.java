@@ -333,6 +333,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			해당_서버_이슈_해결책_엔티티_갱신(해당_서버_이슈_해결책_목록, 서버유형, 엔진_통신_아이디);
 		}
 
+		chat.sendMessageByEngine(검색된_지라_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신되었습니다.");
 
 		this.updateNode(검색된_지라_서버);
 		return 검색된_지라_서버;
