@@ -1,7 +1,39 @@
 spring:
   profiles:
     active: dev
+  datasource:
+    #Hibernate
+    url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+    driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    username: mysqluser
+    password: mysqluserpassword
+    #mybatis
+    hikari:
+      driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+      jdbc-url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+      username: mysqluser
+      password: mysqluserpassword
+
+# Database configuration props
+database:
+  driver: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+  url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+  username: mysqluser
+  password: mysqluserpassword
 
 arms:
   engine:
     url: http://127.0.0.1:33333
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type:
+          descriptor:
+            sql: debug
+    org.springframework.web: debug
+    sql: debug
+    jdbc: debug
+    jdbc.sqlonly: debug
