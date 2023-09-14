@@ -43,10 +43,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +127,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     public ModelAndView getSwitchDBChildNode(@PathVariable(value ="changeReqTableName") String changeReqTableName,
                                              ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
-        log.info("ReqAddController :: getMonitor");
+        log.info("ReqAddController :: getSwitchDBChildNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
         ParameterParser parser = new ParameterParser(request);
@@ -151,6 +148,40 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         }
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getChildNodeWithParent.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getSwitchDBChildNodeWithParent(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+                                               ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+
+        log.info("ReqAddController :: getSwitchDBChildNodeWithParent");
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        ParameterParser parser = new ParameterParser(request);
+        if (parser.getInt("c_id") <= 0) {
+            throw new RuntimeException();
+        } else {
+
+            SessionUtil.setAttribute("getChildNodeWithParent",changeReqTableName);
+
+            Long targetId = new Long(parser.get("c_id"));
+            Criterion criterion1 = Restrictions.eq("c_parentid", targetId);
+            Criterion criterion2 = Restrictions.eq("c_id", targetId);
+            Criterion criterion3 = Restrictions.or(criterion1, criterion2);
+            reqAddEntity.getCriterions().add(criterion3);
+            reqAddEntity.setOrder(Order.asc("c_left"));
+
+            List<ReqAddEntity> list = reqAdd.getChildNode(reqAddEntity);
+
+            SessionUtil.removeAttribute("getChildNodeWithParent");
+
+            ModelAndView modelAndView = new ModelAndView("jsonView");
+            modelAndView.addObject("result", list);
+            return modelAndView;
+        }
+    }
 
     @ResponseBody
     @RequestMapping(
