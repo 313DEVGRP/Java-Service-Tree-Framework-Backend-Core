@@ -102,6 +102,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
 
         modelAndView.addObject("result", pdService.updatePdServiceVersion(pdservice_link, pdServiceVersionEntity));
 
+        chat.sendMessageByEngine("제품(서비스) 버전이 수정되었습니다.");
+
         return modelAndView;
     }
 

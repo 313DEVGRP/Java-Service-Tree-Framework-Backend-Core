@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: live
+    active: stg
   datasource:
     #Hibernate
     url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
@@ -29,11 +29,11 @@ logging:
   level:
     org:
       hibernate:
-        SQL: warn
+        SQL: info
         type:
           descriptor:
-            sql: warn
-    org.springframework.web: warn
-    sql: warn
-    jdbc: warn
-    jdbc.sqlonly: warn
+            sql: info
+    org.springframework.web: info
+    sql: info
+    jdbc: info
+    jdbc.sqlonly: info

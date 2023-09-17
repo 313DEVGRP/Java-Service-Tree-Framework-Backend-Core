@@ -333,6 +333,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			해당_서버_이슈_해결책_엔티티_갱신(해당_서버_이슈_해결책_목록, 서버유형, 엔진_통신_아이디);
 		}
 
+		chat.sendMessageByEngine(검색된_지라_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신되었습니다.");
 
 		this.updateNode(검색된_지라_서버);
 		return 검색된_지라_서버;
@@ -371,7 +372,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_프로젝트_수 > 0) {
 				addedNodeEntity.setJiraProjectEntities(지라서버에_붙일_프로젝트_리스트);
 			}
-			chat.sendMessageByServer("지라 프로젝트 데이터 연결 완료.");
+			chat.sendMessageByEngine("지라 프로젝트 데이터 연결 완료.");
 			
 			int 연결할_이슈_유형_수 = 0;
 			Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트 = new HashSet<>();
@@ -381,7 +382,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_유형_수 > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈_유형_리스트);
 			}
-			chat.sendMessageByServer("지라 이슈유형 데이터 연결 완료.");
+			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
 			
 			int 연결할_이슈_우선순위_수 = 0;
 			Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트 = new HashSet<>();
@@ -389,7 +390,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_우선순위_수 > 0) {
 				addedNodeEntity.setJiraIssuePriorityEntities(지라서버에_붙일_이슈_우선순위_리스트);
 			}
-			chat.sendMessageByServer("지라 이슈우선순위 데이터 연결 완료.");
+			chat.sendMessageByEngine("지라 이슈우선순위 데이터 연결 완료.");
 			
 			int 연결할_이슈_해결책_수 = 0;
 			Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트 = new HashSet<>();
@@ -397,7 +398,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_해결책_수 > 0) {
 				addedNodeEntity.setJiraIssueResolutionEntities(지라서버에_붙일_이슈_해결책_리스트);
 			}
-			chat.sendMessageByServer("지라 이슈해결책 데이터 연결 완료.");
+			chat.sendMessageByEngine("지라 이슈해결책 데이터 연결 완료.");
 			
 			int 연결할_이슈_상태_수 = 0;
 			Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트 = new HashSet<>();
@@ -407,7 +408,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_상태_수 > 0) {
 				addedNodeEntity.setJiraIssueStatusEntities(지라서버에_붙일_이슈_상태_리스트);
 			}
-			chat.sendMessageByServer("지라 이슈상태 데이터 연결 완료.");
+			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
 			
 			this.updateNode(addedNodeEntity);
 		}

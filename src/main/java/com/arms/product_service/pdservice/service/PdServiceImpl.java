@@ -46,6 +46,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.egovframework.javaservice.treeframework.remote.Global.chat;
+
 @Slf4j
 @AllArgsConstructor
 @Service("pdService")
@@ -293,13 +295,21 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         PdServiceEntity savedPdServiceNode = this.getNode(pdService);
 
         Set<PdServiceVersionEntity> versionSet = savedPdServiceNode.getPdServiceVersionEntities();
-        versionSet.stream().filter(entity -> entity.getC_id().equals(versionID)).findFirst().ifPresent(versionSet::remove);
+        PdServiceVersionEntity 지울_버전엔티티 = versionSet.stream().filter(entity -> entity.getC_id().equals(versionID)).findFirst().orElse(null);
+        String 지울_버전_이름 = "";
+        if(지울_버전엔티티 != null) {
+            지울_버전_이름 = 지울_버전엔티티.getC_title();
+            versionSet.remove(지울_버전엔티티);
+        }
         this.updateNode(pdService);
 
         PdServiceVersionEntity 삭제대상버전 = new PdServiceVersionEntity();
         삭제대상버전.setC_id(versionID);
         pdServiceVersion.removeNode(삭제대상버전);
 
+        if(StringUtils.isNotEmpty(지울_버전_이름)) {
+            chat.sendMessageByEngine(savedPdServiceNode.getC_title()+"의 버전 " + 지울_버전_이름 + "이(가) 삭제되었습니다.");
+        }
         return pdService;
     }
 
