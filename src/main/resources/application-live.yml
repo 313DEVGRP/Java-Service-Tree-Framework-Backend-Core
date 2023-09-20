@@ -3,27 +3,27 @@ spring:
     active: live
   datasource:
     #Hibernate
-    url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+    url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
     driverClassName: com.mysql.cj.jdbc.Driver
     username: mysqluser
     password: mysqluserpassword
     #mybatis
     hikari:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      jdbc-url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+      jdbc-url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
       username: mysqluser
       password: mysqluserpassword
 
 # Database configuration props
 database:
   driver: com.mysql.cj.jdbc.Driver
-  url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+  url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
   username: mysqluser
   password: mysqluserpassword
 
 arms:
   engine:
-    url: http://192.168.25.31:33333
+    url: http://engine-fire:33333
 
 logging:
   level:
