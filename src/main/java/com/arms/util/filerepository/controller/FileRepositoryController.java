@@ -75,7 +75,7 @@ public class FileRepositoryController extends TreeAbstractController<FileReposit
 
 
     @ResponseBody
-    @RequestMapping(value="/deleteFileByNode/{fileId}", method = RequestMethod.DELETE)
+    @RequestMapping(value="/deleteFileByNode/{fileId}", method = RequestMethod.POST)
     public ModelAndView deleteFileByNode(@PathVariable(value ="fileId") Long fileId, ModelMap model,
                                          HttpServletRequest request) throws Exception {
 
