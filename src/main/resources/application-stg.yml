@@ -13,6 +13,13 @@ spring:
       jdbc-url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
       username: mysqluser
       password: mysqluserpassword
+  flyway:
+    enabled: true
+    url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+    user: mysqluser
+    password: mysqluserpassword
+    baseline-on-migrate: true           # flyway_schema_history 테이블을 자동으로 생성할지 여부
+    locations: classpath:com/arms/db
 
 # Database configuration props
 database:

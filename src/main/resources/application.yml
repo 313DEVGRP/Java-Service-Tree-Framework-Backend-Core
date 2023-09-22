@@ -25,13 +25,6 @@ spring:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  flyway:
-    enabled: true
-    url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
-    user: mysqluser
-    password: mysqluserpassword
-    baseline-on-migrate: true           # flyway_schema_history 테이블을 자동으로 생성할지 여부
-    locations: classpath:com/arms/db
   main:
     allow-bean-definition-overriding: true
 
