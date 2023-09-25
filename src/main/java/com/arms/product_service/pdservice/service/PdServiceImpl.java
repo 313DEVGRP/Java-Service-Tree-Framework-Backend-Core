@@ -15,6 +15,9 @@ import com.arms.globaltreemap.dao.GlobalTreeMapRepository;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.jira.jiraproject_pure.service.JiraProjectPure;
+import com.arms.jira.jiraserver.service.JiraServer;
+import com.arms.jira.jiraserver_pure.model.JiraServerPureEntity;
+import com.arms.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.requirement.reqadd.model.ReqAddEntity;
 import com.arms.util.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.util.filerepository.model.FileRepositoryEntity;
@@ -76,6 +79,10 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Autowired
     @Qualifier("jiraProjectPure")
     private JiraProjectPure jiraProjectPure;
+
+    @Autowired
+    @Qualifier("jiraServerPure")
+    private JiraServerPure jiraServerPure;
 
     @Override
     public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception {
@@ -349,9 +356,27 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                     List<PdServiceD3Chart> 레벨4_지라프로젝트_리스트 = new ArrayList<>();
 
                                     for (JiraProjectPureEntity 지라프로젝트 : 검색된_지라프로젝트_목록) {
+
+                                        GlobalTreeMapEntity 검색용_글로벌_트리맵2 = new GlobalTreeMapEntity();
+                                        검색용_글로벌_트리맵2.setJiraproject_link(지라프로젝트.getC_id());
+                                        Long 지라서버아이디 = globalTreeMapService.findAllBy(검색용_글로벌_트리맵2).stream()
+                                                .filter(글로벌트리맵2 -> 글로벌트리맵2.getJiraserver_link() != null)
+                                                .map(GlobalTreeMapEntity::getJiraserver_link).findFirst().get();
+
+                                        JiraServerPureEntity 지라서버검색 = new JiraServerPureEntity();
+                                        지라서버검색.setC_id(지라서버아이디);
+                                        String 지라서버명 = "[";
+                                        try {
+                                            JiraServerPureEntity 검색결과 = jiraServerPure.getNode(지라서버검색);
+                                            지라서버명 += 검색결과.getC_jira_server_name()+"] ";
+                                        } catch (Exception e) {
+                                            지라서버명 = "서버없음]";
+                                            throw new RuntimeException("검색된 지라 서버가 없습니다.");
+                                        }
+
                                         레벨4_지라프로젝트_리스트.add( PdServiceD3Chart.builder()
                                                                         .type("Jira")
-                                                                        .name(지라프로젝트.getC_jira_name())
+                                                                        .name(지라서버명+지라프로젝트.getC_jira_name())
                                                                         .build());
                                     }
 
