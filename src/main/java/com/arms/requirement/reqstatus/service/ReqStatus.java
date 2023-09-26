@@ -11,8 +11,6 @@
  */
 package com.arms.requirement.reqstatus.service;
 
-import com.arms.requirement.reqadd.model.ReqAddEntity;
-import com.arms.util.external_communicate.dto.지라_이슈_데이터_전송_객체;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
 public interface ReqStatus extends TreeService {

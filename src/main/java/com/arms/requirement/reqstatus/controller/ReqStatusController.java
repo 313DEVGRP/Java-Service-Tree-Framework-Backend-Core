@@ -11,26 +11,20 @@
  */
 package com.arms.requirement.reqstatus.controller;
 
-import com.arms.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
 import com.arms.jira.jiraissuepriority.service.JiraIssuePriority;
-import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.jira.jiraissuestatus.service.JiraIssueStatus;
-import com.arms.product_service.pdservice.model.PdServiceEntity;
-import com.arms.requirement.reqadd.model.ReqAddDTO;
-import com.arms.requirement.reqadd.model.ReqAddEntity;
+import com.arms.jira.jiraserver.service.JiraServer;
+import com.arms.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.util.external_communicate.dto.지라이슈;
 import com.arms.util.external_communicate.엔진통신기;
-import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.egovframework.javaservice.treeframework.util.StringUtils;
-import com.egovframework.javaservice.treeframework.validation.group.AddNode;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +32,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -65,6 +54,10 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     @Autowired
     @Qualifier("reqStatus")
     private ReqStatus reqStatus;
+
+    @Autowired
+    @Qualifier("jiraServer")
+    private JiraServer jiraServer;
 
     @Autowired
     @Qualifier("jiraIssuePriority")
@@ -215,4 +208,44 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getIssueAndSubLinks.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getLinkedIssueAndSubtask(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: getLinkedIssueAndSubtask");
+
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+        statusEntity.setOrder(Order.asc("c_left"));
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+
+        String 서버_아이디 = request.getParameter("serverId");
+        JiraServerPureEntity 검색용_지라서버 = new JiraServerPureEntity();
+        검색용_지라서버.setC_id(Long.parseLong(서버_아이디));
+        JiraServerPureEntity 검색결과 = jiraServer.getNode(검색용_지라서버);
+        String 엔진통신_아이디 = 검색결과.getC_jira_server_etc();
+
+        Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
+        Long 제품서비스_버전 = Long.parseLong(request.getParameter("versionId"));
+        String 이슈키 = request.getParameter("issueKey");
+
+        int 페이지 = 0; int 사이즈 = 10;
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        int 이슈_검색엔진_벌크_저장 = 엔진통신기.이슈_검색엔진_벌크_저장(Long.parseLong(엔진통신_아이디), 이슈키, 제품서비스_아이디, 제품서비스_버전);
+        log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 이슈_검색엔진_벌크_저장 저장 사이즈 = {}", StringUtils.toString(이슈_검색엔진_벌크_저장));
+
+        List<지라이슈> 링크드이슈_서브데스크 = 엔진통신기.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
+
+        log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크.toString());
+
+        modelAndView.addObject("result", 링크드이슈_서브데스크);
+
+        return modelAndView;
+    }
 }
