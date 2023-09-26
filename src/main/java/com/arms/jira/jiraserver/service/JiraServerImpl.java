@@ -42,7 +42,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.egovframework.javaservice.treeframework.remote.Global.chat;
 
@@ -350,13 +349,13 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		JiraServerEntity addedNodeEntity = this.addNode(jiraServerEntity);
 
-		JiraInfoDTO jiraInfoDTO = new JiraInfoDTO();
-		jiraInfoDTO.setConnectId(randomConnectId);
-		jiraInfoDTO.setType(addedNodeEntity.getC_jira_server_type());
-		jiraInfoDTO.setUri(addedNodeEntity.getC_jira_server_base_url());
-		jiraInfoDTO.setUserId(addedNodeEntity.getC_jira_server_connect_id());
-		jiraInfoDTO.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
-		JiraInfoEntity 등록결과 = 엔진통신기.지라서버_등록(jiraInfoDTO);
+		지라서버정보_데이터 서버정보_데이터 = new 지라서버정보_데이터();
+		서버정보_데이터.setConnectId(randomConnectId);
+		서버정보_데이터.setType(addedNodeEntity.getC_jira_server_type());
+		서버정보_데이터.setUri(addedNodeEntity.getC_jira_server_base_url());
+		서버정보_데이터.setUserId(addedNodeEntity.getC_jira_server_connect_id());
+		서버정보_데이터.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
+		지라서버정보_엔티티 등록결과 = 엔진통신기.지라서버_등록(서버정보_데이터);
 		String 연결_아이디 = 등록결과.getConnectId();
 		logger.info(등록결과.getConnectId());
 		logger.info(등록결과.getType());
@@ -416,9 +415,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return addedNodeEntity;
 	}
 
-	private int 지라서버_엔티티에_지라_이슈_상태들을_연결(Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트, List<지라_이슈_상태_데이터_전송_객체> 가져온_이슈_상태_목록, String 서버유형) throws Exception {
+	private int 지라서버_엔티티에_지라_이슈_상태들을_연결(Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트, List<지라이슈상태_데이터> 가져온_이슈_상태_목록, String 서버유형) throws Exception {
 
-		for (지라_이슈_상태_데이터_전송_객체 가져온_이슈_상태 : 가져온_이슈_상태_목록) {
+		for (지라이슈상태_데이터 가져온_이슈_상태 : 가져온_이슈_상태_목록) {
 			JiraIssueStatusEntity 검색된_이슈_상태 = 지라_이슈_상태_엔티티_검색(가져온_이슈_상태);
 			if (검색된_이슈_상태 == null) {
 				지라서버에_붙일_이슈_상태_리스트.add(미등록_이슈_상태_저장_및_저장된_엔티티(서버유형, 가져온_이슈_상태));
@@ -430,7 +429,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 지라서버에_붙일_이슈_상태_리스트.size();
 	}
 
-	private JiraIssueStatusEntity 기등록_이슈_상태_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueStatusEntity 갱신할_대상_이슈_상태, 지라_이슈_상태_데이터_전송_객체 가져온_이슈_상태) throws Exception {
+	private JiraIssueStatusEntity 기등록_이슈_상태_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueStatusEntity 갱신할_대상_이슈_상태, 지라이슈상태_데이터 가져온_이슈_상태) throws Exception {
 		JiraIssueStatusEntity 갱신결과_이슈_상태_엔티티 = 갱신할_대상_이슈_상태;
 		//공통
 		갱신할_대상_이슈_상태.setC_issue_status_name(가져온_이슈_상태.getName());
@@ -440,7 +439,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 
 
-	private JiraIssueStatusEntity 미등록_이슈_상태_저장_및_저장된_엔티티(String 서버유형, 지라_이슈_상태_데이터_전송_객체 이슈_상태) throws Exception {
+	private JiraIssueStatusEntity 미등록_이슈_상태_저장_및_저장된_엔티티(String 서버유형, 지라이슈상태_데이터 이슈_상태) throws Exception {
 
 		JiraIssueStatusEntity 저장할_이슈_상태 = new JiraIssueStatusEntity();
 		//공통
@@ -456,8 +455,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 저장된_지라이슈상태;
 	}
 
-	private int 지라서버_엔티티에_지라_이슈_해결책들을_연결(Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트, List<지라_이슈_해결책_데이터_전송_객체> 가져온_이슈_해결책_목록, String 서버유형) throws Exception {
-		for (지라_이슈_해결책_데이터_전송_객체 가져온_이슈_해결책 : 가져온_이슈_해결책_목록) {
+	private int 지라서버_엔티티에_지라_이슈_해결책들을_연결(Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트, List<지라이슈해결책_데이터> 가져온_이슈_해결책_목록, String 서버유형) throws Exception {
+		for (지라이슈해결책_데이터 가져온_이슈_해결책 : 가져온_이슈_해결책_목록) {
 			JiraIssueResolutionEntity 검색된_이슈_해결책 = 지라_이슈_해결책_엔티티_검색(가져온_이슈_해결책);
 			if (검색된_이슈_해결책 == null) {
 				지라서버에_붙일_이슈_해결책_리스트.add(미등록_이슈_해결책_저장_및_저장된_엔티티(서버유형, 가져온_이슈_해결책));
@@ -470,7 +469,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 지라서버에_붙일_이슈_해결책_리스트.size();
 	}
 
-	private JiraIssueResolutionEntity 기등록_이슈_해결책_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueResolutionEntity 갱신할_대상_이슈_해결책, 지라_이슈_해결책_데이터_전송_객체 가져온_이슈_해결책) throws Exception {
+	private JiraIssueResolutionEntity 기등록_이슈_해결책_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueResolutionEntity 갱신할_대상_이슈_해결책, 지라이슈해결책_데이터 가져온_이슈_해결책) throws Exception {
 		JiraIssueResolutionEntity 갱신결과_이슈_해결책_엔티티 = 갱신할_대상_이슈_해결책;
 		갱신할_대상_이슈_해결책.setC_issue_resolution_name(가져온_이슈_해결책.getName());
 		갱신할_대상_이슈_해결책.setC_issue_resolution_desc(가져온_이슈_해결책.getDescription());
@@ -480,7 +479,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 갱신결과_이슈_해결책_엔티티;
 	}
 
-	private JiraIssueResolutionEntity 미등록_이슈_해결책_저장_및_저장된_엔티티(String 서버유형, 지라_이슈_해결책_데이터_전송_객체 이슈_해결책) throws Exception{
+	private JiraIssueResolutionEntity 미등록_이슈_해결책_저장_및_저장된_엔티티(String 서버유형, 지라이슈해결책_데이터 이슈_해결책) throws Exception{
 		JiraIssueResolutionEntity 저장할_이슈_해결책 = new JiraIssueResolutionEntity();
 		//공통
 		저장할_이슈_해결책.setC_issue_resolution_id(이슈_해결책.getId());
@@ -497,8 +496,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 
 
-	private int 지라서버_엔티티에_지라_이슈_우선순위들을_연결(Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트, List<지라_이슈_우선순위_데이터_전송_객체> 가져온_이슈_우선순위_목록, String 서버유형) throws Exception {
-		for (지라_이슈_우선순위_데이터_전송_객체 가져온_이슈_우선순위 : 가져온_이슈_우선순위_목록) {
+	private int 지라서버_엔티티에_지라_이슈_우선순위들을_연결(Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트, List<지라이슈우선순위_데이터> 가져온_이슈_우선순위_목록, String 서버유형) throws Exception {
+		for (지라이슈우선순위_데이터 가져온_이슈_우선순위 : 가져온_이슈_우선순위_목록) {
 			JiraIssuePriorityEntity 검색된_이슈_우선순위 = 지라_이슈_우선순위_엔티티_검색(가져온_이슈_우선순위);
 			if (검색된_이슈_우선순위 == null) {
 				지라서버에_붙일_이슈_우선순위_리스트.add(미등록_이슈_우선순위_저장_및_저장된_엔티티(서버유형, 가져온_이슈_우선순위));
@@ -510,7 +509,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 지라서버에_붙일_이슈_우선순위_리스트.size();
 	}
 
-	private JiraIssuePriorityEntity 기등록_이슈_우선순위_갱신_및_갱신된_엔티티(String 서버유형, JiraIssuePriorityEntity 갱신할_대상_이슈_우선순위, 지라_이슈_우선순위_데이터_전송_객체 가져온_이슈_우선순위) throws Exception {
+	private JiraIssuePriorityEntity 기등록_이슈_우선순위_갱신_및_갱신된_엔티티(String 서버유형, JiraIssuePriorityEntity 갱신할_대상_이슈_우선순위, 지라이슈우선순위_데이터 가져온_이슈_우선순위) throws Exception {
 		JiraIssuePriorityEntity 갱신결과_이슈_우선순위_엔티티= 갱신할_대상_이슈_우선순위;
 		갱신할_대상_이슈_우선순위.setC_issue_priority_name(가져온_이슈_우선순위.getName());
 		갱신할_대상_이슈_우선순위.setC_issue_priority_desc(가져온_이슈_우선순위.getDescription());
@@ -521,7 +520,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 갱신결과_이슈_우선순위_엔티티;
 	}
 
-	private JiraIssuePriorityEntity 미등록_이슈_우선순위_저장_및_저장된_엔티티(String 서버유형, 지라_이슈_우선순위_데이터_전송_객체 이슈_우선순위) throws Exception {
+	private JiraIssuePriorityEntity 미등록_이슈_우선순위_저장_및_저장된_엔티티(String 서버유형, 지라이슈우선순위_데이터 이슈_우선순위) throws Exception {
 		JiraIssuePriorityEntity 저장할_이슈_우선순위 = new JiraIssuePriorityEntity();
 		//공통
 		저장할_이슈_우선순위.setC_issue_priority_id(이슈_우선순위.getId());
@@ -539,8 +538,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 
 
-	private int 지라서버_엔티티에_지라_이슈_유형들을_연결(Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트, List<지라_이슈_유형_데이터_전송_객체> 가져온_이슈_유형_목록, String 서버유형) throws Exception {
-		for (지라_이슈_유형_데이터_전송_객체 가져온_이슈_유형 : 가져온_이슈_유형_목록) {
+	private int 지라서버_엔티티에_지라_이슈_유형들을_연결(Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트, List<지라이슈유형_데이터> 가져온_이슈_유형_목록, String 서버유형) throws Exception {
+		for (지라이슈유형_데이터 가져온_이슈_유형 : 가져온_이슈_유형_목록) {
 			JiraIssueTypeEntity 검색된_이슈_유형 = 지라_이슈_유형_엔티티_검색(가져온_이슈_유형);
 			if (검색된_이슈_유형 == null) {
 				지라서버에_붙일_이슈_유형_리스트.add(미등록_이슈_유형_저장_및_저장된_엔티티(서버유형, 가져온_이슈_유형));
@@ -553,7 +552,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 지라서버에_붙일_이슈_유형_리스트.size();
 	}
 
-	private JiraIssueTypeEntity 기등록_이슈_유형_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueTypeEntity 갱신할_대상_이슈_유형, 지라_이슈_유형_데이터_전송_객체 가져온_이슈_유형) throws Exception {
+	private JiraIssueTypeEntity 기등록_이슈_유형_갱신_및_갱신된_엔티티(String 서버유형, JiraIssueTypeEntity 갱신할_대상_이슈_유형, 지라이슈유형_데이터 가져온_이슈_유형) throws Exception {
 		갱신할_대상_이슈_유형.setC_issue_type_desc(가져온_이슈_유형.getDescription());
 		갱신할_대상_이슈_유형.setC_issue_type_name(가져온_이슈_유형.getName());
 		갱신할_대상_이슈_유형.setC_desc(가져온_이슈_유형.getSubtask().toString());
@@ -565,7 +564,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 갱신할_대상_이슈_유형;
 	}
 
-	private JiraIssueTypeEntity 미등록_이슈_유형_저장_및_저장된_엔티티(String 서버유형, 지라_이슈_유형_데이터_전송_객체 이슈_유형) throws Exception {
+	private JiraIssueTypeEntity 미등록_이슈_유형_저장_및_저장된_엔티티(String 서버유형, 지라이슈유형_데이터 이슈_유형) throws Exception {
 		JiraIssueTypeEntity 저장할_이슈_유형 = new JiraIssueTypeEntity();
 		// 공통
 		저장할_이슈_유형.setC_issue_type_id(이슈_유형.getId());
@@ -589,9 +588,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 
 	private int 지라서버_엔티티에_지라_프로젝트들을_연결(Set<JiraProjectEntity> 지라서버에_붙일_프로젝트_목록,
-									   List<지라_프로젝트_데이터_전송_객체> 가져온_지라_프로젝트_목록,
+									   List<지라프로젝트_데이터> 가져온_지라_프로젝트_목록,
 									   String 서버유형, String 엔진_연결_아이디 ) throws Exception {
-		for (지라_프로젝트_데이터_전송_객체 가져온_지라_프로젝트 : 가져온_지라_프로젝트_목록) {
+		for (지라프로젝트_데이터 가져온_지라_프로젝트 : 가져온_지라_프로젝트_목록) {
 			JiraProjectEntity 검색된_지라_프로젝트 = 지라_프로젝트_엔티티_검색(가져온_지라_프로젝트);// 검색은 self, 서버유형 안탐
 			if( 검색된_지라_프로젝트 == null ) {
 				지라서버에_붙일_프로젝트_목록.add(미등록_프로젝트_저장_및_저장된_엔티티(가져온_지라_프로젝트,서버유형, 엔진_연결_아이디));
@@ -604,7 +603,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	}
 
 	private JiraProjectEntity 기등록_프로젝트_갱신_및_갱신된_엔티티(String 서버유형, JiraProjectEntity 갱신_대상_프로젝트_엔티티,
-													지라_프로젝트_데이터_전송_객체 가져온_지라_프로젝트) throws Exception {
+													지라프로젝트_데이터 가져온_지라_프로젝트) throws Exception {
 		JiraProjectEntity 갱신결과_엔티티 = 갱신_대상_프로젝트_엔티티;
 		갱신_대상_프로젝트_엔티티.setC_jira_name(가져온_지라_프로젝트.getName());
 		갱신_대상_프로젝트_엔티티.setC_jira_key(가져온_지라_프로젝트.getKey());
@@ -612,7 +611,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 갱신결과_엔티티;
 	}
 
-	private JiraProjectEntity 미등록_프로젝트_저장_및_저장된_엔티티(지라_프로젝트_데이터_전송_객체 지라_프로젝트, String 서버유형, String 엔진_연결_아이디) throws Exception {
+	private JiraProjectEntity 미등록_프로젝트_저장_및_저장된_엔티티(지라프로젝트_데이터 지라_프로젝트, String 서버유형, String 엔진_연결_아이디) throws Exception {
 		JiraProjectEntity 지라프로젝트_저장 = new JiraProjectEntity();
 		Set<JiraIssueTypeEntity> 프로젝트에_붙일_이슈_유형들 = new HashSet<>();
 		Set<JiraIssueStatusEntity> 프로젝트에_붙일_이슈_상태들= new HashSet<>();
@@ -625,9 +624,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		지라프로젝트_저장.setRef(TreeConstant.First_Node_CID);
 		지라프로젝트_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 		if (서버유형.equals("클라우드")) {
-			List<지라_이슈_유형_데이터_전송_객체> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 지라_프로젝트.getId());
+			List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if(클라우드_프로젝트별_이슈_유형_목록.size() != 0) {
-				for (지라_이슈_유형_데이터_전송_객체 이슈_유형 : 클라우드_프로젝트별_이슈_유형_목록) {
+				for (지라이슈유형_데이터 이슈_유형 : 클라우드_프로젝트별_이슈_유형_목록) {
 					JiraIssueTypeEntity 이슈_유형_검색_결과 = 지라_이슈_유형_엔티티_검색(이슈_유형);
 					if (이슈_유형_검색_결과 == null) {
 						프로젝트에_붙일_이슈_유형들.add(미등록_이슈_유형_저장_및_저장된_엔티티("클라우드", 이슈_유형));
@@ -636,9 +635,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 			지라프로젝트_저장.setJiraIssueTypeEntities(프로젝트에_붙일_이슈_유형들);
 
-			List<지라_이슈_상태_데이터_전송_객체> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 지라_프로젝트.getId());
+			List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if (클라우드_프로젝트별_이슈_상태_목록.size() !=0 ) {
-				for (지라_이슈_상태_데이터_전송_객체 이슈_상태 : 클라우드_프로젝트별_이슈_상태_목록) {
+				for (지라이슈상태_데이터 이슈_상태 : 클라우드_프로젝트별_이슈_상태_목록) {
 					JiraIssueStatusEntity 이슈_상태_검색_결과 = 지라_이슈_상태_엔티티_검색(이슈_상태);
 					if (이슈_상태_검색_결과 == null) {
 						프로젝트에_붙일_이슈_상태들.add(미등록_이슈_상태_저장_및_저장된_엔티티(서버유형, 이슈_상태));
@@ -654,7 +653,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_이슈_상태_갱신(Set<JiraIssueStatusEntity> 등록된_이슈_상태_목록,
 							   		  String 서버유형, String 엔진_연결_아이디) throws Exception {
-		for (지라_이슈_상태_데이터_전송_객체 가져온_이슈_상태 : 엔진통신기.지라_이슈_상태_가져오기(엔진_연결_아이디)) {
+		for (지라이슈상태_데이터 가져온_이슈_상태 : 엔진통신기.지라_이슈_상태_가져오기(엔진_연결_아이디)) {
 			if (기등록_이슈_상태_갱신결과(등록된_이슈_상태_목록, 가져온_이슈_상태) == 0) {
 				등록된_이슈_상태_목록.add(미등록_이슈_상태_저장_및_저장된_엔티티(서버유형, 가져온_이슈_상태));
 			}
@@ -664,7 +663,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_프로젝트별_이슈_상태_갱신(Set<JiraIssueStatusEntity> 등록된_프로젝트의_이슈_상태_목록,
 									 		   String 서버유형, String 엔진_연결_아이디, String 엔진_프로젝트_아이디) throws Exception {
-		for (지라_이슈_상태_데이터_전송_객체 가져온_이슈_상태 : 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 엔진_프로젝트_아이디)) {
+		for (지라이슈상태_데이터 가져온_이슈_상태 : 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 엔진_프로젝트_아이디)) {
 			if (기등록_이슈_상태_갱신결과(등록된_프로젝트의_이슈_상태_목록, 가져온_이슈_상태) == 0 ) {
 				등록된_프로젝트의_이슈_상태_목록.add(미등록_이슈_상태_저장_및_저장된_엔티티(서버유형, 가져온_이슈_상태));
 			}
@@ -672,7 +671,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 1;
 	}
 
-	private int 기등록_이슈_상태_갱신결과(Set<JiraIssueStatusEntity> 기존_이슈_상태_목록, 지라_이슈_상태_데이터_전송_객체 가져온_이슈_상태) throws Exception {
+	private int 기등록_이슈_상태_갱신결과(Set<JiraIssueStatusEntity> 기존_이슈_상태_목록, 지라이슈상태_데이터 가져온_이슈_상태) throws Exception {
 		int 갱신_횟수 = 0;
 		for(JiraIssueStatusEntity issueStatusEntity : 기존_이슈_상태_목록) {
 			if (issueStatusEntity.getC_issue_status_url().equals(가져온_이슈_상태.getSelf())) {
@@ -686,7 +685,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_이슈_유형_갱신(Set<JiraIssueTypeEntity> 등록된_이슈_유형_목록,
 							      	  String 서버유형, String 엔진_연결_아이디) throws Exception {
-		for (지라_이슈_유형_데이터_전송_객체 가져온_이슈_유형 : 엔진통신기.지라_이슈_유형_가져오기(엔진_연결_아이디)) {
+		for (지라이슈유형_데이터 가져온_이슈_유형 : 엔진통신기.지라_이슈_유형_가져오기(엔진_연결_아이디)) {
 			if ( 기등록_이슈_유형_갱신결과(등록된_이슈_유형_목록, 가져온_이슈_유형, 서버유형) == 0) {
 				등록된_이슈_유형_목록.add(미등록_이슈_유형_저장_및_저장된_엔티티(서버유형, 가져온_이슈_유형));
 			}
@@ -696,7 +695,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_프로젝트별_이슈_유형_갱신(Set<JiraIssueTypeEntity> 등록된_프로젝트의_이슈_유형_목록,
 									           String 서버유형, String 엔진_연결_아이디, String 엔진_프로젝트_아이디) throws Exception{
-		for (지라_이슈_유형_데이터_전송_객체 가져온_이슈_유형 : 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 엔진_프로젝트_아이디)) {
+		for (지라이슈유형_데이터 가져온_이슈_유형 : 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 엔진_프로젝트_아이디)) {
 			if ( 기등록_이슈_유형_갱신결과(등록된_프로젝트의_이슈_유형_목록, 가져온_이슈_유형, 서버유형) == 0 ) {
 				등록된_프로젝트의_이슈_유형_목록.add(미등록_이슈_유형_저장_및_저장된_엔티티(서버유형, 가져온_이슈_유형));
 			}
@@ -704,7 +703,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 1;
 	}
 
-	private int 기등록_이슈_유형_갱신결과(Set<JiraIssueTypeEntity> 기존_이슈_유형_목록, 지라_이슈_유형_데이터_전송_객체 가져온_이슈_유형, String 서버유형) throws Exception {
+	private int 기등록_이슈_유형_갱신결과(Set<JiraIssueTypeEntity> 기존_이슈_유형_목록, 지라이슈유형_데이터 가져온_이슈_유형, String 서버유형) throws Exception {
 		int 갱신_횟수 = 0;
 		for (JiraIssueTypeEntity issueTypeEntity : 기존_이슈_유형_목록) {
 			if (issueTypeEntity.getC_issue_type_url().equals(가져온_이슈_유형.getSelf())) {
@@ -723,7 +722,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_이슈_우선순위_엔티티_갱신(Set<JiraIssuePriorityEntity> 등록된_이슈_우선순위_목록,
 									    	   String 서버유형, String 엔진_연결_아이디 ) throws Exception {
-		for (지라_이슈_우선순위_데이터_전송_객체 가져온_이슈_우선순위 : 엔진통신기.지라_이슈_우선순위_가져오기(엔진_연결_아이디)) {
+		for (지라이슈우선순위_데이터 가져온_이슈_우선순위 : 엔진통신기.지라_이슈_우선순위_가져오기(엔진_연결_아이디)) {
 			if ( 기등록_이슈_우선순위_갱신결과(등록된_이슈_우선순위_목록, 가져온_이슈_우선순위, 서버유형) == 0 ) {
 				등록된_이슈_우선순위_목록.add(미등록_이슈_우선순위_저장_및_저장된_엔티티(서버유형, 가져온_이슈_우선순위));
 			}
@@ -731,7 +730,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		return 1;
 	}
 
-	private int 기등록_이슈_우선순위_갱신결과(Set<JiraIssuePriorityEntity> 기존_이슈_우선순위_모음, 지라_이슈_우선순위_데이터_전송_객체 가져온_이슈_우선순위, String 서버유형) throws Exception {
+	private int 기등록_이슈_우선순위_갱신결과(Set<JiraIssuePriorityEntity> 기존_이슈_우선순위_모음, 지라이슈우선순위_데이터 가져온_이슈_우선순위, String 서버유형) throws Exception {
 		int 갱신_횟수 = 0;
 		for (JiraIssuePriorityEntity priorityEntity : 기존_이슈_우선순위_모음) {
 			if (priorityEntity.getC_issue_priority_url().equals(가져온_이슈_우선순위.getSelf())) {
@@ -749,16 +748,16 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버_이슈_해결책_엔티티_갱신(Set<JiraIssueResolutionEntity> 등록된_이슈_해결책_목록,
 											 String 서버유형, String 엔진_연결_아이디 ) throws Exception {
-		List<지라_이슈_해결책_데이터_전송_객체> 가져온_이슈_해결책_목록 = 엔진통신기.지라_이슈_해결책_가져오기(엔진_연결_아이디);
+		List<지라이슈해결책_데이터> 가져온_이슈_해결책_목록 = 엔진통신기.지라_이슈_해결책_가져오기(엔진_연결_아이디);
 
-		for (지라_이슈_해결책_데이터_전송_객체 가져온_이슈_해결책 : 가져온_이슈_해결책_목록) {
+		for (지라이슈해결책_데이터 가져온_이슈_해결책 : 가져온_이슈_해결책_목록) {
 			if ( 기등록_이슈_해결책_갱신결과(등록된_이슈_해결책_목록, 가져온_이슈_해결책) == 0) {
 				등록된_이슈_해결책_목록.add(미등록_이슈_해결책_저장_및_저장된_엔티티(서버유형, 가져온_이슈_해결책));
 			}
 		}
 		return 1;
 	}
-	private int 기등록_이슈_해결책_갱신결과(Set<JiraIssueResolutionEntity> 기존_이슈_해결책_모음, 지라_이슈_해결책_데이터_전송_객체 가져온_이슈_해결책) throws Exception {
+	private int 기등록_이슈_해결책_갱신결과(Set<JiraIssueResolutionEntity> 기존_이슈_해결책_모음, 지라이슈해결책_데이터 가져온_이슈_해결책) throws Exception {
 		int 갱신_횟수 = 0;
 		for (JiraIssueResolutionEntity resolutionEntity : 기존_이슈_해결책_모음) {
 			if (resolutionEntity.getC_issue_resolution_url().equals(가져온_이슈_해결책.getSelf())) {
@@ -774,16 +773,16 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private int 해당_서버의_프로젝트_엔티티_갱신(Set<JiraProjectEntity> 등록된_프로젝트_목록,
 									   String 서버유형, String 엔진_연결_아이디 ) throws Exception {
-		List<지라_프로젝트_데이터_전송_객체> 가져온_프로젝트_목록 = 엔진통신기.지라_프로젝트_목록_가져오기(엔진_연결_아이디);
+		List<지라프로젝트_데이터> 가져온_프로젝트_목록 = 엔진통신기.지라_프로젝트_목록_가져오기(엔진_연결_아이디);
 		
-		for (지라_프로젝트_데이터_전송_객체 가져온_지라_프로젝트 : 가져온_프로젝트_목록) {
+		for (지라프로젝트_데이터 가져온_지라_프로젝트 : 가져온_프로젝트_목록) {
 			if ( 기등록_프로젝트_갱신결과(등록된_프로젝트_목록, 가져온_지라_프로젝트) == 0) { //중복 아님
 				등록된_프로젝트_목록.add(미등록_프로젝트_저장_및_저장된_엔티티(가져온_지라_프로젝트, 서버유형, 엔진_연결_아이디));
 			}
 		}
 		return 1;
 	}
-	private int 기등록_프로젝트_갱신결과 (Set<JiraProjectEntity> 기존_프로젝트_모음, 지라_프로젝트_데이터_전송_객체 가져온_지라_프로젝트) throws Exception{
+	private int 기등록_프로젝트_갱신결과 (Set<JiraProjectEntity> 기존_프로젝트_모음, 지라프로젝트_데이터 가져온_지라_프로젝트) throws Exception{
 		int 갱신_횟수 = 0;
 		for (JiraProjectEntity projectEntity : 기존_프로젝트_모음) {
 			if (projectEntity.getC_jira_url().equals(가져온_지라_프로젝트.getSelf())) {
@@ -794,31 +793,31 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		}
 		return 갱신_횟수;
 	}
-	private JiraProjectEntity 지라_프로젝트_엔티티_검색(지라_프로젝트_데이터_전송_객체 검색할_지라_프로젝트) throws Exception{
+	private JiraProjectEntity 지라_프로젝트_엔티티_검색(지라프로젝트_데이터 검색할_지라_프로젝트) throws Exception{
 		JiraProjectEntity 지라_프로젝트_검색 = new JiraProjectEntity();
 		지라_프로젝트_검색.setWhere("c_jira_url", 검색할_지라_프로젝트.getSelf());
 		return jiraProject.getNode(지라_프로젝트_검색);
 	}
 
-	private JiraIssueTypeEntity 지라_이슈_유형_엔티티_검색 (지라_이슈_유형_데이터_전송_객체 검색할_지라_이슈_유형) throws Exception {
+	private JiraIssueTypeEntity 지라_이슈_유형_엔티티_검색 (지라이슈유형_데이터 검색할_지라_이슈_유형) throws Exception {
 		JiraIssueTypeEntity 지라_이슈타입_검색 = new JiraIssueTypeEntity();
 		지라_이슈타입_검색.setWhere("c_issue_type_url", 검색할_지라_이슈_유형.getSelf());
 		return jiraIssueType.getNode(지라_이슈타입_검색);
 	}
 
-	private JiraIssuePriorityEntity 지라_이슈_우선순위_엔티티_검색(지라_이슈_우선순위_데이터_전송_객체 검색할_지라_이슈_우선순위) throws Exception {
+	private JiraIssuePriorityEntity 지라_이슈_우선순위_엔티티_검색(지라이슈우선순위_데이터 검색할_지라_이슈_우선순위) throws Exception {
 		JiraIssuePriorityEntity 지라_이슈_우선순위_검색 = new JiraIssuePriorityEntity();
 		지라_이슈_우선순위_검색.setWhere("c_issue_priority_url", 검색할_지라_이슈_우선순위.getSelf());
 		return jiraIssuePriority.getNode(지라_이슈_우선순위_검색);
 	}
 
-	private JiraIssueResolutionEntity 지라_이슈_해결책_엔티티_검색(지라_이슈_해결책_데이터_전송_객체 검색할_지라_이슈_해결책) throws Exception{
+	private JiraIssueResolutionEntity 지라_이슈_해결책_엔티티_검색(지라이슈해결책_데이터 검색할_지라_이슈_해결책) throws Exception{
 		JiraIssueResolutionEntity 지라_이슈_해결책_검색 = new JiraIssueResolutionEntity();
 		지라_이슈_해결책_검색.setWhere("c_issue_resolution_url", 검색할_지라_이슈_해결책.getSelf());
 		return jiraIssueResolution.getNode(지라_이슈_해결책_검색);
 	}
 
-	private JiraIssueStatusEntity 지라_이슈_상태_엔티티_검색(지라_이슈_상태_데이터_전송_객체 검색할_이슈_상태) throws Exception {
+	private JiraIssueStatusEntity 지라_이슈_상태_엔티티_검색(지라이슈상태_데이터 검색할_이슈_상태) throws Exception {
 		JiraIssueStatusEntity 지라_이슈_상태_검색 = new JiraIssueStatusEntity();
 		지라_이슈_상태_검색.setWhere("c_issue_status_url", 검색할_이슈_상태.getSelf());
 		return jiraIssueStatus.getNode(지라_이슈_상태_검색);

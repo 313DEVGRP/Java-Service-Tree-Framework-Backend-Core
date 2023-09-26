@@ -36,7 +36,6 @@ import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,10 +183,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 							}
 						}
 					}
-					/*요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
-							.filter(entity -> Objects.equals(entity.getC_issue_type_name(), "arms-requirement"))
-							.findFirst()
-							.orElse(null);*/
+
 
 					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
 					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
@@ -217,11 +213,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 							}
 						}
 					}
-					/*요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-							.filter(entity -> StringUtils.equals(entity.getC_issue_type_name(), "arms-requirement"))
-							//.filter(entity -> Objects.equals(entity.getC_desc(), "arms-requirement"))
-							.findFirst()
-							.orElse(null);*/
 
 					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
 					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
@@ -253,27 +244,27 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
 
-				지라_이슈_필드_데이터_전송_객체.프로젝트 프로젝트 = 지라_이슈_필드_데이터_전송_객체.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
+				지라이슈필드_데이터.프로젝트 프로젝트 = 지라이슈필드_데이터.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
 						.key(검색된_지라프로젝트.getC_jira_key())
 						.name(검색된_지라프로젝트.getC_jira_name())
 						.self(검색된_지라프로젝트.getC_jira_url())
 						.build();
 
-				지라_이슈_우선순위_데이터_전송_객체 우선순위 = new 지라_이슈_우선순위_데이터_전송_객체();
+				지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
 				우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
 				우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
 				우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
 
-				지라_이슈_유형_데이터_전송_객체 유형 = new 지라_이슈_유형_데이터_전송_객체();
+				지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
 				유형.setId(요구사항_이슈_타입.getC_issue_type_id());
 				유형.setName(요구사항_이슈_타입.getC_issue_type_name());
 				유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
 
-				지라_이슈_필드_데이터_전송_객체.보고자 암스서버보고자 = new 지라_이슈_필드_데이터_전송_객체.보고자();
+				지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
 				암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
 				암스서버보고자.setEmailAddress("313cokr@gmail.com");
 
-				지라_이슈_필드_데이터_전송_객체.담당자 암스서버담당자 = new 지라_이슈_필드_데이터_전송_객체.담당자();
+				지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
 				암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
 				암스서버담당자.setEmailAddress("313cokr@gmail.com");
 
@@ -290,7 +281,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"※ 『 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나 』\n" +
 						"※ 『 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다. 』";
 
-				지라_이슈_필드_데이터_전송_객체 요구사항이슈_필드 = 지라_이슈_필드_데이터_전송_객체
+				지라이슈필드_데이터 요구사항이슈_필드 = 지라이슈필드_데이터
 																.builder()
 																.project(프로젝트)
 																.issuetype(유형)
@@ -299,14 +290,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 																.description(이슈내용)
 																.build();
 
-				지라_이슈_생성_데이터_전송_객체 요구사항_이슈 = 지라_이슈_생성_데이터_전송_객체
+				지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 																.builder()
 																.fields(요구사항이슈_필드)
 																.build();
 
 				logger.info("ReqAddImpl = engine parameter :: " + objectMapper.writeValueAsString(요구사항_이슈));
 
-				지라_이슈_데이터_전송_객체 생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+				지라이슈_데이터 생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 
 				ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 				reqStatusDTO.setRef(TreeConstant.First_Node_CID);

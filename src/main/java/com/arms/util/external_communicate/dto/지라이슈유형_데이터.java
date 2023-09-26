@@ -10,14 +10,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라_이슈_상태_데이터_전송_객체 {
+public class 지라이슈유형_데이터 {
 
-    private  String self;
-
+    // 온프레미스, 클라우드 공통
+    private String self;
     private String id;
-
-    private String name;
-
     private String description;
+    private String name;
+    private Boolean subtask;
+
+    // 클라우드만 사용
+    private String untranslatedName;
+    private Integer hierarchyLevel;
 
 }

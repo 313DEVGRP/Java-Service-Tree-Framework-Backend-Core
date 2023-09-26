@@ -1,5 +1,6 @@
 package com.arms.util.external_communicate.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 @Getter
@@ -8,10 +9,13 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class 지라_프로젝트_데이터_전송_객체 {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class 지라이슈해결책_데이터 {
 
     private String self;
     private String id;
-    private String key;
     private String name;
+    private String description;
+    private boolean isDefault;
+
 }

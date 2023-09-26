@@ -10,12 +10,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 지라_이슈_해결책_데이터_전송_객체 {
+public class 지라이슈상태_데이터 {
 
-    private String self;
+    private  String self;
+
     private String id;
+
     private String name;
+
     private String description;
-    private boolean isDefault;
 
 }
