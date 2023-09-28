@@ -25,6 +25,8 @@ public interface PdService extends TreeService {
 
     public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception;
 
+    public PdServiceEntity getNodeWithVersionOrderByCidDesc(PdServiceEntity pdServiceEntity) throws Exception;
+
     public PdServiceEntity addNodeToEndPosition(PdServiceEntity pdServiceEntity) throws Exception;
 
     public PdServiceEntity addPdServiceAndVersion(PdServiceEntity pdServiceEntity) throws Exception;

@@ -101,6 +101,15 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
 
     @Override
+    public PdServiceEntity getNodeWithVersionOrderByCidDesc(PdServiceEntity pdServiceEntity) throws Exception {
+        PdServiceEntity pdServiceNode = this.getNode(pdServiceEntity);
+        Set<PdServiceVersionEntity> sortedSet = new TreeSet<>(Comparator.comparing(PdServiceVersionEntity::getC_id).reversed());
+        sortedSet.addAll(pdServiceNode.getPdServiceVersionEntities());
+        pdServiceNode.setPdServiceVersionEntities(sortedSet);
+        return pdServiceNode;
+    }
+
+    @Override
     public PdServiceEntity addNodeToEndPosition(PdServiceEntity pdServiceEntity) throws Exception {
         //루트 노드를 기준으로 리스트를 검색
         PdServiceEntity paramPdServiceEntity = new PdServiceEntity();

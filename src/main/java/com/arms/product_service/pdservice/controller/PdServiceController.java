@@ -37,8 +37,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -55,6 +54,28 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
     public void initialize() {
         setTreeService(pdService);
         setTreeEntity(PdServiceEntity.class);
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getNodeWithVersionOrderByCidDesc.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getNodeWithVersionOrderByCidDesc(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
+
+        log.info("PdServiceController :: getNodeWithVersionOrderByCidDesc");
+        ParameterParser parser = new ParameterParser(request);
+
+        if (parser.getInt("c_id") <= 0) {
+            throw new RuntimeException("c_id is minus value");
+        }
+
+        PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
+        PdServiceEntity pdServiceNode = pdService.getNodeWithVersionOrderByCidDesc(pdServiceEntity);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", pdServiceNode);
+        return modelAndView;
     }
 
     @ResponseBody
@@ -161,15 +182,17 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
             value = {"/getVersionList.do"},
             method = {RequestMethod.GET}
     )
-    public ResponseEntity<?> getVersionList(PdServiceDTO pdServiceDTO, ModelMap model, HttpServletRequest request) throws Exception {
-
+    public ResponseEntity<?> getVersionList(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
         log.info("PdServiceController :: getVersionList");
+        ParameterParser parser = new ParameterParser(request);
+
+        if (parser.getInt("c_id") <= 0) {
+            throw new RuntimeException("c_id is minus value");
+        }
+
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
-
-        PdServiceEntity pdServiceNode = pdService.getNode(pdServiceEntity);
-        Set<PdServiceVersionEntity> pdServiceVersionList = pdServiceNode.getPdServiceVersionEntities();
-
-        return ResponseEntity.ok(CommonResponse.success(pdServiceVersionList));
+        PdServiceEntity pdServiceNode = pdService.getNodeWithVersionOrderByCidDesc(pdServiceEntity);
+        return ResponseEntity.ok(CommonResponse.success(pdServiceNode.getPdServiceVersionEntities()));
     }
 
     @RequestMapping(value="/removeVersion.do", method= RequestMethod.DELETE)
