@@ -401,9 +401,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		PdServiceVersionEntity pdServiceVersionEntity = pdServiceEntity.getPdServiceVersionEntities()
 			.stream()
-			.filter(a -> followReqLinkDTO.getPdService().equals(a.getC_id()))
+			.filter(a -> followReqLinkDTO.getPdServiceVersion().equals(a.getC_id()))
 			.findFirst().orElseGet(() -> new PdServiceVersionEntity());
-
 
 		if(followReqLinkDTO.getJiraProject()!=null){
 			JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
