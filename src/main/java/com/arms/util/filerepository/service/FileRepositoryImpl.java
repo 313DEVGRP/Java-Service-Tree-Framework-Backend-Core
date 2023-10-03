@@ -50,7 +50,12 @@ public class FileRepositoryImpl extends TreeServiceImpl implements FileRepositor
                 logger.info("row.getFilerepository_link() = " + row.getFilerepository_link());
                 FileRepositoryEntity entity = new FileRepositoryEntity();
                 entity.setC_id(row.getFilerepository_link());
-                returnFileSet.add(this.getNode(entity));
+                FileRepositoryEntity returnEntity = this.getNode(entity);
+
+                if (returnEntity != null) {
+                    returnFileSet.add(returnEntity);
+                }
+
             }
         }
         returnMap.put("files", returnFileSet);
