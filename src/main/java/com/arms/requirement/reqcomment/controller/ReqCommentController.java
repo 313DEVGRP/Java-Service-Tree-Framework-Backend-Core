@@ -12,19 +12,26 @@
 package com.arms.requirement.reqcomment.controller;
 
 import com.arms.requirement.reqcomment.model.ReqCommentDTO;
+import com.arms.requirement.reqcomment.model.ReqCommentEntity;
+import com.arms.requirement.reqcomment.service.ReqComment;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
-
-import com.arms.requirement.reqcomment.model.ReqCommentEntity;
-import com.arms.requirement.reqcomment.service.ReqComment;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -43,4 +50,23 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getReqCommentList.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getReqCommentList(ReqCommentDTO reqCommentDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqCommentController :: getReqCommentList");
+        ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
+         List<ReqCommentEntity> reqCommentEntities = reqComment.getNodesWithoutRoot(reqCommentEntity);
+
+        List<ReqCommentEntity> result = reqCommentEntities.stream().filter(data ->
+                            data.getC_pdservice_link().equals(reqCommentDTO.getC_pdservice_link()) &&
+                            data.getC_req_link().equals(reqCommentDTO.getC_req_link())
+        ).collect(Collectors.toList());
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+
+    }
 }
