@@ -22,10 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Service("fileRepository")
 public class FileRepositoryImpl extends TreeServiceImpl implements FileRepository{
@@ -42,7 +43,7 @@ public class FileRepositoryImpl extends TreeServiceImpl implements FileRepositor
         globalTreeMap.setPdservice_link(parser.getLong("fileIdLink"));
         List<GlobalTreeMapEntity> treeMapListByFileIdLink = globalTreeMapService.findAllBy(globalTreeMap);
 
-        Set<FileRepositoryEntity> returnFileSet = new HashSet<>();
+        Set<FileRepositoryEntity> returnFileSet = new TreeSet<>(Comparator.comparing(FileRepositoryEntity::getC_id).reversed());
         HashMap<String, Set<FileRepositoryEntity>> returnMap = new HashMap();
 
         for( GlobalTreeMapEntity row : treeMapListByFileIdLink ){
