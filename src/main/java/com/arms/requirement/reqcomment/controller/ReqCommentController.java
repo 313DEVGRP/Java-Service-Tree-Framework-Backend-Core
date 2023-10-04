@@ -17,6 +17,8 @@ import com.arms.requirement.reqcomment.service.ReqComment;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,7 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
 
         log.info("ReqCommentController :: getReqCommentList");
         ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
-         List<ReqCommentEntity> reqCommentEntities = reqComment.getNodesWithoutRoot(reqCommentEntity);
+        List<ReqCommentEntity> reqCommentEntities = reqComment.getNodesWithoutRoot(reqCommentEntity);
 
         List<ReqCommentEntity> result = reqCommentEntities.stream().filter(data ->
                             data.getC_pdservice_link().equals(reqCommentDTO.getC_pdservice_link()) &&
@@ -67,6 +69,36 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
         ).collect(Collectors.toList());
 
         return ResponseEntity.ok(CommonResponse.success(result));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getReqCommentChildNodeWithoutPaging.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getReqCommentChildNodeWithoutPaging(ReqCommentDTO reqCommentDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqCommentController :: getReqCommentChildWithoutPaging");
+        ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
+        // List<ReqCommentEntity> reqCommentEntities = reqComment.getChildNodeWithoutPaging(reqCommentEntity);
+
+        /* where 조건 처리 */
+        //        reqCommentEntity.setWhere("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
+
+        /* 조건 두개 만든 후 and */
+        Criterion criterion1 = Restrictions.eq("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
+        Criterion criterion2 = Restrictions.eq("c_req_link", reqCommentDTO.getC_req_link());
+        Criterion criterion = Restrictions.and(criterion1, criterion2);
+        reqCommentEntity.getCriterions().add(criterion);
+        List<ReqCommentEntity> list = reqComment.getChildNode(reqCommentEntity);
+
+/*        List<ReqCommentEntity> result = reqCommentEntities.stream().filter(data ->
+                data.getC_pdservice_link().equals(reqCommentDTO.getC_pdservice_link()) &&
+                        data.getC_req_link().equals(reqCommentDTO.getC_req_link())
+        ).collect(Collectors.toList());*/
+
+        return ResponseEntity.ok(CommonResponse.success(list));
 
     }
 }
