@@ -28,6 +28,14 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /backend-core-api
+    swagger-ui:
+      base-url: /backend-core-api
+
 server:
   port: 31313
   servlet:

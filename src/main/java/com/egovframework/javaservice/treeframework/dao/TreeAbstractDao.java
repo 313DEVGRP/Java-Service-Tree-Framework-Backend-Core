@@ -13,7 +13,6 @@ package com.egovframework.javaservice.treeframework.dao;
 
 import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.*;
 import org.hibernate.criterion.*;
 import org.springframework.orm.hibernate5.HibernateCallback;
@@ -21,9 +20,7 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import javax.annotation.Resource;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
 
