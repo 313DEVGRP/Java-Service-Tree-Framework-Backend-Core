@@ -16,8 +16,10 @@ import com.arms.requirement.reqcomment.model.ReqCommentEntity;
 import com.arms.requirement.reqcomment.service.ReqComment;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.egovframework.javaservice.treeframework.dao.TreeDao;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +48,9 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
     @Autowired
     @Qualifier("reqComment")
     private ReqComment reqComment;
+
+    @Resource(name = "treeDao")
+    private TreeDao treeDao;
 
     @PostConstruct
     public void initialize() {
@@ -74,31 +82,97 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
 
     @ResponseBody
     @RequestMapping(
-            value = {"/getReqCommentChildNodeWithoutPaging.do"},
+            value = {"/getUserReqCommentList.do"},
             method = {RequestMethod.GET}
     )
-    public ResponseEntity<?> getReqCommentChildNodeWithoutPaging(ReqCommentDTO reqCommentDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    public ResponseEntity<?> getUserReqCommentList(ReqCommentDTO reqCommentDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
-        log.info("ReqCommentController :: getReqCommentChildWithoutPaging");
+        log.info("ReqCommentController :: getReqCommentList");
         ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
-        // List<ReqCommentEntity> reqCommentEntities = reqComment.getChildNodeWithoutPaging(reqCommentEntity);
+        List<ReqCommentEntity> reqCommentEntities = reqComment.getNodesWithoutRoot(reqCommentEntity);
 
-        /* where 조건 처리 */
-        //        reqCommentEntity.setWhere("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
+        List<ReqCommentEntity> result = reqCommentEntities.stream().filter(data ->
+                data.getC_req_comment_sender().equals(reqCommentDTO.getC_req_comment_sender())
+        ).collect(Collectors.toList());
 
-        /* 조건 두개 만든 후 and */
+        return ResponseEntity.ok(CommonResponse.success(result));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getReqCommentChildNode.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getReqCommentChildNode(ReqCommentDTO reqCommentDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqCommentController :: getReqCommentChildNode");
+        ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
+
         Criterion criterion1 = Restrictions.eq("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
         Criterion criterion2 = Restrictions.eq("c_req_link", reqCommentDTO.getC_req_link());
         Criterion criterion = Restrictions.and(criterion1, criterion2);
         reqCommentEntity.getCriterions().add(criterion);
+        reqCommentEntity.getOrder().add(Order.desc("c_req_comment_date")); // 최신 시간으로 정렬
+       
         List<ReqCommentEntity> list = reqComment.getChildNode(reqCommentEntity);
-
-/*        List<ReqCommentEntity> result = reqCommentEntities.stream().filter(data ->
-                data.getC_pdservice_link().equals(reqCommentDTO.getC_pdservice_link()) &&
-                        data.getC_req_link().equals(reqCommentDTO.getC_req_link())
-        ).collect(Collectors.toList());*/
 
         return ResponseEntity.ok(CommonResponse.success(list));
 
     }
+
+    @Transactional
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getReqCommentPagingByPdService.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getReqCommentPagingByPdService(ReqCommentDTO reqCommentDTO
+            , ModelMap model
+            , HttpServletRequest request
+            , @RequestParam int PageIndex
+            , @RequestParam int PageUnit) throws Exception {
+
+        log.info("ReqCommentController :: getReqCommentPagingByPdService");
+        ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
+
+        Criterion search_pdservice = Restrictions.eq("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
+        Criterion search_req = Restrictions.eq("c_req_link", reqCommentDTO.getC_req_link());
+        Criterion search_criteria = Restrictions.and(search_pdservice, search_req);
+        reqCommentEntity.getCriterions().add(search_criteria);
+        reqCommentEntity.getOrder().add(Order.desc("c_req_comment_date")); // 최신 시간으로 정렬
+
+        reqCommentEntity.setPageIndex(PageIndex);
+        reqCommentEntity.setPageUnit(PageUnit);
+
+        List<ReqCommentEntity> list = reqComment.getPaginatedChildNode(reqCommentEntity);
+
+        return ResponseEntity.ok(CommonResponse.success(list));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getTotalCountReqComment.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> getTotalCountReqComment(ReqCommentDTO reqCommentDTO
+            , ModelMap model
+            , HttpServletRequest request) throws Exception {
+
+        log.info("ReqCommentController :: getTotalCountReqComment");
+        ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
+
+        Criterion search_pdservice = Restrictions.eq("c_pdservice_link", reqCommentDTO.getC_pdservice_link());
+        Criterion search_req = Restrictions.eq("c_req_link", reqCommentDTO.getC_req_link());
+        Criterion search_criteria = Restrictions.and(search_pdservice, search_req);
+        reqCommentEntity.getCriterions().add(search_criteria);
+
+        treeDao.setClazz(reqCommentEntity.getClass());
+        int totalCount = treeDao.getCount(reqCommentEntity);
+
+        return ResponseEntity.ok(CommonResponse.success(totalCount));
+
+    }
+
 }
