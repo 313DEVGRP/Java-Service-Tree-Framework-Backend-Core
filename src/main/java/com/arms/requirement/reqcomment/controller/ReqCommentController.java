@@ -39,8 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -193,10 +192,7 @@ public class ReqCommentController extends TreeAbstractController<ReqComment, Req
         ReqCommentEntity reqCommentEntity = modelMapper.map(reqCommentDTO, ReqCommentEntity.class);
         reqCommentEntity.setC_title(Util_TitleChecker.StringReplace(reqCommentEntity.getC_title()));
 
-        LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedDateTime = now.format(formatter);
-        reqCommentEntity.setC_req_comment_date(formattedDateTime);
+        reqCommentEntity.setC_req_comment_date(new Date());
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", reqComment.addNode(reqCommentEntity));

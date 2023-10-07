@@ -23,6 +23,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -60,9 +61,9 @@ public class ReqCommentEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_req_comment_sender;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_comment_date")
-    @Type(type="text")
-    private String c_req_comment_date;
+    private Date c_req_comment_date;
 
     @Column(name = "c_req_comment_contents")
     @Type(type="text")
