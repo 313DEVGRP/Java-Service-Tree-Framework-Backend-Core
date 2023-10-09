@@ -109,7 +109,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         SessionUtil.setAttribute("getMonitor",changeReqTableName);
 
-        reqAddEntity.setOrder(Order.asc("c_left"));
+        reqAddEntity.setOrder(Order.asc("c_position"));
         List<ReqAddEntity> list = this.reqAdd.getChildNode(reqAddEntity);
 
         SessionUtil.removeAttribute("getMonitor");
@@ -138,6 +138,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             SessionUtil.setAttribute("getChildNode",changeReqTableName);
 
             reqAddEntity.setWhere("c_parentid", new Long(parser.get("c_id")));
+            reqAddEntity.setOrder(Order.asc("c_position"));
             List<ReqAddEntity> list = reqAdd.getChildNode(reqAddEntity);
 
             SessionUtil.removeAttribute("getChildNode");
@@ -171,7 +172,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             Criterion criterion2 = Restrictions.eq("c_id", targetId);
             Criterion criterion3 = Restrictions.or(criterion1, criterion2);
             reqAddEntity.getCriterions().add(criterion3);
-            reqAddEntity.setOrder(Order.asc("c_left"));
+            reqAddEntity.setOrder(Order.asc("c_position"));
 
             List<ReqAddEntity> list = reqAdd.getChildNode(reqAddEntity);
 
@@ -243,23 +244,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
             List<ReqAddEntity> savedList = reqAdd.getChildNode(reqAddEntity);
 
-            for ( ReqAddEntity entity : savedList ){
-
-//            String[] checkStr = StringUtils.split(entity.getC_req_pdservice_versionset_link(), ",");
-//
-//            if(checkStr == null || checkStr.length < 1){
-//
-//            }
-
-            }
-
-//        ReqAddEntity returnVO = reqAdd.getNode(reqAddEntity);
-//
-//        ReqPriorityEntity reqPriorityEntity = new ReqPriorityEntity();
-//        reqPriorityEntity.setC_id(3L);
-//        ReqPriorityEntity savedObj = reqPriority.getNode(reqPriorityEntity);
-//
-//        returnVO.setReqPriorityEntity(savedObj);
             SessionUtil.removeAttribute("getReqAddListByFilter");
             ModelAndView modelAndView = new ModelAndView("jsonView");
             modelAndView.addObject("result", savedList);
@@ -330,8 +314,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         log.info("ReqAddController :: moveReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
-
-        //ReqAddEntity savedNode = reqAdd.moveReqNode(reqAddEntity, changeReqTableName, request);
 
         SessionUtil.setAttribute("moveNode",changeReqTableName);
 
