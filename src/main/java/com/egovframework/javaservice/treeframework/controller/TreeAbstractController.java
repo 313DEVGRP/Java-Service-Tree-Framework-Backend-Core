@@ -96,6 +96,7 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
         }
 
         treeSearchEntity.setWhere("c_parentid", new Long(parser.get("c_id")));
+        treeSearchEntity.setOrder(Order.desc("c_position"));
         List<TreeSearchEntity> list = treeService.getChildNode(treeSearchEntity);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
@@ -110,7 +111,7 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
         log.info("TreeAbstractController :: getNodesWithoutRoot");
         V treeSearchEntity = modelMapper.map(treeBaseDTO, treeEntity);
 
-        treeSearchEntity.setOrder(Order.desc("c_id"));
+        treeSearchEntity.setOrder(Order.desc("c_position"));
         Criterion criterion = Restrictions.not(
                 // replace "id" below with property name, depending on what you're filtering against
                 Restrictions.in("c_id", new Object[] {TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
@@ -296,7 +297,7 @@ public abstract class TreeAbstractController<T extends TreeService, D extends Tr
         log.info("TreeAbstractController :: getMonitor");
         V treeSearchEntity = modelMapper.map(treeBaseDTO, treeEntity);
 
-        treeSearchEntity.setOrder(Order.desc("c_id"));
+        treeSearchEntity.setOrder(Order.desc("c_position"));
         List<TreeSearchEntity> list = treeService.getChildNode(treeSearchEntity);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
