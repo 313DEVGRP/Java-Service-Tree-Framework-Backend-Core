@@ -67,4 +67,17 @@ public interface 엔진통신기 {
                                        @PathVariable("pdService") Long 제품서비스_아이디,
                                        @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
 
+    /*
+     * 요구사항 상세 페이지
+     */
+    @GetMapping("/engine/jira/{connectId}/issue/getReqCount/{pdServiceId}")
+    Map<String, Long> 제품서비스별_담당자_요구사항_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                         @PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                         @RequestParam("assigneeEmail") String 담당자_이메일);
+
+    @GetMapping("/engine/jira/{connectId}/issue/getReqCount/{pdServiceId}/{issueKey}")
+    Map<String, Long> 제품서비스별_담당자_연관된_요구사항_통계(@PathVariable("connectId") Long 지라서버_아이디,
+                                             @PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                             @PathVariable("issueKey") String 이슈키,
+                                             @RequestParam("assigneeEmail") String 담당자_이메일);
 }

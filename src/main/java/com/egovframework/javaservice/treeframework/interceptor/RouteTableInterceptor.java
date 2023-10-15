@@ -120,6 +120,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("getStatusHistory");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+                if(StringUtils.contains(servletPath,"getPdRelatedReqStats.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("getPdRelatedReqStats");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
             }
             logger.info("RouteTableInterceptor :: onPrepareStatement servletPath -> " + servletPath);
         } catch (Exception e) {

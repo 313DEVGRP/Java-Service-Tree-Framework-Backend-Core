@@ -24,7 +24,9 @@ import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,4 +256,65 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         return modelAndView;
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getPdReqStats.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getPdReqStats(@PathVariable(value ="changeReqTableName") String changeReqTableName, HttpServletRequest request) {
+
+        log.info("ReqStatusController :: getPdReqStats");
+
+        Long 제품서비스_아이디 = Long.parseLong(StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", ""));
+        String 담당자_이메일 = request.getParameter("assigneeEmail");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 엔진통신기.제품서비스별_담당자_요구사항_통계(dummy_jira_server, 제품서비스_아이디, 담당자_이메일));
+
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getPdRelatedReqStats.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getPdRelatedReqStats(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+                                     ReqStatusDTO reqStatusDTO, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: getPdRelatedReqStats");
+
+        Long 제품서비스_아이디 = Long.parseLong(StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", ""));
+
+        JiraServerPureEntity 검색용_지라서버 = new JiraServerPureEntity();
+        검색용_지라서버.setC_id(reqStatusDTO.getC_jira_server_link());
+        JiraServerPureEntity 검색결과_지라서버 = jiraServer.getNode(검색용_지라서버);
+
+        ReqStatusEntity reqStatusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+        SessionUtil.setAttribute("getPdRelatedReqStats", changeReqTableName);
+
+        Criterion searchService = Restrictions.eq("c_pdservice_link", 제품서비스_아이디);
+        Criterion searchReq = Restrictions.eq("c_req_link", reqStatusDTO.getC_req_link());
+        Criterion criterion = Restrictions.and(searchService, searchReq);
+        reqStatusEntity.getCriterions().add(criterion);
+        ReqStatusEntity 검색결과_요구사항 = reqStatus.getNode(reqStatusEntity);
+
+        Long 지라서버_아이디 = Long.parseLong(검색결과_지라서버.getC_jira_server_etc());
+        String 이슈키 = 검색결과_요구사항.getC_issue_key();
+        String 담당자_이메일 = request.getParameter("assigneeEmail");
+
+        log.info("지라서버_아이디: " + 지라서버_아이디);
+        log.info("제품서비스_아이디: " + 제품서비스_아이디);
+        log.info("이슈키: " + 이슈키);
+        log.info("담당자_이메일: " + 담당자_이메일);
+
+        SessionUtil.removeAttribute("getPdRelatedReqStats");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 엔진통신기.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일));
+
+        return modelAndView;
+    }
+
 }
