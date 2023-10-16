@@ -1,5 +1,6 @@
 package com.arms.dashboard.controller;
 
+import com.arms.dashboard.model.AggregationResponse;
 import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.jira.jiraserver.service.JiraServer;
 import lombok.extern.slf4j.Slf4j;
@@ -8,30 +9,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping(value="/arms/dashboard")
+@RequestMapping(value = "/arms/dashboard")
 public class DashboardController extends TreeMapAbstractController {
 
     @Autowired
     private com.arms.util.external_communicate.엔진통신기 엔진통신기;
 
     @Autowired
+    private com.arms.util.external_communicate.통계엔진통신기 통계엔진통신기;
+
+    @Autowired
     @Qualifier("jiraServer")
     private JiraServer jiraServer;
+
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     static final long dummy_jira_server = 0L;
 
-    @RequestMapping(value ="/getVersionProgress", method = RequestMethod.GET)
+    @RequestMapping(value = "/getVersionProgress", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getVersionProgress(HttpServletRequest request) throws Exception {
         /* 임시 틀 생성 */
@@ -42,4 +46,16 @@ public class DashboardController extends TreeMapAbstractController {
 
         return modelAndView;
     }
+
+    @ResponseBody
+    @GetMapping("/jira-issue-statuses")
+    public ModelAndView jiraIssueStatuses(@RequestParam Long pdServiceLink, @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+        log.info("DashboardController :: jiraIssueStatuses");
+        List<AggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(pdServiceLink, pdServiceVersionLinks);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+
 }
