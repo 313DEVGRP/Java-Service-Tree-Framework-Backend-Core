@@ -584,6 +584,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			저장할_이슈_유형.setC_contents(이슈_유형.getHierarchyLevel().toString()); //Integer
 		}
 		JiraIssueTypeEntity 저장된_이슈_유형 = jiraIssueType.addNode(저장할_이슈_유형);
+
 		return 저장된_이슈_유형;
 	}
 
@@ -623,6 +624,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		지라프로젝트_저장.setC_title(지라_프로젝트.getName());
 		지라프로젝트_저장.setRef(TreeConstant.First_Node_CID);
 		지라프로젝트_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+		JiraProjectEntity 저장된_프로젝트 = jiraProject.addNode(지라프로젝트_저장);
+
 		if (서버유형.equals("클라우드")) {
 			List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if(클라우드_프로젝트별_이슈_유형_목록.size() != 0) {
@@ -647,7 +651,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			지라프로젝트_저장.setJiraIssueStatusEntities(프로젝트에_붙일_이슈_상태들);
 		}
 
-		JiraProjectEntity 저장된_프로젝트 = jiraProject.addNode(지라프로젝트_저장);
+		jiraProject.updateNode(저장된_프로젝트);
+		
 		return 저장된_프로젝트;
 	}
 
