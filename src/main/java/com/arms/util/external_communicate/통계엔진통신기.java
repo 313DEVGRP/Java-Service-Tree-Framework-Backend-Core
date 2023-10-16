@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "engine", url = "${arms.engine.url}")
+@FeignClient(name = "dashboardEngine", url = "${arms.engine.url}")
 public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/jira-issue-statuses")
     public List<AggregationResponse> 제품_혹은_제품버전들의_지라이슈상태_집계(
