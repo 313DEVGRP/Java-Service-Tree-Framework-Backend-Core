@@ -1,6 +1,7 @@
 package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.AggregationResponse;
+import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.jira.jiraserver.service.JiraServer;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -57,5 +59,14 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
+    @ResponseBody
+    @GetMapping("/requirements-jira-issue-statuses")
+    public ModelAndView requirementsJiraIssueStatuses(@RequestParam Long pdServiceLink, @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+        log.info("DashboardController :: requirementsJiraIssueStatuses");
+        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(pdServiceLink, pdServiceVersionLinks);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
 
 }
