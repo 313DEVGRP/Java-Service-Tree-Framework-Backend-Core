@@ -112,6 +112,8 @@ public class 지라이슈 {
         private String accountId;
         @JsonProperty("creator_emailAddress")
         private String emailAddress;
+        @JsonProperty("creator_displayName")
+        private String displayName;
 
     }
     @Getter
@@ -127,6 +129,8 @@ public class 지라이슈 {
         private String accountId;
         @JsonProperty("reporter_emailAddress")
         private String emailAddress;
+        @JsonProperty("reporter_displayName")
+        private String displayName;
 
     }
     @Getter
@@ -142,6 +146,8 @@ public class 지라이슈 {
         private String accountId;
         @JsonProperty("assignee_emailAddress")
         private String emailAddress;
+        @JsonProperty("assignee_displayName")
+        private String displayName;
 
     }
     @Getter

@@ -114,6 +114,7 @@ public class FieldsDTO {
     public static class Reporter {
         private String accountId;
         private String emailAddress;
+        private String displayName;
     }
 
     @Getter
@@ -126,6 +127,7 @@ public class FieldsDTO {
     public static class Assignee {
         private String accountId;
         private String emailAddress;
+        private String displayName;
     }
 
     @Getter

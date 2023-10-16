@@ -63,6 +63,7 @@ public class 지라이슈필드_데이터 {
     public static class 보고자 {
         private String name;
         private String emailAddress;
+        private String displayName;
     }
 
     @Getter
@@ -75,6 +76,7 @@ public class 지라이슈필드_데이터 {
     public static class 담당자 {
         private String name;
         private String emailAddress;
+        private String displayName;
     }
 
     @Getter
