@@ -4,11 +4,13 @@ import com.arms.dashboard.model.AggregationResponse;
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.jira.jiraserver.service.JiraServer;
+import com.arms.util.external_communicate.dto.지라이슈_검색_서브버킷_요청;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,16 +19,18 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+import com.arms.util.external_communicate.*;
+
 @Slf4j
 @Controller
 @RequestMapping(value = "/arms/dashboard")
 public class DashboardController extends TreeMapAbstractController {
 
     @Autowired
-    private com.arms.util.external_communicate.엔진통신기 엔진통신기;
+    private 엔진통신기 엔진통신기;
 
     @Autowired
-    private com.arms.util.external_communicate.통계엔진통신기 통계엔진통신기;
+    private 통계엔진통신기 통계엔진통신기;
 
     @Autowired
     @Qualifier("jiraServer")
@@ -48,6 +52,38 @@ public class DashboardController extends TreeMapAbstractController {
 
         return modelAndView;
     }
+
+    @ResponseBody
+    @RequestMapping(value="/jira-linkedIssue-subTask", method = RequestMethod.GET)
+    public ModelAndView getLinkedIssueAndSubTask(@RequestParam Long pdServiceId) {
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+        지라이슈_검색_서브버킷_요청 검색요청_데이터 = 지라이슈_검색_서브버킷_요청.builder()
+                        .그룹할필드("pdServiceVersion")
+                        .서비스아이디(pdServiceId)
+                        .하위_그룹할필드("parentReqKey")
+                        .size(100)
+                        .build();
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_하위이슈_통계 = 엔진통신기.요구사항_연결이슈_하위이슈_통계(dummy_jira_server, 검색요청_데이터);
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_하위이슈_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/jira-issue-assignee", method = RequestMethod.GET)
+    public ModelAndView getJiraAssigneeList(@RequestParam Long pdServiceId) {
+        Map<String, Long> 통신결과 = 통계엔진통신기.제품서비스별_담당자_이름_통계(pdServiceId);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
+
 
     @ResponseBody
     @GetMapping("/jira-issue-statuses")
