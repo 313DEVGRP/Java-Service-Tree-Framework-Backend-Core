@@ -30,7 +30,6 @@ import java.io.Serializable;
 @Builder
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class ReqPriorityDTO extends TreeBaseDTO {
 
   
