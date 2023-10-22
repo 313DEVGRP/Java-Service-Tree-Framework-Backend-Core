@@ -54,6 +54,17 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
+    @RequestMapping(value="/assignee-jira-issue-statuses")
+    public ModelAndView getPerformancePerPersion(@RequestParam Long pdServiceLink) throws Exception {
+        Map<String, Map<String, Map<String, Integer>>> 통신결과 = 통계엔진통신기.담당자_요구사항여부_상태별집계(pdServiceLink);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
+
+    @ResponseBody
     @RequestMapping(value="/jira-linkedIssue-subTask", method = RequestMethod.GET)
     public ModelAndView getLinkedIssueAndSubTask(@RequestParam Long pdServiceId) {
         log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);

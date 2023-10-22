@@ -85,7 +85,8 @@ public interface 엔진통신기 {
     /*
     * 대시보드
     */
-    @GetMapping("/engine/jira/{connectId}/issue/search/sub-bucket")
+    @PostMapping("/engine/jira/{connectId}/issue/search/sub-bucket")
     public ResponseEntity<Map<String,Object>> 요구사항_연결이슈_하위이슈_통계(
-            @PathVariable("connectId") Long 지라서버_아이디, 지라이슈_검색_서브버킷_요청 서브버킷_요청);
+            @PathVariable("connectId") Long 지라서버_아이디,
+            @RequestBody 지라이슈_검색_서브버킷_요청 서브버킷_요청);
 }
