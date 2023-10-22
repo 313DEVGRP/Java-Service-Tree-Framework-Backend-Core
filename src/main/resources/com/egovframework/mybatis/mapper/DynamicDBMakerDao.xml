@@ -40,6 +40,15 @@
             `c_req_start_date`          DATETIME NULL,
             `c_req_end_date`            DATETIME NULL,
 
+            `c_req_total_resource`          bigint null COMMENT '총 작업 MM',
+            `c_req_plan_resource`           bigint null COMMENT '총 계획 MM',
+            `c_req_total_time`              bigint null COMMENT '총 기간 Day',
+            `c_req_plan_time`               bigint null COMMENT '총 계획 Day',
+            `c_req_plan_progress`           bigint null COMMENT '계획 진척도',
+            `c_req_performance_progress`    bigint null COMMENT '실적 진척도',
+            `c_req_manager`                 text null COMMENT '담당자',
+            `c_req_output`                  text null COMMENT '산출물';
+
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -81,6 +90,15 @@
             `c_req_update_date`         DATETIME NULL,
             `c_req_start_date`          DATETIME NULL,
             `c_req_end_date`            DATETIME NULL,
+
+            `c_req_total_resource`          bigint null COMMENT '총 작업 MM',
+            `c_req_plan_resource`           bigint null COMMENT '총 계획 MM',
+            `c_req_total_time`              bigint null COMMENT '총 기간 Day',
+            `c_req_plan_time`               bigint null COMMENT '총 계획 Day',
+            `c_req_plan_progress`           bigint null COMMENT '계획 진척도',
+            `c_req_performance_progress`    bigint null COMMENT '실적 진척도',
+            `c_req_manager`                 text null COMMENT '담당자',
+            `c_req_output`                  text null COMMENT '산출물';
 
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',

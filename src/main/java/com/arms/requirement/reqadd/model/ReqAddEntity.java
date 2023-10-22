@@ -154,6 +154,30 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_end_date")
     private Date c_req_end_date;
 
+    @Column(name = "c_req_total_resource")
+    private Long c_req_total_resource; //'총 작업 MM',
+
+    @Column(name = "c_req_plan_resource")
+    private Long c_req_plan_resource; // '총 계획 MM',
+
+    @Column(name = "c_req_total_time")
+    private Long c_req_total_time; // '총 기간 Day',
+
+    @Column(name = "c_req_plan_time")
+    private Long c_req_plan_time; // '총 계획 Day',
+
+    @Column(name = "c_req_plan_progress")
+    private Long c_req_plan_progress; // '계획 진척도',
+
+    @Column(name = "c_req_performance_progress")
+    private Long c_req_performance_progress; // '실적 진척도',
+
+    @Column(name = "c_req_manager")
+    private String c_req_manager; // '담당자'
+
+    @Column(name = "c_req_output")
+    private String c_req_output; // '산출물'
+
     //내용
     @Lob
     @Column(name = "c_req_contents")

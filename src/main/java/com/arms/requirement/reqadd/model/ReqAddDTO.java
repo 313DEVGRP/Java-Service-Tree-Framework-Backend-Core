@@ -53,6 +53,22 @@ public class ReqAddDTO extends TreeBaseDTO {
 
     private Date c_req_end_date;
 
+    private Long c_req_total_resource; //'총 작업 MM',
+
+    private Long c_req_plan_resource; // '총 계획 MM',
+
+    private Long c_req_total_time; // '총 기간 Day',
+
+    private Long c_req_plan_time; // '총 계획 Day',
+
+    private Long c_req_plan_progress; // '계획 진척도',
+
+    private Long c_req_performance_progress; // '실적 진척도',
+
+    private String c_req_manager; // '담당자'
+
+    private String c_req_output; // '산출물'
+
     private String c_req_contents;
 
     private String c_req_desc;
