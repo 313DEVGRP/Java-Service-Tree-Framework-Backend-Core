@@ -11,6 +11,7 @@ import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.util.external_communicate.dto.지라이슈_검색_서브버킷_요청;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ import com.arms.util.external_communicate.*;
 
 @Slf4j
 @Controller
+@RestController
+@AllArgsConstructor
 @RequestMapping(value = "/arms/dashboard")
 public class DashboardController extends TreeMapAbstractController {
 
