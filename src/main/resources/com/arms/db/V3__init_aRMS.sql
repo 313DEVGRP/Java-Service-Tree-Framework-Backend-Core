@@ -1,3 +1,13 @@
+ALTER TABLE T_ARMS_REQADD
+    ADD COLUMN c_req_priority_link      bigint null comment '요구사항 우선순위',
+    ADD COLUMN c_req_state_link         bigint null comment '요구사항 상태',
+    ADD COLUMN c_req_difficulty_link    bigint null comment '요구사항 난이도';
+
+ALTER TABLE T_ARMS_REQADD_LOG
+    ADD COLUMN c_req_priority_link      bigint null comment '요구사항 우선순위',
+    ADD COLUMN c_req_state_link         bigint null comment '요구사항 상태',
+    ADD COLUMN c_req_difficulty_link    bigint null comment '요구사항 난이도';
+
 ALTER TABLE T_ARMS_REQPRIORITY
     ADD COLUMN c_desc text null comment '설명';
 ALTER TABLE T_ARMS_REQPRIORITY_LOG
