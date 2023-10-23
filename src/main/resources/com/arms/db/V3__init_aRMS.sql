@@ -1,3 +1,28 @@
+ALTER TABLE T_ARMS_REQPRIORITY
+    ADD COLUMN c_desc text null comment '설명';
+ALTER TABLE T_ARMS_REQPRIORITY_LOG
+    ADD COLUMN c_desc text null comment '설명';
+
+UPDATE T_ARMS_REQPRIORITY
+SET C_RIGHT=14
+WHERE C_ID=1;
+
+UPDATE T_ARMS_REQPRIORITY
+SET C_RIGHT=13
+WHERE C_ID=2;
+
+Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (3, 2, 0, 3, 4, 2, '매우 낮음', 'default');
+Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (4, 2, 1, 5, 6, 2, '낮음', 'default');
+Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (5, 2, 2, 7, 8, 2, '중간', 'default');
+Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (6, 2, 3, 9, 10, 2, '높음', 'default');
+Insert into `aRMS`.`T_ARMS_REQPRIORITY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (7, 2, 4, 11, 12, 2, '매우 높음', 'default');
+
+
 --
 -- Table structure for table `T_ARMS_REQSTATE`
 --
@@ -41,9 +66,23 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQSTATE` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='T_ARMS_REQSTATE';
 
 Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (1, 0, 0, 1, 4, 0, 'T_ARMS_REQSTATE', 'root');
+Values (1, 0, 0, 1, 18, 0, 'T_ARMS_REQSTATE', 'root');
 Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (2, 1, 0, 2, 3, 1, '제품(서비스) 요구사항 상태 ( ARMS 전용 )', 'drive');
+Values (2, 1, 0, 2, 17, 1, '제품(서비스) 요구사항 상태 ( ARMS 전용 )', 'drive');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (3, 2, 0, 3, 4, 2, '제안', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (4, 2, 1, 5, 6, 2, '승인', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (5, 2, 2, 7, 8, 2, 'A-RMS 전파', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (6, 2, 3, 9, 10, 2, '구현', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (7, 2, 4, 11, 12, 2, '검증', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (8, 2, 5, 13, 14, 2, '삭제', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (9, 2, 6, 15, 16, 2, '반려', 'default');
 
 DELIMITER $$
 CREATE TRIGGER TG_INSERT_T_ARMS_REQSTATE
@@ -120,9 +159,19 @@ CREATE TABLE IF NOT EXISTS `aRMS`.`T_ARMS_REQDIFFICULTY` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='T_ARMS_REQDIFFICULTY';
 
 Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (1, 0, 0, 1, 4, 0, 'T_ARMS_REQDIFFICULTY', 'root');
+Values (1, 0, 0, 1, 14, 0, 'T_ARMS_REQDIFFICULTY', 'root');
 Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
-Values (2, 1, 0, 2, 3, 1, '제품(서비스) 요구사항 난이도', 'drive');
+Values (2, 1, 0, 2, 13, 1, '제품(서비스) 요구사항 난이도', 'drive');
+Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (3, 2, 0, 3, 4, 2, '매우 어려움', 'default');
+Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (4, 2, 1, 5, 6, 2, '어려움', 'default');
+Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (5, 2, 2, 7, 8, 2, '보통', 'default');
+Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (6, 2, 3, 9, 10, 2, '쉬움', 'default');
+Insert into `aRMS`.`T_ARMS_REQDIFFICULTY` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (7, 2, 4, 11, 12, 2, '매우 쉬움', 'default');
 
 DELIMITER $$
 CREATE TRIGGER TG_INSERT_T_ARMS_REQDIFFICULTY

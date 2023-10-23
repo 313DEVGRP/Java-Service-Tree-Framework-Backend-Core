@@ -36,6 +36,9 @@ public class ReqPriorityDTO extends TreeBaseDTO {
     //내용
     private String c_contents;
 
+    //설명
+    private String c_desc;
+
     //비고
     private String c_etc;
 

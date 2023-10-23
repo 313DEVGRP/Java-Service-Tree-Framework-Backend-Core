@@ -54,6 +54,11 @@ public class ReqPriorityEntity extends TreeSearchEntity implements Serializable 
     @Column(name = "c_contents")
     private String c_contents;
 
+    //설명
+    @Column(name = "c_desc")
+    @Type(type="text")
+    private String c_desc;
+
     //비고
     @Column(name = "c_etc")
     private String c_etc;
