@@ -6,6 +6,7 @@ import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -32,4 +33,7 @@ public interface 통계엔진통신기 {
             @RequestParam List<Long> pdServiceVersionLinks
     );
 
+    @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
+    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
+            @RequestParam Long pdServiceLink) throws IOException;
 }
