@@ -47,7 +47,7 @@
             `c_req_plan_progress`           bigint null COMMENT '계획 진척도',
             `c_req_performance_progress`    bigint null COMMENT '실적 진척도',
             `c_req_manager`                 text null COMMENT '담당자',
-            `c_req_output`                  text null COMMENT '산출물';
+            `c_req_output`                  text null COMMENT '산출물',
 
             `c_req_priority_link`           bigint null comment '요구사항 우선순위',
             `c_req_state_link`              bigint null comment '요구사항 상태',
@@ -102,7 +102,7 @@
             `c_req_plan_progress`           bigint null COMMENT '계획 진척도',
             `c_req_performance_progress`    bigint null COMMENT '실적 진척도',
             `c_req_manager`                 text null COMMENT '담당자',
-            `c_req_output`                  text null COMMENT '산출물';
+            `c_req_output`                  text null COMMENT '산출물',
 
             `c_req_priority_link`           bigint null comment '요구사항 우선순위',
             `c_req_state_link`              bigint null comment '요구사항 상태',
