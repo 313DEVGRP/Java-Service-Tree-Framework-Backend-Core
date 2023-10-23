@@ -41,7 +41,7 @@ public class DashboardController extends TreeMapAbstractController {
 
     static final long dummy_jira_server = 0L;
 
-    @RequestMapping(value = "/getVersionProgress", method = RequestMethod.GET)
+    @GetMapping(value = "/getVersionProgress")
     @ResponseBody
     public ModelAndView getVersionProgress(HttpServletRequest request) throws Exception {
         /* 임시 틀 생성 */
@@ -54,7 +54,7 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value="/assignee-jira-issue-statuses")
+    @GetMapping(value="/assignee-jira-issue-statuses")
     public ModelAndView getPerformancePerPersion(@RequestParam Long pdServiceLink) throws Exception {
         Map<String, Map<String, Map<String, Integer>>> 통신결과 = 통계엔진통신기.담당자_요구사항여부_상태별집계(pdServiceLink);
 
@@ -65,7 +65,7 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value="/jira-linkedIssue-subTask", method = RequestMethod.GET)
+    @GetMapping(value="/jira-linkedIssue-subTask")
     public ModelAndView getLinkedIssueAndSubTask(@RequestParam Long pdServiceId) {
         log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
         지라이슈_검색_서브버킷_요청 검색요청_데이터 = 지라이슈_검색_서브버킷_요청.builder()
@@ -85,7 +85,7 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value="/jira-issue-assignee", method = RequestMethod.GET)
+    @GetMapping(value="/jira-issue-assignee")
     public ModelAndView getJiraAssigneeList(@RequestParam Long pdServiceId) {
         Map<String, Long> 통신결과 = 통계엔진통신기.제품서비스별_담당자_이름_통계(pdServiceId);
 
