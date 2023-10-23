@@ -1,9 +1,15 @@
 package com.arms.dashboard.controller;
 
-import com.arms.dashboard.model.AggregationResponse;
-import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
+import com.arms.dashboard.model.donut.AggregationResponse;
+import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
+import com.arms.dashboard.model.sankey.SankeyData;
+import com.arms.dashboard.model.sankey.SankeyLink;
+import com.arms.dashboard.model.sankey.SankeyNode;
 import com.arms.globaltreemap.controller.TreeMapAbstractController;
-import com.arms.jira.jiraserver.service.JiraServer;
+import com.arms.product_service.pdservice.model.PdServiceEntity;
+import com.arms.product_service.pdservice.service.PdService;
+import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.util.external_communicate.dto.지라이슈_검색_서브버킷_요청;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -16,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +41,8 @@ public class DashboardController extends TreeMapAbstractController {
     private 통계엔진통신기 통계엔진통신기;
 
     @Autowired
-    @Qualifier("jiraServer")
-    private JiraServer jiraServer;
-
+    @Qualifier("pdService")
+    private PdService pdService;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -102,6 +109,56 @@ public class DashboardController extends TreeMapAbstractController {
         Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(pdServiceLink, pdServiceVersionLinks);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/version-assignee", method = RequestMethod.GET)
+    public ModelAndView assigneesByPdServiceVersion(@RequestParam Long pdServiceLink, @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+        log.info("DashboardController :: getSankeyChart");
+
+
+        PdServiceEntity pdServiceEntity = new PdServiceEntity();
+        pdServiceEntity.setC_id(pdServiceLink);
+        PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);
+
+
+        List<SankeyNode> nodeList = new ArrayList<>();
+        List<SankeyLink> linkList = new ArrayList<>();
+
+        // 제품 노드 추가
+        String pdServiceId = savedPdService.getC_id() + "-product";
+        nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
+
+        // 버전 노드와 링크 추가
+        savedPdService.getPdServiceVersionEntities().stream()
+                .sorted(Comparator.comparing(PdServiceVersionEntity::getC_id))
+                .forEach(version -> {
+                    var versionId = version.getC_id() + "-version";
+                    nodeList.add(new SankeyNode(versionId, version.getC_title(), "버전"));
+                    linkList.add(new SankeyLink(pdServiceId, versionId));
+                });
+
+
+        Map<String, List<SankeyElasticSearchData>> result = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks);
+
+        result.forEach((versionId, sankeyCharts) -> {
+            sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
+                String assigneeAccountId = sankeyElasticSearchData.getAssigneeAccountId();
+                String assigneeDisplayName = sankeyElasticSearchData.getAssigneeDisplayName();
+                String nodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
+
+                String workerNodeId = versionId + "-" + assigneeAccountId;
+                nodeList.add(new SankeyNode(workerNodeId, nodeName, "작업자"));
+                linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
+            });
+        });
+
+        SankeyData sankeyData = new SankeyData(nodeList, linkList);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", sankeyData);
+
         return modelAndView;
     }
 
