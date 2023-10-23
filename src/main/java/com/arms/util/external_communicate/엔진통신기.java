@@ -2,6 +2,7 @@ package com.arms.util.external_communicate;
 
 import com.arms.util.external_communicate.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -80,4 +81,12 @@ public interface 엔진통신기 {
                                              @PathVariable("pdServiceId") Long 제품서비스_아이디,
                                              @PathVariable("issueKey") String 이슈키,
                                              @RequestParam("assigneeEmail") String 담당자_이메일);
+
+    /*
+    * 대시보드
+    */
+    @PostMapping("/engine/jira/{connectId}/issue/search/sub-bucket")
+    public ResponseEntity<Map<String,Object>> 요구사항_연결이슈_하위이슈_통계(
+            @PathVariable("connectId") Long 지라서버_아이디,
+            @RequestBody 지라이슈_검색_서브버킷_요청 서브버킷_요청);
 }

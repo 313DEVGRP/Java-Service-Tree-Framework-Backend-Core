@@ -2,9 +2,12 @@ package com.arms.util.external_communicate;
 
 import com.arms.dashboard.model.AggregationResponse;
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.util.external_communicate.dto.지라이슈_검색_서브버킷_요청;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -22,5 +25,11 @@ public interface 통계엔진통신기 {
             @RequestParam List<Long> pdServiceVersionLinks
     );
 
+    @GetMapping("/engine/jira/dashboard/issue-assignee/{pdServiceId}")
+    public Map<String, Long> 제품서비스별_담당자_이름_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디);
 
+
+    @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
+    public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
+            @RequestParam Long pdServiceLink) throws IOException;
 }
