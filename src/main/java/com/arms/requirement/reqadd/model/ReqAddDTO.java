@@ -21,6 +21,12 @@ public class ReqAddDTO extends TreeBaseDTO {
     
     private String c_req_pdservice_versionset_link;
 
+    private Long c_req_priority_link;
+
+    private Long c_req_state_link;
+
+    private Long c_req_difficulty_link;
+
     private String c_req_reviewer01;
 
     private String c_req_reviewer02;
