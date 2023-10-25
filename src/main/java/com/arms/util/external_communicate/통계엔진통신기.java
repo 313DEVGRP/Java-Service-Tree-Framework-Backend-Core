@@ -27,7 +27,7 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/issue-assignee/{pdServiceId}")
     public Map<String, Long> 제품서비스별_담당자_이름_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디);
 
-    @GetMapping("/engine/jira/dashboard/version-assignee")
+    @GetMapping("/engine/jira/dashboard/version-assignees")
     public Map<String, List<SankeyElasticSearchData>> 제품_혹은_제품버전들의_담당자목록(
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
