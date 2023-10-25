@@ -124,15 +124,14 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/version-assignee", method = RequestMethod.GET)
+    @RequestMapping(value = "/version-assignees", method = RequestMethod.GET)
     public ModelAndView assigneesByPdServiceVersion(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam String type
+            @RequestParam List<Long> pdServiceVersionLinks
     ) throws Exception {
         log.info("DashboardController :: getSankeyChart");
 
-        if ("update".equals(type) && pdServiceVersionLinks.isEmpty()) {
+        if (pdServiceVersionLinks.isEmpty()) {
             return new ModelAndView("jsonView")
                     .addObject("result", new SankeyData(Collections.emptyList(), Collections.emptyList()));
         }
@@ -148,7 +147,7 @@ public class DashboardController extends TreeMapAbstractController {
         nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
 
         savedPdService.getPdServiceVersionEntities().stream()
-                .filter(version -> "update".equals(type) ? pdServiceVersionLinks.contains(version.getC_id()) : true)
+                .filter(version -> pdServiceVersionLinks.contains(version.getC_id()))
                 .sorted(Comparator.comparing(PdServiceVersionEntity::getC_id))
                 .forEach(version -> {
                     String versionId = version.getC_id() + "-version";
