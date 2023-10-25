@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import com.arms.util.external_communicate.*;
+import com.arms.util.external_communicate.dto.지라이슈_검색_일반_요청;
 
 @Slf4j
 @Controller
@@ -173,5 +174,21 @@ public class DashboardController extends TreeMapAbstractController {
         return new ModelAndView("jsonView")
                 .addObject("result", sankeyData);
     }
+
+    @ResponseBody
+    @GetMapping("/normal/{pdServiceId}")
+    public ModelAndView normal(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_검색_일반_요청 검색요청_데이터) throws Exception {
+
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+            = 통계엔진통신기.요구사항_연결이슈_일반_통계(pdServiceId, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
 
 }

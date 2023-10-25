@@ -3,7 +3,11 @@ package com.arms.util.external_communicate;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.donut.AggregationResponse;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
+import com.arms.util.external_communicate.dto.지라이슈_검색_일반_요청;
+
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -36,4 +40,10 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
     public Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
             @RequestParam Long pdServiceLink) throws IOException;
+
+    @GetMapping("/engine/jira/dashboard/normal/{pdServiceId}")
+    public ResponseEntity<Map<String,Object>> 요구사항_연결이슈_일반_통계(
+        @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
+        @SpringQueryMap 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청
+    );
 }
