@@ -2,11 +2,13 @@ package com.arms.util.external_communicate.dto;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class 지라이슈_검색_일반_요청 {
 
 	private Long 서비스아이디;

@@ -93,6 +93,27 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
     @ResponseBody
+    @GetMapping(value="/normal/jira-linkedIssue-subTask")
+    public ModelAndView 연결이슈_하위이슈_가져오기(@RequestParam Long pdServiceId) {
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+
+        지라이슈_검색_일반_요청 검색요청_데이터 = 지라이슈_검색_일반_요청.builder()
+                .메인그룹필드("pdServiceVersion")
+                .서비스아이디(pdServiceId) // 2번들어가는중. 향후 수정 예정.
+                .요구사항인지여부(false)
+                .하위그룹필드들(List.of("parentReqKey"))
+                .build();
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_하위이슈_통계 = 엔진통신기.제품서비스_일반_검색(pdServiceId, 검색요청_데이터);
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_하위이슈_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
+
+    @ResponseBody
     @GetMapping(value="/jira-issue-assignee")
     public ModelAndView getJiraAssigneeList(@RequestParam Long pdServiceId) {
         Map<String, Long> 통신결과 = 통계엔진통신기.제품서비스별_담당자_이름_통계(pdServiceId);

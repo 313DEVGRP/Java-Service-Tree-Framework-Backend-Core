@@ -89,4 +89,9 @@ public interface 엔진통신기 {
     public ResponseEntity<Map<String,Object>> 요구사항_연결이슈_하위이슈_통계(
             @PathVariable("connectId") Long 지라서버_아이디,
             @RequestBody 지라이슈_검색_서브버킷_요청 서브버킷_요청);
+
+    @GetMapping("/engine/jira/dashboard/normal/{pdServiceId}")
+    public ResponseEntity<Map<String, Object>> 제품서비스_일반_검색(
+            @PathVariable("pdServiceId") Long 제품서비스_아이디,
+            @RequestBody 지라이슈_검색_일반_요청 지라이슈_검색_일반_요청);
 }
