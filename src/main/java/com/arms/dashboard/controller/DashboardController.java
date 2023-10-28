@@ -10,7 +10,7 @@ import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
-import com.arms.util.external_communicate.dto.지라이슈_검색_서브버킷_요청;
+import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import com.arms.util.external_communicate.*;
-import com.arms.util.external_communicate.dto.지라이슈_검색_일반_요청;
+
 
 @Slf4j
 @Controller
@@ -72,46 +72,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
-    @GetMapping(value="/jira-linkedIssue-subTask")
-    public ModelAndView getLinkedIssueAndSubTask(@RequestParam Long pdServiceId) {
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
-        지라이슈_검색_서브버킷_요청 검색요청_데이터 = 지라이슈_검색_서브버킷_요청.builder()
-                        .그룹할필드("pdServiceVersion")
-                        .서비스아이디(pdServiceId)
-                        .하위_그룹할필드("parentReqKey")
-                        .size(100)
-                        .build();
-
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_하위이슈_통계 = 엔진통신기.요구사항_연결이슈_하위이슈_통계(dummy_jira_server, 검색요청_데이터);
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        Map<String, Object> 통신결과 = 요구사항_연결이슈_하위이슈_통계.getBody();
-        modelAndView.addObject("result", 통신결과);
-
-        return modelAndView;
-    }
-
-    @ResponseBody
-    @GetMapping(value="/normal/jira-linkedIssue-subTask")
-    public ModelAndView 연결이슈_하위이슈_가져오기(@RequestParam Long pdServiceId) {
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
-
-        지라이슈_검색_일반_요청 검색요청_데이터 = 지라이슈_검색_일반_요청.builder()
-                .메인그룹필드("pdServiceVersion")
-                .서비스아이디(pdServiceId) // 2번들어가는중. 향후 수정 예정.
-                .요구사항인지여부(false)
-                .하위그룹필드들(List.of("parentReqKey"))
-                .build();
-
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_하위이슈_통계 = 엔진통신기.제품서비스_일반_검색(pdServiceId, 검색요청_데이터);
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        Map<String, Object> 통신결과 = 요구사항_연결이슈_하위이슈_통계.getBody();
-        modelAndView.addObject("result", 통신결과);
-
-        return modelAndView;
-    }
 
     @ResponseBody
     @GetMapping(value="/jira-issue-assignee")
@@ -198,18 +158,16 @@ public class DashboardController extends TreeMapAbstractController {
 
     @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
-    public ModelAndView normal(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_검색_일반_요청 검색요청_데이터) throws Exception {
+    public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
         log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
 
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
-            = 통계엔진통신기.요구사항_연결이슈_일반_통계(pdServiceId, 검색요청_데이터);
+            = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
-
-
 }
