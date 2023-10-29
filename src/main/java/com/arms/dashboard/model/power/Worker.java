@@ -16,7 +16,7 @@ import java.util.Map;
 public class Worker {
     String id;
     String name;
-    Map<String, String> data;
+    Map<String, Integer> data;
     List<TaskList> children = new ArrayList<>();
 
     public Worker(String id, String name) {

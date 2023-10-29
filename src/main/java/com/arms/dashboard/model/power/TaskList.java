@@ -14,5 +14,5 @@ import java.util.Map;
 public class TaskList {
     String id;
     String name;
-    Map<String, String> data;
+    Map<String, Integer> data;
 }
