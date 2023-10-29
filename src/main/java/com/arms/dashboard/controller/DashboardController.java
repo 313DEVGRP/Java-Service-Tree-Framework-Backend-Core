@@ -170,4 +170,53 @@ public class DashboardController extends TreeMapAbstractController {
         modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
+
+    @ResponseBody
+    @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
+    public ModelAndView exclusion_isreq_normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+
+        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}" , pdServiceId);
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
+    public ModelAndView getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+
+        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}" , pdServiceId);
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+
+        Map<String, Object> 검색결과 = (Map<String, Object>) 통신결과.get("검색결과");
+        List<Object> 작업자별결과 = (List<Object>) 검색결과.get("group_by_assignee.assignee_emailAddress.keyword");
+        modelAndView.addObject("result", 작업자별결과);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
+    public ModelAndView getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
 }
