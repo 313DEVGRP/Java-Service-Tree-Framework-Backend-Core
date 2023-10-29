@@ -11,6 +11,8 @@ import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.util.external_communicate.dto.search.검색결과;
+import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -171,11 +173,11 @@ public class DashboardController extends TreeMapAbstractController {
 
         log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
 
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
@@ -231,12 +233,23 @@ public class DashboardController extends TreeMapAbstractController {
 
         log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
 
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
-        modelAndView.addObject("result", 통신결과);
+        검색결과_목록_메인 검색결과목록 = 요구사항_연결이슈_일반_통계.getBody();
+        List<검색결과> 작업자별결과 = 검색결과목록.get검색결과().get("group_by_assignee.assignee_emailAddress.keyword");
+
+        Map<String, Object> personAndStatus = new HashMap<>();
+        for ( 검색결과 obj : 작업자별결과) {
+            String 작업자메일 = obj.get필드명();
+            int 엣위치 = 작업자메일.indexOf("@");
+            String 작업자아이디 = 작업자메일.substring(0,엣위치);
+            Map<String, List<검색결과>> 하위검색_이슈상태 = (Map<String, List<검색결과>>) obj.get하위검색결과();//("group_by_assignee.assignee_emailAddress.keyword");
+            personAndStatus.put(작업자아이디, 하위검색_이슈상태);
+        }
+
+        modelAndView.addObject("result", personAndStatus);
         return modelAndView;
     }
 

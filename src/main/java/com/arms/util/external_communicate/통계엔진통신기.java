@@ -5,6 +5,7 @@ import com.arms.dashboard.model.donut.AggregationResponse;
 import com.arms.dashboard.model.power.Worker;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 
+import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -43,7 +44,7 @@ public interface 통계엔진통신기 {
             @RequestParam Long pdServiceLink) throws IOException;
 
     @GetMapping("/engine/jira/dashboard/normal/{pdServiceId}")
-    public ResponseEntity<Map<String,Object>> 제품서비스_일반_통계(
+    public ResponseEntity<검색결과_목록_메인> 제품서비스_일반_통계(
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청
     );
