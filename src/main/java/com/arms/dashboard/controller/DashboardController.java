@@ -132,22 +132,18 @@ public class DashboardController extends TreeMapAbstractController {
         nodeList.add(new SankeyNode("defaultNode", "defaultNode", "defaultNode"));
 
 
-        Set<PdServiceVersionEntity> pdServiceVersionEntities = savedPdService.getPdServiceVersionEntities();
-
-        pdServiceVersionEntities.stream()
+        Set<Long> versionIds = savedPdService.getPdServiceVersionEntities().stream()
                 .filter(version -> pdServiceVersionLinks.contains(version.getC_id()))
                 .sorted(Comparator.comparing(PdServiceVersionEntity::getC_id))
-                .forEach(version -> {
+                .map(version -> {
                     String versionId = version.getC_id() + "-version";
                     nodeList.add(new SankeyNode(versionId, version.getC_title(), "버전"));
                     linkList.add(new SankeyLink(pdServiceId, versionId));
-                });
+                    return version.getC_id();
+                })
+                .collect(Collectors.toSet());
 
         Map<String, List<SankeyElasticSearchData>> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks);
-
-        Set<Long> versionIds = pdServiceVersionEntities.stream()
-                .map(PdServiceVersionEntity::getC_id)
-                .collect(Collectors.toSet());
 
         esData.forEach((versionId, sankeyCharts) -> {
             sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
@@ -165,34 +161,25 @@ public class DashboardController extends TreeMapAbstractController {
             linkList.add(new SankeyLink(versionId + "-version", "defaultNode"));
         }
 
-        SankeyData sankeyData = new SankeyData(nodeList, linkList);
-
         return new ModelAndView("jsonView")
-                .addObject("result", sankeyData);
+                .addObject("result", new SankeyData(nodeList, linkList));
     }
 
-    // pdServiceVersionEntities에는 있는 c_id 값이 esData에는 없는 경우, 가짜 노드에 연결시킨다(링크를 추가한다)
-//        pdServiceVersionEntities.stream().map(PdServiceVersionEntity::getC_id).forEach(
-//            versionId -> {
-//        if (!esData.containsKey(versionId)) {
-//            linkList.add(new SankeyLink(versionId + "-version", "defaultNode"));
-//        }
-//    }
-//        );
     @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
     public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
 
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
-            = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
+                = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
+
     @GetMapping("/assignees-requirements-involvements")
     public ModelAndView 작업자별_요구사항_관여도(
             @RequestParam Long pdServiceLink,
@@ -209,7 +196,7 @@ public class DashboardController extends TreeMapAbstractController {
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ModelAndView exclusion_isreq_normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
-        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}" , pdServiceId);
+        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}", pdServiceId);
 
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
@@ -224,7 +211,7 @@ public class DashboardController extends TreeMapAbstractController {
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
     public ModelAndView getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
-        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}" , pdServiceId);
+        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}", pdServiceId);
 
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
@@ -242,7 +229,7 @@ public class DashboardController extends TreeMapAbstractController {
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
     public ModelAndView getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}" , pdServiceId);
+        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
 
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
