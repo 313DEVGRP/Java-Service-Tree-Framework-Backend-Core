@@ -48,6 +48,12 @@ public interface 통계엔진통신기 {
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청
     );
+    
+    @GetMapping("/engine/jira/dashboard/isreq-normal/{pdServiceId}")
+    public ResponseEntity<검색결과_목록_메인> 제품서비스_일반_통계_개선(
+            @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
+            @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청
+    );
 
     @GetMapping("/engine/jira/dashboard/exclusion-isreq-normal/{pdServiceId}")
     public ResponseEntity<Map<String, Object>> 제품서비스_요구사항제회_일반_통계(
