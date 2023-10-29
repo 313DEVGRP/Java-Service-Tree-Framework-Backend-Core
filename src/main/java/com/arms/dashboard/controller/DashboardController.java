@@ -2,6 +2,7 @@ package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.donut.AggregationResponse;
+import com.arms.dashboard.model.power.Worker;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 import com.arms.dashboard.model.sankey.SankeyData;
 import com.arms.dashboard.model.sankey.SankeyLink;
@@ -168,6 +169,18 @@ public class DashboardController extends TreeMapAbstractController {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
+    @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
+    public ModelAndView 작업자별_요구사항_관여도(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws Exception {
+        log.info("DashboardController :: 작업자별_요구사항_관여도");
+        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(pdServiceLink, pdServiceVersionLinks);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
         return modelAndView;
     }
 }
