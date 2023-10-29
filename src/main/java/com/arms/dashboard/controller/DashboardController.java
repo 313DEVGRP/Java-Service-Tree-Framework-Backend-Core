@@ -172,7 +172,7 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
+    @GetMapping("/assignees-requirements-involvements")
     public ModelAndView 작업자별_요구사항_관여도(
             @RequestParam Long pdServiceLink,
             @RequestParam List<Long> pdServiceVersionLinks
