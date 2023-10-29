@@ -2,6 +2,7 @@ package com.arms.util.external_communicate;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.donut.AggregationResponse;
+import com.arms.dashboard.model.power.Worker;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
@@ -51,4 +52,10 @@ public interface 통계엔진통신기 {
     public ResponseEntity<Map<String, Object>> 제품서비스_요구사항제회_일반_통계(
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청);
+
+    @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
+    public List<Worker> 작업자별_요구사항_관여도(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    ) throws IOException;
 }
