@@ -25,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.arms.util.external_communicate.*;
 
@@ -128,8 +129,12 @@ public class DashboardController extends TreeMapAbstractController {
 
         String pdServiceId = savedPdService.getC_id() + "-product";
         nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
+        nodeList.add(new SankeyNode("defaultNode", "defaultNode", "defaultNode"));
 
-        savedPdService.getPdServiceVersionEntities().stream()
+
+        Set<PdServiceVersionEntity> pdServiceVersionEntities = savedPdService.getPdServiceVersionEntities();
+
+        pdServiceVersionEntities.stream()
                 .filter(version -> pdServiceVersionLinks.contains(version.getC_id()))
                 .sorted(Comparator.comparing(PdServiceVersionEntity::getC_id))
                 .forEach(version -> {
@@ -140,6 +145,10 @@ public class DashboardController extends TreeMapAbstractController {
 
         Map<String, List<SankeyElasticSearchData>> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks);
 
+        Set<Long> versionIds = pdServiceVersionEntities.stream()
+                .map(PdServiceVersionEntity::getC_id)
+                .collect(Collectors.toSet());
+
         esData.forEach((versionId, sankeyCharts) -> {
             sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
                 String assigneeAccountId = sankeyElasticSearchData.getAssigneeAccountId();
@@ -148,8 +157,13 @@ public class DashboardController extends TreeMapAbstractController {
                 String workerNodeId = versionId + "-" + assigneeAccountId;
                 nodeList.add(new SankeyNode(workerNodeId, nodeName, "작업자"));
                 linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
+                versionIds.remove(Long.parseLong(versionId));
             });
         });
+
+        for (Long versionId : versionIds) {
+            linkList.add(new SankeyLink(versionId + "-version", "defaultNode"));
+        }
 
         SankeyData sankeyData = new SankeyData(nodeList, linkList);
 
@@ -157,6 +171,14 @@ public class DashboardController extends TreeMapAbstractController {
                 .addObject("result", sankeyData);
     }
 
+    // pdServiceVersionEntities에는 있는 c_id 값이 esData에는 없는 경우, 가짜 노드에 연결시킨다(링크를 추가한다)
+//        pdServiceVersionEntities.stream().map(PdServiceVersionEntity::getC_id).forEach(
+//            versionId -> {
+//        if (!esData.containsKey(versionId)) {
+//            linkList.add(new SankeyLink(versionId + "-version", "defaultNode"));
+//        }
+//    }
+//        );
     @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
     public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
