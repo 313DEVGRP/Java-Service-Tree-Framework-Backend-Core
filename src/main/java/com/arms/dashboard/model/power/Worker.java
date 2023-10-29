@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -15,8 +16,8 @@ import java.util.List;
 public class Worker {
     String id;
     String name;
+    Map<String, String> data;
     List<TaskList> children = new ArrayList<>();
-    int totalInvolvedCount = 0;
 
     public Worker(String id, String name) {
         this.id = id;
