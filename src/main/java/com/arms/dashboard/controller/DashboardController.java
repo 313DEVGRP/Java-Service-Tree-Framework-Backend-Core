@@ -131,7 +131,7 @@ public class DashboardController extends TreeMapAbstractController {
 
         String pdServiceId = savedPdService.getC_id() + "-product";
         nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
-        nodeList.add(new SankeyNode("defaultNode", "defaultNode", "defaultNode"));
+        nodeList.add(new SankeyNode("No-Worker", "No-Worker", "No-Worker"));
 
 
         Set<Long> versionIds = savedPdService.getPdServiceVersionEntities().stream()
@@ -151,16 +151,19 @@ public class DashboardController extends TreeMapAbstractController {
             sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
                 String assigneeAccountId = sankeyElasticSearchData.getAssigneeAccountId();
                 String assigneeDisplayName = sankeyElasticSearchData.getAssigneeDisplayName();
-                String nodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
+                /**
+                 * 추후 displayName 이 겹치는 케이스(ex. 동명이인) 로 인해 accountId로 구분 해야 하는 경우 사용
+                 * String nodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
+                 */
                 String workerNodeId = versionId + "-" + assigneeAccountId;
-                nodeList.add(new SankeyNode(workerNodeId, nodeName, "작업자"));
+                nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
                 linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
                 versionIds.remove(Long.parseLong(versionId));
             });
         });
 
         for (Long versionId : versionIds) {
-            linkList.add(new SankeyLink(versionId + "-version", "defaultNode"));
+            linkList.add(new SankeyLink(versionId + "-version", "No-Worker"));
         }
 
         return new ModelAndView("jsonView")
