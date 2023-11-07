@@ -241,9 +241,6 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
             int 페이지 = 0; int 사이즈 = 10;
 
-            int 이슈_검색엔진_벌크_저장 = 엔진통신기.이슈_검색엔진_벌크_저장(Long.parseLong(엔진통신_아이디), 이슈키, 제품서비스_아이디, 제품서비스_버전);
-            log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 이슈_검색엔진_벌크_저장 사이즈 = {}", StringUtils.toString(이슈_검색엔진_벌크_저장));
-
             List<지라이슈> 링크드이슈_서브데스크 = 엔진통신기.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
 
             log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크.toString());
