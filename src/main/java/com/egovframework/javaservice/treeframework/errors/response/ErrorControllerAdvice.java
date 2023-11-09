@@ -75,6 +75,9 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> onException(Exception e) {
+
+        log.error("[onException] ,cause = {}, errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e), NestedExceptionUtils.getMostSpecificCause(e).getMessage());
+
         return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
     /**
@@ -122,6 +125,7 @@ public class ErrorControllerAdvice {
             return newResponse(ErrorCode.COMMON_INVALID_PARAMETER,HttpStatus.BAD_REQUEST);
         }
     }
+
     @ExceptionHandler(value = {BindException.class})
     public ResponseEntity<?> bindException(BindException e) {
         log.warn("[BindException] ,errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e).getMessage());
