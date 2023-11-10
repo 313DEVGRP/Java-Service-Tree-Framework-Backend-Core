@@ -71,6 +71,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("updateNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+                if(StringUtils.contains(servletPath,"removeNode.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("removeNode");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
                 if(StringUtils.contains(servletPath,"moveNode.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("moveNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
@@ -110,6 +114,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 }
                 if(StringUtils.contains(servletPath,"updateStatusNode.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("updateStatusNode");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
+                if(StringUtils.contains(servletPath,"removeStatusNode.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("removeStatusNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
                 if(StringUtils.contains(servletPath,"moveStatusNode.do")){
@@ -179,6 +187,9 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 if(StringUtils.contains(servletPath,"updateNode.do")){
                     tableName = (String) SessionUtil.getAttribute("updateNode");
                 }
+                if(StringUtils.contains(servletPath,"removeNode.do")){
+                    tableName = (String) SessionUtil.getAttribute("removeNode");
+                }
                 if(StringUtils.contains(servletPath,"moveNode.do")){
                     tableName = (String) SessionUtil.getAttribute("moveNode");
                 }
@@ -209,6 +220,9 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 }
                 if(StringUtils.contains(servletPath,"updateStatusNode.do")){
                     tableName = (String) SessionUtil.getAttribute("updateStatusNode");
+                }
+                if(StringUtils.contains(servletPath,"removeStatusNode.do")){
+                    tableName = (String) SessionUtil.getAttribute("removeStatusNode");
                 }
                 if(StringUtils.contains(servletPath,"moveStatusNode.do")){
                     tableName = (String) SessionUtil.getAttribute("moveStatusNode");

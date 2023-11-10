@@ -304,6 +304,30 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/removeNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> removeReqNode(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
+            BindingResult bindingResult, ModelMap model) throws Exception {
+
+        log.info("ReqAddController :: removeNode");
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        SessionUtil.setAttribute("removeNode",changeReqTableName);
+
+        int removedReqAddEntity = reqAdd.removeNode(reqAddEntity);
+
+        SessionUtil.removeAttribute("removeNode");
+
+        log.info("ReqAddController :: removeNode");
+        return ResponseEntity.ok(CommonResponse.success(removedReqAddEntity));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/moveNode.do"},
             method = {RequestMethod.POST}
     )
