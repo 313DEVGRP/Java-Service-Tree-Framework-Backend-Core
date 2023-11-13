@@ -185,13 +185,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					}
 
 
-					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
-					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
-							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-							.findFirst()
-							.orElse(null);
+//					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
+//					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
+//							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+//							.findFirst()
+//							.orElse(null);
 
-				}else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
+				} else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
 					Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
 					for(JiraIssueTypeEntity 이슈유형 : 지라서버_이슈타입_리스트) {
 						if (이슈유형.getC_check().equals("true")) { // 기본값 설정 true 경우, 해당 이슈유형을 세팅
@@ -214,11 +214,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						}
 					}
 
-					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-							.findFirst()
-							.orElse(null);
+//					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
+//					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+//							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
+//							.findFirst()
+//							.orElse(null);
 				}else {
 					logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
 					throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
@@ -235,7 +235,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
 				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_issue_resolution_name());
-				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_issue_status_name());
+//				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_issue_status_name());
 				if(요구사항_이슈_타입 == null) {
 					logger.error("요구사항_이슈_타입이 없습니다.");
 				} else {
@@ -333,8 +333,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
 
 				//-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
-				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+//				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+//				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 
 				//-- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
 				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
