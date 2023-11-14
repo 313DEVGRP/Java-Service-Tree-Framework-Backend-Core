@@ -113,7 +113,8 @@ public class DashboardController extends TreeMapAbstractController {
     @RequestMapping(value = "/version-assignees", method = RequestMethod.GET)
     public ModelAndView assigneesByPdServiceVersion(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam(required = false, defaultValue = "3") int maxResults
     ) throws Exception {
         log.info("DashboardController :: getSankeyChart");
 
@@ -145,7 +146,7 @@ public class DashboardController extends TreeMapAbstractController {
                 })
                 .collect(Collectors.toSet());
 
-        Map<String, List<SankeyElasticSearchData>> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks);
+        Map<String, List<SankeyElasticSearchData>> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks, maxResults);
 
         esData.forEach((versionId, sankeyCharts) -> {
             sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
