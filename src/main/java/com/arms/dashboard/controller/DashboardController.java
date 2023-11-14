@@ -189,10 +189,11 @@ public class DashboardController extends TreeMapAbstractController {
     @GetMapping("/assignees-requirements-involvements")
     public ModelAndView 작업자별_요구사항_관여도(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam(required = false, defaultValue = "5") int maxResults
     ) throws Exception {
         log.info("DashboardController :: 작업자별_요구사항_관여도");
-        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(pdServiceLink, pdServiceVersionLinks);
+        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
