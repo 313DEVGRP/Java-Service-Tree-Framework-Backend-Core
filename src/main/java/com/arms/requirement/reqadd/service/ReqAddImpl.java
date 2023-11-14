@@ -337,8 +337,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 //				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 
 				//-- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
-				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
+//				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+//				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
 
 				reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
 				reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
@@ -348,7 +348,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("ReqAddImpl = reqStatusDTO :: " + objectMapper.writeValueAsString(reqStatusDTO));
 
 				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
-				if(결과.getStatusCode().isError()){
+				if(결과.getStatusCode().is2xxSuccessful()){
 					chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
 				}
 

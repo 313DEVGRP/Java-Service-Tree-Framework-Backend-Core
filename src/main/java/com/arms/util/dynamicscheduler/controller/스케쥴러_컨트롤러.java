@@ -88,7 +88,7 @@ public class 스케쥴러_컨트롤러{
             List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
             if(결과 == null){
-                chat.sendMessageByEngine("요구사항 이슈가 생성 후, 지라서버에 등록되었습니다.");
+                chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");
             }else {
 
                 for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
@@ -98,7 +98,7 @@ public class 스케쥴러_컨트롤러{
 
                     if( 지라서버 == null ){
 
-                        log.info("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
+                        chat.sendMessageByEngine("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
 
                     } else {
                         int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
