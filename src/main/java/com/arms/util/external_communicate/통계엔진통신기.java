@@ -36,7 +36,8 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/version-assignees")
     public Map<String, List<SankeyElasticSearchData>> 제품_혹은_제품버전들의_담당자목록(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam int maxResults
     );
 
     @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
@@ -63,6 +64,7 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
     public List<Worker> 작업자별_요구사항_관여도(
             @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam int maxResults
     ) throws IOException;
 }

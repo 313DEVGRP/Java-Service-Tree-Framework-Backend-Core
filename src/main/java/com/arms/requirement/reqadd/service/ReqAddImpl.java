@@ -34,6 +34,7 @@ import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.egovframework.javaservice.treeframework.remote.Chat;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -114,7 +115,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			if( 연결정보.getJiraproject_link() != null ){
 
-				//Long 제품서비스_아이디 = 연결정보.getPdservice_link(); //연결정보 없음
 				Long 제품서비스_버전_아이디 = 연결정보.getPdserviceversion_link();
 				Long 지라_프로젝트_아이디 = 연결정보.getJiraproject_link();
 
@@ -130,7 +130,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						.filter(글로벌트리맵 -> 글로벌트리맵.getJiraserver_link() != null) // 특정값이 null이 아닌 엔티티들로 필터링
 						.findFirst() // 첫 번째로 찾은 엔티티를 반환 (단일 값)
 						.orElse(null); // 만약 찾은 엔티티가 없으면 null 반환
-				
+
 				Long 지라서버_아이디 = 지라서버_글로벌트리맵.getJiraserver_link();
 
 				//logger.info("제품 서비스 링크 = " + 제품서비스_아이디);
@@ -148,77 +148,52 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 				Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
 				JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-						.findFirst()
-						.orElse(null);
+						.filter(우선순위 -> StringUtils.equals(우선순위.getC_check(),"true"))
+						.findFirst().orElse(null);
 
 				Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
 				JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-						//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-						.findFirst()
-						.orElse(null);
+						.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+						.findFirst().orElse(null);
 
 				JiraIssueTypeEntity 요구사항_이슈_타입 = new JiraIssueTypeEntity();
 				JiraIssueStatusEntity 요구사항_이슈_상태 = new JiraIssueStatusEntity();
 				if( 검색된_지라서버.getC_jira_server_type().equals("클라우드")){
 
 					Set<JiraIssueTypeEntity> 클라우드_지라서버_이슈타입_리스트 = 검색된_지라프로젝트.getJiraIssueTypeEntities();
-					for(JiraIssueTypeEntity 이슈유형 : 클라우드_지라서버_이슈타입_리스트) {
-						if (이슈유형.getC_check().equals("true")) { // 기본값 설정 true 경우, 해당 이슈유형을 세팅
-							요구사항_이슈_타입 = 이슈유형;
-							break;
-						} else { // 기본값 설정이 false
-							요구사항_이슈_타입 = null;
-						}
-					}
+						요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
+								.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_check(),"true"))
+								.findFirst().orElse(null);
 					if (요구사항_이슈_타입 == null) {
-						for(JiraIssueTypeEntity 이슈유형 : 클라우드_지라서버_이슈타입_리스트) {
-							// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
-							if (이슈유형.getC_issue_type_name().equals("arms-requirement")) {
-								요구사항_이슈_타입 = 이슈유형;
-								break;
-							}
-							else { // 기본값은 아니지만 arms-requirement 없음, null 로 세팅
-								요구사항_이슈_타입 = null;
-							}
-						}
+						// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
+						요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
+								.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
+								.findFirst().orElse(null);
 					}
 
 
-//					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
-//					요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
-//							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-//							.findFirst()
-//							.orElse(null);
+					Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
+						요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
+							.filter(이슈상태 -> StringUtils.equals(이슈상태.getC_check(),"true"))
+							.findFirst()
+							.orElse(null);
 
 				} else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
 					Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-					for(JiraIssueTypeEntity 이슈유형 : 지라서버_이슈타입_리스트) {
-						if (이슈유형.getC_check().equals("true")) { // 기본값 설정 true 경우, 해당 이슈유형을 세팅
-							요구사항_이슈_타입 = 이슈유형;
-							break;
-						} else { // 기본값 설정이 false
-							요구사항_이슈_타입 = null;
+						요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+								.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_check(),"true"))
+								.findFirst().orElse(null);
+						if (요구사항_이슈_타입 == null) {
+							요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+								.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
+								.findFirst().orElse(null);
 						}
-					}
-					if (요구사항_이슈_타입 == null) {
-						for(JiraIssueTypeEntity 이슈유형 : 지라서버_이슈타입_리스트) {
-							// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
-							if (이슈유형.getC_issue_type_name().equals("arms-requirement")) {
-								요구사항_이슈_타입 = 이슈유형;
-								break;
-							}
-							else { // 기본값은 아니지만 arms-requirement 없음, null 로 세팅
-								요구사항_이슈_타입 = null;
-							}
-						}
-					}
 
-//					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-//					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-//							//.filter(entity -> Objects.equals(entity.getC_desc(), "req"))
-//							.findFirst()
-//							.orElse(null);
+					Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
+					요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+							.filter(이슈상태 -> StringUtils.equals(이슈상태.getC_check(), "true"))
+							.findFirst()
+							.orElse(null);
 				}else {
 					logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
 					throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
@@ -233,13 +208,17 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_jira_server_base_url());
 				logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_jira_name());
 
-				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
-				logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_issue_resolution_name());
 //				logger.info("요구사항_이슈_상태 = " + 요구사항_이슈_상태.getC_issue_status_name());
 				if(요구사항_이슈_타입 == null) {
 					logger.error("요구사항_이슈_타입이 없습니다.");
 				} else {
 					logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
+				}
+
+				if (요구사항_이슈_해결책 == null) {
+					logger.info("요구사항_이슈_해결책 기본값이 없습니다. 요구사항은 등록됩니다.");
+				} else {
+					logger.info("요구사항_이슈_해결책 = " + 요구사항_이슈_해결책.getC_issue_resolution_name());
 				}
 
 				logger.info("요구사항_이슈_내용 요구사항아이디 링크 URL = " + 추가된_요구사항의_아이디);
@@ -249,11 +228,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						.name(검색된_지라프로젝트.getC_jira_name())
 						.self(검색된_지라프로젝트.getC_jira_url())
 						.build();
-
-				지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
-				우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
-				우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
-				우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
 
 				지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
 				유형.setId(요구사항_이슈_타입.getC_issue_type_id());
@@ -281,14 +255,34 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"※ 『 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나 』\n" +
 						"※ 『 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다. 』";
 
-				지라이슈필드_데이터 요구사항이슈_필드 = 지라이슈필드_데이터
-																.builder()
-																.project(프로젝트)
-																.issuetype(유형)
-																.priority(우선순위)
-																.summary(savedReqAddEntity.getC_title())
-																.description(이슈내용)
-																.build();
+				지라이슈필드_데이터 요구사항이슈_필드;
+
+				if (요구사항_이슈_우선순위 == null) {
+					logger.info("요구사항_이슈_우선순위 기본값이 없습니다. 요구사항은 등록됩니다.");
+					 요구사항이슈_필드 = 지라이슈필드_데이터
+							.builder()
+							.project(프로젝트)
+							.issuetype(유형)
+							.summary(savedReqAddEntity.getC_title())
+							.description(이슈내용)
+							.build();
+				} else {
+					logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
+					지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
+					우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
+					우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
+					우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
+
+					 요구사항이슈_필드 = 지라이슈필드_데이터
+							.builder()
+							.project(프로젝트)
+							.issuetype(유형)
+							.priority(우선순위)
+							.summary(savedReqAddEntity.getC_title())
+							.description(이슈내용)
+							.build();
+				}
+
 
 				지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 																.builder()
@@ -329,8 +323,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_issue_url(생성된_요구사항_이슈.getSelf());
 
 				//-- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-				reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
-				reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				if(요구사항_이슈_우선순위 != null) {
+					// null이 아닐때만 statusDTO에 우선순위 값 넘긴다.
+					reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
 
 				//-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
 //				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
