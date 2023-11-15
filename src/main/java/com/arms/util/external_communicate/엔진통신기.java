@@ -83,4 +83,8 @@ public interface 엔진통신기 {
                                              @RequestParam("assigneeEmail") String 담당자_이메일);
 
 
+    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions")
+    List<지라이슈> 제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
+                                            @RequestParam Long pdServiceLink,
+                                            @RequestParam List<Long> pdServiceVersionLinks);
 }
