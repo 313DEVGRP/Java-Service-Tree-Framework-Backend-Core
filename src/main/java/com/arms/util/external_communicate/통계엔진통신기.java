@@ -3,6 +3,7 @@ package com.arms.util.external_communicate;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.donut.AggregationResponse;
 import com.arms.dashboard.model.power.Worker;
+import com.arms.dashboard.model.resource.AssigneeData;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -74,4 +75,10 @@ public interface 통계엔진통신기 {
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @RequestParam List<Long> pdServiceVersionLinks,
             @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청);
+
+    @GetMapping("/engine/jira/dashboard/resources/tasks")
+    public List<AssigneeData> 리소스_담당자_데이터_리스트(
+            @RequestParam Long pdServiceLink,
+            @RequestParam List<Long> pdServiceVersionLinks
+    );
 }
