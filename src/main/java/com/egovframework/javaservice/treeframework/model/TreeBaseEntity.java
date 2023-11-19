@@ -181,7 +181,7 @@ public abstract class TreeBaseEntity implements Serializable {
     }
 
     public void setData(String data) {
-        System.out.println("dummy setter");
+        //todo
     }
 
     @Transient
@@ -191,7 +191,7 @@ public abstract class TreeBaseEntity implements Serializable {
     }
 
     public void setCopied(boolean copied){
-        System.out.println("dummy setter");
+        //todo
     }
 
     @Transient
@@ -237,7 +237,7 @@ public abstract class TreeBaseEntity implements Serializable {
     }
 
     public void setState(String state){
-        System.out.println("dummy setter");
+
     }
 
     @Transient

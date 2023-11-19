@@ -133,7 +133,6 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
             }
-            logger.info("RouteTableInterceptor :: onPrepareStatement servletPath -> " + servletPath);
         } catch (Exception e) {
             log.info("RouteTableInterceptor :: onPrepareStatement :: Exception -> " + e.getMessage());
         }
@@ -143,19 +142,19 @@ public class RouteTableInterceptor extends EmptyInterceptor{
     }
 
     private String replaceStatement(String prepedStatement, String replaceTableName) {
-        logger.info("RouteTableInterceptor :: prepedStatement - before =>" + prepedStatement);
-        logger.info("RouteTableInterceptor :: replaceTableName =>" + replaceTableName);
+        log.info("RouteTableInterceptor :: prepedStatement - before =>" + prepedStatement);
+        log.info("RouteTableInterceptor :: replaceTableName =>" + replaceTableName);
         if (StringUtils.isNotEmpty(replaceTableName)) {
             if(StringUtils.contains(replaceTableName,"T_ARMS_REQADD")){
                 prepedStatement = prepedStatement.replaceAll("T_ARMS_REQADD", replaceTableName);
             }else if(StringUtils.contains(replaceTableName,"T_ARMS_REQSTATUS")){
                 prepedStatement = prepedStatement.replaceAll("T_ARMS_REQSTATUS", replaceTableName);
             }else{
-                logger.info("RouteTableInterceptor :: replaceTableName - notFound =>" + replaceTableName);
+                log.info("RouteTableInterceptor :: replaceTableName - notFound =>" + replaceTableName);
             }
-            logger.info("RouteTableInterceptor :: prepedStatement - after =>" + prepedStatement);
+            log.info("RouteTableInterceptor :: prepedStatement - after =>" + prepedStatement);
         } else {
-            logger.info("RouteTableInterceptor :: replaceTableName - empty");
+            log.info("RouteTableInterceptor :: replaceTableName - empty");
         }
         return prepedStatement;
     }
@@ -232,8 +231,8 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 }
             }
         }
-        logger.info("RouteTableInterceptor :: setReplaceTableName -> " + servletPath);
-        logger.info("RouteTableInterceptor :: setReplaceTableName -> " + tableName);
+        log.info("RouteTableInterceptor :: setReplaceTableName -> " + servletPath);
+        log.info("RouteTableInterceptor :: setReplaceTableName -> " + tableName);
         return tableName;
     }
 }

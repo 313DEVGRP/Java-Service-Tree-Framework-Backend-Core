@@ -87,4 +87,13 @@ public interface 엔진통신기 {
     List<지라이슈> 제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
                                             @RequestParam Long pdServiceLink,
                                             @RequestParam List<Long> pdServiceVersionLinks);
+
+    /*
+     * 이슈 가져오기.
+     */
+    @GetMapping("/engine/jira/{connectId}/issue/get/{reqProjectKey}/{reqIssueKey}")
+    지라이슈 요구사항이슈_조회(@PathVariable("connectId") Long 지라서버_아이디,
+                   @PathVariable("reqProjectKey") String 지라프로젝트_키,
+                   @PathVariable("reqIssueKey") String 지라이슈_키);
+
 }

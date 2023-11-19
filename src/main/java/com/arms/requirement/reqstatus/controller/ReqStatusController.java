@@ -127,6 +127,29 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/updateStatusNode.do"},
+            method = {RequestMethod.PUT}
+    )
+    public ModelAndView updateStatusNode(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @RequestBody ReqStatusDTO reqStatusDTO) throws Exception {
+
+        log.info("ReqStatusController :: updateStatusNode");
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+
+        SessionUtil.setAttribute("updateStatusNode",changeReqTableName);
+
+        int 결과 = reqStatus.updateNode(statusEntity);
+
+        SessionUtil.removeAttribute("updateStatusNode");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 결과);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/getStatistics.do"},
             method = {RequestMethod.GET}
     )

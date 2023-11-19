@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -25,6 +26,9 @@ public interface 내부통신기 {
     @GetMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
     List<ReqStatusEntity> 제품별_요구사항_이슈_조회(@PathVariable(value ="changeReqTableName") String changeReqTableName,
                                          @RequestBody ReqStatusDTO reqStatusDTO);
+
+    @PutMapping("/arms/reqStatus/{changeReqTableName}/updateStatusNode.do")
+    Integer updateStatusNode(@PathVariable(value ="changeReqTableName") String changeReqTableName, @RequestBody ReqStatusDTO reqStatusDTO);
 
 
 }
