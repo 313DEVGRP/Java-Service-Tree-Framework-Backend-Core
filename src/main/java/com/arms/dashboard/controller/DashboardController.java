@@ -14,6 +14,7 @@ import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -91,11 +92,11 @@ public class DashboardController extends TreeMapAbstractController {
 
     @ResponseBody
     @GetMapping("/jira-issue-statuses")
-    public ModelAndView jiraIssueStatuses(@RequestParam Long pdServiceLink, @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+    public ModelAndView jiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         log.info("DashboardController :: jiraIssueStatuses");
-        List<AggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(pdServiceLink, pdServiceVersionLinks);
+        ResponseEntity<검색결과_목록_메인> result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(지라이슈_제품_및_제품버전_검색요청);
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
+        modelAndView.addObject("result", result.getBody());
         return modelAndView;
     }
 

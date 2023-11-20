@@ -9,6 +9,7 @@ import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,8 @@ import java.util.Map;
 @FeignClient(name = "engine-dashboard", url = "${arms.engine.url}")
 public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/jira-issue-statuses")
-    public List<AggregationResponse> 제품_혹은_제품버전들의_지라이슈상태_집계(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
+    public ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_지라이슈상태_집계(
+            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 
     @GetMapping("/engine/jira/dashboard/requirements-jira-issue-statuses")
