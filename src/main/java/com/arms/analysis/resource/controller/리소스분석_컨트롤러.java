@@ -1,6 +1,5 @@
 package com.arms.analysis.resource.controller;
 
-import com.arms.dashboard.model.resource.AssigneeData;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
@@ -45,19 +44,6 @@ public class 리소스분석_컨트롤러 {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
-        return modelAndView;
-    }
-
-    @ResponseBody
-    @GetMapping("/tasks")
-    public ModelAndView 리소스_담당자_데이터_리스트(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks
-    ) {
-        log.info("리소스분석_컨트롤러 :: 리소스_담당자_데이터_리스트.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceLink, pdServiceVersionLinks.toString());
-        List<AssigneeData> assigneeDataList = 통계엔진통신기.리소스_담당자_데이터_리스트(pdServiceLink, pdServiceVersionLinks);
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", assigneeDataList);
         return modelAndView;
     }
 

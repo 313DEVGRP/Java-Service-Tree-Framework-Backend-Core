@@ -1,7 +1,6 @@
 package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
-import com.arms.dashboard.model.donut.AggregationResponse;
 import com.arms.dashboard.model.power.Worker;
 import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 import com.arms.dashboard.model.sankey.SankeyData;
