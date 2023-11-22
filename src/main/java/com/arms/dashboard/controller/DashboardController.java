@@ -93,24 +93,24 @@ public class DashboardController extends TreeMapAbstractController {
     @GetMapping("/jira-issue-statuses")
     public ModelAndView jiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         log.info("DashboardController :: jiraIssueStatuses");
-        ResponseEntity<검색결과_목록_메인> result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(지라이슈_제품_및_제품버전_검색요청);
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result.getBody());
-        return modelAndView;
-    }
-
-    @ResponseBody
-    @GetMapping("/requirements-jira-issue-statuses")
-    public ModelAndView requirementsJiraIssueStatuses(@RequestParam Long pdServiceLink, @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
-        log.info("DashboardController :: requirementsJiraIssueStatuses");
-        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(pdServiceLink, pdServiceVersionLinks);
+        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(지라이슈_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
     }
 
     @ResponseBody
-    @RequestMapping(value = "/version-assignees", method = RequestMethod.GET)
+    @GetMapping("/requirements-jira-issue-statuses")
+    public ModelAndView requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+        log.info("DashboardController :: requirementsJiraIssueStatuses");
+        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(지라이슈_제품_및_제품버전_검색요청).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/version-assignees")
     public ModelAndView assigneesByPdServiceVersion(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
@@ -144,22 +144,19 @@ public class DashboardController extends TreeMapAbstractController {
                 })
                 .collect(Collectors.toSet());
 
-        List<검색결과> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(지라이슈_제품_및_제품버전_검색요청);
-
-        esData.forEach(result -> {
-            String versionId = result.get필드명();
-            result.get하위검색결과().get("assignees").forEach(assignee -> {
-                String assigneeAccountId = assignee.get필드명();
-                assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
-                    String assigneeDisplayName = displayName.get필드명();
-                    String workerNodeId = versionId + "-" + assigneeAccountId;
-                    /**
-                     * 추후 displayName 이 겹치는 케이스(ex. 동명이인) 로 인해 accountId로 구분 해야 하는 경우 사용
-                     * String workerNodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
-                     */
-                    nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
-                    linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
-                    versionIds.remove(Long.parseLong(versionId));
+        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(통계엔진통신기.제품_혹은_제품버전들의_담당자목록(지라이슈_제품_및_제품버전_검색요청).getBody());
+        optionalEsData.ifPresent(esData -> {
+            esData.forEach(result -> {
+                String versionId = result.get필드명();
+                result.get하위검색결과().get("assignees").forEach(assignee -> {
+                    String assigneeAccountId = assignee.get필드명();
+                    assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+                        String assigneeDisplayName = displayName.get필드명();
+                        String workerNodeId = versionId + "-" + assigneeAccountId;
+                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
+                        linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
+                        versionIds.remove(Long.parseLong(versionId));
+                    });
                 });
             });
         });
@@ -187,12 +184,10 @@ public class DashboardController extends TreeMapAbstractController {
 
     @GetMapping("/assignees-requirements-involvements")
     public ModelAndView 작업자별_요구사항_관여도(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam(required = false, defaultValue = "5") int maxResults
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
         log.info("DashboardController :: 작업자별_요구사항_관여도");
-        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(pdServiceLink, pdServiceVersionLinks, maxResults);
+        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
