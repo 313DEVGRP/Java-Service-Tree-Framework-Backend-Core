@@ -2,8 +2,7 @@ package com.arms.util.external_communicate;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.power.Worker;
-import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
-
+import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
@@ -34,10 +33,8 @@ public interface 통계엔진통신기 {
     public Map<String, Long> 제품서비스별_담당자_이름_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디);
 
     @GetMapping("/engine/jira/dashboard/version-assignees")
-    public Map<String, List<SankeyElasticSearchData>> 제품_혹은_제품버전들의_담당자목록(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam int maxResults
+    public List<검색결과> 제품_혹은_제품버전들의_담당자목록(
+            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 
     @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
