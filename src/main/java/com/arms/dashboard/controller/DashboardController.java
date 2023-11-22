@@ -112,12 +112,11 @@ public class DashboardController extends TreeMapAbstractController {
     @ResponseBody
     @RequestMapping(value = "/version-assignees", method = RequestMethod.GET)
     public ModelAndView assigneesByPdServiceVersion(
-            @RequestParam Long pdServiceLink,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @RequestParam(required = false, defaultValue = "3") int maxResults
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
         log.info("DashboardController :: getSankeyChart");
-
+        Long pdServiceLink = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
+        List<Long> pdServiceVersionLinks = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
         if (pdServiceVersionLinks.isEmpty()) {
             return new ModelAndView("jsonView")
                     .addObject("result", new SankeyData(Collections.emptyList(), Collections.emptyList()));
@@ -134,7 +133,6 @@ public class DashboardController extends TreeMapAbstractController {
         nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
         nodeList.add(new SankeyNode("No-Worker", "No-Worker", "No-Worker"));
 
-
         Set<Long> versionIds = savedPdService.getPdServiceVersionEntities().stream()
                 .filter(version -> pdServiceVersionLinks.contains(version.getC_id()))
                 .sorted(Comparator.comparing(PdServiceVersionEntity::getC_id))
@@ -146,26 +144,27 @@ public class DashboardController extends TreeMapAbstractController {
                 })
                 .collect(Collectors.toSet());
 
-        Map<String, List<SankeyElasticSearchData>> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(pdServiceLink, pdServiceVersionLinks, maxResults);
+        List<검색결과> esData = 통계엔진통신기.제품_혹은_제품버전들의_담당자목록(지라이슈_제품_및_제품버전_검색요청);
 
-        esData.forEach((versionId, sankeyCharts) -> {
-            sankeyCharts.stream().forEach(sankeyElasticSearchData -> {
-                String assigneeAccountId = sankeyElasticSearchData.getAssigneeAccountId();
-                String assigneeDisplayName = sankeyElasticSearchData.getAssigneeDisplayName();
-                /**
-                 * 추후 displayName 이 겹치는 케이스(ex. 동명이인) 로 인해 accountId로 구분 해야 하는 경우 사용
-                 * String nodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
-                 */
-                String workerNodeId = versionId + "-" + assigneeAccountId;
-                nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
-                linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
-                versionIds.remove(Long.parseLong(versionId));
+        esData.forEach(result -> {
+            String versionId = result.get필드명();
+            result.get하위검색결과().get("assignees").forEach(assignee -> {
+                String assigneeAccountId = assignee.get필드명();
+                assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+                    String assigneeDisplayName = displayName.get필드명();
+                    String workerNodeId = versionId + "-" + assigneeAccountId;
+                    /**
+                     * 추후 displayName 이 겹치는 케이스(ex. 동명이인) 로 인해 accountId로 구분 해야 하는 경우 사용
+                     * String workerNodeName = String.format("%s(%s)", assigneeDisplayName, assigneeAccountId);
+                     */
+                    nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
+                    linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
+                    versionIds.remove(Long.parseLong(versionId));
+                });
             });
         });
 
-        for (Long versionId : versionIds) {
-            linkList.add(new SankeyLink(versionId + "-version", "No-Worker"));
-        }
+        versionIds.forEach(versionId -> linkList.add(new SankeyLink(versionId + "-version", "No-Worker")));
 
         return new ModelAndView("jsonView")
                 .addObject("result", new SankeyData(nodeList, linkList));
