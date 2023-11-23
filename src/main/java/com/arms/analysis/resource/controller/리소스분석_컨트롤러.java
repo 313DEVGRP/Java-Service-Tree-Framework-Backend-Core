@@ -63,4 +63,26 @@ public class 리소스분석_컨트롤러 {
         modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
+
+    @ResponseBody
+    @GetMapping("/normal-versionAndMail-filter/{pdServiceId}")
+    public ModelAndView 리소스_버전필터_작업자필터_통계(@PathVariable("pdServiceId") Long pdServiceId,
+                                       @RequestParam List<Long> pdServiceVersionLinks,
+                                       @RequestParam List<String> mailAddressList,
+                                       지라이슈_단순_검색_요청 검색요청_데이터) throws Exception {
+
+        log.info("리소스분석_컨트롤러 :: 리소스_버전필터_작업자필터_통계.pdServiceVersionLinks ==> {}, mailAddressList ==> {}"
+                , pdServiceVersionLinks.toString(), mailAddressList.toString());
+
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.일반_버전_및_작업자_필터_검색(pdServiceId, pdServiceVersionLinks, mailAddressList, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+
+        검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+
+        modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
 }

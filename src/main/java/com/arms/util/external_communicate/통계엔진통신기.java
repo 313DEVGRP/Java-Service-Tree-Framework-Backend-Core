@@ -73,4 +73,11 @@ public interface 통계엔진통신기 {
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @RequestParam List<Long> pdServiceVersionLinks,
             @SpringQueryMap 지라이슈_단순_검색_요청 지라이슈_단순_검색_요청);
+
+    @GetMapping("/engine/jira/dashboard/normal-versionAndMail-filter/{pdServiceId}")
+    ResponseEntity<검색결과_목록_메인> 일반_버전_및_작업자_필터_검색(
+            @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
+            @RequestParam List<Long> pdServiceVersionLinks,
+            @RequestParam List<String> mailAddressList,
+            @SpringQueryMap 지라이슈_단순_검색_요청 지라이슈_단순_검색_요청);
 }
