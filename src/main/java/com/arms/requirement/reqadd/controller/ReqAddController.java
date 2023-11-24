@@ -110,7 +110,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         SessionUtil.setAttribute("getMonitor",changeReqTableName);
 
         reqAddEntity.setOrder(Order.asc("c_position"));
-        List<ReqAddEntity> list = this.reqAdd.getChildNode(reqAddEntity);
+        List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
 
         SessionUtil.removeAttribute("getMonitor");
 
