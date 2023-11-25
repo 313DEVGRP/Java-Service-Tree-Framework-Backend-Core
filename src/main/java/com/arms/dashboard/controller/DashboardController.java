@@ -2,7 +2,6 @@ package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.power.Worker;
-import com.arms.dashboard.model.sankey.SankeyElasticSearchData;
 import com.arms.dashboard.model.sankey.SankeyData;
 import com.arms.dashboard.model.sankey.SankeyLink;
 import com.arms.dashboard.model.sankey.SankeyNode;
@@ -53,6 +52,23 @@ public class DashboardController extends TreeMapAbstractController {
 
     static final long dummy_jira_server = 0L;
 
+    @ResponseBody
+    @GetMapping("/aggregation/nested")
+    public ModelAndView commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(지라이슈_제품_및_제품버전_검색요청).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/aggregation/flat")
+    public ModelAndView commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
     @GetMapping(value = "/getVersionProgress")
     @ResponseBody
     public ModelAndView getVersionProgress(HttpServletRequest request) throws Exception {
