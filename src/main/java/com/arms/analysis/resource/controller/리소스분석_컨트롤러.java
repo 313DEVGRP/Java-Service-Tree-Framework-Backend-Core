@@ -1,5 +1,6 @@
 package com.arms.analysis.resource.controller;
 
+import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -56,7 +60,7 @@ public class 리소스분석_컨트롤러 {
         log.info("리소스분석_컨트롤러 :: 리소스_작업자_통계.제품서비스의 c_id ==> {}, 선택된버전의 c_id ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = 통계엔진통신기.일반_버전필터_작업자별_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
@@ -82,6 +86,28 @@ public class 리소스분석_컨트롤러 {
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
 
         modelAndView.addObject("result", 통신결과);
+
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/reqInAction/{pdServiceId}")
+    public ModelAndView 서브태스크_부모_요구사항_집계(@PathVariable("pdServiceId") Long pdServiceId,
+                                        @RequestParam List<Long> pdServiceVersionLinks,
+                                        지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+        log.info("리소스분석_컨트롤러 :: 서브태스크_부모_요구사항_집계");
+
+        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+        검색결과_목록_메인 결과 = 집계결과.getBody();
+        List<검색결과> 검색결과_목록 = 결과.get검색결과().get("group_by_parentReqKey");
+        List<String> 부모_요구사항_목록 =
+                검색결과_목록.stream().map(검색결과::get필드명)
+                        .distinct().collect(Collectors.toList());
+        Map<String, Integer> result = new HashMap<>();
+        result.put("parentReqCount",(부모_요구사항_목록.size() != 0 ? 부모_요구사항_목록.size() - 1 : 0 ));
+        log.info("리소스분석_컨트롤러 :: 부모_요구사항_목록 => {}", 부모_요구사항_목록.toString());
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
 
         return modelAndView;
     }

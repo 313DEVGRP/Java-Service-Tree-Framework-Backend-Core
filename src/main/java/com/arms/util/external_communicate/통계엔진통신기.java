@@ -79,7 +79,7 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_검색_일반_요청);
 
     @GetMapping("/engine/jira/dashboard/normal-version-only/{pdServiceId}")
-    ResponseEntity<검색결과_목록_메인> 일반_버전필터_작업자별_검색(
+    ResponseEntity<검색결과_목록_메인> 일반_버전필터_검색(
             @PathVariable("pdServiceId") Long 제품서비스_아이디 ,
             @RequestParam List<Long> pdServiceVersionLinks,
             @SpringQueryMap 지라이슈_단순_검색_요청 지라이슈_단순_검색_요청);
