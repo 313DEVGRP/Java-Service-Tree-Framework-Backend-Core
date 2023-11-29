@@ -99,7 +99,7 @@ public class 리소스분석_컨트롤러 {
 
         ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         검색결과_목록_메인 결과 = 집계결과.getBody();
-        List<검색결과> 검색결과_목록 = 결과.get검색결과().get("group_by_parentReqKey");
+        List<검색결과> 검색결과_목록 = 결과.get검색결과().get("group_by_parentReqKey.keyword");
         List<String> 부모_요구사항_목록 =
                 검색결과_목록.stream().map(검색결과::get필드명)
                         .distinct().collect(Collectors.toList());
