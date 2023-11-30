@@ -106,16 +106,6 @@ public class DashboardController extends TreeMapAbstractController {
 
 
     @ResponseBody
-    @GetMapping("/jira-issue-statuses")
-    public ModelAndView jiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        log.info("DashboardController :: jiraIssueStatuses");
-        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_지라이슈상태_집계(지라이슈_제품_및_제품버전_검색요청).getBody();
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
-    }
-
-    @ResponseBody
     @GetMapping("/requirements-jira-issue-statuses")
     public ModelAndView requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
         log.info("DashboardController :: requirementsJiraIssueStatuses");

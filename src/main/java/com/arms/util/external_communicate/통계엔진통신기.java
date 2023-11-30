@@ -18,10 +18,6 @@ import java.util.Map;
 
 @FeignClient(name = "engine-dashboard", url = "${arms.engine.url}")
 public interface 통계엔진통신기 {
-    @GetMapping("/engine/jira/dashboard/jira-issue-statuses")
-    ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_지라이슈상태_집계(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
-    );
 
     @GetMapping("/engine/jira/dashboard/aggregation/nested")
     ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_집계_nested(
