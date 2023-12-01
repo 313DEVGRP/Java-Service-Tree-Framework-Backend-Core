@@ -2,7 +2,6 @@ package com.arms.util.external_communicate;
 
 import com.arms.util.external_communicate.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,5 +94,10 @@ public interface 엔진통신기 {
     지라이슈 요구사항이슈_조회(@PathVariable("connectId") Long 지라서버_아이디,
                    @PathVariable("reqProjectKey") String 지라프로젝트_키,
                    @PathVariable("reqIssueKey") String 지라이슈_키);
+
+    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions/heatmap")
+    히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
+                               @RequestParam Long pdServiceLink,
+                               @RequestParam List<Long> pdServiceVersionLinks);
 
 }

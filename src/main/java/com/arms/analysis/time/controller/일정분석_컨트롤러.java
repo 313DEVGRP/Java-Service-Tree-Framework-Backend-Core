@@ -3,6 +3,7 @@ package com.arms.analysis.time.controller;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.히트맵데이터;
 import com.arms.util.external_communicate.엔진통신기;
 import com.arms.util.external_communicate.통계엔진통신기;
 import lombok.AllArgsConstructor;
@@ -37,10 +38,22 @@ public class 일정분석_컨트롤러 {
     @GetMapping(value = "/pdService/pdServiceVersions")
     @ResponseBody
     public ModelAndView 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
-                                           @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+                                        @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
 
         log.info("일정분석_컨트롤러 :: 제품서비스_버전목록으로_조회");
         List<지라이슈> result = 엔진통신기.제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+    @GetMapping(value = "/heatmap")
+    @ResponseBody
+    public ModelAndView 히트맵_제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                            @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("일정분석_컨트롤러 :: 히트맵_제품서비스_버전목록으로_조회");
+        히트맵데이터 result = 엔진통신기.히트맵_제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
