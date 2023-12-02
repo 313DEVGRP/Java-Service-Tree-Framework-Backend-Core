@@ -331,85 +331,98 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
-
         List<PdServiceEntity> 서비스_리스트 = this.getNodesWithoutRoot(new PdServiceEntity());
 
         if (서비스_리스트.isEmpty()) {
             return null;
+        } else {
+            List<Long> 버전아이디_목록 = new ArrayList<>();
+            for (PdServiceEntity 서비스엔티티 : 서비스_리스트) {
+                Set<PdServiceVersionEntity> 버전엔티티_세트 = 서비스엔티티.getPdServiceVersionEntities();
+                버전아이디_목록.addAll(버전엔티티_세트.stream().map(버전 -> 버전.getC_id()).collect(Collectors.toList()));
+            }
+            // 1.버전 - 서비스 / 버전 - 지라프로젝트가 있는 엔티티 획득.
+            List<GlobalTreeMapEntity> 버전_중심_글로벌트리맵엔티티_목록 = globalTreeMapService.findAllByIds(버전아이디_목록, "pdserviceversion_link");
+            // 2.버전 - 지라프로젝트 아이디만 솎아내기
+            List<Long> 연관_지라프로젝트_아이디_목록 = 버전_중심_글로벌트리맵엔티티_목록.stream()
+                    .map(GlobalTreeMapEntity::getJiraproject_link)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            JiraProjectPureEntity 프로젝트_퓨어_검색 = new JiraProjectPureEntity();
+            프로젝트_퓨어_검색.getCriterions().add(Restrictions.in("c_id",연관_지라프로젝트_아이디_목록));
+            // 3. 솎아낸 아이디만 모아서, 지라프로젝트 엔티티 가져오기
+            List<JiraProjectPureEntity> 지라프로젝트_목록 = jiraProjectPure.getChildNode(프로젝트_퓨어_검색);
+            // 4. 지라프로젝트 맵 생성 (K-V) - (아이디-명)
+            Map<Long, String> 지라프로젝트_맵 = 지라프로젝트_목록.stream()
+                    .collect(Collectors.toMap(JiraProjectPureEntity::getC_id, JiraProjectPureEntity::getC_jira_name));
+
+            List<GlobalTreeMapEntity> 유니크_지라프로젝트_서버_트리맵 = globalTreeMapService
+                    .findAllByIds(연관_지라프로젝트_아이디_목록,"jiraproject_link").stream()
+                    .filter(글로벌트리맵엔티티->글로벌트리맵엔티티.getJiraserver_link() != null) // 이 시점에 server와 project 만 있다.
+                    .collect(Collectors.collectingAndThen(
+                                Collectors.toCollection(()-> new TreeSet<>(
+                                    Comparator.comparing(entity -> entity.getJiraproject_link()+"|"+entity.getJiraserver_link()))),
+                            ArrayList::new));
+
+            List<PdServiceD3Chart> 레벨2_서비스_리스트 =
+                    서비스_리스트.parallelStream().map(
+                            서비스 -> {
+                                Set<PdServiceVersionEntity> 서비스_버전_리스트 = 서비스.getPdServiceVersionEntities();
+
+                                List<PdServiceD3Chart> 레벨3_버전_리스트 = 서비스_버전_리스트.stream().map(
+                                        버전 -> {
+                                            List<Long> 해당버전_지라프로젝트_아이디_목록 = 버전_중심_글로벌트리맵엔티티_목록.stream()
+                                                    .filter(엔티티 -> Objects.equals(엔티티.getPdserviceversion_link(), 버전.getC_id()))
+                                                    .map(GlobalTreeMapEntity::getJiraproject_link).collect(Collectors.toList());
+
+                                            List<PdServiceD3Chart> 레벨4_지라프로젝트_목록 = new ArrayList<>();
+
+                                            for(Long 프로젝트_아이디 : 해당버전_지라프로젝트_아이디_목록) {
+                                                if (Objects.isNull(프로젝트_아이디)) {
+                                                  continue;
+                                                }
+
+                                                String 지라프로젝트_명 = 지라프로젝트_맵.get(프로젝트_아이디);
+                                                Long 지라서버_아이디 = 유니크_지라프로젝트_서버_트리맵.stream()
+                                                        .filter(프로젝트_서버_트리맵 -> Objects.equals(프로젝트_서버_트리맵.getJiraproject_link(),프로젝트_아이디))
+                                                        .map(GlobalTreeMapEntity::getJiraserver_link).findFirst().orElse(0L);
+
+                                                JiraServerPureEntity 지라서버검색 = new JiraServerPureEntity();
+                                                지라서버검색.setC_id(지라서버_아이디);
+
+                                                String 지라서버명="";
+
+                                                try {
+                                                    JiraServerPureEntity 지라서버퓨어_엔티티 = jiraServerPure.getNode(지라서버검색);
+                                                    지라서버명 += "["+지라서버퓨어_엔티티.getC_jira_server_name()+"] ";
+                                                } catch (Exception e) {
+                                                    throw new RuntimeException("검색된 지라 서버가 없습니다.");
+                                                }
+                                                if(!지라서버명.isBlank()) {
+                                                    레벨4_지라프로젝트_목록.add(PdServiceD3Chart.builder()
+                                                            .type("Jira")
+                                                            .name(지라서버명 + 지라프로젝트_명)
+                                                            .build());
+                                                }
+                                            }
+                                            return PdServiceD3Chart.builder().type("Version")
+                                                    .name(버전.getC_title())
+                                                    .children(레벨4_지라프로젝트_목록).build();
+
+                                }).collect(Collectors.toList()); //레벨3
+
+                                return PdServiceD3Chart.builder().type("PdService").name(서비스.getC_title())
+                                        .children(레벨3_버전_리스트).build();
+
+                            }).collect(Collectors.toList()); // 레벨2_서비스_리스트
+
+            return PdServiceD3Chart.builder()
+                    .name("a-RMS") //레벨1
+                    .children(레벨2_서비스_리스트)
+                    .build();
         }
 
-        List<PdServiceD3Chart> 레벨2_서비스_리스트 =
-                서비스_리스트.parallelStream().map(
-                    서비스 ->{
-                        Set<PdServiceVersionEntity> 서비스_버전_리스트 = 서비스.getPdServiceVersionEntities();
-
-                        List<PdServiceD3Chart> 레벨3_버전_리스트 = 서비스_버전_리스트.stream()
-                                .map(버전 -> {
-                                    GlobalTreeMapEntity 검색용_글로벌_트리맵 = new GlobalTreeMapEntity();
-                                    검색용_글로벌_트리맵.setPdserviceversion_link(버전.getC_id());
-
-                                    List<Long> 지라프로젝트_아이디_목록 = globalTreeMapService.findAllBy(검색용_글로벌_트리맵).stream()
-                                            .filter(글로벌트리맵 -> 글로벌트리맵.getJiraproject_link() != null)
-                                            .map(GlobalTreeMapEntity::getJiraproject_link).collect(Collectors.toList());
-
-                                    Criterion criterion = Restrictions.in("c_id", 지라프로젝트_아이디_목록);
-                                    JiraProjectPureEntity 지라프로젝트_검색전용 = new JiraProjectPureEntity();
-                                    지라프로젝트_검색전용.getCriterions().add(criterion);
-
-                                    List<JiraProjectPureEntity> 검색된_지라프로젝트_목록 = null;
-                                    try {
-                                        검색된_지라프로젝트_목록 = jiraProjectPure.getChildNode(지라프로젝트_검색전용);
-                                    } catch (Exception e) {
-                                        throw new RuntimeException("검색된 지라 프로젝트 목록이 없습니다.");
-                                    }
-                                    List<PdServiceD3Chart> 레벨4_지라프로젝트_리스트 = new ArrayList<>();
-
-                                    for (JiraProjectPureEntity 지라프로젝트 : 검색된_지라프로젝트_목록) {
-
-                                        GlobalTreeMapEntity 검색용_글로벌_트리맵2 = new GlobalTreeMapEntity();
-                                        검색용_글로벌_트리맵2.setJiraproject_link(지라프로젝트.getC_id());
-                                        Long 지라서버아이디 = globalTreeMapService.findAllBy(검색용_글로벌_트리맵2).stream()
-                                                .filter(글로벌트리맵2 -> 글로벌트리맵2.getJiraserver_link() != null)
-                                                .map(GlobalTreeMapEntity::getJiraserver_link).findFirst().get();
-
-                                        JiraServerPureEntity 지라서버검색 = new JiraServerPureEntity();
-                                        지라서버검색.setC_id(지라서버아이디);
-                                        String 지라서버명 = "[";
-                                        try {
-                                            JiraServerPureEntity 검색결과 = jiraServerPure.getNode(지라서버검색);
-                                            지라서버명 += 검색결과.getC_jira_server_name()+"] ";
-                                        } catch (Exception e) {
-                                            지라서버명 = "서버없음]";
-                                            throw new RuntimeException("검색된 지라 서버가 없습니다.");
-                                        }
-
-                                        레벨4_지라프로젝트_리스트.add( PdServiceD3Chart.builder()
-                                                                        .type("Jira")
-                                                                        .name(지라서버명+지라프로젝트.getC_jira_name())
-                                                                        .build());
-                                    }
-
-                                    return PdServiceD3Chart.builder()
-                                            .type("Version")
-                                            .name(버전.getC_title())
-                                            .children(레벨4_지라프로젝트_리스트)
-                                            .build();
-                                })
-                                .collect(Collectors.toList()); //레벨3
-
-                        return PdServiceD3Chart.builder()
-                                .type("PdService")
-                                .name(서비스.getC_title())
-                                .children(레벨3_버전_리스트)
-                                .build();
-
-                    }).collect(Collectors.toList()); // 레벨2_서비스_리스트
-
-        return PdServiceD3Chart.builder()
-                .name("a-RMS") //레벨1
-                .children(레벨2_서비스_리스트)
-                .build();
     }
-
-
 }
