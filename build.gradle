@@ -99,8 +99,8 @@ ext {
     metadataUrl = "${repositoryUrl}313devgrp/Java-Service-Tree-Framework-Backend-Core/maven-metadata.xml"
 
     //version 정보
-    majorVersion = 3
-    minorVersion = 13
+    majorVersion = 23
+    minorVersion = 12
     //patchVersion = auto generation
 
     //mac 사용자 아래 114까지 주석처리!!
