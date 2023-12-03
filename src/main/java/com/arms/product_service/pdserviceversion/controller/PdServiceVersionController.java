@@ -25,8 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
@@ -76,4 +75,19 @@ public class PdServiceVersionController extends TreeAbstractController<PdService
         return modelAndView;
     }
 
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getVersionStartDates.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getVersionStartDates(PdServiceVersionDTO pdServiceVersionDTO,
+                                            @RequestParam("c_ids") List<Long> c_ids) throws Exception {
+
+        log.info("PdServiceVersionController :: getVersionStartDates");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", pdServiceVersion.getVersionStartDates(c_ids));
+        return modelAndView;
+    }
 }

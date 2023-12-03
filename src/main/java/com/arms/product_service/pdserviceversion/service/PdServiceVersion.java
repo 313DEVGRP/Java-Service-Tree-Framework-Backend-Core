@@ -15,6 +15,7 @@ import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PdServiceVersion extends TreeService {
 
@@ -22,4 +23,5 @@ public interface PdServiceVersion extends TreeService {
 
     public List<PdServiceVersionEntity> getVersionListByCids(List<Long> pdServiceVersionDTO) throws Exception;
 
+    Map<Long, String> getVersionStartDates(List<Long> pdServiceVersionList) throws Exception;
 }

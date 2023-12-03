@@ -19,7 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service("pdServiceVersion")
 public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVersion{
@@ -47,6 +49,21 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         logger.info("UserPdServiceVersionController ::  getVersions :: pdServiceVersionDTOS = " + pdServiceVersionEntities.size());
 
         return pdServiceVersionEntities;
+    }
+
+    @Override
+    public Map<Long, String> getVersionStartDates(List<Long> pdServiceVersionList) throws Exception {
+
+        Map<Long, String> 버전_시작일 = new HashMap<>();
+        for (Long c_id : pdServiceVersionList) {
+            PdServiceVersionEntity pdServiceVersionEntity = new PdServiceVersionEntity();
+            pdServiceVersionEntity.setC_id(c_id);
+            PdServiceVersionEntity 버전정보 = this.getNode(pdServiceVersionEntity);
+            String 시작일 = 버전정보.getC_pds_version_start_date();
+            버전_시작일.put(c_id, 시작일);
+        }
+
+        return 버전_시작일;
     }
 
 }

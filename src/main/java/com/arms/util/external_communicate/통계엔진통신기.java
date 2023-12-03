@@ -86,4 +86,10 @@ public interface 통계엔진통신기 {
             @RequestParam List<Long> pdServiceVersionLinks,
             @RequestParam List<String> mailAddressList,
             @SpringQueryMap 지라이슈_단순_검색_요청 지라이슈_단순_검색_요청);
+
+    @GetMapping("/engine/jira/dashboard/daily-requirements-jira-issue-statuses")
+    ResponseEntity<Map<String, RequirementJiraIssueAggregationResponse>> 제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계(
+            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+            @RequestParam String startDate
+    );
 }

@@ -1,8 +1,11 @@
 package com.arms.analysis.time.controller;
 
+import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
+import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.util.external_communicate.dto.히트맵데이터;
 import com.arms.util.external_communicate.엔진통신기;
 import com.arms.util.external_communicate.통계엔진통신기;
@@ -16,7 +19,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -32,6 +39,9 @@ public class 일정분석_컨트롤러 {
 
     @Autowired
     private 통계엔진통신기 통계엔진통신기;
+
+    @Autowired
+    private PdServiceVersion pdServiceVersion;
 
     static final long dummy_jira_server = 0L;
 
@@ -75,4 +85,42 @@ public class 일정분석_컨트롤러 {
         modelAndView.addObject("result", 통계결과);
         return modelAndView;
     }
+
+    @ResponseBody
+    @GetMapping("/daily-requirements-jira-issue-statuses")
+    public ModelAndView 제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+
+        log.info("일정분석_컨트롤러 :: 제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계");
+
+        Map<Long, String> versionStartDates = pdServiceVersion.getVersionStartDates(지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
+        log.info(versionStartDates.toString());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        LocalDate minDate = null;
+
+        for (String value : versionStartDates.values()) {
+            try {
+                LocalDate date = LocalDate.parse(value.split(" ")[0], formatter);
+                //System.out.println("formatting date: " + date);
+                if (minDate == null || date.isBefore(minDate)) {
+                    minDate = date;
+                }
+            } catch (DateTimeParseException e) {
+                // value가 날짜 형식이 아닌 경우
+            }
+        }
+
+        if (minDate == null) {
+            LocalDate currentDate = LocalDate.now();
+            LocalDate sevenDaysAgo = currentDate.minusDays(7);
+            minDate = sevenDaysAgo; // 일주일 전 날짜로 설정
+        }
+
+        log.info("start date: " + String.valueOf(minDate));
+        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(minDate)).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
 }
