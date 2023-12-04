@@ -66,4 +66,14 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         return 버전_시작일;
     }
 
+    @Override
+    public List<PdServiceVersionEntity> getVersionListByAjax(List<Long> pdServiceVersionList) throws Exception {
+        PdServiceVersionEntity 버전_검색세팅 = new PdServiceVersionEntity();
+        버전_검색세팅.setWhereIn("c_id",pdServiceVersionList);
+        List<PdServiceVersionEntity> 검색결과 = this.getChildNode(버전_검색세팅);
+
+        logger.info("PdServiceVersionController ::  getVersionList.size = {}", 검색결과.size());
+
+        return 검색결과;
+    }
 }

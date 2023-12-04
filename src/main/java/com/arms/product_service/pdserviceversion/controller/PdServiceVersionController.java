@@ -88,6 +88,23 @@ public class PdServiceVersionController extends TreeAbstractController<PdService
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", pdServiceVersion.getVersionStartDates(c_ids));
+
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getVersionListBy.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getVersionListByAjax(PdServiceVersionDTO pdServiceVersionDTO,
+                                                @RequestParam("c_ids") List<Long> c_ids) throws Exception {
+
+        log.info("PdServiceVersionController :: getVersionStartEndDates");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", pdServiceVersion.getVersionListByAjax(c_ids));
+
         return modelAndView;
     }
 }
