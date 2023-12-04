@@ -11,11 +11,6 @@
  */
 package com.arms.jira.jiraproject_pure.service;
 
-import com.arms.jira.jiraissuestatus.model.JiraIssueStatusEntity;
-import com.arms.jira.jiraissuetype.model.JiraIssueTypeEntity;
-import com.arms.jira.jiraproject.model.JiraProjectEntity;
-import com.arms.requirement.reqadd.model.ReqAddEntity;
-import com.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.egovframework.javaservice.treeframework.service.TreeService;
 
 import java.util.List;

@@ -1,10 +1,8 @@
 package com.arms.product_service.pdservice_pure.model;
 
-import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
 
-import java.util.Set;
 
 @Getter
 @Setter

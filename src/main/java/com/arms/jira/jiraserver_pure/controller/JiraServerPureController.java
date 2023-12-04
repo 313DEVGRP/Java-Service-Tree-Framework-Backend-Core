@@ -16,6 +16,7 @@ import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.jira.jiraserver_pure.model.JiraServerPureDTO;
 import com.arms.jira.jiraserver_pure.model.JiraServerPureEntity;
+import com.arms.jira.jiraserver_pure.service.JiraServerPure;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -40,15 +41,15 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/jiraServerPure"})
-public class JiraServerPureController extends TreeAbstractController<JiraServer, JiraServerPureDTO, JiraServerPureEntity> {
+public class JiraServerPureController extends TreeAbstractController<JiraServerPure, JiraServerPureDTO, JiraServerPureEntity> {
 
     @Autowired
-    @Qualifier("jiraServer")
-    private JiraServer jiraServer;
+    @Qualifier("jiraServerPure")
+    private JiraServerPure jiraServerPure;
 
     @PostConstruct
     public void initialize() {
-        setTreeService(jiraServer);
+        setTreeService(jiraServerPure);
         setTreeEntity(JiraServerPureEntity.class);
     }
 
@@ -64,6 +65,6 @@ public class JiraServerPureController extends TreeAbstractController<JiraServer,
         log.info("JiraServerController :: getJiraServerMonitor");
         JiraServerPureEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerPureEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.getNodesWithoutRoot(jiraServerEntity)));
+        return ResponseEntity.ok(CommonResponse.success(jiraServerPure.getNodesWithoutRoot(jiraServerEntity)));
     }
 }

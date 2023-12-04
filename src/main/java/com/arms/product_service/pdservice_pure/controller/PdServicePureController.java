@@ -11,9 +11,9 @@
  */
 package com.arms.product_service.pdservice_pure.controller;
 
-import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdservice_pure.model.PdServicePureDTO;
 import com.arms.product_service.pdservice_pure.model.PdServicePureEntity;
+import com.arms.product_service.pdservice_pure.service.PdServicePure;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.AllArgsConstructor;
@@ -33,15 +33,15 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = {"/arms/pdServicePure"})
-public class PdServicePureController extends TreeAbstractController<PdService, PdServicePureDTO, PdServicePureEntity> {
+public class PdServicePureController extends TreeAbstractController<PdServicePure, PdServicePureDTO, PdServicePureEntity> {
 
     @Autowired
-    @Qualifier("pdService")
-    private PdService pdService;
+    @Qualifier("pdServicePure")
+    private PdServicePure pdServicePure;
 
     @PostConstruct
     public void initialize() {
-        setTreeService(pdService);
+        setTreeService(pdServicePure);
         setTreeEntity(PdServicePureEntity.class);
     }
 
@@ -55,7 +55,7 @@ public class PdServicePureController extends TreeAbstractController<PdService, P
         log.info("PdServiceController :: getPdServiceMonitor");
         PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServicePureDTO, PdServicePureEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(pdService.getNodesWithoutRoot(pdServicePureEntity)));
+        return ResponseEntity.ok(CommonResponse.success(pdServicePure.getNodesWithoutRoot(pdServicePureEntity)));
 
     }
 }

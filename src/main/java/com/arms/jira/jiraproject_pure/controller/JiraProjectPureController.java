@@ -11,47 +11,32 @@
  */
 package com.arms.jira.jiraproject_pure.controller;
 
-import com.arms.jira.jiraproject.model.JiraProjectDTO;
-import com.arms.jira.jiraproject.model.JiraProjectEntity;
-import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraproject_pure.model.JiraProjectPureDTO;
 import com.arms.jira.jiraproject_pure.model.JiraProjectPureEntity;
-import com.arms.product_service.pdservice.service.PdService;
-import com.arms.requirement.reqadd.model.ReqAddDTO;
-import com.arms.requirement.reqadd.model.ReqAddEntity;
-import com.egovframework.javaservice.treeframework.controller.CommonResponse;
+import com.arms.jira.jiraproject_pure.service.JiraProjectPure;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Slf4j
 @Controller
 @RequestMapping(value = {"/arms/jiraProjectPure"})
-public class JiraProjectPureController extends TreeAbstractController<JiraProject, JiraProjectPureDTO, JiraProjectPureEntity> {
+public class JiraProjectPureController extends TreeAbstractController<JiraProjectPure, JiraProjectPureDTO, JiraProjectPureEntity> {
 
     @Autowired
-    @Qualifier("jiraProject")
-    private JiraProject jiraProject;
-
-    @Autowired
-    @Qualifier("pdService")
-    private PdService pdService;
+    @Qualifier("jiraProjectPure")
+    private JiraProjectPure jiraProjectPure;
 
     @PostConstruct
     public void initialize() {
-        setTreeService(jiraProject);
+        setTreeService(jiraProjectPure);
         setTreeEntity(JiraProjectPureEntity.class);
     }
 
