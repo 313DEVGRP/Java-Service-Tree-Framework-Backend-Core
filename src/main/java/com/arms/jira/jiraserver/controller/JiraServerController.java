@@ -89,6 +89,8 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> 지라_서버_항목별_갱신(
             @PathVariable String renewTarget, JiraServerDTO jiraServerDTO) throws Exception{
+
+        log.info("JiraServerController :: 지라_서버_항목별_갱신 갱신종류=> {}", renewTarget);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(renewTarget, jiraServerEntity)));
@@ -101,6 +103,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraprojectList(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraprojectList");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_프로젝트_가져오기(jiraServerEntity)));
@@ -113,6 +116,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraprojectPure(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraprojectPure");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_프로젝트만_가져오기(jiraServerEntity)));
@@ -125,6 +129,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraIssueTypeList(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraIssueTypeList");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈유형_가져오기(jiraServerEntity)));
@@ -137,6 +142,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraIssueStatusList(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraIssueStatusList");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈상태_가져오기(jiraServerEntity)));
@@ -149,6 +155,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraIssuePriorityList(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraIssuePriorityList");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈우선순위_가져오기(jiraServerEntity)));
@@ -161,6 +168,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     )
     public ResponseEntity<?> getJiraIssueResolutionList(JiraServerDTO jiraServerDTO) throws Exception {
 
+        log.info("JiraServerController :: getJiraIssueResolutionList");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_이슈해결책_가져오기(jiraServerEntity)));
@@ -178,6 +186,8 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     public ResponseEntity<?> 온프레미스_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
                                                       @PathVariable(name="targetCid") Long 항목_c_id,
                                                       JiraServerDTO jiraServerDTO) throws Exception{
+
+        log.info("JiraServerController :: 온프레미스_항목별_기본값_설정, 설정할_항목 : {}, 항목_c_id : {}", 설정할_항목, 항목_c_id);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(설정할_항목,항목_c_id,jiraServerEntity)));

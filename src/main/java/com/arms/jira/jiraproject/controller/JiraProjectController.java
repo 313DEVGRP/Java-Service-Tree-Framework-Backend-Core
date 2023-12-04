@@ -108,7 +108,7 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
                                               JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
 
-        logger.info("JiraProjectController :: 온프레미스_항목별_기본값_설정");
+        logger.info("JiraProjectController :: 온프레미스_항목별_기본값_설정, 설정할_항목: {}, 항목_c_id: {}", 설정할_항목, 항목_c_id);
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_기본값_설정(설정할_항목, 항목_c_id, jiraProjectEntity)));
     }

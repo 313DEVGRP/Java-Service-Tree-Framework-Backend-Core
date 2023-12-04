@@ -24,6 +24,7 @@ import com.arms.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
 import com.arms.jira.jiraproject_pure.model.JiraProjectPureEntity;
+import com.arms.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.util.external_communicate.*;
 import com.arms.util.external_communicate.dto.*;
@@ -59,6 +60,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Qualifier("jiraProject")
 	private JiraProject jiraProject;
 
+	@Autowired
+	@Qualifier("jiraProjectPure")
+	private JiraProjectPure jiraProjectPure;
 	@Autowired
 	@Qualifier("jiraIssueType")
 	private JiraIssueType jiraIssueType;
@@ -101,7 +105,6 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		검색용_서버_엔티티.setC_id(jiraServerEntity.getC_id());
 
 		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
-		String 서버유형 = 검색된_지라_서버.getC_jira_server_type();
 
 		// url에서 가져오므로
 		//이슈 유형
@@ -174,9 +177,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 
-		Criterion criterion = Restrictions.in("c_id", 프로젝트_cId_목록);
 		JiraProjectEntity 프로젝트_검색전용 = new JiraProjectEntity();
-		프로젝트_검색전용.getCriterions().add(criterion);
+		프로젝트_검색전용.setWhereIn("c_id",프로젝트_cId_목록);
 		List<JiraProjectEntity> 지라프로젝트_목록 = jiraProject.getChildNode(프로젝트_검색전용);
 		return 지라프로젝트_목록;
 	}
@@ -194,10 +196,10 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				프로젝트_cId_목록.add(연결정보.getJiraproject_link());
 			}
 		}
-		Criterion criterion = Restrictions.in("c_id", 프로젝트_cId_목록);
+
 		JiraProjectPureEntity 프로젝트_검색전용 = new JiraProjectPureEntity();
-		프로젝트_검색전용.getCriterions().add(criterion);
-		List<JiraProjectPureEntity> 지라프로젝트_목록 = jiraProject.getChildNode(프로젝트_검색전용);
+		프로젝트_검색전용.setWhereIn("c_id", 프로젝트_cId_목록);
+		List<JiraProjectPureEntity> 지라프로젝트_목록 = jiraProjectPure.getChildNode(프로젝트_검색전용);
 
 		return 지라프로젝트_목록;
 	}
@@ -214,9 +216,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				이슈유형_cId_목록.add(연결정보.getJiraissuetype_link());
 			}
 		}
-		Criterion criterion = Restrictions.in("c_id", 이슈유형_cId_목록);
+
 		JiraIssueTypeEntity 이슈유형_검색전용 = new JiraIssueTypeEntity();
-		이슈유형_검색전용.getCriterions().add(criterion);
+		이슈유형_검색전용.setWhereIn("c_id",이슈유형_cId_목록);
 		List<JiraIssueTypeEntity> 지라이슈유형_목록 = jiraIssueType.getChildNode(이슈유형_검색전용);
 
 		return 지라이슈유형_목록;
@@ -234,9 +236,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				이슈상태_cId_목록.add(연결정보.getJiraissuestatus_link());
 			}
 		}
-		Criterion criterion = Restrictions.in("c_id", 이슈상태_cId_목록);
+
 		JiraIssueStatusEntity 이슈상태_검색전용 = new JiraIssueStatusEntity();
-		이슈상태_검색전용.getCriterions().add(criterion);
+		이슈상태_검색전용.setWhereIn("c_id", 이슈상태_cId_목록);
 		List<JiraIssueStatusEntity> 지라이슈상태_목록 = jiraIssueType.getChildNode(이슈상태_검색전용);
 		
 		return 지라이슈상태_목록;
@@ -254,9 +256,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				이슈우선순위_cId_목록.add(연결정보.getJiraissuepriority_link());
 			}
 		}
-		Criterion criterion = Restrictions.in("c_id", 이슈우선순위_cId_목록);
+
 		JiraIssuePriorityEntity 이슈우선순위_검색전용 = new JiraIssuePriorityEntity();
-		이슈우선순위_검색전용.getCriterions().add(criterion);
+		이슈우선순위_검색전용.setWhereIn("c_id", 이슈우선순위_cId_목록);
 		List<JiraIssuePriorityEntity> 지라이슈우선순위_목록 = jiraIssuePriority.getChildNode(이슈우선순위_검색전용);
 
 		return 지라이슈우선순위_목록;
@@ -275,9 +277,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 
-		Criterion criterion = Restrictions.in("c_id", 이슈해결책_cId_목록);
 		JiraIssueResolutionEntity 이슈해결책_검색전용 = new JiraIssueResolutionEntity();
-		이슈해결책_검색전용.getCriterions().add(criterion);
+		이슈해결책_검색전용.setWhereIn("c_id", 이슈해결책_cId_목록);
 		List<JiraIssueResolutionEntity> 지라이슈해결책_목록 = jiraIssueResolution.getChildNode(이슈해결책_검색전용);
 
 		return 지라이슈해결책_목록;
@@ -638,6 +639,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				}
 			}
 			지라프로젝트_저장.setJiraIssueTypeEntities(프로젝트에_붙일_이슈_유형들);
+			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
 
 			List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if (클라우드_프로젝트별_이슈_상태_목록.size() !=0 ) {
@@ -649,6 +651,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 				}
 			}
 			지라프로젝트_저장.setJiraIssueStatusEntities(프로젝트에_붙일_이슈_상태들);
+			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
 		}
 
 		jiraProject.updateNode(저장된_프로젝트);
