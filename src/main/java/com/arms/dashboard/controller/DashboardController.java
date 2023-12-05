@@ -1,7 +1,6 @@
 package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
-import com.arms.dashboard.model.power.Worker;
 import com.arms.dashboard.model.sankey.SankeyData;
 import com.arms.dashboard.model.sankey.SankeyLink;
 import com.arms.dashboard.model.sankey.SankeyNode;
@@ -193,7 +192,7 @@ public class DashboardController extends TreeMapAbstractController {
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
         log.info("DashboardController :: 작업자별_요구사항_관여도");
-        List<Worker> result = 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
+        List<Map<String, Object>> result = 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
