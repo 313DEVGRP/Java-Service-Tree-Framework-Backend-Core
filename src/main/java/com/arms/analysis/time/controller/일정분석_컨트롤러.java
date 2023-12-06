@@ -123,4 +123,44 @@ public class 일정분석_컨트롤러 {
         return modelAndView;
     }
 
+    @ResponseBody
+    @GetMapping("/daily-requirements-count/jira-issue-statuses")
+    public ModelAndView 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+                                                       @RequestParam(required = false) String startDate) throws Exception {
+
+        log.info("일정분석_컨트롤러 :: 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계");
+
+        if (startDate == null || startDate.isEmpty()) {
+            Map<Long, String> versionStartDates = pdServiceVersion.getVersionStartDates(지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
+            log.info(versionStartDates.toString());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate minDate = null;
+
+            for (String value : versionStartDates.values()) {
+                try {
+                    LocalDate date = LocalDate.parse(value.split(" ")[0], formatter);
+                    if (minDate == null || date.isBefore(minDate)) {
+                        minDate = date;
+                    }
+                } catch (DateTimeParseException e) {
+                    // value가 날짜 형식이 아닌 경우
+                }
+            }
+
+            if (minDate == null) {
+                LocalDate currentDate = LocalDate.now();
+                LocalDate sevenDaysAgo = currentDate.minusDays(7);
+                minDate = sevenDaysAgo; // 일주일 전 날짜로 설정
+            }
+
+            startDate = String.valueOf(minDate);
+        }
+
+        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(startDate)).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
 }
