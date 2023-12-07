@@ -24,14 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 
 import com.arms.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.jira.jiraproject.service.JiraProject;
@@ -100,16 +95,32 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
 
     @ResponseBody
     @RequestMapping(
-            value = {"/{defaultTarget}/makeDefault.do/{targetCid}"},
+            value = {"/{defaultTarget}/makeDefault.do"},
             method = {RequestMethod.PUT}
     )
-    public ResponseEntity<?> 온프레미스_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
-                                              @PathVariable(name="targetCid") Long 항목_c_id,
+    public ResponseEntity<?> 클라우드서버_지라프로젝트_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
+                                              @RequestParam(name="targetCid") Long 항목_c_id,
                                               JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
 
-        logger.info("JiraProjectController :: 온프레미스_항목별_기본값_설정, 설정할_항목: {}, 항목_c_id: {}", 설정할_항목, 항목_c_id);
+        logger.info("JiraProjectController :: 클라우드서버_지라프로젝트_항목별_기본값_설정, 설정할_항목: {}, 항목_c_id: {}", 설정할_항목, 항목_c_id);
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_기본값_설정(설정할_항목, 항목_c_id, jiraProjectEntity)));
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value={"{renewTarget}/renewNode.do"},
+            method = {RequestMethod.PUT }
+    )
+    public ResponseEntity<?> 클라우드서버_지라프로젝트_항목별_갱신(@PathVariable(name="renewTarget") String 설정할_항목,
+                                                  @RequestParam(name="serverId") Long 서버_c_id,
+                                                  JiraProjectDTO jiraProjectDTO) throws Exception {
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+
+        logger.info("JiraProjectController :: 클라우드서버_지라프로젝트_항목별_갱신, 서버_c_id: {}, 프로젝트_c_id: {}, 설정할_항목: {}", 서버_c_id, jiraProjectEntity.getC_id(),설정할_항목);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_갱신(서버_c_id, jiraProjectEntity, 설정할_항목)));
+    }
+
 }

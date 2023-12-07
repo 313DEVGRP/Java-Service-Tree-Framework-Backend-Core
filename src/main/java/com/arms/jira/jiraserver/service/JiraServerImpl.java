@@ -32,6 +32,7 @@ import com.egovframework.javaservice.treeframework.TreeConstant;
 import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.Util_TitleChecker;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -108,7 +109,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		// url에서 가져오므로
 		//이슈 유형
-		if(설정할_항목.equals("이슈유형")) {
+		if(설정할_항목.equals("issueStatus")) {
 			Set<JiraIssueTypeEntity> 이슈_유형_목록 = 검색된_지라_서버.getJiraIssueTypeEntities();
 			if(이슈_유형_목록.size() != 0) {
 				for (JiraIssueTypeEntity 이슈_유형 : 이슈_유형_목록) {
@@ -121,7 +122,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 		//이슈 상태
-		if(설정할_항목.equals("이슈상태")) {
+		if(설정할_항목.equals("issueStatus")) {
 			Set<JiraIssueStatusEntity> 이슈_상태_목록 = 검색된_지라_서버.getJiraIssueStatusEntities();
 			if(이슈_상태_목록.size() != 0 ) {
 				for (JiraIssueStatusEntity 이슈_상태 : 이슈_상태_목록) {
@@ -134,7 +135,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 		//이슈 해결책
-		if(설정할_항목.equals("이슈해결책")) {
+		if(설정할_항목.equals("issueResolution")) {
 			Set<JiraIssueResolutionEntity> 이슈_해결책_목록 = 검색된_지라_서버.getJiraIssueResolutionEntities();
 			if(이슈_해결책_목록.size() != 0) {
 				for (JiraIssueResolutionEntity 이슈_해결책 : 이슈_해결책_목록) {
@@ -147,7 +148,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 		//이슈 우선순위
-		if(설정할_항목.equals("이슈우선순위")) {
+		if(설정할_항목.equals("issuePriority")) {
 			Set<JiraIssuePriorityEntity> 이슈_우선순위_목록 = 검색된_지라_서버.getJiraIssuePriorityEntities();
 			if(이슈_우선순위_목록.size() != 0) {
 				for (JiraIssuePriorityEntity 이슈_우선순위 : 이슈_우선순위_목록) {
@@ -293,17 +294,17 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		JiraServerEntity 검색된_지라_서버 = this.getNode(검색용_서버_엔티티);
 		String 서버유형 = 검색된_지라_서버.getC_jira_server_type();
 		String 엔진_통신_아이디 = 검색된_지라_서버.getC_jira_server_etc(); // 여기 까지 공통
-
-		if ( 갱신할_항목.equals("프로젝트")) {
+		logger.info("[ JiraServerImpl :: 서버_엔티티_항목별_갱신 ] :: 갱신할_항목 → {}, 서버유형 → {}");
+		if (StringUtils.equals(갱신할_항목,"jiraProject")) {
 			Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_지라_서버.getJiraProjectEntities();
 			해당_서버의_프로젝트_엔티티_갱신(해당_서버_프로젝트_목록, 서버유형, 엔진_통신_아이디);
 		}
 
-		if ( 갱신할_항목.equals("이슈유형") && 서버유형.equals("온프레미스")) {
+		if (StringUtils.equals(갱신할_항목,"issueType") && 서버유형.equals("온프레미스")) {
 			Set<JiraIssueTypeEntity> 해당_서버_이슈_유형_목록 = 검색된_지라_서버.getJiraIssueTypeEntities();
 			해당_서버_이슈_유형_갱신(해당_서버_이슈_유형_목록, 서버유형, 엔진_통신_아이디);
 		}
-		if ( 갱신할_항목.equals("이슈유형") && 서버유형.equals("클라우드")) {
+		if (StringUtils.equals(갱신할_항목,"issueType") && 서버유형.equals("클라우드")) {
 			Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_지라_서버.getJiraProjectEntities();
 			for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
 				Set<JiraIssueTypeEntity> 프로젝트의_이슈_유형_목록 = 프로젝트.getJiraIssueTypeEntities();
@@ -311,11 +312,11 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 
-		if (갱신할_항목.equals("이슈상태") && 서버유형.equals("온프레미스")) {
+		if (StringUtils.equals(갱신할_항목,"issueStatus") && 서버유형.equals("온프레미스")) {
 			Set<JiraIssueStatusEntity> 해당_서버_이슈_상태_목록 = 검색된_지라_서버.getJiraIssueStatusEntities();
 			해당_서버_이슈_상태_갱신(해당_서버_이슈_상태_목록, 서버유형, 엔진_통신_아이디);
 		}
-		if (갱신할_항목.equals("이슈상태") && 서버유형.equals("클라우드")) {
+		if (StringUtils.equals(갱신할_항목,"issueStatus") && 서버유형.equals("클라우드")) {
 			Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_지라_서버.getJiraProjectEntities();
 			for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
 				Set<JiraIssueStatusEntity> 프로젝트의_이슈_상태_목록 = 프로젝트.getJiraIssueStatusEntities();
@@ -323,12 +324,12 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 
-		if ( 갱신할_항목.equals("이슈우선순위")) {
+		if (StringUtils.equals(갱신할_항목,"issuePriority")) {
 			Set<JiraIssuePriorityEntity> 해당_서버_이슈_우선순위_목록 = 검색된_지라_서버.getJiraIssuePriorityEntities();
 			해당_서버_이슈_우선순위_엔티티_갱신(해당_서버_이슈_우선순위_목록, 서버유형, 엔진_통신_아이디);
 		}
 
-		if ( 갱신할_항목.equals("이슈해결책")) {
+		if (StringUtils.equals(갱신할_항목,"issueResolution")) {
 			Set<JiraIssueResolutionEntity> 해당_서버_이슈_해결책_목록 = 검색된_지라_서버.getJiraIssueResolutionEntities();
 			해당_서버_이슈_해결책_엔티티_갱신(해당_서버_이슈_해결책_목록, 서버유형, 엔진_통신_아이디);
 		}
