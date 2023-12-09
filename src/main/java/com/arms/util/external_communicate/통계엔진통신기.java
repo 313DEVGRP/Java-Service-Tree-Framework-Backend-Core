@@ -3,6 +3,7 @@ package com.arms.util.external_communicate;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.util.external_communicate.dto.지라이슈;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
@@ -97,4 +98,14 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
             @RequestParam String startDate
     );
+
+    @GetMapping("/engine/jira/dashboard/weekly-requirements-search")
+    ResponseEntity<Map<String, RequirementJiraIssueAggregationResponse>> 제품서비스_버전목록으로_주간조회(
+            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+            @RequestParam String startDate
+    );
+
+    @GetMapping("/engine/jira/dashboard/weekly-issue-search")
+    List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+                               @RequestParam Integer baseWeek);
 }

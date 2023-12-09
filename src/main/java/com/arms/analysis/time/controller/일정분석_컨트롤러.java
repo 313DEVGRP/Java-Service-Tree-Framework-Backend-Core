@@ -163,4 +163,14 @@ public class 일정분석_컨트롤러 {
         return modelAndView;
     }
 
+    @GetMapping(value = "/weekly-issue-search")
+    @ResponseBody
+    public ModelAndView 제품서비스_버전목록으로_주간조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, @RequestParam Integer baseWeek) throws Exception {
+
+        log.info("일정분석_컨트롤러 :: 제품서비스_버전목록으로_조회");
+        List<지라이슈> result = 통계엔진통신기.제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 ,baseWeek);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
 }
