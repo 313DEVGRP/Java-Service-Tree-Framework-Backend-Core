@@ -99,13 +99,8 @@ public interface 통계엔진통신기 {
             @RequestParam String startDate
     );
 
-    @GetMapping("/engine/jira/dashboard/weekly-requirements-search")
-    ResponseEntity<Map<String, RequirementJiraIssueAggregationResponse>> 제품서비스_버전목록으로_주간조회(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-            @RequestParam String startDate
-    );
-
     @GetMapping("/engine/jira/dashboard/weekly-issue-search")
-    List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                               @RequestParam Integer baseWeek);
+    List<지라이슈> 제품서비스_버전목록으로_주간이슈조회(
+            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+            @RequestParam Integer baseWeek);
 }
