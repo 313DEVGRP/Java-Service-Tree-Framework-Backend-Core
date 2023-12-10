@@ -1,5 +1,6 @@
 package com.arms.analysis.time.controller;
 
+import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -158,7 +159,7 @@ public class 일정분석_컨트롤러 {
             startDate = String.valueOf(minDate);
         }
 
-        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(startDate)).getBody();
+        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> result = 통계엔진통신기.제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(startDate)).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;

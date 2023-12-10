@@ -1,5 +1,6 @@
 package com.arms.util.external_communicate;
 
+import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -94,7 +95,7 @@ public interface 통계엔진통신기 {
     );
 
     @GetMapping("/engine/jira/dashboard/daily-requirements-count/jira-issue-statuses")
-    ResponseEntity<Map<String, RequirementJiraIssueAggregationResponse>> 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(
+    ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
             @RequestParam String startDate
     );
