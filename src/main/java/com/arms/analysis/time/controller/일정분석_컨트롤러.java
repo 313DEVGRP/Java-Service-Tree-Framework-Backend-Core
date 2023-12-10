@@ -165,12 +165,12 @@ public class 일정분석_컨트롤러 {
         return modelAndView;
     }
 
-    @GetMapping(value = "/weekly-issue-search")
+    @GetMapping(value = "/weekly-updated-issue-search")
     @ResponseBody
-    public ModelAndView 제품서비스_버전목록으로_주간조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, @RequestParam Integer baseWeek) throws Exception {
+    public ModelAndView 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, @RequestParam Integer baseWeek) throws Exception {
 
-        log.info("일정분석_컨트롤러 :: 제품서비스_버전목록으로_주간조회");
-        List<지라이슈> 오늘기준_일주일_데이터 = 통계엔진통신기.제품서비스_버전목록으로_주간이슈조회(지라이슈_제품_및_제품버전_검색요청 ,baseWeek);
+        log.info("일정분석_컨트롤러 :: 제품서비스_버전목록으로_주간_업데이트된_이슈조회");
+        List<지라이슈> 오늘기준_일주일_데이터 = 통계엔진통신기.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 ,baseWeek);
 
 
         Map<Long, List<지라이슈>> 버전별_그룹화_결과 = 오늘기준_일주일_데이터.stream()
