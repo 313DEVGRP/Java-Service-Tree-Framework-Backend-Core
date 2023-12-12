@@ -88,7 +88,8 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/weekly-updated-issue-search")
     List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-            @RequestParam Integer baseWeek);
+            @RequestParam Integer baseWeek,
+            @RequestParam String sortField);
 
     @GetMapping("/engine/jira/dashboard/standard-daily/jira-issue")
     ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
