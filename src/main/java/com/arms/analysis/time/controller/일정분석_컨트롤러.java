@@ -3,11 +3,8 @@ package com.arms.analysis.time.controller;
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈;
-import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
-import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.util.external_communicate.dto.히트맵데이터;
 import com.arms.util.external_communicate.엔진통신기;
 import com.arms.util.external_communicate.통계엔진통신기;
 import lombok.AllArgsConstructor;
@@ -179,6 +176,18 @@ public class 일정분석_컨트롤러 {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 버전별_그룹화_결과);
 
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @GetMapping("/standard-daily/jira-issue")
+    public ModelAndView 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
+
+        log.info("일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계");
+
+        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> result = 통계엔진통신기.기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
         return modelAndView;
     }
 }

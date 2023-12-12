@@ -2,12 +2,9 @@ package com.arms.util.external_communicate;
 
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
+import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈;
-import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
-import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
-import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
@@ -104,4 +101,9 @@ public interface 통계엔진통신기 {
     List<지라이슈> 제품서비스_버전목록으로_주간_업데이트된_이슈조회(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
             @RequestParam Integer baseWeek);
+
+    @GetMapping("/engine/jira/dashboard/standard-daily/jira-issue")
+    ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
+            @SpringQueryMap 지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청
+    );
 }
