@@ -32,7 +32,7 @@ public class 스코프분석_컨트롤러 {
     static final long dummy_jira_server = 0L;
 
     @ResponseBody
-    @GetMapping("/getReqAndSubtaskPerVersion/{pdServiceId}")
+    @GetMapping("/getReqPerVersion/{pdServiceId}")
     public ModelAndView 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
                                                      지라이슈_단순_검색_요청 검색요청_데이터) throws Exception {
