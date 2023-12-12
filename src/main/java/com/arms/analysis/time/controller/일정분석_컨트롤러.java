@@ -85,83 +85,6 @@ public class 일정분석_컨트롤러 {
         return modelAndView;
     }
 
-    @ResponseBody
-    @GetMapping("/daily-requirements-jira-issue-statuses")
-    public ModelAndView 제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
-
-        log.info("일정분석_컨트롤러 :: 제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계");
-
-        Map<Long, String> versionStartDates = pdServiceVersion.getVersionStartDates(지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
-        log.info(versionStartDates.toString());
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        LocalDate minDate = null;
-
-        for (String value : versionStartDates.values()) {
-            try {
-                LocalDate date = LocalDate.parse(value.split(" ")[0], formatter);
-                //System.out.println("formatting date: " + date);
-                if (minDate == null || date.isBefore(minDate)) {
-                    minDate = date;
-                }
-            } catch (DateTimeParseException e) {
-                // value가 날짜 형식이 아닌 경우
-            }
-        }
-
-        if (minDate == null) {
-            LocalDate currentDate = LocalDate.now();
-            LocalDate sevenDaysAgo = currentDate.minusDays(7);
-            minDate = sevenDaysAgo; // 일주일 전 날짜로 설정
-        }
-
-        log.info("start date: " + String.valueOf(minDate));
-        Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(minDate)).getBody();
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
-    }
-
-    @ResponseBody
-    @GetMapping("/daily-requirements-count/jira-issue-statuses")
-    public ModelAndView 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                                                       @RequestParam(required = false) String startDate) throws Exception {
-
-        log.info("일정분석_컨트롤러 :: 제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계");
-
-        if (startDate == null || startDate.isEmpty()) {
-            Map<Long, String> versionStartDates = pdServiceVersion.getVersionStartDates(지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks());
-            log.info(versionStartDates.toString());
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate minDate = null;
-
-            for (String value : versionStartDates.values()) {
-                try {
-                    LocalDate date = LocalDate.parse(value.split(" ")[0], formatter);
-                    if (minDate == null || date.isBefore(minDate)) {
-                        minDate = date;
-                    }
-                } catch (DateTimeParseException e) {
-                    // value가 날짜 형식이 아닌 경우
-                }
-            }
-
-            if (minDate == null) {
-                LocalDate currentDate = LocalDate.now();
-                LocalDate sevenDaysAgo = currentDate.minusDays(7);
-                minDate = sevenDaysAgo; // 일주일 전 날짜로 설정
-            }
-
-            startDate = String.valueOf(minDate);
-        }
-
-        Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> result = 통계엔진통신기.제품_혹은_제품버전들의_이슈생성개수_및_상태_일별_집계(지라이슈_제품_및_제품버전_검색요청, String.valueOf(startDate)).getBody();
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
-    }
-
     @GetMapping(value = "/weekly-updated-issue-search")
     @ResponseBody
     public ModelAndView 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, @RequestParam Integer baseWeek) throws Exception {
@@ -183,7 +106,7 @@ public class 일정분석_컨트롤러 {
     @GetMapping("/standard-daily/jira-issue")
     public ModelAndView 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 
-        log.info("일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계");
+        log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
 
         Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> result = 통계엔진통신기.기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
