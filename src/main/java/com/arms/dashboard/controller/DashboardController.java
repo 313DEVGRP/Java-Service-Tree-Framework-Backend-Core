@@ -38,7 +38,7 @@ public class DashboardController {
     @Autowired
     private PdService pdService;
 
-    static final long dummy_jira_server = 0L;
+    static final long DUMMY_JIRA_SERVER_ID = 0L;
 
     @GetMapping("/aggregation/nested")
     public ModelAndView commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
@@ -62,7 +62,7 @@ public class DashboardController {
         String 제품서비스_아이디 = request.getParameter("pdserviceId");
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result",
-                엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, 11L, 10L));
+                엔진통신기.제품서비스_버전별_상태값_통계(DUMMY_JIRA_SERVER_ID, 11L, 10L));
 
         return modelAndView;
     }
