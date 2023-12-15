@@ -91,7 +91,6 @@ public class DashboardController {
 
     @GetMapping("/requirements-jira-issue-statuses")
     public ModelAndView requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
-        log.info("DashboardController :: requirementsJiraIssueStatuses");
         Map<String, RequirementJiraIssueAggregationResponse> result = 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(지라이슈_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
@@ -102,7 +101,6 @@ public class DashboardController {
     public ModelAndView assigneesByPdServiceVersion(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
-        log.info("DashboardController :: getSankeyChart");
         Long pdServiceLink = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
         List<Long> pdServiceVersionLinks = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
         if (pdServiceVersionLinks.isEmpty()) {
@@ -157,9 +155,6 @@ public class DashboardController {
 
     @GetMapping("/normal/{pdServiceId}")
     public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
-
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
-
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
@@ -173,7 +168,6 @@ public class DashboardController {
     public ModelAndView 작업자별_요구사항_관여도(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     ) throws Exception {
-        log.info("DashboardController :: 작업자별_요구사항_관여도");
         List<Map<String, Object>> result = 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
@@ -182,9 +176,6 @@ public class DashboardController {
 
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ModelAndView exclusion_isreq_normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
-
-        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}", pdServiceId);
-
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
 
@@ -196,9 +187,6 @@ public class DashboardController {
 
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
     public ModelAndView getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
-
-        log.info("DashboardController :: exclusion_isreq_normal_aggs.pdServiceId ==> {}", pdServiceId);
-
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
 
@@ -213,9 +201,6 @@ public class DashboardController {
 
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
     public ModelAndView getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
-
-        log.info("DashboardController :: getLinkedIssueAndSubTask.pdServiceId ==> {}", pdServiceId);
-
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
