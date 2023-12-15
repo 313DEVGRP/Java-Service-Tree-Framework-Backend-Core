@@ -102,7 +102,7 @@ public class DashboardController {
 
 
     @GetMapping("/normal/{pdServiceId}")
-    public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public ModelAndView normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
                 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
@@ -113,9 +113,9 @@ public class DashboardController {
     }
 
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    public ModelAndView exclusion_isreq_normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public ModelAndView exclusionIsReqNormalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
-                = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
+                = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
@@ -126,7 +126,7 @@ public class DashboardController {
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
     public ModelAndView getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계
-                = 통계엔진통신기.제품서비스_요구사항제회_일반_통계(pdServiceId, 검색요청_데이터);
+                = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
