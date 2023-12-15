@@ -4,6 +4,7 @@ import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationRespo
 import com.arms.dashboard.model.sankey.SankeyData;
 import com.arms.dashboard.model.sankey.SankeyLink;
 import com.arms.dashboard.model.sankey.SankeyNode;
+import com.arms.dashboard.service.DashboardService;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
@@ -11,8 +12,10 @@ import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -27,33 +30,23 @@ import com.arms.util.external_communicate.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "/arms/dashboard")
+@RequiredArgsConstructor
 public class DashboardController {
-
-    @Autowired
-    private 엔진통신기 엔진통신기;
-
-    @Autowired
-    private 통계엔진통신기 통계엔진통신기;
-
-    @Autowired
-    private PdService pdService;
-
     static final long DUMMY_JIRA_SERVER_ID = 0L;
 
+    private final 엔진통신기 엔진통신기;
+    private final 통계엔진통신기 통계엔진통신기;
+    private final PdService pdService;
+    private final DashboardService dashboardService;
+
     @GetMapping("/aggregation/nested")
-    public ModelAndView commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(지라이슈_제품_및_제품버전_검색요청).getBody();
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
+    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청)));
     }
 
     @GetMapping("/aggregation/flat")
-    public ModelAndView commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청).getBody();
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
+    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청)));
     }
 
     @GetMapping(value = "/getVersionProgress")
