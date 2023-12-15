@@ -4,7 +4,6 @@ import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationRespo
 import com.arms.dashboard.model.sankey.SankeyData;
 import com.arms.dashboard.model.sankey.SankeyLink;
 import com.arms.dashboard.model.sankey.SankeyNode;
-import com.arms.globaltreemap.controller.TreeMapAbstractController;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
@@ -12,14 +11,9 @@ import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -31,11 +25,9 @@ import com.arms.util.external_communicate.*;
 
 
 @Slf4j
-@Controller
 @RestController
-@AllArgsConstructor
 @RequestMapping(value = "/arms/dashboard")
-public class DashboardController extends TreeMapAbstractController {
+public class DashboardController {
 
     @Autowired
     private 엔진통신기 엔진통신기;
@@ -44,14 +36,10 @@ public class DashboardController extends TreeMapAbstractController {
     private 통계엔진통신기 통계엔진통신기;
 
     @Autowired
-    @Qualifier("pdService")
     private PdService pdService;
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     static final long dummy_jira_server = 0L;
 
-    @ResponseBody
     @GetMapping("/aggregation/nested")
     public ModelAndView commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(지라이슈_제품_및_제품버전_검색요청).getBody();
@@ -60,7 +48,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/aggregation/flat")
     public ModelAndView commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         검색결과_목록_메인 result = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청).getBody();
@@ -68,8 +55,8 @@ public class DashboardController extends TreeMapAbstractController {
         modelAndView.addObject("result", result);
         return modelAndView;
     }
+
     @GetMapping(value = "/getVersionProgress")
-    @ResponseBody
     public ModelAndView getVersionProgress(HttpServletRequest request) throws Exception {
         /* 임시 틀 생성 */
         String 제품서비스_아이디 = request.getParameter("pdserviceId");
@@ -80,8 +67,7 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
-    @GetMapping(value="/assignee-jira-issue-statuses")
+    @GetMapping(value = "/assignee-jira-issue-statuses")
     public ModelAndView getPerformancePerPersion(@RequestParam Long pdServiceLink) throws Exception {
         Map<String, Map<String, Map<String, Integer>>> 통신결과 = 통계엔진통신기.담당자_요구사항여부_상태별집계(pdServiceLink);
 
@@ -92,8 +78,7 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
 
-    @ResponseBody
-    @GetMapping(value="/jira-issue-assignee")
+    @GetMapping(value = "/jira-issue-assignee")
     public ModelAndView getJiraAssigneeList(@RequestParam Long pdServiceId) {
         Map<String, Long> 통신결과 = 통계엔진통신기.제품서비스별_담당자_이름_통계(pdServiceId);
 
@@ -104,7 +89,6 @@ public class DashboardController extends TreeMapAbstractController {
     }
 
 
-    @ResponseBody
     @GetMapping("/requirements-jira-issue-statuses")
     public ModelAndView requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
         log.info("DashboardController :: requirementsJiraIssueStatuses");
@@ -114,7 +98,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/version-assignees")
     public ModelAndView assigneesByPdServiceVersion(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
@@ -172,7 +155,6 @@ public class DashboardController extends TreeMapAbstractController {
                 .addObject("result", new SankeyData(nodeList, linkList));
     }
 
-    @ResponseBody
     @GetMapping("/normal/{pdServiceId}")
     public ModelAndView normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
@@ -198,7 +180,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
     public ModelAndView exclusion_isreq_normal_aggs(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
@@ -213,7 +194,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
     public ModelAndView getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
@@ -231,7 +211,6 @@ public class DashboardController extends TreeMapAbstractController {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
     public ModelAndView getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
 
@@ -245,10 +224,10 @@ public class DashboardController extends TreeMapAbstractController {
         List<검색결과> 작업자별결과 = 검색결과목록.get검색결과().get("group_by_assignee.assignee_emailAddress.keyword");
 
         Map<String, Object> personAndStatus = new HashMap<>();
-        for ( 검색결과 obj : 작업자별결과) {
+        for (검색결과 obj : 작업자별결과) {
             String 작업자메일 = obj.get필드명();
             int 엣위치 = 작업자메일.indexOf("@");
-            String 작업자아이디 = 작업자메일.substring(0,엣위치);
+            String 작업자아이디 = 작업자메일.substring(0, 엣위치);
             Map<String, List<검색결과>> 하위검색_이슈상태 = (Map<String, List<검색결과>>) obj.get하위검색결과();//("group_by_assignee.assignee_emailAddress.keyword");
             personAndStatus.put(작업자아이디, 하위검색_이슈상태);
         }
