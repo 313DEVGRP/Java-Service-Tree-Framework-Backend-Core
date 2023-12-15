@@ -1,9 +1,9 @@
 package com.arms.dashboard.service;
 
-import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
-import com.arms.dashboard.model.sankey.SankeyData;
-import com.arms.dashboard.model.sankey.SankeyData.SankeyLink;
-import com.arms.dashboard.model.sankey.SankeyData.SankeyNode;
+import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.dashboard.model.SankeyData;
+import com.arms.dashboard.model.SankeyData.SankeyLink;
+import com.arms.dashboard.model.SankeyData.SankeyNode;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
@@ -15,7 +15,6 @@ import com.arms.util.external_communicate.통계엔진통신기;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,7 +95,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<Map<String, Object>> 작업자별_요구사항_관여도(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws IOException {
+    public List<Map<String, Object>> 작업자별_요구사항_관여도(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         return 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
     }
 }

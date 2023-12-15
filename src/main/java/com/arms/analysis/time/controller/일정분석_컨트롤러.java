@@ -1,7 +1,6 @@
 package com.arms.analysis.time.controller;
 
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;

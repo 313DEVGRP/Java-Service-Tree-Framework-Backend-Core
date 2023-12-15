@@ -1,4 +1,4 @@
-package com.arms.dashboard.model.combination;
+package com.arms.dashboard.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
