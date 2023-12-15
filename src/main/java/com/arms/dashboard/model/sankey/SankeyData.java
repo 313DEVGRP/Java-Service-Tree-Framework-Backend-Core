@@ -14,4 +14,20 @@ public class SankeyData {
     private List<SankeyNode> nodes = new ArrayList<>();
     private List<SankeyLink> links = new ArrayList<>();
 
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SankeyLink {
+        private String source;
+        private String target;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SankeyNode {
+        private String id;
+        private String name;
+        private String type;
+    }
 }

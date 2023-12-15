@@ -2,8 +2,8 @@ package com.arms.dashboard.service;
 
 import com.arms.dashboard.model.combination.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.sankey.SankeyData;
-import com.arms.dashboard.model.sankey.SankeyLink;
-import com.arms.dashboard.model.sankey.SankeyNode;
+import com.arms.dashboard.model.sankey.SankeyData.SankeyLink;
+import com.arms.dashboard.model.sankey.SankeyData.SankeyNode;
 import com.arms.product_service.pdservice.model.PdServiceEntity;
 import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
