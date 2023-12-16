@@ -64,12 +64,6 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
     public ModelAndView getNodeWithVersionOrderByCidDesc(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
 
         log.info("PdServiceController :: getNodeWithVersionOrderByCidDesc");
-        ParameterParser parser = new ParameterParser(request);
-
-        if (parser.getInt("c_id") <= 0) {
-            throw new RuntimeException("c_id is minus value");
-        }
-
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
         PdServiceEntity pdServiceNode = pdService.getNodeWithVersionOrderByCidDesc(pdServiceEntity);
 
