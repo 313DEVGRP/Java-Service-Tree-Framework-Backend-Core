@@ -68,18 +68,20 @@ public class 일정분석_컨트롤러 {
     }
 
     @ResponseBody
-    @GetMapping("/normal-version/{pdServiceId}")
-    public ModelAndView 제품서비스_일반_버전_통계(@PathVariable("pdServiceId") Long pdServiceId,
-                                       @RequestParam List<Long> pdServiceVersionLinks,
-                                       지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+    @GetMapping("/normal-version/resolution")
+    public ModelAndView 제품서비스_일반_버전_해결책유무_집계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+                                             @RequestParam(required = false) String resolution) {
 
-        log.info("일정분석_컨트롤러 :: 제품서비스_일반_버전_집계 pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
+        log.info("일정분석_컨트롤러 :: 제품서비스_일반_버전_해결책유무_집계 pdServiceId ==> {}, pdServiceVersionLinks ==> {}, resolution ==> {}",
+                                                                                    지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(),
+                                                                                    지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().toString(),
+                                                                                    resolution);
 
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_통계
-                = 통계엔진통신기.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계
+                = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(지라이슈_제품_및_제품버전_검색요청, resolution);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_통계.getBody();
+        검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
         modelAndView.addObject("result", 통계결과);
         return modelAndView;
     }
