@@ -1,5 +1,6 @@
 package com.arms.util.external_communicate;
 
+import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.util.external_communicate.dto.*;
@@ -107,4 +108,7 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
             @RequestParam String resolution
     );
+
+    @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees")
+    ResponseEntity<List<요구사항_별_상태_및_유일_작업자_수>> 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 }
