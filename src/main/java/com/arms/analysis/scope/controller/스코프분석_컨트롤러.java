@@ -2,6 +2,7 @@ package com.arms.analysis.scope.controller;
 
 import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -33,35 +34,28 @@ public class 스코프분석_컨트롤러 {
 
     static final long dummy_jira_server = 0L;
 
-    @ResponseBody
     @GetMapping("/getReqPerVersion/{pdServiceId}")
-    public ModelAndView 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
+    public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_단순_검색_요청 검색요청_데이터) throws Exception {
+                                                     지라이슈_단순_검색_요청 검색요청_데이터) {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
                 , pdServiceId.toString(), pdServiceVersionLinks.toString());
         ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        검색결과_목록_메인 통신결과 = 집계결과.getBody();
-        modelAndView.addObject("result", 통신결과);
-        return modelAndView;
+        return ResponseEntity.ok(집계결과.getBody());
 
     }
 
-    @ResponseBody
     @GetMapping("/req-status-and-reqInvolved-unique-assignees")
-    public ModelAndView 요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public  ResponseEntity<List<요구사항_별_상태_및_유일_작업자_수>> 요구사항_별_상태_및_관여_작업자_수(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+
         log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 지라이슈_제품_및_제품버전_검색요청.pdServiceLink ==> {}, pdServiceVersionLinks ==> {}",
                 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().toString());
 
         ResponseEntity<List<요구사항_별_상태_및_유일_작업자_수>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청);
 
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        List<요구사항_별_상태_및_유일_작업자_수> 검색결과 = 통신결과.getBody();
-        modelAndView.addObject("result", 검색결과);
-
-        return modelAndView;
+        return ResponseEntity.ok(통신결과.getBody());
     }
 
 }
