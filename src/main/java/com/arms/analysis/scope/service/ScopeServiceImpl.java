@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ScopeServiceImpl implements ScopeService {
     private static final String NO_DATA = "No Data";
-    private static final String DEFAULT_BLACK_COLOR = "#0000000";
+    private static final String DEFAULT_BLACK_COLOR = "#000000";
 
     private final PdService pdService;
     private final 내부통신기 내부통신기;
@@ -81,7 +81,7 @@ public class ScopeServiceImpl implements ScopeService {
                 .map(com.arms.util.external_communicate.dto.search.검색결과::get필드명)
                 .collect(Collectors.toList());
 
-        // 9. requirements 리스트를 필터링하여 id 값이 top10FieldNames 에 있는 요소만 선택
+        // 9. requirements 리스트를 필터링하여 id 값이 issueKeys 에 있는 요소만 선택
         List<TreeBarDTO> filteredRequirements = filteredRequirements(requirements, issueKeys);
 
         // 10. 요구사항 등록
