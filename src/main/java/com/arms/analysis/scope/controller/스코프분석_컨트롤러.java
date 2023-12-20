@@ -1,6 +1,8 @@
 package com.arms.analysis.scope.controller;
 
+import com.arms.analysis.scope.dto.TreeBarDTO;
 import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_수;
+import com.arms.analysis.scope.service.ScopeService;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import lombok.AllArgsConstructor;
@@ -9,19 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.arms.util.external_communicate.통계엔진통신기;
-import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
 @Slf4j
-@Controller
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "/arms/analysis/scope")
@@ -31,6 +29,9 @@ public class 스코프분석_컨트롤러 {
 
     @Autowired
     private 통계엔진통신기 통계엔진통신기;
+
+    @Autowired
+    private ScopeService scopeService;
 
     static final long dummy_jira_server = 0L;
 
@@ -57,5 +58,13 @@ public class 스코프분석_컨트롤러 {
 
         return ResponseEntity.ok(통신결과.getBody());
     }
+
+    @GetMapping("/tree-bar-top10")
+    public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(
+            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+    ) throws Exception {
+        return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(지라이슈_제품_및_제품버전_검색요청)));
+    }
+
 
 }
