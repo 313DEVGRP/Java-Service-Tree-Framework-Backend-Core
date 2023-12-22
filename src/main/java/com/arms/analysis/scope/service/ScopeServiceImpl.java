@@ -145,7 +145,7 @@ public class ScopeServiceImpl implements ScopeService {
                                 .id(requirement.getId() + NO_DATA)
                                 .name(NO_DATA)
                                 .type("assignee")
-                                .color(DEFAULT_BLACK_COLOR)
+                                .color("")
                                 .parent(requirement.getId())
                                 .build()
                 )
@@ -165,7 +165,7 @@ public class ScopeServiceImpl implements ScopeService {
                                 .id(versionId + NO_DATA)
                                 .name(NO_DATA)
                                 .type("requirement")
-                                .color(DEFAULT_BLACK_COLOR)
+                                .color("")
                                 .parent(versionId)
                                 .build();
 
@@ -197,12 +197,13 @@ public class ScopeServiceImpl implements ScopeService {
                                 String color = assigneeToColorMap.computeIfAbsent(name, k ->
                                         String.format("#%02x%02x%02x", random.nextInt(256), random.nextInt(256), random.nextInt(256))
                                 );
+                                long value = assignee.get개수();
                                 return TreeBarDTO.builder()
                                         .id(parent + assignee.get필드명())
                                         .parent(parent)
                                         .type("assignee")
-                                        .name(name)
-                                        .value(assignee.get개수())
+                                        .name(name + " (" + value + ")")
+                                        .value(value)
                                         .color(color)
                                         .build();
                             });
