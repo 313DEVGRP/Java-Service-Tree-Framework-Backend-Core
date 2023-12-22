@@ -3,6 +3,7 @@ package com.arms.util.external_communicate;
 import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.dashboard.model.Worker;
 import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -39,7 +40,7 @@ public interface 통계엔진통신기 {
     );
 
     @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
-    ResponseEntity<List<Map<String, Object>>> 작업자별_요구사항_관여도(
+    ResponseEntity<List<Worker>> 작업자별_요구사항_관여도(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 

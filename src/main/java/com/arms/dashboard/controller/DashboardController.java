@@ -2,6 +2,7 @@ package com.arms.dashboard.controller;
 
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.SankeyData;
+import com.arms.dashboard.model.Worker;
 import com.arms.dashboard.service.DashboardService;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
@@ -55,7 +56,7 @@ public class DashboardController {
      * Apache Echarts TreeMap Chart API - Dashboard, Analysis Resource
      */
     @GetMapping("/assignees-requirements-involvements")
-    ResponseEntity<ApiResult<List<Map<String, Object>>>> 작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청)));
     }
 
