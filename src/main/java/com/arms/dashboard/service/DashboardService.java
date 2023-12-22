@@ -2,6 +2,7 @@ package com.arms.dashboard.service;
 
 import com.arms.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.dashboard.model.SankeyData;
+import com.arms.dashboard.model.Worker;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
@@ -18,7 +19,7 @@ public interface DashboardService {
 
     SankeyData sankeyChartAPI(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception;
 
-    List<Map<String, Object>> 작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
+    List<Worker> 작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
     Map<String, Long> 제품서비스별_담당자_이름_통계(Long pdServiceId);
 
