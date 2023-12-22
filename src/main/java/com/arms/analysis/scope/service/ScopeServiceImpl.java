@@ -145,7 +145,7 @@ public class ScopeServiceImpl implements ScopeService {
                                 .id(requirement.getId() + NO_DATA)
                                 .name(NO_DATA)
                                 .type("assignee")
-                                .color("")
+                                .color(DEFAULT_BLACK_COLOR)
                                 .parent(requirement.getId())
                                 .build()
                 )
