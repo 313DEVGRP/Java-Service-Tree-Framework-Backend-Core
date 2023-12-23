@@ -9,6 +9,8 @@ import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.util.external_communicate.dto.상품_서비스_버전;
+import com.arms.util.external_communicate.dto.요구_사항;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.util.external_communicate.내부통신기;
 import com.arms.util.external_communicate.통계엔진통신기;
@@ -211,5 +213,49 @@ public class ScopeServiceImpl implements ScopeService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<상품_서비스_버전> 요구사항_상태_매핑(List<상품_서비스_버전> 상품_서비스_버전_목록, Map<String, List<검색결과>> 검색결과) {
 
+        // 버전별_요구사항_상태
+        List<검색결과> 버전별_검색_결과 = 검색결과.get("group_by_pdServiceVersion");
+        Map<String, List<Map<String, String>>> 버전_맵 = new HashMap<>();
+        for ( 검색결과 버전_결과요소 : 버전별_검색_결과 ) {
+            // 필드, 개수, 하위검색결과
+            String 버전_아이디 = 버전_결과요소.get필드명();// 버전명
+            List<Map<String, String>> 이슈키_이슈상태_목록 = new ArrayList<>();
+
+            List<검색결과> 해당_버전_이슈_목록 = 버전_결과요소.get하위검색결과().get("group_by_key");
+            for (검색결과 각각_이슈 : 해당_버전_이슈_목록) {
+                Map<String, String> 이슈_키_상태 = new HashMap<>();
+                String issueKey = 각각_이슈.get필드명(); // 이슈 이름
+                String statusName = 각각_이슈.get하위검색결과().get("group_by_status.status_name.keyword").get(0).get필드명();
+                이슈_키_상태.put(issueKey, statusName);
+                이슈키_이슈상태_목록.add(이슈_키_상태);
+            }
+            버전_맵.put(버전_아이디,이슈키_이슈상태_목록);
+        }
+
+        //상품_서비스_버전의 요구_사항에 요구_사항_상태 매핑하기
+        for (상품_서비스_버전 버전_요소 : 상품_서비스_버전_목록) {
+            List<Map<String, String>> 이슈_키_상태_맵_목록 = 버전_맵.get(String.valueOf(버전_요소.get상품_서비스_버전()));
+
+            List<요구_사항> 요구_사항들 = 버전_요소.get요구사항들();
+            for(int i = 0; i < 요구_사항들.size(); i++) {
+                요구_사항 요구_사항 = 요구_사항들.get(i);
+                String 요구_사항_키 = 요구_사항.get요구_사항_번호();
+
+                for(int j = 0; j < 이슈_키_상태_맵_목록.size(); j++) {
+                    Map<String, String> 이슈_키_상태_맵 = 이슈_키_상태_맵_목록.get(j);
+                    if(이슈_키_상태_맵.containsKey(요구_사항_키)){
+                        요구_사항.set요구_사항_상태(이슈_키_상태_맵.get(요구_사항_키));
+                        이슈_키_상태_맵_목록.remove(j);
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return 상품_서비스_버전_목록;
+    }
 }

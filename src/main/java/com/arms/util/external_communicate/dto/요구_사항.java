@@ -16,8 +16,13 @@ import java.util.List;
 public class 요구_사항 {
 
     private String 요구_사항_번호;
+
     private String 요구_사항_담당자;
+
     private int 작업자수;
+
+    private String 요구_사항_상태;
+
     private List<String> 하위_이슈_사항_담당자;
 
 }
