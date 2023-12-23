@@ -25,16 +25,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import com.arms.jira.jiraserver.model.JiraServerEntity;
 import com.arms.jira.jiraserver.service.JiraServer;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @Controller
@@ -180,11 +177,11 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
 
     @ResponseBody
     @RequestMapping(
-            value = {"/{defaultTarget}/makeDefault.do/{targetCid}"},
+            value = {"/{defaultTarget}/makeDefault.do"},
             method = {RequestMethod.PUT}
     )
     public ResponseEntity<?> 온프레미스_항목별_기본값_설정(@PathVariable(name="defaultTarget") String 설정할_항목,
-                                                      @PathVariable(name="targetCid") Long 항목_c_id,
+                                                      @RequestParam(name="targetCid") Long 항목_c_id,
                                                       JiraServerDTO jiraServerDTO) throws Exception{
 
         log.info("JiraServerController :: 온프레미스_항목별_기본값_설정, 설정할_항목 : {}, 항목_c_id : {}", 설정할_항목, 항목_c_id);
