@@ -5,6 +5,7 @@ import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_
 import com.arms.analysis.scope.service.ScopeService;
 import com.arms.util.external_communicate.dto.상품_서비스_버전;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_병합_검색_요청;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,12 +51,24 @@ public class 스코프분석_컨트롤러 {
 
     @GetMapping("/req-status-and-reqInvolved-unique-assignees")
     public  ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(
+            지라이슈_제품_및_제품버전_병합_검색_요청 지라이슈_제품_및_제품버전_병합_검색_요청) {
+        log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수2 ] :: 요구_사항, 하위_이슈_사항");
+        log.info(지라이슈_제품_및_제품버전_병합_검색_요청.get요구_사항().getPdServiceLink().toString());
+        log.info(지라이슈_제품_및_제품버전_병합_검색_요청.get요구_사항().toString());
+        log.info(지라이슈_제품_및_제품버전_병합_검색_요청.get하위_이슈_사항().toString());
+        ResponseEntity<List<상품_서비스_버전>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_병합_검색_요청);
+
+        return ResponseEntity.ok(통신결과.getBody());
+    }
+
+    @GetMapping("/req-status-and-reqInvolved-unique-assignees3")
+    public  ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수2(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
 
-        log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 지라이슈_제품_및_제품버전_검색요청.pdServiceLink ==> {}, pdServiceVersionLinks ==> {}",
+        log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수2 ] :: 지라이슈_제품_및_제품버전_검색요청.pdServiceLink ==> {}, pdServiceVersionLinks ==> {}",
                 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink(), 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().toString());
 
-        ResponseEntity<List<상품_서비스_버전>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_검색요청);
+        ResponseEntity<List<상품_서비스_버전>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수3(지라이슈_제품_및_제품버전_검색요청);
 
         return ResponseEntity.ok(통신결과.getBody());
     }
