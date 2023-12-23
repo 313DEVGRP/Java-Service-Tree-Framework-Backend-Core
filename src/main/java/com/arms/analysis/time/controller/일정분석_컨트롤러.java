@@ -16,9 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,25 +80,6 @@ public class 일정분석_컨트롤러 {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
         modelAndView.addObject("result", 통계결과);
-        return modelAndView;
-    }
-
-    @GetMapping(value = "/weekly-updated-issue-search")
-    @ResponseBody
-    public ModelAndView 제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
-                                                   @RequestParam Integer baseWeek,
-                                                   @RequestParam String sortField) throws Exception {
-
-        log.info("일정분석_컨트롤러 :: 제품서비스_버전목록으로_주간_업데이트된_이슈조회");
-        List<지라이슈> 오늘기준_일주일_데이터 = 통계엔진통신기.제품서비스_버전목록으로_주간_업데이트된_이슈조회(지라이슈_제품_및_제품버전_검색요청, baseWeek, sortField);
-
-
-        Map<Long, List<지라이슈>> 버전별_그룹화_결과 = 오늘기준_일주일_데이터.stream()
-                .collect(Collectors.groupingBy(지라이슈::getPdServiceVersion));
-
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 버전별_그룹화_결과);
-
         return modelAndView;
     }
 
