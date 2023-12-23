@@ -61,7 +61,7 @@ public class 스코프분석_컨트롤러 {
         return ResponseEntity.ok(통신결과.getBody());
     }
 
-    @GetMapping("/req-status-and-reqInvolved-unique-assignees3")
+    @GetMapping("/req-status-and-reqInvolved-unique-assignees2")
     public  ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수2(
             지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
 
