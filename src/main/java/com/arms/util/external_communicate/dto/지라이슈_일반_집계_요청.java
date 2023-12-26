@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class 지라이슈_일반_검색_요청 {
+public class 지라이슈_일반_집계_요청 {
 
     private Boolean isReq;
     private List<String> 하위그룹필드들;

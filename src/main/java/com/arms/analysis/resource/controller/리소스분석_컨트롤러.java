@@ -2,8 +2,8 @@ package com.arms.analysis.resource.controller;
 
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈_단순_검색_요청;
-import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_단순_집계_요청;
+import com.arms.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.util.external_communicate.통계엔진통신기;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class 리소스분석_컨트롤러 {
     @GetMapping("/normal-version/{pdServiceId}")
     public ModelAndView 제품서비스_일반_버전_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                        @RequestParam List<Long> pdServiceVersionLinks,
-                                       지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+                                       지라이슈_일반_집계_요청 검색요청_데이터) throws Exception {
 
         log.info("리소스분석_컨트롤러 :: 제품서비스_버전_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
@@ -55,7 +55,7 @@ public class 리소스분석_컨트롤러 {
     @GetMapping("/workerStatus/{pdServiceId}")
     public ModelAndView 리소스_작업자_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                         @RequestParam List<Long> pdServiceVersionLinks,
-                                        지라이슈_단순_검색_요청 검색요청_데이터) throws Exception {
+                                        지라이슈_단순_집계_요청 검색요청_데이터) throws Exception {
 
         log.info("리소스분석_컨트롤러 :: 리소스_작업자_통계.제품서비스의 c_id ==> {}, 선택된버전의 c_id ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
@@ -73,7 +73,7 @@ public class 리소스분석_컨트롤러 {
     public ModelAndView 리소스_버전필터_작업자필터_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                        @RequestParam List<Long> pdServiceVersionLinks,
                                        @RequestParam List<String> mailAddressList,
-                                       지라이슈_단순_검색_요청 검색요청_데이터) throws Exception {
+                                       지라이슈_단순_집계_요청 검색요청_데이터) throws Exception {
 
         log.info("리소스분석_컨트롤러 :: 리소스_버전필터_작업자필터_통계.pdServiceVersionLinks ==> {}, mailAddressList ==> {}"
                 , pdServiceVersionLinks.toString(), mailAddressList.toString());
@@ -94,7 +94,7 @@ public class 리소스분석_컨트롤러 {
     @GetMapping("/reqInAction/{pdServiceId}")
     public ModelAndView 서브태스크_부모_요구사항_집계(@PathVariable("pdServiceId") Long pdServiceId,
                                         @RequestParam List<Long> pdServiceVersionLinks,
-                                        지라이슈_일반_검색_요청 검색요청_데이터) throws Exception {
+                                        지라이슈_일반_집계_요청 검색요청_데이터) throws Exception {
         log.info("리소스분석_컨트롤러 :: 서브태스크_부모_요구사항_집계");
 
         ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);

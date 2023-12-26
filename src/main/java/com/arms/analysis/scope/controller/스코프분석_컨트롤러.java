@@ -40,7 +40,7 @@ public class 스코프분석_컨트롤러 {
     @GetMapping("/getReqPerVersion/{pdServiceId}")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
                                                      @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_단순_검색_요청 검색요청_데이터) {
+                                                     지라이슈_단순_집계_요청 검색요청_데이터) {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
                 , pdServiceId.toString(), pdServiceVersionLinks.toString());
         ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
@@ -71,7 +71,7 @@ public class 스코프분석_컨트롤러 {
         ResponseEntity<List<제품_서비스_버전>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수3(지라이슈_제품_및_제품버전_검색요청);
 
         String 하위그룹필드 = "key,status.status_name.keyword";
-        지라이슈_일반_검색_요청 일반_검색 = 지라이슈_일반_검색_요청.builder()
+        지라이슈_일반_집계_요청 일반_검색 = 지라이슈_일반_집계_요청.builder()
                 .isReq(true)
                 .메인그룹필드("pdServiceVersion")
                 .컨텐츠보기여부(true)

@@ -5,7 +5,7 @@ import com.arms.dashboard.model.SankeyData;
 import com.arms.dashboard.model.Worker;
 import com.arms.dashboard.service.DashboardService;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
@@ -72,7 +72,7 @@ public class DashboardController {
      * Dashboard
      */
     @GetMapping("/normal/{pdServiceId}")
-    ResponseEntity<ApiResult<검색결과_목록_메인>> normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    ResponseEntity<ApiResult<검색결과_목록_메인>> normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_일반_통계(pdServiceId, 검색요청_데이터)));
     }
 
@@ -80,7 +80,7 @@ public class DashboardController {
      * 현재 미사용
      */
     @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    ResponseEntity<ApiResult<Map<String, Object>>> exclusionIsReqNormalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    ResponseEntity<ApiResult<Map<String, Object>>> exclusionIsReqNormalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터)));
     }
 
@@ -88,7 +88,7 @@ public class DashboardController {
      * Dashboard
      */
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
-    ResponseEntity<ApiResult<List<Object>>> getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    ResponseEntity<ApiResult<List<Object>>> getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계_TOP_5(pdServiceId, 검색요청_데이터)));
     }
 
@@ -96,7 +96,7 @@ public class DashboardController {
      * Dashboard
      */
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
-    ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.getIssueResponsibleStatusTop5(pdServiceId, 검색요청_데이터)));
     }
 
