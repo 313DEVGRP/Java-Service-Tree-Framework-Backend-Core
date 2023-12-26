@@ -69,6 +69,9 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     @Qualifier("jiraIssueStatus")
     private JiraIssueStatus jiraIssueStatus;
 
+    @Autowired
+    private com.arms.util.external_communicate.통계엔진통신기 통계엔진통신기;
+
     @PostConstruct
     public void initialize() {
         setTreeService(reqStatus);
@@ -276,6 +279,30 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         return modelAndView;
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getReqAndReqIssueAndLinkedIssue.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getReqAndReqIssueAndLinkedIssue(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, HttpServletRequest request) throws Exception {
+
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+
+        statusEntity.setOrder(Order.asc("c_req_link")); // 요구사항 c_id
+
+        ReqStatusEntity 검색_전용 = new ReqStatusEntity();
+        검색_전용.setC_pdservice_link(statusEntity.getC_pdservice_link());
+        검색_전용.setWhereIn("c_pds_version_link",request.getParameterValues("pdServiceLinks"));
+        검색_전용.setOrder(Order.asc("c_req_link"));
+        List<ReqStatusEntity> 요구사항_연결이슈_검색_결과 = reqStatus.getChildNode(검색_전용);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        return modelAndView;
+
+    }
+
 
     @ResponseBody
     @RequestMapping(
