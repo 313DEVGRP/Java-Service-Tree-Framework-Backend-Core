@@ -12,8 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class 상품_서비스_버전 {
+public class 제품_서비스_버전 {
 
-    private Long 상품_서비스_버전;
+    private Long 제품_서비스_버전;
     private List<요구_사항> 요구사항들;
 }

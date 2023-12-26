@@ -9,7 +9,7 @@ import com.arms.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.상품_서비스_버전;
+import com.arms.util.external_communicate.dto.제품_서비스_버전;
 import com.arms.util.external_communicate.dto.요구_사항;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.util.external_communicate.내부통신기;
@@ -214,7 +214,7 @@ public class ScopeServiceImpl implements ScopeService {
     }
 
     @Override
-    public List<상품_서비스_버전> 요구사항_상태_매핑(List<상품_서비스_버전> 상품_서비스_버전_목록, Map<String, List<검색결과>> 검색결과) {
+    public List<제품_서비스_버전> 요구사항_상태_매핑(List<제품_서비스_버전> 제품_서비스_버전_목록, Map<String, List<검색결과>> 검색결과) {
 
         // 버전별_요구사항_상태
         List<검색결과> 버전별_검색_결과 = 검색결과.get("group_by_pdServiceVersion");
@@ -235,9 +235,9 @@ public class ScopeServiceImpl implements ScopeService {
             버전_맵.put(버전_아이디,이슈키_이슈상태_목록);
         }
 
-        //상품_서비스_버전의 요구_사항에 요구_사항_상태 매핑하기
-        for (상품_서비스_버전 버전_요소 : 상품_서비스_버전_목록) {
-            List<Map<String, String>> 이슈_키_상태_맵_목록 = 버전_맵.get(String.valueOf(버전_요소.get상품_서비스_버전()));
+        //제품_서비스_버전의 요구_사항에 요구_사항_상태 매핑하기
+        for (제품_서비스_버전 버전_요소 : 제품_서비스_버전_목록) {
+            List<Map<String, String>> 이슈_키_상태_맵_목록 = 버전_맵.get(String.valueOf(버전_요소.get제품_서비스_버전()));
 
             List<요구_사항> 요구_사항들 = 버전_요소.get요구사항들();
             for(int i = 0; i < 요구_사항들.size(); i++) {
@@ -256,6 +256,6 @@ public class ScopeServiceImpl implements ScopeService {
 
         }
 
-        return 상품_서비스_버전_목록;
+        return 제품_서비스_버전_목록;
     }
 }
