@@ -97,6 +97,11 @@ public interface 통계엔진통신기 {
             @RequestParam String sortField
     );
 
+    @GetMapping("/engine/jira/dashboard/standard-daily/updated-ridgeline")
+    ResponseEntity<Map<Long, Map<String, Map<String,List<지라이슈>>>> >기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회 (
+            @SpringQueryMap 지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청
+    );
+
     @GetMapping("/engine/jira/dashboard/normal-version/resolution/{pdServiceId}")
     ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_해결책유무_통계(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
