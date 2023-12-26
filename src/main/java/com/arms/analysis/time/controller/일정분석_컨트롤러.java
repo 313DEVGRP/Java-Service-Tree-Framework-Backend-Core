@@ -114,4 +114,19 @@ public class 일정분석_컨트롤러 {
         
     }
 
+    @ResponseBody
+    @GetMapping("/standard-daily/updated-ridgeline")
+    public ModelAndView 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
+
+        log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
+
+        Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 검색일자_범위_데이터);
+
+        return modelAndView;
+
+    }
+
 }
