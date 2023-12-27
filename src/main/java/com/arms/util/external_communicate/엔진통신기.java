@@ -2,6 +2,7 @@ package com.arms.util.external_communicate;
 
 import com.arms.util.external_communicate.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,22 +26,22 @@ public interface 엔진통신기 {
     public List<지라프로젝트_데이터> 지라_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuetype/list")
-    public List<지라이슈유형_데이터> 지라_이슈_유형_가져오기 (@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈유형_데이터> 지라_이슈_유형_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuepriority/list")
-    public List<지라이슈우선순위_데이터> 지라_이슈_우선순위_가져오기 (@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈우선순위_데이터> 지라_이슈_우선순위_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issueresolution/list")
-    public List<지라이슈해결책_데이터> 지라_이슈_해결책_가져오기 (@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈해결책_데이터> 지라_이슈_해결책_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuestatus/list")
     public List<지라이슈상태_데이터> 지라_이슈_상태_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/engine/jira/{connectId}/issue/search/{issueKey}/subAndLinks")
     public List<지라이슈> 지라_연결된이슈_서브테스크_가져오기(@PathVariable("connectId") Long 연결_아이디,
-                                                      @PathVariable("issueKey") String 이슈_키,
-                                                      @RequestParam("page") int 페이지_번호,
-                                                      @RequestParam("size") int 페이지_사이즈);
+                                          @PathVariable("issueKey") String 이슈_키,
+                                          @RequestParam("page") int 페이지_번호,
+                                          @RequestParam("size") int 페이지_사이즈);
 
     /*
      * 클라우드
@@ -48,6 +49,7 @@ public interface 엔진통신기 {
     @GetMapping("/{connectId}/jira/issuetype/project/{projectId}")
     public List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록(@PathVariable("connectId") String 연결_아이디,
                                                 @PathVariable("projectId") String 프로젝트_아이디);
+
     @GetMapping("/{connectId}/jira/issuestatus/project/{projectId}")
     public List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록(@PathVariable("connectId") String 연결_아이디,
                                                 @PathVariable("projectId") String 프로젝트_아이디);
@@ -64,8 +66,8 @@ public interface 엔진통신기 {
 
     @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                       @PathVariable("pdService") Long 제품서비스_아이디,
-                                       @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
+                                              @PathVariable("pdService") Long 제품서비스_아이디,
+                                              @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
 
     /*
      * 요구사항 상세 페이지
@@ -84,8 +86,8 @@ public interface 엔진통신기 {
 
     @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions")
     List<지라이슈> 제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                                            @RequestParam Long pdServiceLink,
-                                            @RequestParam List<Long> pdServiceVersionLinks);
+                               @RequestParam Long pdServiceLink,
+                               @RequestParam List<Long> pdServiceVersionLinks);
 
     /*
      * 이슈 가져오기.
@@ -99,5 +101,10 @@ public interface 엔진통신기 {
     히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
                                @RequestParam Long pdServiceLink,
                                @RequestParam List<Long> pdServiceVersionLinks);
+
+
+    @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
+    ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
+                                                @RequestBody 지라이슈_일반_검색_요청 지라이슈_일반_검색_요청);
 
 }

@@ -16,7 +16,10 @@ import com.arms.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.jira.jiraserver.service.JiraServer;
 import com.arms.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.util.external_communicate.dto.IsReqType;
 import com.arms.util.external_communicate.dto.지라이슈;
+import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈필드_데이터;
 import com.arms.util.external_communicate.엔진통신기;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.egovframework.javaservice.treeframework.controller.TreeAbstractController;
@@ -125,6 +128,31 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/requirement-linkedissue.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 제품별_요구사항_연결이슈_조회(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: 제품별_요구사항_연결이슈_조회");
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
+
+        IsReqType isReqType = IsReqType.ALL;
+
+        지라이슈_일반_검색_요청 요청= 지라이슈_일반_검색_요청
+                .builder()
+                .isReqType(isReqType)
+                .build();
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 엔진통신기.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
         return modelAndView;
     }
 
