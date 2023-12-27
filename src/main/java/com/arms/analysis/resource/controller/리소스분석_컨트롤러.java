@@ -2,8 +2,8 @@ package com.arms.analysis.resource.controller;
 
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈_단순_집계_요청;
 import com.arms.util.external_communicate.dto.지라이슈_일반_집계_요청;
+import com.arms.util.external_communicate.dto.지라이슈_단순_집계_요청;
 import com.arms.util.external_communicate.통계엔진통신기;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -111,4 +111,5 @@ public class 리소스분석_컨트롤러 {
 
         return modelAndView;
     }
+
 }

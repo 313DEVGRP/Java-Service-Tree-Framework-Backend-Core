@@ -1,7 +1,6 @@
 package com.arms.analysis.scope.controller;
 
 import com.arms.analysis.scope.dto.TreeBarDTO;
-import com.arms.analysis.scope.dto.요구사항_별_상태_및_유일_작업자_수;
 import com.arms.analysis.scope.service.ScopeService;
 import com.arms.util.external_communicate.dto.*;
 import com.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.arms.util.external_communicate.통계엔진통신기;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 import java.util.List;
