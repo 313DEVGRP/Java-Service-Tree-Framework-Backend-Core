@@ -10,7 +10,7 @@ import com.arms.product_service.pdservice.service.PdService;
 import com.arms.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.util.external_communicate.dto.search.검색결과;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.util.external_communicate.dto.지라이슈_일반_검색_요청;
+import com.arms.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.util.external_communicate.엔진통신기;
 import com.arms.util.external_communicate.통계엔진통신기;
@@ -100,7 +100,7 @@ public class DashboardServiceImpl implements DashboardService {
 
 
     @Override
-    public 검색결과_목록_메인 제품서비스_일반_통계(Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public 검색결과_목록_메인 제품서비스_일반_통계(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
         return 요구사항_연결이슈_일반_통계.getBody();
     }
@@ -111,13 +111,13 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> 제품서비스_요구사항제외_일반_통계(Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public Map<String, Object> 제품서비스_요구사항제외_일반_통계(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터);
         return 요구사항_연결이슈_일반_통계.getBody();
     }
 
     @Override
-    public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터);
         Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         Map<String, Object> 검색결과 = (Map<String, Object>) 통신결과.get("검색결과");
@@ -126,7 +126,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, 지라이슈_일반_검색_요청 검색요청_데이터) {
+    public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
         검색결과_목록_메인 검색결과목록 = 요구사항_연결이슈_일반_통계.getBody();
