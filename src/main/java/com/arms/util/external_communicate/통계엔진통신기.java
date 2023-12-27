@@ -84,7 +84,7 @@ public interface 통계엔진통신기 {
             @PathVariable("pdServiceId") Long 제품서비스_아이디,
             @RequestParam List<Long> pdServiceVersionLinks,
             @RequestParam List<String> mailAddressList,
-            @SpringQueryMap 지라이슈_단순_검색_요청 지라이슈_단순_검색_요청);
+            @SpringQueryMap 지라이슈_단순_집계_요청 지라이슈_단순_집계_요청);
 
     @GetMapping("/engine/jira/dashboard/standard-daily/jira-issue")
     ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(
@@ -97,6 +97,11 @@ public interface 통계엔진통신기 {
             @RequestParam String sortField
     );
 
+    @GetMapping("/engine/jira/dashboard/standard-daily/updated-ridgeline")
+    ResponseEntity<Map<Long, Map<String, Map<String,List<지라이슈>>>> >기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회 (
+            @SpringQueryMap 지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청
+    );
+
     @GetMapping("/engine/jira/dashboard/normal-version/resolution/{pdServiceId}")
     ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_해결책유무_통계(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
@@ -104,9 +109,10 @@ public interface 통계엔진통신기 {
     );
 
     @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees")
-    ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(@SpringQueryMap 지라이슈_제품_및_제품버전_병합_검색_요청 지라이슈_제품_및_제품버전_검색요청);
+    ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(@SpringQueryMap 지라이슈_제품_및_제품버전_병합_검색_요청 지라이슈_제품_및_제품버전_검색요청);
 
     @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees2")
+    ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수3(@SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
     ResponseEntity<List<상품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수3(@SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
     @GetMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")

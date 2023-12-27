@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class 지라이슈_단순_검색_요청 {
+public class 지라이슈_단순_집계_요청 {
 
     private List<String> 하위그룹필드들;
     private String 메인그룹필드;
