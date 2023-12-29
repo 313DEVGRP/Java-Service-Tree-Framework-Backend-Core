@@ -111,7 +111,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             value = {"/{changeReqTableName}/getStatusMonitor.do"},
             method = {RequestMethod.GET, RequestMethod.POST}
     )
-    public ModelAndView getMonitor(
+    public ModelAndView getStatusMonitor(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
