@@ -42,3 +42,7 @@ server:
     session:
       timeout: 7200
   contextPath: /
+
+feign:
+  hystrix:
+    enabled: true
