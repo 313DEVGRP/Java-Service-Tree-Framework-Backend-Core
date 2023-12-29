@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Scope;
 import feign.Feign;
 import feign.hystrix.HystrixFeign;
 
-@Configuration
+// @Configuration
 public class NestedObjectFeignConfig {
 
 	@Bean
