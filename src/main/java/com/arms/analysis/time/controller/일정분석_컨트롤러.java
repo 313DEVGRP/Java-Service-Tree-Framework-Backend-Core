@@ -1,6 +1,8 @@
 package com.arms.analysis.time.controller;
 
+import com.arms.analysis.time.model.등고선데이터;
 import com.arms.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.analysis.time.service.TimeService;
 import com.arms.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.util.external_communicate.dto.*;
 import com.arms.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -16,8 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +39,8 @@ public class 일정분석_컨트롤러 {
 
     @Autowired
     private PdServiceVersion pdServiceVersion;
+
+    private final TimeService timeService;
 
     static final long dummy_jira_server = 0L;
 
@@ -116,17 +120,24 @@ public class 일정분석_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/standard-daily/updated-ridgeline")
-    public ModelAndView 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
+    public List<등고선데이터> 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 
         log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
 
         Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 검색일자_범위_데이터);
+        Long service_id = 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink();
 
-        return modelAndView;
+        Map<String, String>  요구사항리스트 = timeService.getReqIssueList(service_id);
 
+        if(지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT){ // 요구사항 업데이트 수 검색했을 경우
+            List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
+            return result;
+        } else if (지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType()  == IsReqType.ISSUE) { // 연관된 이슈들만 검색했을 경우
+            List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
+            return result;
+        }
+        return null;
     }
 
 }
