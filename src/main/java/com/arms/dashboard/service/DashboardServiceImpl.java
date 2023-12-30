@@ -61,16 +61,20 @@ public class DashboardServiceImpl implements DashboardService {
         List<SankeyLink> linkList = new ArrayList<>();
 
         String pdServiceId = savedPdService.getC_id() + "-product";
-        nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품"));
-        nodeList.add(new SankeyNode("No-Worker", "No-Worker", "No-Worker"));
 
+        // 1. 제품 노드 추가
+        nodeList.add(new SankeyNode(pdServiceId, savedPdService.getC_title(), "제품", ""));
+
+        // 2. 제품 버전 노드 추가
         Set<Long> versionIds = savedPdService.getPdServiceVersionEntities().stream().filter(version -> pdServiceVersionLinks.contains(version.getC_id())).sorted(Comparator.comparing(PdServiceVersionEntity::getC_id)).map(version -> {
             String versionId = version.getC_id() + "-version";
-            nodeList.add(new SankeyNode(versionId, version.getC_title(), "버전"));
+            nodeList.add(new SankeyNode(versionId, version.getC_title(), "버전", ""));
+            // 2-1. 제품 노드와 제품 버전 노드를 연결하는 link 추가
             linkList.add(new SankeyLink(pdServiceId, versionId));
             return version.getC_id();
         }).collect(Collectors.toSet());
 
+        // 3. Engine 에 담당자 데이터 요청
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(통계엔진통신기.제품_혹은_제품버전들의_담당자목록(지라이슈_제품_및_제품버전_검색요청).getBody());
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
@@ -80,7 +84,9 @@ public class DashboardServiceImpl implements DashboardService {
                     assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
                         String assigneeDisplayName = displayName.get필드명();
                         String workerNodeId = versionId + "-" + assigneeAccountId;
-                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자"));
+                        // 3-1. 담당자 노드 추가
+                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자", versionId));
+                        // 3-2. 제품 버전 노드와 작업자 노드를 연결하는 link 추가
                         linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
                         versionIds.remove(Long.parseLong(versionId));
                     });
@@ -88,7 +94,22 @@ public class DashboardServiceImpl implements DashboardService {
             });
         });
 
-        versionIds.forEach(versionId -> linkList.add(new SankeyLink(versionId + "-version", "No-Worker")));
+        // 4. 담당자가 없는 제품 버전 찾기 (계층적인 표현에 있어 UI 상 문제가 있기 때문에 가짜 노드와 링크를 추가해주어야함)
+        boolean isWorkerNodeExist = false;
+        List<SankeyNode> versionNode = nodeList.stream().filter(node -> node.getType().equals("버전")).collect(Collectors.toList());
+        for (SankeyNode node : versionNode) {
+            if (nodeList.stream().noneMatch(workerNode -> workerNode.getParent().equals(node.getId().split("-")[0]))) {
+                isWorkerNodeExist = true;
+                // 4-1. 제품 버전 노드와 가짜 노드를 연결하는 link 추가
+                linkList.add(new SankeyLink(node.getId(), "No-Worker"));
+            }
+        }
+
+        // 4-1. 의 경우, 차트의 Level 이 맞지 않아 UI 가 이상해지기 때문에 가짜 노드를 추가
+        if (isWorkerNodeExist) {
+            // 4-2. 가짜 노드 추가
+            nodeList.add(new SankeyNode("No-Worker", "No-Worker", "No-Worker", ""));
+        }
 
         return new SankeyData(nodeList, linkList);
     }
