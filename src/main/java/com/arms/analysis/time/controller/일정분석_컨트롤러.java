@@ -101,12 +101,11 @@ public class 일정분석_컨트롤러 {
 
     @ResponseBody
     @GetMapping("/standard-daily/updated-jira-issue")
-    public ModelAndView 기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청
-                ,@RequestParam String sortField) throws Exception {
+    public ModelAndView 기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 
         log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
 
-        List<지라이슈> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청, sortField).getBody();
+        List<지라이슈> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
         Map<Long, List<지라이슈>> 버전별_그룹화_결과 = 검색일자_범위_데이터.stream()
                 .collect(Collectors.groupingBy(지라이슈::getPdServiceVersion));
