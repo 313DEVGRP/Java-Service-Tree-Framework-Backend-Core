@@ -13,7 +13,7 @@ Ex)  나쁜 예 : sudden.memberObject
 
 2. 클래스(Class) 명명 규칙
 
-클래스명에는 파스칼을 사용한다.
+클래스명에는 한글을 사용한다.
 Ex) public class HelloWorld {}
 
 인터페이스에는 특별한 접두사나 접미사를 사용하지 않고 파스칼을 사용한다.
