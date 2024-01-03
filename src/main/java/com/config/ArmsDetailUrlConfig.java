@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ArmsDetailUrlConfig {
 
+    @Value("${arms.detail.connect.url}")
     public static String address;
 
     @Value("${arms.detail.connect.url}")
