@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 public class ArmsDetailUrlConfig {
 
     @Value("${arms.detail.connect.url}")
-    public static String address;
+    public String address;
 
-    @Value("${arms.detail.connect.url}")
-    public static void setAddress(String address) {
-        ArmsDetailUrlConfig.address = address;
+
+    public String getAddress() {
+        return address;
     }
 }
