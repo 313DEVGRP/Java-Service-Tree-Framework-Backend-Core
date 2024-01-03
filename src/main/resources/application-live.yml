@@ -31,7 +31,7 @@ database:
 arms:
   detail:
     connect:
-      url: http://${ARMS_CONNECT_ADDR}
+      url: http://${ARMS_DETAIL_CONNECT_URL}
   engine:
     url: http://engine-fire:33333
 
