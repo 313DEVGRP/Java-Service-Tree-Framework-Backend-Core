@@ -251,13 +251,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
 						"✔ 현황 통계에서 배제되어 불이익을 받을 수 있습니다.\n" +
 						"✔ 아래 링크에서 요구사항을 내용을 확인 할 수 있습니다.\n\n" +
+						"※ 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나, \n" +
+						"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
-						"요구사항 내용 확인 ⇒ " + armsConnectUrl + "/arms/detail.html?page=detail&pdService=" + 제품서비스_아이디 +
+						"자세한 요구사항 내용 확인 ⇒ " + armsConnectUrl + "/arms/detail.html?page=detail&pdService=" + 제품서비스_아이디 +
 						"&pdServiceVersion=" + 제품서비스_버전_아이디 + "&reqAdd=" + 추가된_요구사항의_아이디 +
 						"&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라_프로젝트_아이디 + "\n" +
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
-						"※ 『 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나 』\n" +
-						"※ 『 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다. 』";
+						"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
+
+				이슈내용 = 이슈내용 + savedReqAddEntity.getC_req_contents();
 
 				지라이슈필드_데이터 요구사항이슈_필드;
 
