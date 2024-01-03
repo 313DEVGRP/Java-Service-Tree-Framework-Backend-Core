@@ -259,7 +259,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 						"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
-				이슈내용 = 이슈내용 + StringUtils.removeHtmlTags(Jsoup.clean(savedReqAddEntity.getC_req_contents(), Whitelist.none()));
+				이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(savedReqAddEntity.getC_req_contents(), Whitelist.none())),"&nbsp;", " ");
+
 
 				지라이슈필드_데이터 요구사항이슈_필드;
 
