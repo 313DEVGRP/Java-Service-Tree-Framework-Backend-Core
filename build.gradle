@@ -281,6 +281,9 @@ dependencies {
     // poi
     implementation 'org.apache.poi:poi:5.1.0'
     implementation 'org.apache.poi:poi-ooxml:5.1.0'
+    
+    //html 제거용
+    implementation 'org.jsoup:jsoup:1.14.3'
 
 }
 

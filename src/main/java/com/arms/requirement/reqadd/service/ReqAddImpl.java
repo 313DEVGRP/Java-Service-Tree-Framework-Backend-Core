@@ -38,6 +38,8 @@ import com.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,7 +256,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 						"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
-				이슈내용 = 이슈내용 + savedReqAddEntity.getC_req_contents();
+				이슈내용 = 이슈내용 + Jsoup.clean(savedReqAddEntity.getC_req_contents(), Whitelist.none());
 
 				지라이슈필드_데이터 요구사항이슈_필드;
 
