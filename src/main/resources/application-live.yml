@@ -29,8 +29,9 @@ database:
   password: mysqluserpassword
 
 arms:
-  connect:
-    url: http://${ARMS_CONNECT_ADDR}
+  detail:
+    connect:
+      url: http://${ARMS_CONNECT_ADDR}
   engine:
     url: http://engine-fire:33333
 

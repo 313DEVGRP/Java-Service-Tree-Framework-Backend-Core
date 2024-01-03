@@ -29,6 +29,9 @@ database:
   password: mysqluserpassword
 
 arms:
+  detail:
+    connect:
+      url: http://127.0.0.1
   engine:
     url: http://engine-fire:33333
 
