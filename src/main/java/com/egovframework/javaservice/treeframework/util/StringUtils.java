@@ -1,6 +1,7 @@
 package com.egovframework.javaservice.treeframework.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
@@ -18,6 +19,19 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public class StringUtils extends org.apache.commons.lang.StringUtils {
+
+    public static  String removeHtmlTags(String value) {
+        String rtnVal = StringEscapeUtils.unescapeHtml4(value);
+        // unescapeHtml : <p><h3 class="kkk">테스트</p> 케이스
+
+        rtnVal = rtnVal.replaceAll("<(/)?([a-zA-Z]*)([0-9]?)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
+        //  태그제거 : 테스트 케이스
+
+        rtnVal = StringEscapeUtils.escapeHtml4(rtnVal);
+        // escapeHtml : 테스트&nbsp;케이스
+
+        return rtnVal;
+    }
     public static String getString(String text) {
         if (null == text) {
             return "";
