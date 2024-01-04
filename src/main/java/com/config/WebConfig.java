@@ -11,19 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost",
-                        "http://127.0.0.1",
-                        "http://localhost:9999",
-                        "http://127.0.0.1:9999",
-                        "http://313.co.kr",
-                        "http://www.313.co.kr",
-                        "http://313.co.kr:9999",
-                        "http://www.313.co.kr:9999",
-                        "http://a-rms.net",
-                        "http://www.a-rms.net",
-                        "http://www.a-rms.net:9999",
-                        "http://a-rms.net:9999",
-                        "http://arms.mmc-mad.com")
+                        "http://localhost , http://127.0.0.1 , http://localhost:9999 , http://127.0.0.1:9999 , http://313.co.kr , http://www.313.co.kr , http://313.co.kr:9999 , http://www.313.co.kr:9999 , http://a-rms.net , http://www.a-rms.net , http://www.a-rms.net:9999 , http://a-rms.net:9999  , http://arms.mmc-mad.com")
                 .allowedMethods(
                     HttpMethod.GET.name(),
                     HttpMethod.HEAD.name(),
