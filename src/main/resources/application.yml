@@ -54,3 +54,7 @@ hystrix:
         isolation:
           thread:
             timeoutInMilliseconds: 10000
+    "엔진통신기#이슈_검색엔진_벌크_저장(Long,String,Long,Long)":
+      execution:
+        timeout:
+          enabled: false
