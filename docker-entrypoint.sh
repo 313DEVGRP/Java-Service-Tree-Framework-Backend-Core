@@ -27,4 +27,4 @@ JVM_OPTS="-server $GC_OPTS $MEM_OPTS $NET_OPTS"
 
 #spring boot start
 #exec java -Djava.security.egd=file:/dev/./urandom -jar $JAVA_OPTS -Dspring.profiles.active=live javaServiceTreeFramework.jar $@
-exec java -Djava.security.egd=file:/dev/./urandom -jar $JVM_OPTS -Dspring.profiles.active=live javaServiceTreeFramework.jar $@
+exec java -Duser.timezone=Asia/Seoul -Djava.security.egd=file:/dev/./urandom -jar $JVM_OPTS -Dspring.profiles.active=live javaServiceTreeFramework.jar $@
