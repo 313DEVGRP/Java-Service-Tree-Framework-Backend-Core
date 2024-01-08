@@ -58,3 +58,7 @@ hystrix:
       execution:
         timeout:
           enabled: false
+    "엔진통신기#요구사항이슈_조회(Long,String,String)":
+      execution:
+        timeout:
+          enabled: false
