@@ -13,6 +13,9 @@ package com.arms.api.requirement.reqadd.model;
 
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
+import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -178,14 +181,44 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_output")
     private String c_req_output; // '산출물'
 
-    @Column(name="c_req_priority_link")
-    private Long c_req_priority_link; // 우선순위
+    // 우선순위
+    private ReqPriorityEntity reqPriorityEntity;
 
-    @Column(name="c_req_state_link")
-    private Long c_req_state_link; // 상태
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_priority_link", referencedColumnName = "c_id")
+    public ReqPriorityEntity getReqPriorityEntity() { return reqPriorityEntity; }
 
-    @Column(name="c_req_difficulty_link")
-    private Long c_req_difficulty_link; // 난이도
+    public void setReqPriorityEntity(ReqPriorityEntity reqPriorityEntity) {
+        this.reqPriorityEntity = reqPriorityEntity;
+    }
+
+    // 상태
+    private ReqStateEntity reqStateEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_state_link", referencedColumnName = "c_id")
+    public ReqStateEntity getReqStateEntity() { return reqStateEntity; }
+
+    public void setReqStateEntity(ReqStateEntity reqStateEntity) {
+        this.reqStateEntity = reqStateEntity;
+    }
+
+    // 난이도
+    private ReqDifficultyEntity reqDifficultyEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_req_difficulty_link", referencedColumnName = "c_id")
+    public ReqDifficultyEntity getReqDifficultyEntity() { return reqDifficultyEntity; }
+
+    public void setReqDifficultyEntity(ReqDifficultyEntity reqDifficultyEntity) {
+        this.reqDifficultyEntity = reqDifficultyEntity;
+    }
 
     //내용
     @Lob
