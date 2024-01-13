@@ -178,6 +178,15 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_output")
     private String c_req_output; // '산출물'
 
+    @Column(name="c_req_priority_link")
+    private Long c_req_priority_link; // 우선순위
+
+    @Column(name="c_req_state_link")
+    private Long c_req_state_link; // 상태
+
+    @Column(name="c_req_difficulty_link")
+    private Long c_req_difficulty_link; // 난이도
+
     //내용
     @Lob
     @Column(name = "c_req_contents")
