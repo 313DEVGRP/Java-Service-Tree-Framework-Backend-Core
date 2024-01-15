@@ -124,26 +124,21 @@ public class 일정분석_컨트롤러 {
     @GetMapping("/standard-daily/updated-ridgeline")
     public List<등고선데이터> 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 
-        try{
 
-            log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
+        log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
 
-            Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
+        Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
-            Long service_id = 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink();
+        Long service_id = 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink();
 
-            Map<String, String>  요구사항리스트 = timeService.getReqIssueList(service_id);
+        Map<String, String>  요구사항리스트 = timeService.getReqIssueList(service_id);
 
-            if(지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT){ // 요구사항 업데이트 수 검색했을 경우
-                List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
-                return result;
-            } else if (지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType()  == IsReqType.ISSUE) { // 연관된 이슈들만 검색했을 경우
-                List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
-                return result;
-            }
-            return null;
-        }catch (Exception e){
-            e.printStackTrace();
+        if(지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType() == IsReqType.REQUIREMENT){ // 요구사항 업데이트 수 검색했을 경우
+            List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
+            return result;
+        } else if (지라이슈_일자별_제품_및_제품버전_검색요청.getIsReqType()  == IsReqType.ISSUE) { // 연관된 이슈들만 검색했을 경우
+            List<등고선데이터> result = timeService.등고선데이터_변환(검색일자_범위_데이터,요구사항리스트);
+            return result;
         }
         return null;
     }

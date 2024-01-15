@@ -4,6 +4,7 @@ import com.arms.api.analysis.time.model.등고선데이터;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.util.external_communicate.dto.요구사항_별_업데이트_데이터;
 import com.arms.api.util.external_communicate.dto.지라이슈;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class TimeServiceImpl implements TimeService{
         return 요구사항맵;
     }
     @Override
-    public List<등고선데이터> 등고선데이터_변환(Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터, Map<String, String> 요구사항목록){
+    public List<등고선데이터> 등고선데이터_변환(Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 검색일자_범위_데이터, Map<String, String> 요구사항목록){
         List<등고선데이터> result = 검색일자_범위_데이터.entrySet().stream()
                 .flatMap(versions -> {
                     Long version = versions.getKey();

@@ -51,6 +51,7 @@ public class 지라이슈 {
     private String summary;
 
     private Long pdServiceId;
+
     private Long[] pdServiceVersion;
     private Long singlePdServiceVersion;
 
