@@ -159,7 +159,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             value = {"/{changeReqTableName}/updateStatusNode.do"},
             method = {RequestMethod.PUT}
     )
-    public ModelAndView updateStatusNode(
+    public ResponseEntity<?> 요구사항_이슈_수정하기(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             @RequestBody ReqStatusDTO reqStatusDTO) throws Exception {
 
@@ -172,9 +172,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         SessionUtil.removeAttribute("updateStatusNode");
 
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 결과);
-        return modelAndView;
+        return ResponseEntity.ok(CommonResponse.success(결과));
     }
 
     @ResponseBody
