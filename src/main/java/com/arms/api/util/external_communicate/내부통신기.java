@@ -20,7 +20,7 @@ public interface 내부통신기 {
                                          @RequestBody ReqStatusDTO reqStatusDTO);
 
     @PutMapping("/arms/reqStatus/{changeReqTableName}/updateStatusNode.do")
-    Integer updateStatusNode(@PathVariable(value ="changeReqTableName") String changeReqTableName, @RequestBody ReqStatusDTO reqStatusDTO);
+    ResponseEntity<?> 요구사항_이슈_수정하기(@PathVariable(value ="changeReqTableName") String changeReqTableName, @RequestBody ReqStatusDTO reqStatusDTO);
 
 
 }

@@ -194,7 +194,7 @@ public class 스케쥴러_컨트롤러{
                                     요구사항_이슈_엔티티.setC_issue_status_name(ES_지라이슈.getStatus().getName());
 
                                     ReqStatusDTO statusDTO = modelMapper.map(요구사항_이슈_엔티티, ReqStatusDTO.class);
-                                    내부통신기.updateStatusNode("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
+                                    내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
                                 }
                             }
                         }
