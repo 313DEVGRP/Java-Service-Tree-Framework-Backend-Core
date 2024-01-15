@@ -19,8 +19,17 @@ public interface 엔진통신기 {
      * 공통
      */
     @PostMapping("/{connectId}/jira/issue")
-    public 지라이슈_데이터 이슈_생성하기(@PathVariable("connectId") Long 연결_아이디,
-                            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터);
+    public 지라이슈_데이터 이슈_생성하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
+    );
+
+    @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}")
+    public 지라이슈_데이터 이슈_수정하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
+    );
 
     @GetMapping("/{connectId}/jira/project/list")
     public List<지라프로젝트_데이터> 지라_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
