@@ -3,19 +3,19 @@ spring:
     active: dev
   datasource:
     #Hibernate
-    url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+    url: jdbc:log4jdbc:mysql://www.313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
     driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     username: mysqluser
     password: mysqluserpassword
     #mybatis
     hikari:
       driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-      jdbc-url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+      jdbc-url: jdbc:log4jdbc:mysql://www.313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
       username: mysqluser
       password: mysqluserpassword
   flyway:
     enabled: true
-    url: jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+    url: jdbc:mysql://www.313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
     user: mysqluser
     password: mysqluserpassword
     baseline-on-migrate: true           # flyway_schema_history 테이블을 자동으로 생성할지 여부
@@ -24,7 +24,7 @@ spring:
 # Database configuration props
 database:
   driver: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
-  url: jdbc:log4jdbc:mysql://313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
+  url: jdbc:log4jdbc:mysql://www.313.co.kr:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
   username: mysqluser
   password: mysqluserpassword
 
