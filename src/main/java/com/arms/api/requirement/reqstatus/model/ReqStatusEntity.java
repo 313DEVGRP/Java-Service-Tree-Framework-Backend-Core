@@ -59,9 +59,14 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_pds_version_link")
     private Long c_pds_version_link;
 
+    // -- 버전이름에 versionset_link에 대응하는 버전 명 넣기.
     @Column(name = "c_pds_version_name")
     @Type(type="text")
     private String c_pds_version_name;
+
+    @Column(name = "c_req_pdservice_versionset_link")
+    @Type(type="text")
+    private String c_req_pdservice_versionset_link;
 
     //-- 제품 서비스 연결 지라 server
     @Column(name = "c_jira_server_link")

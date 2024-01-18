@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -104,14 +105,25 @@ public class 스케쥴러_컨트롤러{
                         chat.sendMessageByEngine("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
 
                     } else {
-                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
+//                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
+//                                Long.parseLong(지라서버.getC_jira_server_etc()),
+//                                요구사항_이슈_엔티티.getC_issue_key(),
+//                                요구사항_이슈_엔티티.getC_pdservice_link(),
+//                                요구사항_이슈_엔티티.getC_pds_version_link()
+//                                );
+
+                        String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
+                        Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
+                                .filter(s -> !s.isEmpty())
+                                .map(Long::valueOf)
+                                .toArray(Long[]::new);
+
+                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장2(
                                 Long.parseLong(지라서버.getC_jira_server_etc()),
                                 요구사항_이슈_엔티티.getC_issue_key(),
                                 요구사항_이슈_엔티티.getC_pdservice_link(),
-                                요구사항_이슈_엔티티.getC_pds_version_link()
+                                버전_아이디_목록_배열
                                 );
-
-
 
                         log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
                     }

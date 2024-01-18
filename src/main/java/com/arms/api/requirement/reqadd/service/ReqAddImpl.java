@@ -106,7 +106,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		List<String> 디비에저장된_제품서비스_하위의_버전리스트 = Arrays.asList(objectMapper.readValue(추가된_요구사항의_제품서비스_버전리스트, String[].class));
 
 		Long 제품서비스_아이디 = 추가된_요구사항의_제품서비스.getC_id();
-
+		Set<PdServiceVersionEntity> 제품서비스_버전_세트 = 추가된_요구사항의_제품서비스.getPdServiceVersionEntities();
+		Map<Long, String> 제품_버전아이디_버전명_맵 = 제품서비스_버전_세트.stream().collect(Collectors.toMap(PdServiceVersionEntity::getC_id, PdServiceVersionEntity::getC_title));
 
 		Map<Long,Set<Long>> 지라프로젝트_버전아이디_맵 = new HashMap<>();
 
@@ -213,10 +214,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			logger.info("추가된_요구사항의_제품서비스 = " + 추가된_요구사항의_제품서비스.getC_title());
 			logger.info("제품서비스_아이디 = " + 제품서비스_아이디);
 
-			String 요구사항_매핑_버전아이디_문자열 = 지라프로젝트_버전아이디_맵.get(지라프로젝트_아이디)
-					.stream().map(String::valueOf)
-					.collect(Collectors.joining(",","[","]"));
-			logger.info("요구사항_매핑_버전_아이디_목록 = {}", 요구사항_매핑_버전아이디_문자열);
+			Set<Long> 버전아이디_세트 = 지라프로젝트_버전아이디_맵.get(지라프로젝트_아이디);
+			List<Long> 버전아이디_내림차순_목록 = 버전아이디_세트.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+
+			String 버전아이디_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(String::valueOf)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+			String 버전명_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(제품_버전아이디_버전명_맵::get)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			logger.info("요구사항_매핑_버전_아이디_목록 = {}", 버전아이디_내림차순_문자열);
+			logger.info("요구사항_매핑_버전_이름_목록 = {}", 버전명_내림차순_문자열);
 
 			logger.info("검색된_지라서버 = " + 검색된_지라서버.getC_jira_server_base_url());
 			logger.info("검색된_지라프로젝트 = " + 검색된_지라프로젝트.getC_jira_name());
@@ -316,8 +323,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			//-- 제품 서비스
 			reqStatusDTO.setC_pdservice_link(추가된_요구사항의_제품서비스.getC_id());
 			reqStatusDTO.setC_pdservice_name(추가된_요구사항의_제품서비스.getC_title());
+
 			//-- 지라프로젝트에 생성된 요구사항의 매핑버전목록
-			reqStatusDTO.setC_req_pdservice_versionset_link(요구사항_매핑_버전아이디_문자열);
+			reqStatusDTO.setC_pds_version_name(버전명_내림차순_문자열);
+			reqStatusDTO.setC_req_pdservice_versionset_link(버전아이디_내림차순_문자열);
+
 			//-- 제품 서비스 연결 지라 server
 			reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
 			reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
