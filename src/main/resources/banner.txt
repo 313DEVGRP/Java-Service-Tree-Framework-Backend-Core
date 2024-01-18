@@ -6,8 +6,8 @@
 ██   ██       ██   ██ ██  ██  ██      ██
 ██   ██       ██   ██ ██      ██ ███████
 
-Service URL : https://www.a-rms.net
-Support URL : https://www.313.co.kr
+Service URL : http://www.a-rms.net
+Support URL : http://www.313.co.kr
 
 Java-Service-Tree-Framework-Backend-Core
 made by 313DEVGRP ( 313cokr@gmail.com )
