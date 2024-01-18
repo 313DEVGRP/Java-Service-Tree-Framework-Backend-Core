@@ -1,0 +1,16 @@
+UPDATE T_ARMS_REQSTATE
+SET C_RIGHT=26
+WHERE C_ID =1;
+
+UPDATE T_ARMS_REQSTATE
+SET C_RIGHT=25
+WHERE C_ID =2;
+
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (10, 2, 7, 17, 18, 2, '열림', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (11, 2, 8, 19, 20, 2, '진행중', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (12, 2, 9, 21, 22, 2, '해결됨', 'default');
+Insert into `aRMS`.`T_ARMS_REQSTATE` (C_ID, C_PARENTID, C_POSITION, C_LEFT, C_RIGHT, C_LEVEL, C_TITLE, C_TYPE)
+Values (13, 2, 10, 23, 24, 2, '닫힘', 'default');
