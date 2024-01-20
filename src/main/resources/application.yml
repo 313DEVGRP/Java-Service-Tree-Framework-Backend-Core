@@ -62,3 +62,7 @@ hystrix:
       execution:
         timeout:
           enabled: false
+    "엔진통신기#히트맵_제품서비스_버전목록으로_조회(Long,Long,List)":
+      execution:
+        timeout:
+          enabled: false
