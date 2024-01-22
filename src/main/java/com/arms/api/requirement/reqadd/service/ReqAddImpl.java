@@ -27,6 +27,9 @@ import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
+import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.config.ArmsDetailUrlConfig;
@@ -738,5 +741,132 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			.build();
 	}
 
+	@Override
+	@Transactional
+	public ReqAddEntity updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
+		// TODO: 요구사항 수정 시 ReqAdd 업데이트, 엔진통신기로 지라 이슈 수정, ReqStatus 업데이트
+		return null;
+	}
 
+	private Set<String> 유지된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
+		Set<String> 유지된버전 = new HashSet<>(현재버전);
+		유지된버전.retainAll(수정할버전);
+		return 유지된버전;
+	}
+
+	private Set<String> 추가된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
+		Set<String> 추가된버전 = new HashSet<>(수정할버전);
+		추가된버전.removeAll(현재버전);
+		return 추가된버전;
+	}
+
+	private Set<String> 삭제된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
+		Set<String> 삭제된버전 = new HashSet<>(현재버전);
+		삭제된버전.removeAll(수정할버전);
+		return 삭제된버전;
+	}
+
+	private String 등록및수정지라이슈본문가져오기(ReqAddEntity reqAddEntity, String 요청자, String 제품명, String 버전명목록) {
+		String 우선순위 = Optional.ofNullable(reqAddEntity.getReqPriorityEntity()).map(ReqPriorityEntity::getC_title).orElse("우선순위");
+		String 난이도 = Optional.ofNullable(reqAddEntity.getReqDifficultyEntity()).map(ReqDifficultyEntity::getC_title).orElse("난이도");
+		String 상태 = Optional.ofNullable(reqAddEntity.getReqStateEntity()).map(ReqStateEntity::getC_title).orElse("상태");
+		String 최초요청일 = Optional.ofNullable(reqAddEntity.getC_req_create_date()).map(String::valueOf).orElse("최초요청일");
+		String 지라이슈본문 = Optional.ofNullable(reqAddEntity.getC_req_contents()).orElse("지라이슈본문");
+
+		String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
+				"✔ 본 이슈는 자동으로 관리되므로,\n" +
+				"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
+				"✔ 현황 통계에서 배제되어 불이익을 받을 수 있습니다.\n" +
+				"✔ 아래 링크에서 요구사항을 내용을 확인 할 수 있습니다.\n\n" +
+				"※ 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나, \n" +
+				"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
+				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
+				"제품 : " + 제품명 + "\n" +
+				"제품 버전 : " + 버전명목록 + "\n" +
+				"요구사항 우선순위 : " + 우선순위 + "\n" +
+				"요구사항 난이도 : " + 난이도 + "\n" +
+				"요구사항 상태 : " + 상태 + "\n" +
+				"요구사항 요청자 : " + 요청자 + "\n" +
+				"요구사항 최초 요청일 : " + 최초요청일 + "\n" +
+				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
+				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
+
+
+		이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(지라이슈본문, Whitelist.none())), "&nbsp;", " ");
+		return 이슈내용;
+	}
+
+	private String 삭제할지라이슈본문가져오기() {
+		return "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
+				"✔ 본 이슈는 삭제 된 이슈입니다.,\n" +
+				"✔ 삭제 된 이슈는 통계에 수집되지 않습니다. \n\n\n";
+	}
+
+	private JiraIssueTypeEntity 온프레미스요구사항이슈타입검색(JiraServerEntity 지라서버) throws Exception {
+		Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 지라서버.getJiraIssueTypeEntities();
+		JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_타입;
+	}
+
+	private JiraIssueStatusEntity 온프레미스요구사항이슈상태검색(JiraServerEntity 지라서버) throws Exception {
+		Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 지라서버.getJiraIssueStatusEntities();
+		JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_상태;
+	}
+
+	/**
+	 *
+	 * TODO: 클라우드, 온프레미스 이슈 타입, 이슈 상태 검색 관련 하나의 메소드로 통합?
+	 * 지라 프로젝트, 서버 모두 getJiraIssueTypeEntities() 메소드를 가지고 있음.
+	 * 디자인 패턴은 배보다 배꼽이 더 큰 모양새고.. 제네릭을 사용하기도 애매하고.. instanceof와 타입 캐스팅 정도가 무난할까..?
+	 */
+	private JiraIssueTypeEntity 클라우드요구사항이슈타입검색(JiraProjectEntity 지라프로젝트) throws Exception {
+		Set<JiraIssueTypeEntity> 지라프로젝트_이슈타입_리스트 = 지라프로젝트.getJiraIssueTypeEntities();
+		JiraIssueTypeEntity 요구사항_이슈_타입 = 지라프로젝트_이슈타입_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_타입;
+	}
+
+	private JiraIssueStatusEntity 클라우드요구사항이슈상태검색(JiraProjectEntity 지라프로젝트) throws Exception {
+		Set<JiraIssueStatusEntity> 지라프로젝트_이슈상태_리스트 = 지라프로젝트.getJiraIssueStatusEntities();
+		JiraIssueStatusEntity 요구사항_이슈_상태 = 지라프로젝트_이슈상태_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_상태;
+	}
+
+	private JiraIssuePriorityEntity 요구사항이슈우선순위검색(JiraServerEntity 지라서버) throws Exception {
+		Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 지라서버.getJiraIssuePriorityEntities();
+		JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_우선순위;
+	}
+
+	private JiraIssueResolutionEntity 요구사항이슈해결책검색(JiraServerEntity 지라서버) throws Exception {
+		Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 지라서버.getJiraIssueResolutionEntities();
+		JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.findFirst().orElse(null);
+		return 요구사항_이슈_해결책;
+	}
+
+	private JiraProjectEntity 지라프로젝트검색(Long 지라_프로젝트_아이디) throws Exception {
+		JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
+		지라프로젝트_검색용_엔티티.setC_id(지라_프로젝트_아이디);
+		JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
+		return 검색된_지라프로젝트;
+	}
+
+	private JiraServerEntity 지라서버검색(Long 지라서버_아이디) throws Exception {
+		JiraServerEntity 지라서버_검색용_엔티티 = new JiraServerEntity();
+		지라서버_검색용_엔티티.setC_id(지라서버_아이디);
+		JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
+		return 검색된_지라서버;
+	}
 }
