@@ -255,6 +255,12 @@ dependencies {
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
     implementation group: 'javax.mail', name: 'mail', version: '1.4.7'
 
+    // mapstruct
+    implementation "org.mapstruct:mapstruct:1.5.5.Final"
+    testImplementation "org.mapstruct:mapstruct:1.5.5.Final"
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
+
     // Slack Notification
     implementation "com.slack.api:slack-api-client:1.25.1"
 

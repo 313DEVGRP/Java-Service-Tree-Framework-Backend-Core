@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.*;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
@@ -42,6 +43,8 @@ import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateN
 import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.criterion.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +101,9 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         setTreeService(reqAdd);
         setTreeEntity(ReqAddEntity.class);
     }
+
+    @Autowired
+    private ReqAddControllerMapper reqAddControllerMapper;
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -406,6 +412,43 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         ) throws Exception {
 
         return  ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO,changeReqTableName));
+    }
+
+
+    @GetMapping(value = "/{changeReqTableName}/getNode.do/{c_id}")
+    public ResponseEntity<LoadReqAddDTO> loadReqNode(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
+    ) throws Exception {
+
+        log.info("ReqAddController :: getNode.do :: 단건 조회");
+
+        log.info("ReqAddController :: getNode.do :: changeReqTableName :: " + changeReqTableName);
+
+        log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
+
+        SessionUtil.setAttribute("getNode",changeReqTableName);
+
+        ReqAddEntity reqAddEntity = new ReqAddEntity();
+
+        reqAddEntity.setC_id(c_id);
+
+        ReqAddEntity response = reqAdd.getNode(reqAddEntity);
+
+        log.info("ReqAddController :: getNode.do :: response :: " + response);
+
+        LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
+
+        log.info("ReqAddController :: getNode.do :: reqAddDto :: " + reqAddDto);
+
+        SessionUtil.removeAttribute("getNode");
+
+        return ResponseEntity.ok(reqAddDto);
+    }
+
+    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+    interface ReqAddControllerMapper {
+        LoadReqAddDTO toLoadReqAddDto(ReqAddEntity reqAddEntity);
     }
 
 
