@@ -259,7 +259,7 @@ dependencies {
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
     // dwr
-    implementation '313devgrp:dwr:3.1.3:RELEASE'
+    implementation '313devgrp:dwr:3.3.3'
 
     // mybatis
     implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.3.1'
