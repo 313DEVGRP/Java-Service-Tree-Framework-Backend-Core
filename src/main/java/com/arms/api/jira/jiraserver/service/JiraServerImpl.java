@@ -26,8 +26,10 @@ import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.util.external_communicate.*;
 import com.arms.api.util.external_communicate.dto.*;
+import com.arms.api.util.external_communicate.엔진통신기;
+import com.arms.api.util.external_communicate.지라서버정보_데이터;
+import com.arms.api.util.external_communicate.지라서버정보_엔티티;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -830,5 +832,30 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		JiraIssueStatusEntity 지라_이슈_상태_검색 = new JiraIssueStatusEntity();
 		지라_이슈_상태_검색.setWhere("c_issue_status_url", 검색할_이슈_상태.getSelf());
 		return jiraIssueStatus.getNode(지라_이슈_상태_검색);
+	}
+
+	@Override
+	@Transactional
+	public int 암스_및_엔진_서버정보수정(JiraServerEntity jiraServerEntity) throws Exception {
+		int 결과 = this.updateNode(jiraServerEntity);
+		JiraServerEntity 커넥트아이디가져오기 = this.getNode(jiraServerEntity);
+
+		지라서버정보_데이터 서버정보_데이터 = new 지라서버정보_데이터();
+		서버정보_데이터.setConnectId(커넥트아이디가져오기.getC_jira_server_etc());
+		서버정보_데이터.setType(jiraServerEntity.getC_jira_server_type());
+		서버정보_데이터.setUri(jiraServerEntity.getC_jira_server_base_url());
+		서버정보_데이터.setUserId(jiraServerEntity.getC_jira_server_connect_id());
+		서버정보_데이터.setPasswordOrToken(jiraServerEntity.getC_jira_server_connect_pw());
+
+		지라서버정보_엔티티 수정결과 = 엔진통신기.지라서버_등록(서버정보_데이터);
+
+		if( 수정결과 != null) {
+			logger.info(수정결과.getConnectId());
+			logger.info(수정결과.getType());
+			logger.info(수정결과.getSelf());
+			logger.info(수정결과.getPasswordOrToken());
+		}
+
+		return 결과;
 	}
 }

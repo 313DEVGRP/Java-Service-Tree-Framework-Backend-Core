@@ -107,7 +107,9 @@ public class 일정분석_컨트롤러 {
 
         List<지라이슈> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
-        Map<Long, List<지라이슈>> 버전별_그룹화_결과 = 검색일자_범위_데이터.stream()
+        Map<Long, List<지라이슈>> 버전별_그룹화_결과 = Optional.ofNullable(검색일자_범위_데이터)
+                .orElseGet(Collections::emptyList)
+                .stream()
                 .collect(Collectors.groupingBy(지라이슈::getPdServiceVersion));
 
         ModelAndView modelAndView = new ModelAndView("jsonView");

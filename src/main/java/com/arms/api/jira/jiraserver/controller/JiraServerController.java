@@ -15,6 +15,7 @@ import com.arms.api.jira.jiraserver.model.JiraServerDTO;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
+import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
 import com.arms.api.jira.jiraserver.service.JiraServer;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @Controller
@@ -188,6 +190,19 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(설정할_항목,항목_c_id,jiraServerEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updateNodeAndEngineServerInfoUpdate.do", method = RequestMethod.PUT)
+    public ModelAndView 암스_및_엔진_서버정보수정(@Validated(value = UpdateNode.class) JiraServerDTO JiraServerDTO,
+                                         BindingResult bindingResult, HttpServletRequest request, ModelMap model) throws Exception {
+
+        log.info("JiraServerController :: 암스_및_엔진_서버정보수정");
+        JiraServerEntity treeSearchEntity = modelMapper.map(JiraServerDTO, JiraServerEntity.class);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", jiraServer.암스_및_엔진_서버정보수정(treeSearchEntity));
+        return modelAndView;
     }
 
 }
