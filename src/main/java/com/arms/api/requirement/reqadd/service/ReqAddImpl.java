@@ -22,9 +22,12 @@ import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.JiraServerType;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
@@ -88,6 +91,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 	@Autowired
 	private ArmsDetailUrlConfig armsDetailUrlConfig;
+
+	@Autowired
+	private PdService pdService;
 
 	//새로 작성중인 요구사항 생성 - 중간 작성.
 	@Override
@@ -744,7 +750,172 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Override
 	@Transactional
 	public ReqAddEntity updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
-		// TODO: 요구사항 수정 시 ReqAdd 업데이트, 엔진통신기로 지라 이슈 수정, ReqStatus 업데이트
+		logger.info("ReqAddImpl :: updateReqNode");
+		// 1. 수정 전 ReqAdd 조회
+		ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+		logger.info("ReqAddImpl :: updateReqNode :: 응답 성공");
+		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
+		logger.info("ReqAddImpl :: updateReqNode :: 요구사항조회 :: " + loadReqAddDTO.toString());
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
+
+		// 2. 수정 전 후 비교
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
+
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 전 버전 -> " + 수정전버전셋);
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 후 버전 -> " + 현재버전셋);
+
+		Set<String> 유지된버전 = 유지된버전찾기(수정전버전셋, 현재버전셋);
+		Set<String> 추가된버전 = 추가된버전찾기(수정전버전셋, 현재버전셋);
+		Set<String> 삭제된버전 = 삭제된버전찾기(수정전버전셋, 현재버전셋);
+
+		logger.info("ReqAddImpl :: updateReqNode :: 유지된 버전 -> " + 유지된버전);
+		logger.info("ReqAddImpl :: updateReqNode :: 추가된 버전 -> " + 추가된버전);
+		logger.info("ReqAddImpl :: updateReqNode :: 삭제된 버전 -> " + 삭제된버전);
+
+		String 수정전제목 = loadReqAddDTO.getC_title();
+		String 현재제목 = reqAddEntity.getC_title();
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 전 제목 -> " + 수정전제목);
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 후 제목 -> " + 현재제목);
+
+		String 수정전본문 = loadReqAddDTO.getC_req_contents();
+		String 현재본문 = reqAddEntity.getC_req_contents();
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 전 본문 -> " + 수정전본문);
+		logger.info("ReqAddImpl :: updateReqNode :: 수정 후 본문 -> " + 현재본문);
+
+		String 요구사항최초요청자 = loadReqAddDTO.getC_req_writer();
+
+		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+
+		List<PdServiceVersionEntity> 수정될버전데이터 = pdServiceVersion.getVersionListByCids(현재버전셋리스트);
+
+		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining(", "));
+
+		PdServiceEntity pdServiceEntity = new PdServiceEntity();
+		pdServiceEntity.setC_id(Long.valueOf(pdServiceId));
+		PdServiceEntity 제품데이터 = pdService.getNode(pdServiceEntity);
+
+		String 제품명 = 제품데이터.getC_title();
+
+
+		// 3. ReqAdd 업데이트
+        SessionUtil.setAttribute("updateNode", changeReqTableName);
+		this.updateNode(reqAddEntity);
+        SessionUtil.removeAttribute("updateNode");
+
+		List<GlobalTreeMapEntity> 글로벌트리맵By버전 = globalTreeMapService.findAllByIds(현재버전셋리스트, "pdserviceversion_link")
+				.stream()
+				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
+				.collect(Collectors.toList());
+
+		// 4. 버전 변경에 대한 처리. 지라 이슈(추가, 삭제, 변경), ReqStatus 처리
+		for (GlobalTreeMapEntity globalTreeMap : 글로벌트리맵By버전) {
+			Long 지라_프로젝트_아이디 = globalTreeMap.getJiraproject_link();
+			String 현재버전 = globalTreeMap.getPdserviceversion_link().toString();
+
+			GlobalTreeMapEntity 글로벌트리맵By지라프로젝트 = GlobalTreeMapEntity.builder().jiraproject_link(지라_프로젝트_아이디).build();
+			List<GlobalTreeMapEntity> 지라프로젝트에_연결된정보들 = globalTreeMapService.findAllBy(글로벌트리맵By지라프로젝트);
+
+			GlobalTreeMapEntity 지라서버_글로벌트리맵 = 지라프로젝트에_연결된정보들.stream()
+					.filter(글로벌트리맵 -> 글로벌트리맵.getJiraserver_link() != null)
+					.findFirst()
+					.orElseThrow(() -> new RuntimeException(""));
+
+			Long 지라서버_아이디 = 지라서버_글로벌트리맵.getJiraserver_link();
+
+			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			JiraIssueStatusEntity 요구사항_이슈_상태;
+			JiraIssueTypeEntity 요구사항_이슈_타입;
+
+			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
+
+			switch (jiraServerType) {
+				case CLOUD:
+					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
+					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
+					break;
+				case ON_PREMISE:
+					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
+					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
+			}
+
+			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
+
+			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
+			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+
+			지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
+			우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
+			우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
+			우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
+
+			지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
+			상태.setId("");
+			상태.setName("");
+			상태.setSelf("");
+			상태.setDescription("");
+
+			지라이슈해결책_데이터 해결책 = new 지라이슈해결책_데이터();
+			해결책.setId("");
+			해결책.setName("");
+			해결책.setSelf("");
+			해결책.setDescription("");
+
+
+			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
+			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버보고자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
+			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+
+			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, 요구사항최초요청자, 제품명, 버전명목록);
+			String 삭제지라이슈본문 = 삭제할지라이슈본문가져오기();
+
+			logger.info("ReqAddImpl :: updateReqNode :: 일반지라이슈본문 -> " + 일반지라이슈본문);
+			logger.info("ReqAddImpl :: updateReqNode :: 삭제지라이슈본문 -> " + 삭제지라이슈본문);
+
+			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈필드_데이터
+					.builder()
+					.project(프로젝트)
+					.issuetype(유형)
+					.priority(우선순위)
+					.status(상태)
+					.resolution(해결책)
+					.summary(reqAddEntity.getC_title())
+					.description(일반지라이슈본문)
+					.build();
+
+			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+					.builder()
+					.fields(지라이슈생성데이터)
+					.build();
+
+			if(유지된버전.contains(현재버전)) {
+				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), "이슈키", 요구사항_이슈);
+			} else if(추가된버전.contains(현재버전)) {
+				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+			} else if(삭제된버전.contains(현재버전)) {
+				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), "이슈키",요구사항_이슈);
+			} else {
+				throw new RuntimeException("버전 정보가 잘못 되었습니다.");
+			}
+
+			// TODO: 만약, 요구사항의 수정이 아닌 버전에 연결 된 지라 프로젝트 변경 시에도 ReqAdd, ReqStatus 관리가 필요함.
+
+		}
+
 		return null;
 	}
 
@@ -764,6 +935,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		Set<String> 삭제된버전 = new HashSet<>(현재버전);
 		삭제된버전.removeAll(수정할버전);
 		return 삭제된버전;
+	}
+
+	private static 지라이슈필드_데이터.프로젝트 지라프로젝트빌더(JiraProjectEntity 검색된_지라프로젝트) {
+		return 지라이슈필드_데이터.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
+				.key(검색된_지라프로젝트.getC_jira_key())
+				.name(검색된_지라프로젝트.getC_jira_name())
+				.self(검색된_지라프로젝트.getC_jira_url())
+				.build();
 	}
 
 	private String 등록및수정지라이슈본문가져오기(ReqAddEntity reqAddEntity, String 요청자, String 제품명, String 버전명목록) {
@@ -818,12 +997,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 요구사항_이슈_상태;
 	}
 
-	/**
-	 *
-	 * TODO: 클라우드, 온프레미스 이슈 타입, 이슈 상태 검색 관련 하나의 메소드로 통합?
-	 * 지라 프로젝트, 서버 모두 getJiraIssueTypeEntities() 메소드를 가지고 있음.
-	 * 디자인 패턴은 배보다 배꼽이 더 큰 모양새고.. 제네릭을 사용하기도 애매하고.. instanceof와 타입 캐스팅 정도가 무난할까..?
-	 */
 	private JiraIssueTypeEntity 클라우드요구사항이슈타입검색(JiraProjectEntity 지라프로젝트) throws Exception {
 		Set<JiraIssueTypeEntity> 지라프로젝트_이슈타입_리스트 = 지라프로젝트.getJiraIssueTypeEntities();
 		JiraIssueTypeEntity 요구사항_이슈_타입 = 지라프로젝트_이슈타입_리스트.stream()
