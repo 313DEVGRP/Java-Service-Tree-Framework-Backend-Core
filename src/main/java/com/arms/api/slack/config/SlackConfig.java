@@ -10,17 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(value = SlackProperty.class)
 public class SlackConfig {
     @Bean
-    public SlackProperty slackProperty() {
-        return new SlackProperty();
+    public SlackApiService slackService(SlackProperty slackProperty) {
+        return new SlackApiService(slackProperty);
     }
 
     @Bean
-    public SlackApiService slackService() {
-        return new SlackApiService(slackProperty());
-    }
-
-    @Bean
-    public SlackService slackClient() {
-        return new SlackService(slackService());
+    public SlackService slackClient(SlackApiService slackApiService) {
+        return new SlackService(slackApiService);
     }
 }
