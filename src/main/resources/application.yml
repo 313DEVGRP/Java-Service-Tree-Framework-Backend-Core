@@ -70,9 +70,3 @@ hystrix:
       execution:
         timeout:
           enabled: false
-
-slack:
-  service-name: ${spring.application.name}
-  token: xoxb-6506875664277-6522692878945-FEu67lT8P0IHg50oyGqq0sTY
-  profile: ${spring.profiles.active}
-  url: https://slack.com/

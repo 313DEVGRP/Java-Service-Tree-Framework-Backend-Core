@@ -22,8 +22,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
-
 @Slf4j
 @Controller
 @RestController
@@ -109,6 +107,10 @@ public class 일정분석_컨트롤러 {
 
         List<지라이슈> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
+        Map<Long, List<지라이슈>> 버전별_그룹화_결과 = Optional.ofNullable(검색일자_범위_데이터)
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .collect(Collectors.groupingBy(지라이슈::getPdServiceVersion));
         Map<Long, List<지라이슈>> 버전별_그룹화_결과
                 = 검색일자_범위_데이터.stream().flatMap(a->a.지라버전별로_분해가져오기().stream()).collect(groupingBy(지라이슈::getSinglePdServiceVersion));
 
@@ -124,10 +126,9 @@ public class 일정분석_컨트롤러 {
     @GetMapping("/standard-daily/updated-ridgeline")
     public List<등고선데이터> 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 
-
         log.info("[일정분석_컨트롤러 :: 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회] :: 지라이슈 일자별 제품 및 제품버전 검색요청 -> " + 지라이슈_일자별_제품_및_제품버전_검색요청.toString());
 
-        Map<Long, Map<String, Map<String,List<요구사항_별_업데이트_데이터>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
+        Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청).getBody();
 
         Long service_id = 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink();
 
