@@ -70,11 +70,3 @@ hystrix:
       execution:
         timeout:
           enabled: false
-
-# public repository 에 token 노출 시, slack 에서 token expire 처리.
-# secret 처리 필요.
-slack:
-  service-name: ${spring.application.name}
-  token: xoxb-6506875664277-6522692878945-FEu67lT8P0IHg50oyGqq0sTY
-  profile: ${spring.profiles.active}
-  url: https://slack.com/
