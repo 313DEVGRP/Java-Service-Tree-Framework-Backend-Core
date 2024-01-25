@@ -42,31 +42,3 @@ server:
     session:
       timeout: 7200
   contextPath: /
-
-feign:
-  hystrix:
-    enabled: true
-
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 30000
-    "엔진통신기#이슈_검색엔진_벌크_저장(Long,String,Long,Long)":
-      execution:
-        timeout:
-          enabled: false
-    "엔진통신기#요구사항이슈_조회(Long,String,String)":
-      execution:
-        timeout:
-          enabled: false
-    "엔진통신기#히트맵_제품서비스_버전목록으로_조회(Long,Long,List)":
-      execution:
-        timeout:
-          enabled: false
-    "엔진통신기#이슈_생성하기(Long,지라이슈생성_데이터)":
-      execution:
-        timeout:
-          enabled: false

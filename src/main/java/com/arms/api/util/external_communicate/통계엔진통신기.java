@@ -106,8 +106,8 @@ public interface 통계엔진통신기 {
             @RequestParam String resolution
     );
 
-    @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees")
-    ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(@SpringQueryMap 지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_검색요청);
+    @PostMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees")
+    ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(@RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_검색요청);
 
     @GetMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(
