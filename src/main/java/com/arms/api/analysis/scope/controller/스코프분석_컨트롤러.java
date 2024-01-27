@@ -47,30 +47,34 @@ public class 스코프분석_컨트롤러 {
 
     }
 
-    @GetMapping("/req-status-and-reqInvolved-unique-assignees")
-    public  ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(
-            지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_병합_집계_요청) {
-        log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] :: 요구_사항, 하위_이슈_사항");
-        log.info("요청 제품_서비스 아이디 : {}" ,지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getPdServiceLink().toString());
-        log.info("요구_사항 isReqType : {}", 지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getIsReqType());
-        log.info("하위_이슈_사항 isReqType : {}", 지라이슈_제품_및_제품버전_병합_집계_요청.get하위_이슈_사항().getIsReqType());
+    @PostMapping("/req-status-and-reqInvolved-unique-assignees")
+    public ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수(
+           @RequestBody 지라이슈_제품_및_제품버전_병합_집계_요청 지라이슈_제품_및_제품버전_병합_집계_요청) {
+        Long 선택된_제품서비스_아이디 = 지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getPdServiceLink();
+        List<Long> 선택된_버전_목록 = 지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getPdServiceVersionLinks();
+        log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] 백엔드 요청");
+        log.info("요구_사항 :: 선택된_제품_서비스 아이디 : {}", 선택된_제품서비스_아이디);
+        log.info("요구_사항 :: 선택된_제품_서비스 버전 : {}", 선택된_버전_목록);
 
-        ResponseEntity<List<제품_서비스_버전>> 통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_병합_집계_요청);
+        ResponseEntity<List<제품_서비스_버전>> 요구사항_별_상태_및_관여_작업자_수_통신결과 = 통계엔진통신기.요구사항_별_상태_및_관여_작업자_수(지라이슈_제품_및_제품버전_병합_집계_요청);
 
         String 하위그룹필드 = "key,status.status_name.keyword";
-        지라이슈_일반_집계_요청 일반_검색 = 지라이슈_일반_집계_요청.builder()
+        지라이슈_일반_집계_요청 일반_집계_요청_세팅 = 지라이슈_일반_집계_요청.builder()
                 .isReq(true)
                 .메인그룹필드("pdServiceVersion")
                 .컨텐츠보기여부(true)
                 .크기(1000)
                 .하위그룹필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
                 .build();
-        ResponseEntity<검색결과_목록_메인> 검색결과 =
-                통계엔진통신기.제품서비스_일반_버전_통계(지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getPdServiceLink(),
-                        지라이슈_제품_및_제품버전_병합_집계_요청.get요구_사항().getPdServiceVersionLinks(), 일반_검색);
-
-        List<제품_서비스_버전> 매핑결과 = scopeService.요구사항_상태_매핑(통신결과.getBody(), 검색결과.getBody().get검색결과());
-
+        ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계_통신결과 =
+                통계엔진통신기.제품서비스_일반_버전_통계(선택된_제품서비스_아이디, 선택된_버전_목록, 일반_집계_요청_세팅);
+        List<제품_서비스_버전> 매핑결과 = null;
+        if(요구사항_별_상태_및_관여_작업자_수_통신결과 != null && 제품서비스_일반_버전_통계_통신결과 != null
+                && 제품서비스_일반_버전_통계_통신결과.getBody() != null) {
+            매핑결과 = scopeService.요구사항_상태_매핑(요구사항_별_상태_및_관여_작업자_수_통신결과.getBody(), 제품서비스_일반_버전_통계_통신결과.getBody().get검색결과());
+        } else {
+            log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] 매핑결과가 null 입니다.");
+        }
         return ResponseEntity.ok(매핑결과);
     }
 
