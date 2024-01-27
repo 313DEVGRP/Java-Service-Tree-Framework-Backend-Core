@@ -52,8 +52,9 @@ public class 지라이슈 {
 
     private Long pdServiceId;
 
-    private Long[] pdServiceVersion;
-    private Long singlePdServiceVersion;
+    private Long[] pdServiceVersions;
+
+    private Long pdServiceVersion;
 
     private String _class; //추가
 
@@ -304,9 +305,9 @@ public class 지라이슈 {
     }
 
     public List<지라이슈> 지라버전별로_분해가져오기(){
-        return Arrays.stream(this.getPdServiceVersion()).map(
+        return Arrays.stream(this.getPdServiceVersions()).map(
                 a->{
-                    this.singlePdServiceVersion = a.longValue();
+                    this.pdServiceVersion = a.longValue();
                     return this;
                 }
         ).collect(Collectors.toList());
