@@ -217,7 +217,7 @@ public class ScopeServiceImpl implements ScopeService {
     public List<제품_서비스_버전> 요구사항_상태_매핑(List<제품_서비스_버전> 제품_서비스_버전_목록, Map<String, List<검색결과>> 검색결과) {
 
         // 버전별_요구사항_상태
-        List<검색결과> 버전별_검색_결과 = 검색결과.get("group_by_pdServiceVersion");
+        List<검색결과> 버전별_검색_결과 = 검색결과.get("group_by_pdServiceVersions");
         Map<String, List<Map<String, String>>> 버전_맵 = new HashMap<>();
         for ( 검색결과 버전_결과요소 : 버전별_검색_결과 ) {
             // 필드, 개수, 하위검색결과

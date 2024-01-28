@@ -61,7 +61,7 @@ public class 스코프분석_컨트롤러 {
         String 하위그룹필드 = "key,status.status_name.keyword";
         지라이슈_일반_집계_요청 일반_집계_요청_세팅 = 지라이슈_일반_집계_요청.builder()
                 .isReq(true)
-                .메인그룹필드("pdServiceVersion")
+                .메인그룹필드("pdServiceVersions")
                 .컨텐츠보기여부(true)
                 .크기(1000)
                 .하위그룹필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
