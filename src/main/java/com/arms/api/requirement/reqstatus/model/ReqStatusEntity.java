@@ -60,6 +60,7 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     private Long c_pds_version_link;
 
     // -- 버전이름에 versionset_link에 대응하는 버전 명 넣기.
+    // -- 버전이름에 versionset_link에 대응하는 버전 명 삽입 예정.
     @Column(name = "c_pds_version_name")
     @Type(type="text")
     private String c_pds_version_name;
@@ -102,6 +103,34 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_req_name")
     @Type(type="text")
     private String c_req_name;
+
+    // 요구사항 우선순위
+    @Column(name = "c_req_priority_link")
+    @Type(type="text")
+    private Long c_req_priority_link;
+
+    @Column(name = "c_req_priority_name")
+    @Type(type="text")
+    private String c_req_priority_name;
+
+    // 요구사항 난이도
+    @Column(name = "c_req_difficulty_link")
+    @Type(type="text")
+    private Long c_req_difficulty_link;
+
+    @Column(name = "c_req_difficulty_name")
+    @Type(type="text")
+    private String c_req_difficulty_name;
+
+
+    // 요구사항 상태
+    @Column(name = "c_req_state_link")
+    @Type(type="text")
+    private Long c_req_state_link;
+
+    @Column(name = "c_req_state_name")
+    @Type(type="text")
+    private String c_req_state_name;
 
     @Column(name = "c_issue_key")
     @Type(type="text")
@@ -178,6 +207,24 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     //비고
     @Column(name = "c_etc")
     private String c_etc;
+
+
+
+    // '총 작업 MM'
+    @Column(name = "c_req_total_resource")
+    private Long c_req_total_resource;
+
+    // '총 계획 MM'
+    @Column(name = "c_req_plan_resource")
+    private Long c_req_plan_resource;
+
+    // '총 기간 Day'
+    @Column(name = "c_req_total_time")
+    private Long c_req_total_time;
+
+    // '총 계획 Day'
+    @Column(name = "c_req_plan_time")
+    private Long c_req_plan_time;
 
     /*
      * Extend Bean Field
