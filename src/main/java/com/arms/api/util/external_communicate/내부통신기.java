@@ -35,4 +35,9 @@ public interface 내부통신기 {
             @PathVariable(value = "c_id") Long c_id
     );
 
+    @GetMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
+    List<ReqStatusEntity> reqStatusList(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+                                         @RequestBody ReqStatusDTO reqStatusDTO);
+
+
 }

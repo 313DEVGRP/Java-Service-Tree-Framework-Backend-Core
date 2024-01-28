@@ -388,7 +388,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return modelAndView;
     }
 
-    @DeleteMapping("/arms/reqStatus/{changeReqTableName}/removeNode.do/{c_id}")
+    @DeleteMapping("/{changeReqTableName}/removeNode.do/{c_id}")
     public ResponseEntity<Integer> 요구사항삭제(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @PathVariable(value = "c_id") Long c_id, HttpServletRequest request

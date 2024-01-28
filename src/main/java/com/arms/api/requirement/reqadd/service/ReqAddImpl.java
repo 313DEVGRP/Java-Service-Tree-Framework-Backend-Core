@@ -38,6 +38,7 @@ import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqpriority.service.ReqPriority;
 import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
@@ -763,7 +764,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 	@Override
 	@Transactional
-	public ReqAddEntity updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
+	public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
 		logger.info("ReqAddImpl :: updateReqNode");
 		// 1. 수정 전 ReqAdd 조회
 		ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
@@ -777,7 +778,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
 		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
-
+		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		루프용버전셋.addAll(현재버전셋);
 		logger.info("ReqAddImpl :: updateReqNode :: 수정 전 버전 -> " + 수정전버전셋);
 		logger.info("ReqAddImpl :: updateReqNode :: 수정 후 버전 -> " + 현재버전셋);
 
@@ -785,9 +787,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		Set<String> 추가된버전 = 추가된버전찾기(수정전버전셋, 현재버전셋);
 		Set<String> 삭제된버전 = 삭제된버전찾기(수정전버전셋, 현재버전셋);
 
-		logger.info("ReqAddImpl :: updateReqNode :: 유지된 버전 -> " + 유지된버전);
-		logger.info("ReqAddImpl :: updateReqNode :: 추가된 버전 -> " + 추가된버전);
-		logger.info("ReqAddImpl :: updateReqNode :: 삭제된 버전 -> " + 삭제된버전);
+		logger.info("ReqAddImpl :: updateReqNode :: 유지된버전 -> " + 유지된버전);
+		logger.info("ReqAddImpl :: updateReqNode :: 추가된버전 -> " + 추가된버전);
+		logger.info("ReqAddImpl :: updateReqNode :: 삭제된버전 -> " + 삭제된버전);
 
 		String 수정전제목 = loadReqAddDTO.getC_title();
 		String 현재제목 = reqAddEntity.getC_title();
@@ -801,31 +803,53 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		String 요구사항최초요청자 = loadReqAddDTO.getC_req_writer();
 
+		logger.info("ReqAddImpl :: updateReqNode :: 요구사항최초요청자 -> " + 요구사항최초요청자);
+
 		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+		logger.info("ReqAddImpl :: updateReqNode :: 현재버전셋리스트 -> " + 현재버전셋리스트);
 
 		List<PdServiceVersionEntity> 수정될버전데이터 = pdServiceVersion.getVersionListByCids(현재버전셋리스트);
 
-		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining(", "));
+		logger.info("ReqAddImpl :: updateReqNode :: 수정될버전데이터 -> " + 수정될버전데이터);
+
+		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+		logger.info("ReqAddImpl :: updateReqNode :: 버전명목록 -> " + 버전명목록);
 
 		PdServiceEntity pdServiceEntity = new PdServiceEntity();
 		pdServiceEntity.setC_id(Long.valueOf(pdServiceId));
 		PdServiceEntity 제품데이터 = pdService.getNode(pdServiceEntity);
-
+		Set<PdServiceVersionEntity> pdServiceVersionEntities = 제품데이터.getPdServiceVersionEntities();
 		String 제품명 = 제품데이터.getC_title();
 
+		logger.info("ReqAddImpl :: updateReqNode :: 제품명 -> " + 제품명);
 
 		// 3. ReqAdd 업데이트
         SessionUtil.setAttribute("updateNode", changeReqTableName);
 		this.updateNode(reqAddEntity);
         SessionUtil.removeAttribute("updateNode");
 
-		List<GlobalTreeMapEntity> 글로벌트리맵By버전 = globalTreeMapService.findAllByIds(현재버전셋리스트, "pdserviceversion_link")
+		logger.info("ReqAddImpl :: updateReqNode :: ReqAdd 업데이트 완료");
+
+		List<GlobalTreeMapEntity> 글로벌트리맵By버전 = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
 				.stream()
 				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
 				.collect(Collectors.toList());
 
+		logger.info("ReqAddImpl :: updateReqNode :: 글로벌트리맵By버전 -> " + 글로벌트리맵By버전);
+
+		List<ReqStatusEntity> reqStatusEntityList = 내부통신기.reqStatusList("T_ARMS_REQSTATUS_"+pdServiceId, new ReqStatusDTO());
+
+		String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, 요구사항최초요청자, 제품명, 버전명목록);
+		String 삭제지라이슈본문 = 삭제할지라이슈본문가져오기();
+
+		logger.info("ReqAddImpl :: updateReqNode :: 일반지라이슈본문 -> " + 일반지라이슈본문);
+		logger.info("ReqAddImpl :: updateReqNode :: 삭제지라이슈본문 -> " + 삭제지라이슈본문);
+
 		// 4. 버전 변경에 대한 처리. 지라 이슈(추가, 삭제, 변경), ReqStatus 처리
 		for (GlobalTreeMapEntity globalTreeMap : 글로벌트리맵By버전) {
+
 			Long 지라_프로젝트_아이디 = globalTreeMap.getJiraproject_link();
 			String 현재버전 = globalTreeMap.getPdserviceversion_link().toString();
 
@@ -868,23 +892,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
 			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
 
-			지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
-			우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
-			우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
-			우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
-
-			지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
-			상태.setId("");
-			상태.setName("");
-			상태.setSelf("");
-			상태.setDescription("");
-
-			지라이슈해결책_데이터 해결책 = new 지라이슈해결책_데이터();
-			해결책.setId("");
-			해결책.setName("");
-			해결책.setSelf("");
-			해결책.setDescription("");
-
 
 			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
 			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
@@ -894,44 +901,256 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
 			암스서버담당자.setEmailAddress("313cokr@gmail.com");
 
-			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, 요구사항최초요청자, 제품명, 버전명목록);
-			String 삭제지라이슈본문 = 삭제할지라이슈본문가져오기();
-
-			logger.info("ReqAddImpl :: updateReqNode :: 일반지라이슈본문 -> " + 일반지라이슈본문);
-			logger.info("ReqAddImpl :: updateReqNode :: 삭제지라이슈본문 -> " + 삭제지라이슈본문);
-
-			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈필드_데이터
-					.builder()
-					.project(프로젝트)
-					.issuetype(유형)
-					.priority(우선순위)
-					.status(상태)
-					.resolution(해결책)
-					.summary(reqAddEntity.getC_title())
-					.description(일반지라이슈본문)
-					.build();
-
-			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
-					.builder()
-					.fields(지라이슈생성데이터)
-					.build();
-
 			if(유지된버전.contains(현재버전)) {
-				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), "이슈키", 요구사항_이슈);
+				지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+				지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+						.builder()
+						.fields(지라이슈생성데이터)
+						.build();
+
+				Long 지라서버링크 = 검색된_지라서버.getC_id();
+				Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+				ReqStatusEntity 일치하는ReqStatus = reqStatusEntityList.stream()
+						.filter(a -> a.getC_jira_server_link().equals(지라서버링크) && a.getC_jira_project_link().equals(지라프로젝트링크))
+						.filter(a -> a.getC_req_link().equals(reqAddEntity.getC_id()))
+						.findFirst().orElseThrow();
+
+				엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 일치하는ReqStatus.getC_issue_key(), 요구사항_이슈);
+
+				ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+				reqStatusDTO.setRef(TreeConstant.First_Node_CID);
+				reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+				/* 제품 및 버전*/
+				reqStatusDTO.setC_title(현재제목);
+				reqStatusDTO.setC_contents(현재본문);
+				reqStatusDTO.setC_pdservice_name(제품명);
+				reqStatusDTO.setC_pds_version_link(globalTreeMap.getPdserviceversion_link());
+				reqStatusDTO.setC_pds_version_name(버전명목록);
+				reqStatusDTO.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+
+				/* 지라 서버 */
+				reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
+				reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+				reqStatusDTO.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+				/* 지라 프로젝트 */
+				reqStatusDTO.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+				reqStatusDTO.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+				reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+				reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+				//-- 요구사항
+				reqStatusDTO.setC_req_link(reqAddEntity.getC_id());
+				reqStatusDTO.setC_req_name(reqAddEntity.getC_title());
+
+				// 등록일 경우, 엔진 응답 후 처리
+				reqStatusDTO.setC_issue_key(일치하는ReqStatus.getC_issue_key());
+				reqStatusDTO.setC_issue_url(일치하는ReqStatus.getC_issue_url());
+
+				//-- 제품 서비스 연결 지라 server
+				reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
+				reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+				reqStatusDTO.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+				//-- 제품 서비스 연결 지라 프로젝트
+				reqStatusDTO.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+				reqStatusDTO.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+				reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+				reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+				if(요구사항_이슈_우선순위 != null) {
+					reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				if(요구사항_이슈_해결책 != null) {
+					reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				if(요구사항_이슈_상태 != null) {
+					reqStatusDTO.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
+				reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
+				reqStatusDTO.setC_issue_update_date(new Date());
+				reqStatusDTO.setC_id(일치하는ReqStatus.getC_id());
+
+				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_"+pdServiceId, reqStatusDTO);
+
+				if(결과.getStatusCode().is2xxSuccessful()){
+					String 업데이트된버전명 = 제품데이터.getPdServiceVersionEntities().stream()
+							.filter(a -> a.getC_id().equals(Long.valueOf(현재버전)))
+							.map(PdServiceVersionEntity::getC_title)
+							.findFirst().orElseThrow();
+					chat.sendMessageByEngine(업데이트된버전명 + " 버전에 연결 된 지라 프로젝트(" + 검색된_지라프로젝트.getC_title() + ")에 지라 이슈가 수정되었습니다.");
+				}
+
 			} else if(추가된버전.contains(현재버전)) {
-				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+				logger.info("추가된버전 contains 현재버전");
+				지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+				지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+						.builder()
+						.fields(지라이슈생성데이터)
+						.build();
+
+				Long 지라서버링크 = 검색된_지라서버.getC_id();
+				Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+				logger.info("지라서버링크 :: " + 지라서버링크); // 69
+				logger.info("지라프로젝트링크 :: " + 지라프로젝트링크); // 343
+
+				지라이슈_데이터 이슈_생성하기 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+
+				ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+				reqStatusDTO.setRef(TreeConstant.First_Node_CID);
+				reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+				/* 제품 및 버전*/
+				reqStatusDTO.setC_title(현재제목);
+				reqStatusDTO.setC_contents(현재본문);
+				reqStatusDTO.setC_pdservice_name(제품명);
+				reqStatusDTO.setC_pds_version_link(globalTreeMap.getPdserviceversion_link());
+				reqStatusDTO.setC_pds_version_name(버전명목록);
+				reqStatusDTO.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+
+				/* 지라 서버 */
+				reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
+				reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+				reqStatusDTO.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+				/* 지라 프로젝트 */
+				reqStatusDTO.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+				reqStatusDTO.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+				reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+				reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+				//-- 요구사항
+				reqStatusDTO.setC_req_link(reqAddEntity.getC_id());
+				reqStatusDTO.setC_req_name(reqAddEntity.getC_title());
+
+				// 등록일 경우, 엔진 응답 후 처리
+				reqStatusDTO.setC_issue_key(이슈_생성하기.getKey());
+				reqStatusDTO.setC_issue_url(이슈_생성하기.getSelf());
+
+				//-- 제품 서비스 연결 지라 server
+				reqStatusDTO.setC_jira_server_link(검색된_지라서버.getC_id());
+				reqStatusDTO.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+				reqStatusDTO.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+				//-- 제품 서비스 연결 지라 프로젝트
+				reqStatusDTO.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+				reqStatusDTO.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+				reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+				reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+				if(요구사항_이슈_우선순위 != null) {
+					reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				if(요구사항_이슈_해결책 != null) {
+					reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				if(요구사항_이슈_상태 != null) {
+					reqStatusDTO.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
+					reqStatusDTO.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				}
+
+				reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
+				reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
+
+				reqStatusDTO.setC_issue_create_date(new Date());
+
+				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_"+pdServiceId, reqStatusDTO);
+
+				if(결과.getStatusCode().is2xxSuccessful()){
+					String 업데이트된버전명 = 제품데이터.getPdServiceVersionEntities().stream()
+							.filter(a -> a.getC_id().equals(Long.valueOf(현재버전)))
+							.map(PdServiceVersionEntity::getC_title)
+							.findFirst().orElseThrow();
+					chat.sendMessageByEngine(업데이트된버전명 + " 버전에 연결 된 지라 프로젝트(" + 검색된_지라프로젝트.getC_title() + ")에 지라 이슈가 등록되었습니다.");
+				}
+
 			} else if(삭제된버전.contains(현재버전)) {
-				지라이슈_데이터 변경된_요구사항_이슈 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), "이슈키",요구사항_이슈);
+				logger.info("삭제된버전 contains 현재버전");
+				지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 삭제지라이슈본문 , 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+				지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+						.builder()
+						.fields(지라이슈생성데이터)
+						.build();
+
+				Long 지라서버링크 = 검색된_지라서버.getC_id();
+				Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+				ReqStatusEntity 일치하는ReqStatus = reqStatusEntityList.stream()
+						.filter(a -> a.getC_jira_server_link().equals(지라서버링크))
+						.filter(a -> a.getC_jira_project_link().equals(지라프로젝트링크))
+						.filter(a -> a.getC_req_link().equals(reqAddEntity.getC_id()))
+						.findFirst().orElseThrow();
+
+				엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 일치하는ReqStatus.getC_issue_key(), 요구사항_이슈);
+
+				ResponseEntity<?> 결과 = 내부통신기.요구사항삭제("T_ARMS_REQSTATUS_"+pdServiceId, 일치하는ReqStatus.getC_id());
+
+				if(결과.getStatusCode().is2xxSuccessful()){
+					String 업데이트된버전명 = 제품데이터.getPdServiceVersionEntities().stream()
+							.filter(a -> a.getC_id().equals(Long.valueOf(현재버전)))
+							.map(PdServiceVersionEntity::getC_title)
+							.findFirst().orElseThrow();
+					chat.sendMessageByEngine(업데이트된버전명 + " 버전에 연결 된 지라 프로젝트(" + 검색된_지라프로젝트.getC_title() + ")에 등록 된 지라 이슈가 Soft Delete 처리되었습니다. 지라 이슈는 남아있지만, 통계에 수집되지 않습니다.");
+				}
 			} else {
 				throw new RuntimeException("버전 정보가 잘못 되었습니다.");
 			}
-
-			// TODO: 만약, 요구사항의 수정이 아닌 버전에 연결 된 지라 프로젝트 변경 시에도 ReqAdd, ReqStatus 관리가 필요함.
 
 		}
 
 		return null;
 	}
+
+	private 지라이슈필드_데이터 get지라이슈생성데이터(ReqAddEntity reqAddEntity, 지라이슈필드_데이터.프로젝트 프로젝트, 지라이슈유형_데이터 유형, String 지라이슈본문, JiraIssuePriorityEntity 요구사항_이슈_우선순위, JiraIssueStatusEntity 요구사항_이슈_상태, JiraIssueResolutionEntity 요구사항_이슈_해결책) {
+		지라이슈필드_데이터 지라이슈생성데이터 = new 지라이슈필드_데이터();
+		지라이슈생성데이터.setProject(프로젝트);
+		지라이슈생성데이터.setIssuetype(유형);
+		지라이슈생성데이터.setSummary(reqAddEntity.getC_title());
+		지라이슈생성데이터.setDescription(지라이슈본문);
+
+		if (요구사항_이슈_우선순위 != null) {
+			지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
+			우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
+			우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
+			우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
+			지라이슈생성데이터.setPriority(우선순위);
+		}
+
+		// 엔진에서 오류 발생시킴 if (필드_데이터.getStatus() != null) -> 입력 값에 수정할 수 없는 필드가 있습니다.
+//		if (요구사항_이슈_상태 != null) {
+//			지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
+//			상태.setId(요구사항_이슈_상태.getC_issue_status_id());
+//			상태.setName(요구사항_이슈_상태.getC_issue_status_name());
+//			상태.setSelf(요구사항_이슈_상태.getC_issue_status_url());
+//			지라이슈생성데이터.setStatus(상태);
+//		}
+
+		if (요구사항_이슈_해결책 != null) {
+			지라이슈해결책_데이터 해결책 = new 지라이슈해결책_데이터();
+			해결책.setId(요구사항_이슈_해결책.getC_issue_resolution_id());
+			해결책.setName(요구사항_이슈_해결책.getC_issue_resolution_name());
+			해결책.setSelf(요구사항_이슈_해결책.getC_issue_resolution_url());
+			지라이슈생성데이터.setResolution(해결책);
+		}
+		return 지라이슈생성데이터;
+	}
+
 
 	private Set<String> 유지된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
 		Set<String> 유지된버전 = new HashSet<>(현재버전);
@@ -951,7 +1170,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 삭제된버전;
 	}
 
-	private static 지라이슈필드_데이터.프로젝트 지라프로젝트빌더(JiraProjectEntity 검색된_지라프로젝트) {
+	private 지라이슈필드_데이터.프로젝트 지라프로젝트빌더(JiraProjectEntity 검색된_지라프로젝트) {
 		return 지라이슈필드_데이터.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
 				.key(검색된_지라프로젝트.getC_jira_key())
 				.name(검색된_지라프로젝트.getC_jira_name())
@@ -959,11 +1178,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				.build();
 	}
 
-	private String 등록및수정지라이슈본문가져오기(ReqAddEntity reqAddEntity, String 요청자, String 제품명, String 버전명목록) {
+	private String 등록및수정지라이슈본문가져오기(ReqAddEntity reqAddEntity, String 작성자, String 제품명, String 버전명목록) {
 		String 우선순위 = Optional.ofNullable(reqAddEntity.getReqPriorityEntity()).map(ReqPriorityEntity::getC_title).orElse("우선순위");
 		String 난이도 = Optional.ofNullable(reqAddEntity.getReqDifficultyEntity()).map(ReqDifficultyEntity::getC_title).orElse("난이도");
 		String 상태 = Optional.ofNullable(reqAddEntity.getReqStateEntity()).map(ReqStateEntity::getC_title).orElse("상태");
-		String 최초요청일 = Optional.ofNullable(reqAddEntity.getC_req_create_date()).map(String::valueOf).orElse("최초요청일");
+		String 작성일 = Optional.ofNullable(reqAddEntity.getC_req_create_date()).map(String::valueOf).orElse("최초요청일");
 		String 지라이슈본문 = Optional.ofNullable(reqAddEntity.getC_req_contents()).orElse("지라이슈본문");
 
 		String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
@@ -976,11 +1195,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
 				"제품 : " + 제품명 + "\n" +
 				"제품 버전 : " + 버전명목록 + "\n" +
-				"요구사항 우선순위 : " + 우선순위 + "\n" +
-				"요구사항 난이도 : " + 난이도 + "\n" +
-				"요구사항 상태 : " + 상태 + "\n" +
-				"요구사항 요청자 : " + 요청자 + "\n" +
-				"요구사항 최초 요청일 : " + 최초요청일 + "\n" +
+//				"요구사항 우선순위 : " + 우선순위 + "\n" +
+//				"요구사항 난이도 : " + 난이도 + "\n" +
+//				"요구사항 상태 : " + 상태 + "\n" +
+				"요구사항 작성자 : " + 작성자 + "\n" +
+				"요구사항 작성일 : " + 작성일 + "\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
@@ -990,9 +1209,12 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	}
 
 	private String 삭제할지라이슈본문가져오기() {
-		return "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
+		String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
 				"✔ 본 이슈는 삭제 된 이슈입니다.,\n" +
 				"✔ 삭제 된 이슈는 통계에 수집되지 않습니다. \n\n\n";
+
+		이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean("", Whitelist.none())), "&nbsp;", " ");
+		return 이슈내용;
 	}
 
 	private JiraIssueTypeEntity 온프레미스요구사항이슈타입검색(JiraServerEntity 지라서버) throws Exception {

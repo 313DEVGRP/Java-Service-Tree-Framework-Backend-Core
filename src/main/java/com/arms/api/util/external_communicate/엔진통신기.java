@@ -25,7 +25,7 @@ public interface 엔진통신기 {
     );
 
     @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}")
-    public 지라이슈_데이터 이슈_수정하기(
+    public Map<String,Object> 이슈_수정하기(
             @PathVariable("connectId") Long 연결_아이디,
             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
             @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
