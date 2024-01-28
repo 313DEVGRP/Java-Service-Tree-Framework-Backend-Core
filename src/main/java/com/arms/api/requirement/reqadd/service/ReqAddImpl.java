@@ -27,6 +27,10 @@ import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
+import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
+import com.arms.api.requirement.reqpriority.service.ReqPriority;
+import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.config.ArmsDetailUrlConfig;
@@ -322,6 +326,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				//-- 요구사항
 				reqStatusDTO.setC_req_link(savedReqAddEntity.getC_id());
 				reqStatusDTO.setC_req_name(savedReqAddEntity.getC_title());
+
+				//-- 요구사항 우선순위
+				reqStatusDTO.setC_req_priority_link(savedReqAddEntity.getReqPriorityEntity().getC_id());
+				reqStatusDTO.setC_req_priority_name(savedReqAddEntity.getReqPriorityEntity().getC_title());
+				//-- 요구사항 상태
+				reqStatusDTO.setC_req_state_link(savedReqAddEntity.getReqStateEntity().getC_id());
+				reqStatusDTO.setC_req_state_name(savedReqAddEntity.getReqStateEntity().getC_title());
+				//-- 요구사항 난이도
+				reqStatusDTO.setC_req_difficulty_link(savedReqAddEntity.getReqDifficultyEntity().getC_id());
+				reqStatusDTO.setC_req_difficulty_name(savedReqAddEntity.getReqDifficultyEntity().getC_title());
 
 				//-- 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든.
 				reqStatusDTO.setC_issue_key(생성된_요구사항_이슈.getKey());

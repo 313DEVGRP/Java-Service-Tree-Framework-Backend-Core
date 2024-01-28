@@ -23,6 +23,8 @@ public class ReqStatusDTO extends TreeBaseDTO {
 
     private String c_pds_version_name;
 
+    private String c_req_pdservice_versionset_link;
+
     //-- 제품 서비스 연결 지라 server
     private Long c_jira_server_link;
 
@@ -44,6 +46,18 @@ public class ReqStatusDTO extends TreeBaseDTO {
 
     private String c_req_name;
 
+    //-- 요구사항 우선순위
+    private Long c_req_priority_link;
+    private String c_req_priority_name;
+
+    //-- 요구사항 난이도
+    private Long c_req_difficulty_link;
+    private String c_req_difficulty_name;
+
+    //-- 요구사항 상태
+    private Long c_req_state_link;
+    private String c_req_state_name;
+    
     private String c_issue_key;
 
     private String c_issue_url;
