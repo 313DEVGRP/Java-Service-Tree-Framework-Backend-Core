@@ -36,19 +36,19 @@ public class 비용서비스_구현 implements 비용서비스 {
         전체결과.addAll(요구사항_결과.getBody());
         전체결과.addAll(하위이슈_결과.getBody());
 
-        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
-        optionalEsData.ifPresent(esData -> {
-            esData.forEach(result -> {
-                String versionId = result.get필드명();
-                result.get하위검색결과().get("assignees").forEach(assignee -> {
-                    String assigneeAccountId = assignee.get필드명();
-                    assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
-                        String assigneeDisplayName = displayName.get필드명();
-                        String workerNodeId = versionId + "-" + assigneeAccountId;
-                    });
-                });
-            });
-        });
+//        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
+//        optionalEsData.ifPresent(esData -> {
+//            esData.forEach(result -> {
+//                String versionId = result.get필드명();
+//                result.get하위검색결과().get("assignees").forEach(assignee -> {
+//                    String assigneeAccountId = assignee.get필드명();
+//                    assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+//                        String assigneeDisplayName = displayName.get필드명();
+//                        String workerNodeId = versionId + "-" + assigneeAccountId;
+//                    });
+//                });
+//            });
+//        });
 
         return 전체결과;
     }
