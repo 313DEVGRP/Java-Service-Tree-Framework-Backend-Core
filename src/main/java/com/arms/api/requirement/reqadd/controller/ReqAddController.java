@@ -301,17 +301,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: updateReqNode");
+
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("updateNode",changeReqTableName);
+        Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
-        int savedReqAddEntity = reqAdd.updateNode(reqAddEntity);
-
-        SessionUtil.removeAttribute("updateNode");
-
-        log.info("ReqAddController :: updateReqNode");
-        return ResponseEntity.ok(CommonResponse.success(savedReqAddEntity));
-
+        return ResponseEntity.ok(CommonResponse.success(result));
     }
 
     @ResponseBody

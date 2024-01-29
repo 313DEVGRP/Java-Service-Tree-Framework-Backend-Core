@@ -26,12 +26,15 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.JiraServerType;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
@@ -768,7 +771,477 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Override
 	@Transactional
 	public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
-		return null;
+		// 1. 수정 전 ReqAdd 조회
+		ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+        assert 요구사항조회.getStatusCode().is2xxSuccessful() : "요구사항 조회 API 호출 실패";
+		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
+        assert loadReqAddDTO != null : "요구사항 조회 API가 null을 반환함";
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
+
+		// 2. 수정 전 후 비교
+		ObjectMapper objectMapper = new ObjectMapper();
+		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		루프용버전셋.addAll(현재버전셋);
+
+		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+
+		logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
+		logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
+		logger.info("루프용버전셋리스트 : {}", 루프용버전셋리스트);
+
+		List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
+				.stream()
+				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
+				.collect(Collectors.toList());
+
+		Set<Long> 수정전버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 수정전버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("수정전버전에연결된지라프로젝트아이디 : {}", 수정전버전에연결된지라프로젝트아이디);
+
+		Set<Long> 현재버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 현재버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
+
+		Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+
+		logger.info("유지된지라프로젝트아이디 : {}", 유지된지라프로젝트아이디);
+		logger.info("추가된지라프로젝트아이디 : {}", 추가된지라프로젝트아이디);
+		logger.info("삭제된지라프로젝트아이디 : {}", 삭제된지라프로젝트아이디);
+
+		List<PdServiceVersionEntity> 버전데이터 = pdServiceVersion.getVersionListByCids(루프용버전셋리스트);
+
+		List<PdServiceVersionEntity> 수정될버전데이터 = 버전데이터.stream()
+				.filter(pdServiceVersionEntity -> 현재버전셋리스트.contains(pdServiceVersionEntity.getC_id()))
+				.collect(Collectors.toList());
+		PdServiceEntity 제품데이터 = 제품데이터조회(pdServiceId);
+
+		/* 지라 이슈에 사용 할 데이터 */
+		String 요구사항최초요청자 = loadReqAddDTO.getC_req_writer();
+		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining("\",\"", "[\"", "\"]"));
+		String 제품명 = 제품데이터.getC_title();
+		String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, 요구사항최초요청자, 제품명, 버전명목록);
+		String 삭제지라이슈본문 = 삭제할지라이슈본문가져오기();
+		String 수정전제목 = loadReqAddDTO.getC_title();
+		String 현재제목 = reqAddEntity.getC_title();
+		String 수정전본문 = loadReqAddDTO.getC_req_contents();
+		String 현재본문 = reqAddEntity.getC_req_contents();
+
+		logger.info("제품명 : {}", 제품명);
+		logger.info("버전명목록 : {}", 버전명목록);
+
+		// 3. ReqAdd 업데이트
+		SessionUtil.setAttribute("updateNode", changeReqTableName);
+		this.updateNode(reqAddEntity);
+		SessionUtil.removeAttribute("updateNode");
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		List<ReqStatusEntity> reqStatusEntityList = 내부통신기.reqStatusList("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO)
+				.stream().filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id())).collect(Collectors.toList());
+
+		List<ReqStatusEntity> 유지된지라프로젝트 = reqStatusEntityList.stream()
+				.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+		List<ReqStatusEntity> 삭제된지라프로젝트 = reqStatusEntityList.stream()
+				.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+
+		for (ReqStatusEntity reqStatusEntity : 유지된지라프로젝트) {
+			Long 지라서버_아이디 = reqStatusEntity.getC_jira_server_link();
+			Long 지라_프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
+			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			JiraIssueStatusEntity 요구사항_이슈_상태;
+			JiraIssueTypeEntity 요구사항_이슈_타입;
+
+			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
+
+			switch (jiraServerType) {
+				case CLOUD:
+					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
+					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
+					break;
+				case ON_PREMISE:
+					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
+					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
+			}
+
+			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
+
+			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
+			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+
+
+			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
+			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버보고자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
+			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+					.builder()
+					.fields(지라이슈생성데이터)
+					.build();
+
+			Long 지라서버링크 = 검색된_지라서버.getC_id();
+			Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+
+			엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+
+			ReqStatusDTO updateReqStatus = new ReqStatusDTO();
+			updateReqStatus.setRef(TreeConstant.First_Node_CID);
+			updateReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+			/* 제품 및 버전*/
+			updateReqStatus.setC_title(현재제목);
+			updateReqStatus.setC_contents(현재본문);
+			updateReqStatus.setC_pdservice_name(제품명);
+			updateReqStatus.setC_pds_version_link(reqStatusEntity.getC_pds_version_link()); // TODO: 다중 버전 지원 시 해당 필드는 deprecated 될 예정 ?
+			updateReqStatus.setC_pds_version_name(버전명목록);
+			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+
+			/* 지라 서버 */
+			updateReqStatus.setC_jira_server_link(지라서버링크);
+			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			/* 지라 프로젝트 */
+			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
+			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			//-- 요구사항
+			updateReqStatus.setC_req_link(reqAddEntity.getC_id());
+			updateReqStatus.setC_req_name(reqAddEntity.getC_title());
+
+			// 등록일 경우, 엔진 응답 후 처리
+			updateReqStatus.setC_issue_key(reqStatusEntity.getC_issue_key());
+			updateReqStatus.setC_issue_url(reqStatusEntity.getC_issue_url());
+
+			//-- 제품 서비스 연결 지라 server
+			updateReqStatus.setC_jira_server_link(지라서버링크);
+			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			//-- 제품 서비스 연결 지라 프로젝트
+			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
+			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			if (요구사항_이슈_우선순위 != null) {
+				updateReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_해결책 != null) {
+				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_상태 != null) {
+				updateReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
+			updateReqStatus.setC_issue_assignee(암스서버담당자.getName());
+			updateReqStatus.setC_issue_update_date(new Date());
+			updateReqStatus.setC_id(reqStatusEntity.getC_id());
+
+			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
+
+			if (결과.getStatusCode().is2xxSuccessful()) {
+				chat.sendMessageByEngine("지라 이슈가 수정되었습니다.");
+			}
+		}
+
+		for (ReqStatusEntity reqStatusEntity : 삭제된지라프로젝트) {
+			Long 지라서버_아이디 = reqStatusEntity.getC_jira_server_link();
+			Long 지라_프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
+			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			JiraIssueStatusEntity 요구사항_이슈_상태;
+			JiraIssueTypeEntity 요구사항_이슈_타입;
+
+			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
+
+			switch (jiraServerType) {
+				case CLOUD:
+					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
+					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
+					break;
+				case ON_PREMISE:
+					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
+					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
+			}
+
+			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
+
+			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
+			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+
+
+			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
+			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버보고자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
+			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 삭제지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+					.builder()
+					.fields(지라이슈생성데이터)
+					.build();
+
+			Long 지라서버링크 = 검색된_지라서버.getC_id();
+			Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+
+			엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+
+			ReqStatusDTO updateReqStatus = new ReqStatusDTO();
+			updateReqStatus.setRef(TreeConstant.First_Node_CID);
+			updateReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+			/* 제품 및 버전*/
+			updateReqStatus.setC_title(현재제목);
+			updateReqStatus.setC_contents(현재본문);
+			updateReqStatus.setC_pdservice_name(제품명);
+			updateReqStatus.setC_pds_version_link(reqStatusEntity.getC_pds_version_link()); // TODO: 다중 버전 지원 시 해당 필드는 deprecated 될 예정 ?
+			updateReqStatus.setC_pds_version_name(버전명목록);
+			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+
+			/* 지라 서버 */
+			updateReqStatus.setC_jira_server_link(지라서버링크);
+			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			/* 지라 프로젝트 */
+			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
+			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			//-- 요구사항
+			updateReqStatus.setC_req_link(reqAddEntity.getC_id());
+			updateReqStatus.setC_req_name(reqAddEntity.getC_title());
+
+			// 등록일 경우, 엔진 응답 후 처리
+			updateReqStatus.setC_issue_key(reqStatusEntity.getC_issue_key());
+			updateReqStatus.setC_issue_url(reqStatusEntity.getC_issue_url());
+
+			//-- 제품 서비스 연결 지라 server
+			updateReqStatus.setC_jira_server_link(지라서버링크);
+			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			//-- 제품 서비스 연결 지라 프로젝트
+			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
+			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			if (요구사항_이슈_우선순위 != null) {
+				updateReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_해결책 != null) {
+				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_상태 != null) {
+				updateReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
+				updateReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
+			updateReqStatus.setC_issue_assignee(암스서버담당자.getName());
+			updateReqStatus.setC_issue_update_date(new Date());
+			updateReqStatus.setC_issue_delete_date(new Date());
+			updateReqStatus.setC_id(reqStatusEntity.getC_id());
+
+			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
+
+			if (결과.getStatusCode().is2xxSuccessful()) {
+				chat.sendMessageByEngine("지라 이슈가 Soft Delete 처리되었습니다. 지라 이슈는 남아있지만, 통계에 수집되지 않습니다.");
+			}
+		}
+
+		for (Long 지라_프로젝트_아이디 : 추가된지라프로젝트아이디) {
+			GlobalTreeMapEntity 글로벌트리맵 = globalTreeMapService.findAllByIds(Collections.singletonList(지라_프로젝트_아이디), "jiraproject_link")
+					.stream()
+					.filter(globalTreeMap -> globalTreeMap.getJiraserver_link() != null)
+					.findFirst().orElseThrow();
+
+			Long 지라서버_아이디 = 글로벌트리맵.getJiraserver_link();
+
+			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			JiraIssueStatusEntity 요구사항_이슈_상태;
+			JiraIssueTypeEntity 요구사항_이슈_타입;
+
+			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
+
+			switch (jiraServerType) {
+				case CLOUD:
+					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
+					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
+					break;
+				case ON_PREMISE:
+					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
+					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
+			}
+
+			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
+
+			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
+			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+
+
+			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
+			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버보고자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
+			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+
+			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+
+			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
+					.builder()
+					.fields(지라이슈생성데이터)
+					.build();
+
+			Long 지라서버링크 = 검색된_지라서버.getC_id();
+			Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
+
+			지라이슈_데이터 이슈_생성하기 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+
+			ReqStatusDTO createReqStatus = new ReqStatusDTO();
+			createReqStatus.setRef(TreeConstant.First_Node_CID);
+			createReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
+
+			// TODO: ReqStatus의 기존 필드(단일 버전)는 앞으로 안쓰게 될 것. 지금은 지라프로젝트가 여러 버전에 매핑되어있는데, 아무거나 하나 입력
+			Long 버전명 = globalTreeMapEntities.stream()
+					.filter(globalTreeMap -> globalTreeMap.getPdserviceversion_link() != null)
+					.filter(globalTreeMap -> globalTreeMap.getJiraproject_link().equals(지라프로젝트링크))
+					.findFirst().orElseThrow().getPdservice_link();
+
+			/* 제품 및 버전*/
+			createReqStatus.setC_title(현재제목);
+			createReqStatus.setC_contents(현재본문);
+			createReqStatus.setC_pdservice_name(제품명);
+			createReqStatus.setC_pds_version_link(버전명);
+			createReqStatus.setC_pds_version_name(버전명목록);
+			createReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+
+			/* 지라 서버 */
+			createReqStatus.setC_jira_server_link(검색된_지라서버.getC_id());
+			createReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			createReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			/* 지라 프로젝트 */
+			createReqStatus.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+			createReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			createReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			createReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			//-- 요구사항
+			createReqStatus.setC_req_link(reqAddEntity.getC_id());
+			createReqStatus.setC_req_name(reqAddEntity.getC_title());
+
+			// 등록일 경우, 엔진 응답 후 처리
+			createReqStatus.setC_issue_key(이슈_생성하기.getKey());
+			createReqStatus.setC_issue_url(이슈_생성하기.getSelf());
+
+			//-- 제품 서비스 연결 지라 server
+			createReqStatus.setC_jira_server_link(검색된_지라서버.getC_id());
+			createReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
+			createReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
+
+			//-- 제품 서비스 연결 지라 프로젝트
+			createReqStatus.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+			createReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
+			createReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
+			createReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
+
+			if (요구사항_이슈_우선순위 != null) {
+				createReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
+				createReqStatus.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_해결책 != null) {
+				createReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
+				createReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			if (요구사항_이슈_상태 != null) {
+				createReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
+				createReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+			}
+
+			createReqStatus.setC_issue_reporter(암스서버보고자.getName());
+			createReqStatus.setC_issue_assignee(암스서버담당자.getName());
+
+			createReqStatus.setC_issue_create_date(new Date());
+
+			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + pdServiceId, createReqStatus);
+
+			if (결과.getStatusCode().is2xxSuccessful()) {
+				chat.sendMessageByEngine("지라 이슈가 등록되었습니다.");
+			}
+		}
+
+		return 1;
 	}
 
 	private 지라이슈필드_데이터 get지라이슈생성데이터(ReqAddEntity reqAddEntity, 지라이슈필드_데이터.프로젝트 프로젝트, 지라이슈유형_데이터 유형, String 지라이슈본문, JiraIssuePriorityEntity 요구사항_이슈_우선순위, JiraIssueStatusEntity 요구사항_이슈_상태, JiraIssueResolutionEntity 요구사항_이슈_해결책) {
@@ -931,5 +1404,29 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		지라서버_검색용_엔티티.setC_id(지라서버_아이디);
 		JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
 		return 검색된_지라서버;
+	}
+
+	private Set<Long> 유지된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 유지된버전 = new HashSet<>(현재버전);
+		유지된버전.retainAll(수정할버전);
+		return 유지된버전;
+	}
+
+	private Set<Long> 추가된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 추가된버전 = new HashSet<>(수정할버전);
+		추가된버전.removeAll(현재버전);
+		return 추가된버전;
+	}
+
+	private Set<Long> 삭제된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 삭제된버전 = new HashSet<>(현재버전);
+		삭제된버전.removeAll(수정할버전);
+		return 삭제된버전;
+	}
+	private PdServiceEntity 제품데이터조회(String pdServiceId) throws Exception {
+		PdServiceEntity pdServiceEntity = new PdServiceEntity();
+		pdServiceEntity.setC_id(Long.valueOf(pdServiceId));
+		PdServiceEntity 제품데이터 = pdService.getNode(pdServiceEntity);
+		return 제품데이터;
 	}
 }
