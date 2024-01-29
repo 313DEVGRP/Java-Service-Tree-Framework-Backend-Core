@@ -187,6 +187,10 @@ public class ReqStatusEntity extends TreeSearchEntity implements Serializable {
     private Date c_issue_update_date;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_issue_delete_date")
+    private Date c_issue_delete_date; // 이슈 집계 제외 날짜
+
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_req_start_date")
     private Date c_req_start_date;
 

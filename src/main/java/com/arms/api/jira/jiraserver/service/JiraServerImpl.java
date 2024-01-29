@@ -850,8 +850,10 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		지라서버정보_엔티티 수정결과 = 엔진통신기.지라서버_등록(서버정보_데이터);
 
 		if( 수정결과 != null) {
+			logger.info(" [ " + this.getClass().getName() + " :: 암스_및_엔진_서버정보수정 ] :: 수정결과 ->" );
 			logger.info(수정결과.getConnectId());
 			logger.info(수정결과.getType());
+			logger.info(수정결과.getUri());
 			logger.info(수정결과.getSelf());
 			logger.info(수정결과.getPasswordOrToken());
 		}
