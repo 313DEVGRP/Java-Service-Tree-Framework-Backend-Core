@@ -87,6 +87,8 @@ public class ReqStatusDTO extends TreeBaseDTO {
 
     private Date c_issue_update_date;
 
+    private Date c_issue_delete_date; // 이슈 집계 제외 날짜
+
     private Date c_req_start_date;
 
     private Date c_req_end_date;
