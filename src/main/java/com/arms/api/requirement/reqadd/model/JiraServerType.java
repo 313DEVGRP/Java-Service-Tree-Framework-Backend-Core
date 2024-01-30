@@ -20,6 +20,6 @@ public enum JiraServerType {
                 return jiraServerType;
             }
         }
-        throw new IllegalArgumentException("Invalid Jira Server Type: " + type);
+        throw new IllegalArgumentException("유효하지 않은 지라 서버 타입: " + type);
     }
 }

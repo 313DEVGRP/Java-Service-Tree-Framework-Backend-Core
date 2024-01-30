@@ -846,8 +846,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		this.updateNode(reqAddEntity);
 		SessionUtil.removeAttribute("updateNode");
 
-		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-		List<ReqStatusEntity> reqStatusEntityList = 내부통신기.reqStatusList("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO)
+		List<ReqStatusEntity> reqStatusEntityList = 내부통신기.reqStatusList("T_ARMS_REQSTATUS_" + pdServiceId, new ReqStatusDTO())
 				.stream().filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id())).collect(Collectors.toList());
 
 		List<ReqStatusEntity> 유지된지라프로젝트 = reqStatusEntityList.stream()
@@ -868,23 +867,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
 			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
 			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
-			JiraIssueStatusEntity 요구사항_이슈_상태;
-			JiraIssueTypeEntity 요구사항_이슈_타입;
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			switch (jiraServerType) {
-				case CLOUD:
-					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
-					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
-					break;
-				case ON_PREMISE:
-					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
-					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
-			}
+			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
+					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -927,24 +919,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
 			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
-			//-- 요구사항
+			/* ReqAdd */
 			updateReqStatus.setC_req_link(reqAddEntity.getC_id());
 			updateReqStatus.setC_req_name(reqAddEntity.getC_title());
 
-			// 등록일 경우, 엔진 응답 후 처리
+			/* 등록일 경우, 엔진 호출 후 처리 */
 			updateReqStatus.setC_issue_key(reqStatusEntity.getC_issue_key());
 			updateReqStatus.setC_issue_url(reqStatusEntity.getC_issue_url());
-
-			//-- 제품 서비스 연결 지라 server
-			updateReqStatus.setC_jira_server_link(지라서버링크);
-			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
-			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
-
-			//-- 제품 서비스 연결 지라 프로젝트
-			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
-			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
-			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
-			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
 			if (요구사항_이슈_우선순위 != null) {
 				updateReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
@@ -961,8 +942,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				updateReqStatus.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 			}
 
-			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
-			updateReqStatus.setC_issue_assignee(암스서버담당자.getName());
 			updateReqStatus.setC_issue_update_date(new Date());
 			updateReqStatus.setC_id(reqStatusEntity.getC_id());
 
@@ -980,23 +959,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
 			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
 			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
-			JiraIssueStatusEntity 요구사항_이슈_상태;
-			JiraIssueTypeEntity 요구사항_이슈_타입;
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			switch (jiraServerType) {
-				case CLOUD:
-					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
-					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
-					break;
-				case ON_PREMISE:
-					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
-					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
-			}
+			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
+					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -1020,8 +992,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
 
 			ReqStatusDTO updateReqStatus = new ReqStatusDTO();
-			updateReqStatus.setRef(TreeConstant.First_Node_CID);
-			updateReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
 
 			/* 제품 및 버전*/
 			updateReqStatus.setC_title(현재제목);
@@ -1050,17 +1020,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_issue_key(reqStatusEntity.getC_issue_key());
 			updateReqStatus.setC_issue_url(reqStatusEntity.getC_issue_url());
 
-			//-- 제품 서비스 연결 지라 server
-			updateReqStatus.setC_jira_server_link(지라서버링크);
-			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
-			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
-
-			//-- 제품 서비스 연결 지라 프로젝트
-			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
-			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
-			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
-			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
-
 			if (요구사항_이슈_우선순위 != null) {
 				updateReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
 				updateReqStatus.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
@@ -1076,8 +1035,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				updateReqStatus.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 			}
 
-			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
-			updateReqStatus.setC_issue_assignee(암스서버담당자.getName());
 			updateReqStatus.setC_issue_update_date(new Date());
 			updateReqStatus.setC_issue_delete_date(new Date());
 			updateReqStatus.setC_id(reqStatusEntity.getC_id());
@@ -1101,23 +1058,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
 			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
 			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
-			JiraIssueStatusEntity 요구사항_이슈_상태;
-			JiraIssueTypeEntity 요구사항_이슈_타입;
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			switch (jiraServerType) {
-				case CLOUD:
-					요구사항_이슈_상태 = 클라우드요구사항이슈상태검색(검색된_지라프로젝트);
-					요구사항_이슈_타입 = 클라우드요구사항이슈타입검색(검색된_지라프로젝트);
-					break;
-				case ON_PREMISE:
-					요구사항_이슈_상태 = 온프레미스요구사항이슈상태검색(검색된_지라서버);
-					요구사항_이슈_타입 = 온프레미스요구사항이슈타입검색(검색된_지라서버);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid Jira Server Type: " + jiraServerType);
-			}
+			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
+					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -1140,8 +1090,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			지라이슈_데이터 이슈_생성하기 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 
 			ReqStatusDTO createReqStatus = new ReqStatusDTO();
-			createReqStatus.setRef(TreeConstant.First_Node_CID);
-			createReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
 
 			// TODO: ReqStatus의 기존 필드(단일 버전)는 앞으로 안쓰게 될 것. 지금은 지라프로젝트가 여러 버전에 매핑되어있는데, 아무거나 하나 입력
 			Long 버전명 = globalTreeMapEntities.stream()
@@ -1158,34 +1106,24 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			createReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
 
 			/* 지라 서버 */
-			createReqStatus.setC_jira_server_link(검색된_지라서버.getC_id());
+			createReqStatus.setC_jira_server_link(지라서버링크);
 			createReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
 			createReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
 
 			/* 지라 프로젝트 */
-			createReqStatus.setC_jira_project_link(검색된_지라프로젝트.getC_id());
+			createReqStatus.setC_jira_project_link(지라프로젝트링크);
 			createReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
 			createReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
 			createReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
-			//-- 요구사항
+			/* ReqAdd */
 			createReqStatus.setC_req_link(reqAddEntity.getC_id());
 			createReqStatus.setC_req_name(reqAddEntity.getC_title());
 
-			// 등록일 경우, 엔진 응답 후 처리
+			/* 등록일 경우, 엔진 호출 후 처리 */
 			createReqStatus.setC_issue_key(이슈_생성하기.getKey());
 			createReqStatus.setC_issue_url(이슈_생성하기.getSelf());
 
-			//-- 제품 서비스 연결 지라 server
-			createReqStatus.setC_jira_server_link(검색된_지라서버.getC_id());
-			createReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
-			createReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
-
-			//-- 제품 서비스 연결 지라 프로젝트
-			createReqStatus.setC_jira_project_link(검색된_지라프로젝트.getC_id());
-			createReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
-			createReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
-			createReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
 			if (요구사항_이슈_우선순위 != null) {
 				createReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
@@ -1321,36 +1259,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 이슈내용;
 	}
 
-	private JiraIssueTypeEntity 온프레미스요구사항이슈타입검색(JiraServerEntity 지라서버) throws Exception {
-		Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 지라서버.getJiraIssueTypeEntities();
-		JiraIssueTypeEntity 요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
+	private JiraIssueTypeEntity 요구사항이슈타입검색(Set<JiraIssueTypeEntity> issueTypes) throws Exception {
+		return issueTypes.stream()
 				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
 				.findFirst().orElse(null);
-		return 요구사항_이슈_타입;
 	}
 
-	private JiraIssueStatusEntity 온프레미스요구사항이슈상태검색(JiraServerEntity 지라서버) throws Exception {
-		Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 지라서버.getJiraIssueStatusEntities();
-		JiraIssueStatusEntity 요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
+	private JiraIssueStatusEntity 요구사항이슈상태검색(Set<JiraIssueStatusEntity> issueStatuses) throws Exception {
+		return issueStatuses.stream()
 				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
 				.findFirst().orElse(null);
-		return 요구사항_이슈_상태;
-	}
-
-	private JiraIssueTypeEntity 클라우드요구사항이슈타입검색(JiraProjectEntity 지라프로젝트) throws Exception {
-		Set<JiraIssueTypeEntity> 지라프로젝트_이슈타입_리스트 = 지라프로젝트.getJiraIssueTypeEntities();
-		JiraIssueTypeEntity 요구사항_이슈_타입 = 지라프로젝트_이슈타입_리스트.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
-				.findFirst().orElse(null);
-		return 요구사항_이슈_타입;
-	}
-
-	private JiraIssueStatusEntity 클라우드요구사항이슈상태검색(JiraProjectEntity 지라프로젝트) throws Exception {
-		Set<JiraIssueStatusEntity> 지라프로젝트_이슈상태_리스트 = 지라프로젝트.getJiraIssueStatusEntities();
-		JiraIssueStatusEntity 요구사항_이슈_상태 = 지라프로젝트_이슈상태_리스트.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
-				.findFirst().orElse(null);
-		return 요구사항_이슈_상태;
 	}
 
 	private JiraIssuePriorityEntity 요구사항이슈우선순위검색(JiraServerEntity 지라서버) throws Exception {
