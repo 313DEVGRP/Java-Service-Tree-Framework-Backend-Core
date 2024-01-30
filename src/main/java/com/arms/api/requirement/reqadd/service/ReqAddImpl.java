@@ -888,19 +888,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
-			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
-			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
-			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
-			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
+			지라이슈필드_데이터.보고자 암스서버보고자 = 암스서버보고자가져오기(검색된_지라서버);
 
-			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
-			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버보고자.setEmailAddress("313cokr@gmail.com");
-
-			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
-			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+			지라이슈필드_데이터.담당자 암스서버담당자 = 암스서버담당자가져오기(검색된_지라서버);
 
 			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
 
@@ -912,12 +904,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			Long 지라서버링크 = 검색된_지라서버.getC_id();
 			Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
 
-
 			엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
 
 			ReqStatusDTO updateReqStatus = new ReqStatusDTO();
-			updateReqStatus.setRef(TreeConstant.First_Node_CID);
-			updateReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
 
 			/* 제품 및 버전*/
 			updateReqStatus.setC_title(현재제목);
@@ -963,13 +952,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			}
 
 			if (요구사항_이슈_해결책 != null) {
-				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
-				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
 			}
 
 			if (요구사항_이슈_상태 != null) {
-				updateReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
-				updateReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				updateReqStatus.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				updateReqStatus.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 			}
 
 			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
@@ -1011,19 +1000,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
-			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
-			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
-			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
-			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
+			지라이슈필드_데이터.보고자 암스서버보고자 = 암스서버보고자가져오기(검색된_지라서버);
 
-			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
-			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버보고자.setEmailAddress("313cokr@gmail.com");
-
-			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
-			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+			지라이슈필드_데이터.담당자 암스서버담당자 = 암스서버담당자가져오기(검색된_지라서버);
 
 			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 삭제지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
 
@@ -1086,13 +1067,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			}
 
 			if (요구사항_이슈_해결책 != null) {
-				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
-				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				updateReqStatus.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+				updateReqStatus.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
 			}
 
 			if (요구사항_이슈_상태 != null) {
-				updateReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
-				updateReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				updateReqStatus.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				updateReqStatus.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 			}
 
 			updateReqStatus.setC_issue_reporter(암스서버보고자.getName());
@@ -1140,19 +1121,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
-			지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
-			유형.setId(요구사항_이슈_타입.getC_issue_type_id());
-			유형.setName(요구사항_이슈_타입.getC_issue_type_name());
-			유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
+			지라이슈필드_데이터.보고자 암스서버보고자 = 암스서버보고자가져오기(검색된_지라서버);
 
-			지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
-			암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버보고자.setEmailAddress("313cokr@gmail.com");
-
-			지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
-			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
-			암스서버담당자.setEmailAddress("313cokr@gmail.com");
+			지라이슈필드_데이터.담당자 암스서버담당자 = 암스서버담당자가져오기(검색된_지라서버);
 
 			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
 
@@ -1220,13 +1193,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			}
 
 			if (요구사항_이슈_해결책 != null) {
-				createReqStatus.setC_issue_resolution_link(요구사항_이슈_우선순위.getC_id());
-				createReqStatus.setC_issue_resolution_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				createReqStatus.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+				createReqStatus.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
 			}
 
 			if (요구사항_이슈_상태 != null) {
-				createReqStatus.setC_issue_status_link(요구사항_이슈_우선순위.getC_id());
-				createReqStatus.setC_issue_status_name(요구사항_이슈_우선순위.getC_issue_priority_name());
+				createReqStatus.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				createReqStatus.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 			}
 
 			createReqStatus.setC_issue_reporter(암스서버보고자.getName());
@@ -1242,6 +1215,28 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		}
 
 		return 1;
+	}
+
+	private 지라이슈유형_데이터 지라이슈유형가져오기(JiraIssueTypeEntity 요구사항_이슈_타입) {
+		지라이슈유형_데이터 유형 = new 지라이슈유형_데이터();
+		유형.setId(요구사항_이슈_타입.getC_issue_type_id());
+		유형.setName(요구사항_이슈_타입.getC_issue_type_name());
+		유형.setSelf(요구사항_이슈_타입.getC_issue_type_url());
+		return 유형;
+	}
+
+	private 지라이슈필드_데이터.담당자 암스서버담당자가져오기(JiraServerEntity 검색된_지라서버) {
+		지라이슈필드_데이터.담당자 암스서버담당자 = new 지라이슈필드_데이터.담당자();
+		암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
+		암스서버담당자.setEmailAddress("313cokr@gmail.com");
+		return 암스서버담당자;
+	}
+
+	private 지라이슈필드_데이터.보고자 암스서버보고자가져오기(JiraServerEntity 검색된_지라서버) {
+		지라이슈필드_데이터.보고자 암스서버보고자 = new 지라이슈필드_데이터.보고자();
+		암스서버보고자.setName(검색된_지라서버.getC_jira_server_connect_id());
+		암스서버보고자.setEmailAddress("313cokr@gmail.com");
+		return 암스서버보고자;
 	}
 
 	private 지라이슈필드_데이터 get지라이슈생성데이터(ReqAddEntity reqAddEntity, 지라이슈필드_데이터.프로젝트 프로젝트, 지라이슈유형_데이터 유형, String 지라이슈본문, JiraIssuePriorityEntity 요구사항_이슈_우선순위, JiraIssueStatusEntity 요구사항_이슈_상태, JiraIssueResolutionEntity 요구사항_이슈_해결책) {
@@ -1278,24 +1273,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 지라이슈생성데이터;
 	}
 
-
-	private Set<String> 유지된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
-		Set<String> 유지된버전 = new HashSet<>(현재버전);
-		유지된버전.retainAll(수정할버전);
-		return 유지된버전;
-	}
-
-	private Set<String> 추가된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
-		Set<String> 추가된버전 = new HashSet<>(수정할버전);
-		추가된버전.removeAll(현재버전);
-		return 추가된버전;
-	}
-
-	private Set<String> 삭제된버전찾기(Set<String> 현재버전, Set<String> 수정할버전) {
-		Set<String> 삭제된버전 = new HashSet<>(현재버전);
-		삭제된버전.removeAll(수정할버전);
-		return 삭제된버전;
-	}
 
 	private 지라이슈필드_데이터.프로젝트 지라프로젝트빌더(JiraProjectEntity 검색된_지라프로젝트) {
 		return 지라이슈필드_데이터.프로젝트.builder().id(검색된_지라프로젝트.getC_desc())
