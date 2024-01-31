@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 public @interface ExcelFieldAnnotation {
 
     int columnIndex();
-    String formmating() default  "";
 
-    String headerName() default "";
+    String headerName() default "test";
 
+    String formatting() default  "";
 }
