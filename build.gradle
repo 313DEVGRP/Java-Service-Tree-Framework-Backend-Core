@@ -255,8 +255,8 @@ dependencies {
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
     implementation group: 'javax.mail', name: 'mail', version: '1.4.7'
 
-    // Slack Notification
-    implementation "com.slack.api:slack-api-client:1.25.1"
+    // micrometer
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.12.2'
 
     // modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'

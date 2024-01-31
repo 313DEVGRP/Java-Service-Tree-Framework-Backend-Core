@@ -47,3 +47,10 @@ logging:
     sql: info
     jdbc: info
     jdbc.sqlonly: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+
