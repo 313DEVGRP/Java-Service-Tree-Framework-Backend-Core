@@ -322,14 +322,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.fields(요구사항이슈_필드)
 					.build();
 
-			logger.info("ReqAddImpl = engine parameter :: " + objectMapper.writeValueAsString(요구사항_이슈));
+			logger.info("[ ReqAddImpl :: addReqNodeNew ] ::engine parameter -> " + objectMapper.writeValueAsString(요구사항_이슈));
 
 			지라이슈_데이터 생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 
+			logger.info("[ ReqAddImpl :: addReqNodeNew ] :: 생성된_요구사항 이슈 -> {}", 생성된_요구사항_이슈.toString());
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 			reqStatusDTO.setRef(TreeConstant.First_Node_CID);
 			reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 			reqStatusDTO.setC_title(savedReqAddEntity.getC_title());
+
 			//-- 제품 서비스
 			reqStatusDTO.setC_pdservice_link(추가된_요구사항의_제품서비스.getC_id());
 			reqStatusDTO.setC_pdservice_name(추가된_요구사항의_제품서비스.getC_title());
@@ -348,6 +350,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			reqStatusDTO.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
 			reqStatusDTO.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
 
+			logger.info("[ ReqAddImpl :: addReqNodeNew ] :: 요구사항의 우선순위,상태,난이도 -> {} {} {}",
+					savedReqAddEntity.getReqPriorityEntity().getC_title(),
+					savedReqAddEntity.getReqStateEntity().getC_title(),
+					savedReqAddEntity.getReqDifficultyEntity().getC_title());
 			//-- 요구사항
 			reqStatusDTO.setC_req_link(savedReqAddEntity.getC_id());
 			reqStatusDTO.setC_req_name(savedReqAddEntity.getC_title());

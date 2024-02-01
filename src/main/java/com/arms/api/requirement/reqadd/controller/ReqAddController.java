@@ -283,7 +283,20 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);
         reqAddEntity.setPdServiceEntity(savedPdService);
 
-        ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
+        ReqPriorityEntity 우선순위_검색 = new ReqPriorityEntity();
+        우선순위_검색.setC_id(reqAddDTO.getC_req_priority_link());
+        ReqPriorityEntity 우선순위_검색결과 = reqPriority.getNode(우선순위_검색);
+        ReqDifficultyEntity 난이도_검색 = new ReqDifficultyEntity();
+        난이도_검색.setC_id(reqAddDTO.getC_req_difficulty_link());
+        ReqDifficultyEntity 난이도_검색결과 = reqDifficulty.getNode(난이도_검색);
+        ReqStateEntity 상태_검색 = new ReqStateEntity();
+        상태_검색.setC_id(reqAddDTO.getC_req_state_link());
+        ReqStateEntity 상태_검색결과 = reqState.getNode(상태_검색);
+        reqAddEntity.setReqPriorityEntity(우선순위_검색결과);
+        reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
+        reqAddEntity.setReqStateEntity(상태_검색결과);
+
+        ReqAddEntity savedNode = reqAdd.addReqNodeNew(reqAddEntity, changeReqTableName);
 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
