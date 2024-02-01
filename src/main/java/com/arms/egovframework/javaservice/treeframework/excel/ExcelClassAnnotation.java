@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface ExcelClassAnnotation {
 
     String sheetName();
-
-    int headerSize();
-
+    int headerTitleRowSize() default 1;
+    String headerTitleName() default "";
+    int headerRowSize();
 }

@@ -253,7 +253,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                             FileRepository fileRepository) throws Exception {
 
         // Spring multipartResolver 사용시
-        PropertiesReader propertiesReader = new PropertiesReader("com/egovframework/property/globals.properties");
+        PropertiesReader propertiesReader = new PropertiesReader("com/arms/egovframework/property/globals.properties");
         String uploadDir = propertiesReader.getProperty("Globals.fileStorePath");
         long maxFileSize = TreeConstant.MAX_UPLOAD_FILESIZE;
 

@@ -14,42 +14,52 @@ import java.util.stream.IntStream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-@Slf4j
 public abstract class ExcelUtilsBase {
 
     protected InputStream inputStream;
     protected OutputStream outputStream;
 
+
     public ExcelUtilsBase(OutputStream outputStream)  {
-            this.outputStream = outputStream;
+        this.outputStream = outputStream;
     }
 
     public ExcelUtilsBase(InputStream inputStream) {
         this.inputStream = inputStream;
     }
 
-    public <T> void create(List<T> srcContent, Class<T> cls) throws IOException {
+
+
+    public <T> void create(List<List<?>> srcContent) throws IOException {
         Workbook workbook = null;
         try {
-            String sheetName = getExportSheetName(cls);
-            List<CellTemplate> templateList = getExportableFields(cls);
 
             workbook = createOrGetWorkBook(true);
-            fillWorkBook(workbook, sheetName, templateList, srcContent);
 
+            for(List<?> lists:srcContent){
+
+                if(lists.size()>0){
+                    String sheetName = getExportSheetName(lists.get(0).getClass());
+                    List<CellTemplate> templateList = getExportableFields(lists.get(0).getClass());
+                    fillWorkBook(workbook, sheetName, templateList, lists);
+                }
+
+            }
             workbook.write(this.outputStream);
-        } catch (Exception ex) {
-            log.info("ExcelUtilsBase :: create :: Exception -> " + ex.getMessage());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
         } finally {
             close(workbook, this.outputStream);
         }
     }
+
 
     public <T> List<T> read(Class<T> cls) throws Exception {
         Workbook workbook = null;
@@ -78,7 +88,8 @@ public abstract class ExcelUtilsBase {
 
     protected abstract Workbook getWorkbook() throws IOException;
 
-    protected abstract <T> void fillWorkBook(Workbook workbook, String sheetName, List<CellTemplate> templateList, List<T> srcContent) throws IllegalArgumentException, IllegalAccessException;
+    protected abstract <T> void fillWorkBook(Workbook workbook, String sheetName, List<CellTemplate> templateList, List<T> srcContent)
+            throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException;
 
     private <T> Workbook createOrGetWorkBook(boolean createNewIfNotFound) throws  IOException {
 
@@ -105,21 +116,6 @@ public abstract class ExcelUtilsBase {
         throw new RuntimeException("Can't find sheet " + sheetName);
     }
 
-    private List<Sheet> getSheetBySheetNames(Workbook workbook, List<String> sheetNames) {
-        Iterator<Sheet> iterator = workbook.sheetIterator();
-        List<Sheet> sheetList = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Sheet sheet = iterator.next();
-            sheetNames.stream().filter(sheetName->sheet.getSheetName().equals(sheetName))
-                .findFirst()
-                .ifPresent(sheetName->sheetList.add(sheet));
-        }
-
-        return sheetList;
-
-    }
-
-
     private <T> Sheet readSheet(Class<T> cls, Workbook workbook) {
         String sheetName = getExportSheetName(cls);
 
@@ -135,9 +131,8 @@ public abstract class ExcelUtilsBase {
             for (Annotation annotation : annotations) {
                 if (annotation instanceof ExcelClassAnnotation) {
                     Sheet sheetBySheetName
-                        = getSheetBySheetName(workbook,((ExcelClassAnnotation) annotation).sheetName());
+                            = getSheetBySheetName(workbook,((ExcelClassAnnotation) annotation).sheetName());
                     try {
-                        System.out.println(sheetBySheetName.getSheetName());
                         sheets.add(readContent(sheetBySheetName, cls));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -153,7 +148,7 @@ public abstract class ExcelUtilsBase {
         List<T> result = new ArrayList<>();
         List<CellTemplate> templateList = getExportableFields(cls);
         Iterator<Row> rows = sheet.rowIterator();
-        IntStream.range(0,getHeaderSize(cls)).forEach(i-> skipExcelHeader(rows));
+        IntStream.range(0,getHeaderTotalRowSize(cls)).forEach(i-> skipExcelHeader(rows));
         while (rows.hasNext()) {
             Row row = rows.next();
             T item = readRow(cls, templateList, row);
@@ -163,7 +158,8 @@ public abstract class ExcelUtilsBase {
         return result;
     }
 
-    private void skipExcelHeader(Iterator<Row> rows) {
+    public void skipExcelHeader(Iterator<Row> rows) {
+
         rows.next();
     }
 
@@ -190,22 +186,6 @@ public abstract class ExcelUtilsBase {
         throw new IllegalArgumentException(cls + "is not exportable.");
     }
 
-    private List<String> getExportSheetNames(List<Class<?>> classList) {
-
-        List<String> exportSheetNames = new ArrayList<>();
-
-        classList.forEach(cls->{
-            Annotation[] annotations = cls.getAnnotations();
-            for (Annotation annotation : annotations) {
-                if (annotation instanceof ExcelClassAnnotation) {
-                    exportSheetNames.add(((ExcelClassAnnotation) annotation).sheetName());
-                }
-            }
-        });
-
-        return exportSheetNames;
-    }
-
 
     @Getter
     @Setter
@@ -215,14 +195,39 @@ public abstract class ExcelUtilsBase {
         private Class<?> aClass;
     }
 
-    private <T> int getHeaderSize(Class<T> cls){
+    public <T> int getHeaderRowSize(Class<T> cls){
         Annotation[] annotations = cls.getAnnotations();
         for (Annotation annotation : annotations) {
             if (annotation instanceof ExcelClassAnnotation) {
-                return ((ExcelClassAnnotation) annotation).headerSize();
+                return ((ExcelClassAnnotation) annotation).headerRowSize();
             }
         }
         throw new IllegalArgumentException(cls + "is not exportable.");
+    }
+
+    public <T> int getHeaderTitleRowSize(Class<T> cls){
+        Annotation[] annotations = cls.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof ExcelClassAnnotation) {
+                return ((ExcelClassAnnotation) annotation).headerTitleRowSize();
+            }
+        }
+        throw new IllegalArgumentException(cls + "is not exportable.");
+    }
+
+    public <T> String getHeaderTitleName(Class<T> cls){
+        Annotation[] annotations = cls.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof ExcelClassAnnotation) {
+                return ((ExcelClassAnnotation) annotation).headerTitleName();
+            }
+        }
+        throw new IllegalArgumentException(cls + "is not exportable.");
+    }
+
+    public <T> int getHeaderTotalRowSize(Class<T> cls){
+        return getHeaderRowSize(cls)+getHeaderTitleRowSize(cls);
+
     }
 
 

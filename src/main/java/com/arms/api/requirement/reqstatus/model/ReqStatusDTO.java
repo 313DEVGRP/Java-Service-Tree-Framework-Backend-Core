@@ -102,4 +102,16 @@ public class ReqStatusDTO extends TreeBaseDTO {
     //비고
     private String c_etc;
 
+    // '총 작업 MM'
+    private Long c_req_total_resource;
+
+    // '총 계획 MM'
+    private Long c_req_plan_resource;
+
+    // '총 기간 Day'
+    private Long c_req_total_time;
+
+    // '총 계획 Day'
+    private Long c_req_plan_time;
+
 }
