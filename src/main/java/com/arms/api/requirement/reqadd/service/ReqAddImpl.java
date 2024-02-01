@@ -888,10 +888,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
-			지라이슈필드_데이터.보고자 암스서버보고자 = 암스서버보고자가져오기(검색된_지라서버);
-
-			지라이슈필드_데이터.담당자 암스서버담당자 = 암스서버담당자가져오기(검색된_지라서버);
-
 			지라이슈필드_데이터 지라이슈생성데이터 = get지라이슈생성데이터(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
 
 			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
@@ -950,6 +946,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			updateReqStatus.setC_issue_update_date(new Date());
 			updateReqStatus.setC_id(reqStatusEntity.getC_id());
+
+			updateReqStatus.setC_req_plan_resource(reqAddEntity.getC_req_plan_resource());
+			updateReqStatus.setC_req_plan_time(reqAddEntity.getC_req_plan_time());
+			updateReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
+			updateReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
 
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
 
@@ -1045,6 +1046,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_issue_delete_date(new Date());
 			updateReqStatus.setC_id(reqStatusEntity.getC_id());
 
+			updateReqStatus.setC_req_plan_resource(reqAddEntity.getC_req_plan_resource());
+			updateReqStatus.setC_req_plan_time(reqAddEntity.getC_req_plan_time());
+			updateReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
+			updateReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
+
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
 
 			if (결과.getStatusCode().is2xxSuccessful()) {
@@ -1130,7 +1136,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			createReqStatus.setC_issue_key(이슈_생성하기.getKey());
 			createReqStatus.setC_issue_url(이슈_생성하기.getSelf());
 
-
 			if (요구사항_이슈_우선순위 != null) {
 				createReqStatus.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
 				createReqStatus.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
@@ -1150,6 +1155,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			createReqStatus.setC_issue_assignee(암스서버담당자.getName());
 
 			createReqStatus.setC_issue_create_date(new Date());
+
+			createReqStatus.setC_req_plan_resource(reqAddEntity.getC_req_plan_resource());
+			createReqStatus.setC_req_plan_time(reqAddEntity.getC_req_plan_time());
+			createReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
+			createReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
 
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + pdServiceId, createReqStatus);
 
