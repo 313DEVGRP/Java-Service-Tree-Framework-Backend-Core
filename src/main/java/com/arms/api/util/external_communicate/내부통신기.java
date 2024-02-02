@@ -29,15 +29,4 @@ public interface 내부통신기 {
             @PathVariable(value = "c_id") Long c_id
     );
 
-    @DeleteMapping("/arms/reqStatus/{changeReqTableName}/removeNode.do/{c_id}")
-    ResponseEntity<Integer> 요구사항삭제(
-            @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @PathVariable(value = "c_id") Long c_id
-    );
-
-    @GetMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
-    List<ReqStatusEntity> reqStatusList(@PathVariable(value ="changeReqTableName") String changeReqTableName,
-                                         @RequestBody ReqStatusDTO reqStatusDTO);
-
-
 }

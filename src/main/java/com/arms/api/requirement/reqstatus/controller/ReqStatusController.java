@@ -388,28 +388,4 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return modelAndView;
     }
 
-    @DeleteMapping("/{changeReqTableName}/removeNode.do/{c_id}")
-    public ResponseEntity<Integer> 요구사항삭제(
-            @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
-    ) throws Exception {
-
-        log.info("ReqStatusController :: removeNode.do");
-
-        log.info("ReqStatusController :: removeNode.do :: changeReqTableName :: " + changeReqTableName);
-
-        log.info("ReqStatusController :: removeNode.do :: c_id :: " + c_id);
-
-        SessionUtil.setAttribute("removeNode", changeReqTableName);
-
-        ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
-
-        reqStatusEntity.setC_id(c_id);
-
-        int result = reqStatus.removeNode(reqStatusEntity);
-
-        SessionUtil.removeAttribute("removeNode");
-
-        return ResponseEntity.ok(result);
-    }
 }
