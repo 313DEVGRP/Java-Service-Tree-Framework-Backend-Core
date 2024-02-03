@@ -94,7 +94,7 @@ public class FileRepositoryController extends TreeAbstractController<FileReposit
     public void downloadFile(@PathVariable(value ="fileId") Long fileId,
                              HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        PropertiesReader propertiesReader = new PropertiesReader("com/egovframework/property/globals.properties");
+        PropertiesReader propertiesReader = new PropertiesReader("com/arms/egovframework/property/globals.properties");
         String uploadPath = propertiesReader.getProperty("Globals.fileStorePath");
 
         FileRepositoryEntity fileRepositoryEntity = new FileRepositoryEntity();
