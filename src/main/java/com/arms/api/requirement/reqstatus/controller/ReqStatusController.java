@@ -286,21 +286,16 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         ModelAndView modelAndView = new ModelAndView("jsonView");
         if (검색결과 != null) {
             String 엔진통신_아이디 = 검색결과.getC_jira_server_etc();
-
-            Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
-            Long 제품서비스_버전 = Long.parseLong(request.getParameter("versionId"));
             String 이슈키 = request.getParameter("issueKey");
-
-            int 페이지 = 0; int 사이즈 = 10;
 
             List<지라이슈> 링크드이슈_서브데스크 = 엔진통신기.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
 
-            log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크.toString());
+            log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크);
 
             modelAndView.addObject("result", 링크드이슈_서브데스크);
         } else {
             modelAndView.addObject("result", "");
-            log.info("ReqStatusEntity :: getLinkedIssueAndSubtask => 검색된 지라서버가 없습니다.");
+            log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 검색된 지라서버가 없습니다.");
         }
 
         return modelAndView;
