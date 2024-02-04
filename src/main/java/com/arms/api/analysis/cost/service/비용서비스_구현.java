@@ -1,5 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.cost.dto.버전별_요구사항별_활성화된_요구사항;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
@@ -7,14 +8,19 @@ import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
+import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.external_communicate.dto.IsReqType;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
+import com.arms.api.util.external_communicate.dto.지라이슈;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -27,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +47,10 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     @Qualifier("reqAdd")
     private ReqAdd reqAdd;
+
+    @Autowired
+    @Qualifier("reqStatus")
+    private ReqStatus reqStatus;
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -182,5 +193,54 @@ public class 비용서비스_구현 implements 비용서비스 {
         }
 
         return 결과데이터;
+    }
+
+    @Override
+    public 버전별_요구사항별_활성화된_요구사항 버전별_요구사항별_활성화된_요구사항(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+
+        Long 제품및서비스 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
+
+        List<Long> 버전 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
+
+        List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
+
+        Map<Long, Map<Long, List<버전별_요구사항별_활성화된_요구사항.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
+                .map(버전별_요구사항별_활성화된_요구사항::필요데이터)
+                .filter(entity -> {
+                    List<지라이슈> list = 통계엔진통신기.요구사항키로_하위이슈_조회(entity.getC_issue_key());
+                    return list != null && !list.isEmpty();
+                }).collect(Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_pds_version_link,
+                        Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_req_link)));
+
+
+        버전별_요구사항별_활성화된_요구사항 결과 = new 버전별_요구사항별_활성화된_요구사항();
+
+        그룹화된_결과.forEach((key1, value1) -> {
+            버전별_요구사항별_활성화된_요구사항.요구사항별_그룹 그룹1 = new 버전별_요구사항별_활성화된_요구사항.요구사항별_그룹();
+            value1.forEach((key2, value2) -> 그룹1.get요구사항별_그룹().put(key2, value2));
+            결과.get버전별_그룹().put(key1, 그룹1);
+        });
+        return 결과;
+    }
+
+    public List<ReqStatusEntity> 지라이슈상태_테이블_조회(Long 제품및서비스 , List<Long> 버전) throws Exception {
+
+        ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
+
+        String 조회대상_지라이슈상태_테이블 = "T_ARMS_REQSTATUS_"+제품및서비스;
+
+        System.out.println("조회 대상 테이블 searchTable :"+조회대상_지라이슈상태_테이블);
+
+        SessionUtil.setAttribute("req-activated-issue", 조회대상_지라이슈상태_테이블);
+
+        Criterion 버전조건_질의 = Restrictions.in("c_pds_version_link", 버전);
+
+        reqStatusEntity.getCriterions().add(버전조건_질의);
+
+        List<ReqStatusEntity> 검색결과_요구사항 = reqStatus.getChildNode(reqStatusEntity);
+
+        SessionUtil.removeAttribute("req-activated-issue");
+
+        return 검색결과_요구사항;
     }
 }

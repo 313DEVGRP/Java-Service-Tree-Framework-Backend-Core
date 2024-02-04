@@ -1,5 +1,6 @@
 package com.arms.api.analysis.cost.controller;
 
+import com.arms.api.analysis.cost.dto.버전별_요구사항별_활성화된_요구사항;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.analysis.cost.service.비용서비스;
@@ -63,6 +64,23 @@ public class 비용분석_컨트롤러 {
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 조회결과);
+        return modelAndView;
+    }
+
+    /**
+     * 버전별 요구사항별 활성화된 지라 지라 이슈 아이디 조회 API (버블 차트)
+     */
+    @ResponseBody
+    @RequestMapping(
+            value = {"/req-activated-issue"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 버전별_요구사항별_활성화된_요구사항(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+        로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_활성화된_요구사항 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
+        로그.info(지라이슈_제품_및_제품버전_검색요청.toString());
+        버전별_요구사항별_활성화된_요구사항 검색결과 = 비용서비스.버전별_요구사항별_활성화된_요구사항(지라이슈_제품_및_제품버전_검색요청);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 검색결과);
         return modelAndView;
     }
 }
