@@ -74,6 +74,7 @@ public class TimeServiceImpl implements TimeService{
         Map<Long, List<지라이슈>> 버전별_그룹화_결과 = Optional.ofNullable(검색일자_범위_데이터.getBody())
                 .orElseGet(Collections::emptyList)
                 .stream()
+                .flatMap(issue->issue.지라버전별로_분해가져오기().stream())
                 .collect(Collectors.groupingBy(지라이슈::getPdServiceVersion));
 
         return 버전별_그룹화_결과;

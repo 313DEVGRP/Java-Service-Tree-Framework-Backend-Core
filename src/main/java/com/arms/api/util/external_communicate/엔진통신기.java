@@ -83,7 +83,7 @@ public interface 엔진통신기 {
     @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
                                               @PathVariable("pdService") Long 제품서비스_아이디,
-                                              @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
+                                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디);
 
     /*
      * 요구사항 상세 페이지
