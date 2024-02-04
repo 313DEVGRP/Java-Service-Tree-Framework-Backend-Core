@@ -255,7 +255,9 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         }
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService, pds_version));
+        modelAndView.addObject("result",
+                엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService,
+                        List.of(pds_version).stream().toArray(Long[]::new)));
         return modelAndView;
 
     }
