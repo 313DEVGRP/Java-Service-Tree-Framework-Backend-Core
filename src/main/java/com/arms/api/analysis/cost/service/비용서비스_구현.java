@@ -86,7 +86,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                             String 고유아이디 = versionId + "-" + assigneeAccountId;
 
                             버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
-                                    .이름(assigneeDisplayName+"-"+assigneeAccountId)
+                                    .이름(assigneeDisplayName)
                                     .연봉(null)
                                     .성과(null)
                                     .build();

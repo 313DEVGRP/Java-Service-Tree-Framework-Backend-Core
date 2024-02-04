@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 public class ExcelGantUpload {
@@ -24,12 +25,16 @@ public class ExcelGantUpload {
 	private final List<WbsSchedule> getWebScheduleList;
 
 	public ExcelGantUpload(InputStream inputStream) throws IOException {
-		try(inputStream) {
-			this.sheet = WorkbookFactory.create(inputStream).getSheet("Schedule");
+		Workbook workbook = null;
+		try {
+			workbook = WorkbookFactory.create(inputStream);
+			this.sheet = workbook.getSheet("Schedule");
+			this.getWebScheduleList = new ArrayList<>(convertExcelToWbsSchedule());
+		} finally {
+			if (workbook != null) {
+				workbook.close();
+			}
 		}
-		this.getWebScheduleList = new ArrayList<>(convertExcelToWbsSchedule());
-
-		getWebScheduleList.stream().collect(Collectors.toList());
 	}
 
 	private List<WbsSchedule> convertExcelToWbsSchedule() {

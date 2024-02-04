@@ -140,8 +140,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터);
-        Map<String, Object> 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
-        Map<String, Object> 검색결과 = (Map<String, Object>) 통신결과.get("검색결과");
+        Map<String, Object> 통신결과 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(Collections.emptyMap());
+        Map<String, Object> 검색결과 = Optional.ofNullable((Map<String, Object>) 통신결과.get("검색결과")).orElse(Collections.emptyMap());
         List<Object> 작업자별결과 = (List<Object>) 검색결과.get("group_by_assignee.assignee_emailAddress.keyword");
         return 작업자별결과;
     }
@@ -150,8 +150,11 @@ public class DashboardServiceImpl implements DashboardService {
     public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, 검색요청_데이터);
 
-        검색결과_목록_메인 검색결과목록 = 요구사항_연결이슈_일반_통계.getBody();
-        List<검색결과> 작업자별결과 = 검색결과목록.get검색결과().get("group_by_assignee.assignee_emailAddress.keyword");
+        검색결과_목록_메인 검색결과목록 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(new 검색결과_목록_메인());
+
+        Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());
+
+        List<검색결과> 작업자별결과 = Optional.ofNullable(검색결과.get("group_by_assignee.assignee_emailAddress.keyword")).orElse(Collections.emptyList());
 
         Map<String, Object> personAndStatus = new HashMap<>();
         for (검색결과 obj : 작업자별결과) {
