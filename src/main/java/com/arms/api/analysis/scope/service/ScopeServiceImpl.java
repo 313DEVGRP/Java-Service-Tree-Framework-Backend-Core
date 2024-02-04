@@ -14,7 +14,10 @@ import com.arms.api.util.external_communicate.dto.요구_사항;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.내부통신기;
 import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScopeServiceImpl implements ScopeService {
     private static final String NO_DATA = "No Data";
     private static final String DEFAULT_BLACK_COLOR = "#000000";
@@ -33,6 +37,7 @@ public class ScopeServiceImpl implements ScopeService {
     private final PdService pdService;
     private final 내부통신기 내부통신기;
     private final 통계엔진통신기 통계엔진통신기;
+    private final Gson gson;
 
     @Override
     public List<TreeBarDTO> treeBar(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
@@ -61,7 +66,26 @@ public class ScopeServiceImpl implements ScopeService {
         treeBarList.addAll(addProductVersions(productVersions, product));
 
         // 5. 요구사항 조회
-        List<TreeBarDTO> requirements = getRequirements(reqStatuses, pdServiceVersionLinks);
+        List<ReqStatusEntity> reqStatusEntities = getRequirements(reqStatuses, pdServiceVersionLinks);
+
+        // 5-1. ReqStatus 1 -> 버전 N 관계. 버전 개수만큼 요구사항 복제
+        List<ReqStatusEntity> reqStatusEntityList = reqStatusEntities.stream()
+                .flatMap(reqStatusEntity -> {
+                    List<Long> versionSet = gson.fromJson(reqStatusEntity.getC_req_pdservice_versionset_link(), new TypeToken<List<Long>>(){}.getType());
+                    return versionSet.stream().map(versionId -> {
+                        ReqStatusEntity replica = new ReqStatusEntity();
+                        replica.setC_id(reqStatusEntity.getC_id());
+                        replica.setC_issue_key(reqStatusEntity.getC_issue_key());
+                        replica.setC_title(reqStatusEntity.getC_title());
+                        replica.setC_req_pdservice_versionset_link(versionId.toString() + "-version");
+                        return replica;
+                    });
+                })
+                .collect(Collectors.toList());
+
+        List<TreeBarDTO> requirements = reqStatusEntityList.stream()
+                .map(TreeBarDTO::new)
+                .collect(Collectors.toList());
 
         // 6. 각 요구사항 별 담당자와 빈도수를 조회 (Top 10)
         ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청);
@@ -92,7 +116,7 @@ public class ScopeServiceImpl implements ScopeService {
         treeBarList.addAll(filteredRequirements);
 
         // 11. 요구사항 별 담당자 등록
-        treeBarList.addAll(addAssignees(top10Requirements));
+        treeBarList.addAll(addAssignees(top10Requirements, filteredRequirements));
 
         // 12. 제품 버전에 대해 요구사항이 없는 경우를 확인하고 가짜 요구사항과 가짜 담당자 노드를 추가
         treeBarList.addAll(addFakeNodesForProductVersions(productVersions, filteredRequirements));
@@ -116,7 +140,7 @@ public class ScopeServiceImpl implements ScopeService {
     private List<TreeBarDTO> addProductVersions(List<PdServiceVersionEntity> productVersions, PdServiceEntity product) {
         return productVersions.stream()
                 .map(pdServiceVersionEntity -> TreeBarDTO.builder()
-                        .id(pdServiceVersionEntity.getC_id().toString())
+                        .id(pdServiceVersionEntity.getC_id().toString() + "-version")
                         .name(pdServiceVersionEntity.getC_title())
                         .color("")
                         .type("version")
@@ -125,16 +149,18 @@ public class ScopeServiceImpl implements ScopeService {
                 .collect(Collectors.toList());
     }
 
-    private List<TreeBarDTO> getRequirements(List<ReqStatusEntity> reqStatuses, List<Long> pdServiceVersionLinks) {
+    private List<ReqStatusEntity> getRequirements(List<ReqStatusEntity> reqStatuses, List<Long> pdServiceVersionLinks) {
         return reqStatuses.stream()
-                .filter(entity -> pdServiceVersionLinks.contains(entity.getC_pds_version_link()))
-                .map(TreeBarDTO::new)
+                .filter(entity -> {
+                    List<Long> versionSet = gson.fromJson(entity.getC_req_pdservice_versionset_link(), new TypeToken<List<Long>>(){}.getType());
+                    return versionSet.stream().anyMatch(pdServiceVersionLinks::contains);
+                })
                 .collect(Collectors.toList());
     }
 
     private List<TreeBarDTO> filteredRequirements(List<TreeBarDTO> requirements, List<String> issueKeys) {
         return requirements.stream()
-                .filter(req -> issueKeys.contains(req.getId()))
+                .filter(req -> issueKeys.contains(req.getId().split("\\|")[0]))
                 .collect(Collectors.toList());
     }
 
@@ -142,7 +168,7 @@ public class ScopeServiceImpl implements ScopeService {
         return filteredRequirements.stream()
                 .filter(requirement ->
                         top10Requirements.stream()
-                                .noneMatch(parentReqKey -> requirement.getId().equals(parentReqKey.get필드명()))
+                                .noneMatch(parentReqKey -> requirement.getId().split("\\|")[0].equals(parentReqKey.get필드명()))
                 )
                 .map(requirement ->
                         TreeBarDTO.builder()
@@ -162,7 +188,7 @@ public class ScopeServiceImpl implements ScopeService {
                     String versionId = pdServiceVersionEntity.getC_id().toString();
 
                     boolean existsInRequirements = filteredRequirements.stream()
-                            .anyMatch(req -> versionId.equals(req.getParent()));
+                            .anyMatch(req -> versionId.equals(req.getParent().split("\\-")[0]));
 
                     if (!existsInRequirements) {
                         TreeBarDTO fakeRequirement = TreeBarDTO.builder()
@@ -170,7 +196,7 @@ public class ScopeServiceImpl implements ScopeService {
                                 .name(NO_DATA)
                                 .type("requirement")
                                 .color("")
-                                .parent(versionId)
+                                .parent(versionId + "-version")
                                 .build();
 
                         TreeBarDTO fakeAssignee = TreeBarDTO.builder()
@@ -189,27 +215,31 @@ public class ScopeServiceImpl implements ScopeService {
                 .collect(Collectors.toList());
     }
 
-    private List<TreeBarDTO> addAssignees(List<검색결과> top10Requirements) {
+    private List<TreeBarDTO> addAssignees(List<검색결과> top10Requirements, List<TreeBarDTO> filteredRequirements) {
         Map<String, String> assigneeToColorMap = new HashMap<>();
         return top10Requirements.stream()
                 .flatMap(parentReqKey -> {
                     String parent = parentReqKey.get필드명();
-                    return parentReqKey.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream()
-                            .map(assignee -> {
-                                String name = assignee.get필드명();
-                                String color = assigneeToColorMap.computeIfAbsent(name, k ->
-                                        String.format("#%02x%02x%02x", RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256))
-                                );
-                                long value = assignee.get개수();
-                                return TreeBarDTO.builder()
-                                        .id(parent + assignee.get필드명())
-                                        .parent(parent)
-                                        .type("assignee")
-                                        .name(name + " (" + value + ")")
-                                        .value(value)
-                                        .color(color)
-                                        .build();
-                            });
+                    return filteredRequirements.stream()
+                            .filter(req -> parent.equals(req.getId().split("\\|")[0]))
+                            .flatMap(treeBarDTO ->
+                                    parentReqKey.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream()
+                                            .map(assignee -> {
+                                                String name = assignee.get필드명();
+                                                String color = assigneeToColorMap.computeIfAbsent(name, k ->
+                                                        String.format("#%02x%02x%02x", RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256))
+                                                );
+                                                long value = assignee.get개수();
+                                                return TreeBarDTO.builder()
+                                                        .id(treeBarDTO.getId() + "|" + assignee.get필드명())
+                                                        .parent(treeBarDTO.getId())
+                                                        .type("assignee")
+                                                        .name(name + " (" + value + ")")
+                                                        .value(value)
+                                                        .color(color)
+                                                        .build();
+                                            })
+                            );
                 })
                 .collect(Collectors.toList());
     }
