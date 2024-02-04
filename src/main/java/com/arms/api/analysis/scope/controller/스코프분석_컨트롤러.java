@@ -42,7 +42,7 @@ public class 스코프분석_컨트롤러 {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
                 , pdServiceId, pdServiceVersionLinks);
         지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("pdServiceVersion")
+                .메인그룹필드("pdServiceVersions")
                 .하위그룹필드들(List.of("isReq"))
                 .컨텐츠보기여부(false)
                 .build();
