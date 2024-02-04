@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 public class ScopeServiceImpl implements ScopeService {
     private static final String NO_DATA = "No Data";
     private static final String DEFAULT_BLACK_COLOR = "#000000";
-    private static final Random RANDOM = new Random();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final PdService pdService;
     private final 내부통신기 내부통신기;

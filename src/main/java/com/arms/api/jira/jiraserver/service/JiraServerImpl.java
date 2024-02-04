@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.security.SecureRandom;
 import java.util.*;
 
 import static com.arms.egovframework.javaservice.treeframework.remote.Global.chat;
@@ -55,7 +56,7 @@ import static com.arms.egovframework.javaservice.treeframework.remote.Global.cha
 public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private static final Random RANDOM = new Random();
+	private static final SecureRandom RANDOM = new SecureRandom();
 
 	@Autowired
 	private 엔진통신기 엔진통신기;
