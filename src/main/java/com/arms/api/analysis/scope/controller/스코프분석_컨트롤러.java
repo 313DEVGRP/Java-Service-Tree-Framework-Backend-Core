@@ -35,14 +35,18 @@ public class 스코프분석_컨트롤러 {
 
     static final long dummy_jira_server = 0L;
 
-    @GetMapping("/getReqPerVersion/{pdServiceId}")
+    @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
-                                                     @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_단순_집계_요청 검색요청_데이터) {
+                                                                        @RequestParam List<Long> pdServiceVersionLinks) {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
-                , pdServiceId.toString(), pdServiceVersionLinks.toString());
-        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                , pdServiceId, pdServiceVersionLinks);
+        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("pdServiceVersion")
+                .하위그룹필드들(List.of("isReq"))
+                .컨텐츠보기여부(false)
+                .build();
 
+        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         return ResponseEntity.ok(집계결과.getBody());
 
     }
