@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 public class ScopeServiceImpl implements ScopeService {
     private static final String NO_DATA = "No Data";
     private static final String DEFAULT_BLACK_COLOR = "#000000";
+    private static final Random RANDOM = new Random();
 
     private final PdService pdService;
     private final 내부통신기 내부통신기;
@@ -64,11 +65,11 @@ public class ScopeServiceImpl implements ScopeService {
         // 6. 각 요구사항 별 담당자와 빈도수를 조회 (Top 10)
         ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청);
 
-        검색결과_목록_메인 검색결과목록메인 = 외부API응답.getBody();
+        검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(외부API응답.getBody()).orElse(new 검색결과_목록_메인());
 
-        Map<String, List<검색결과>> 검색결과 = 검색결과목록메인.get검색결과();
+        Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록메인.get검색결과()).orElse(Collections.emptyMap());
 
-        List<검색결과> groupByParentReqKey = 검색결과.get("group_by_parentReqKey");
+        List<검색결과> groupByParentReqKey = Optional.ofNullable(검색결과.get("group_by_parentReqKey")).orElse(Collections.emptyList());
 
         // 7. 담당자의 작업량(Sub-Task)가 아닌, Scope 이기 때문에, 담당자가 많은 것을 기준으로 요구사항 Top 10 추출.
         List<검색결과> top10Requirements = groupByParentReqKey.stream()
@@ -188,7 +189,6 @@ public class ScopeServiceImpl implements ScopeService {
     }
 
     private List<TreeBarDTO> addAssignees(List<검색결과> top10Requirements) {
-        Random random = new Random();
         Map<String, String> assigneeToColorMap = new HashMap<>();
         return top10Requirements.stream()
                 .flatMap(parentReqKey -> {
@@ -197,7 +197,7 @@ public class ScopeServiceImpl implements ScopeService {
                             .map(assignee -> {
                                 String name = assignee.get필드명();
                                 String color = assigneeToColorMap.computeIfAbsent(name, k ->
-                                        String.format("#%02x%02x%02x", random.nextInt(256), random.nextInt(256), random.nextInt(256))
+                                        String.format("#%02x%02x%02x", RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256))
                                 );
                                 long value = assignee.get개수();
                                 return TreeBarDTO.builder()
