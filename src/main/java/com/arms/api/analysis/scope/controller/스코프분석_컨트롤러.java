@@ -17,6 +17,7 @@ import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,14 +36,18 @@ public class 스코프분석_컨트롤러 {
 
     static final long dummy_jira_server = 0L;
 
-    @GetMapping("/getReqPerVersion/{pdServiceId}")
+    @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
-                                                     @RequestParam List<Long> pdServiceVersionLinks,
-                                                     지라이슈_단순_집계_요청 검색요청_데이터) {
+                                                                        @RequestParam List<Long> pdServiceVersionLinks) {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
-                , pdServiceId.toString(), pdServiceVersionLinks.toString());
-        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                , pdServiceId, pdServiceVersionLinks);
+        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("pdServiceVersion")
+                .하위그룹필드들(List.of("isReq"))
+                .컨텐츠보기여부(false)
+                .build();
 
+        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         return ResponseEntity.ok(집계결과.getBody());
 
     }
@@ -66,15 +71,22 @@ public class 스코프분석_컨트롤러 {
                 .크기(1000)
                 .하위그룹필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
                 .build();
+
         ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계_통신결과 =
                 통계엔진통신기.제품서비스_일반_버전_통계(선택된_제품서비스_아이디, 선택된_버전_목록, 일반_집계_요청_세팅);
-        List<제품_서비스_버전> 매핑결과 = null;
-        if(요구사항_별_상태_및_관여_작업자_수_통신결과 != null && 제품서비스_일반_버전_통계_통신결과 != null
-                && 제품서비스_일반_버전_통계_통신결과.getBody() != null) {
-            매핑결과 = scopeService.요구사항_상태_매핑(요구사항_별_상태_및_관여_작업자_수_통신결과.getBody(), 제품서비스_일반_버전_통계_통신결과.getBody().get검색결과());
-        } else {
-            log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] 매핑결과가 null 입니다.");
-        }
+
+        List<제품_서비스_버전> 매핑결과 = Optional.ofNullable(요구사항_별_상태_및_관여_작업자_수_통신결과)
+                .map(ResponseEntity::getBody)
+                .flatMap(요구사항_별_상태_및_관여_작업자_수 ->
+                        Optional.ofNullable(제품서비스_일반_버전_통계_통신결과)
+                                .map(ResponseEntity::getBody)
+                                .map(검색결과_목록_메인::get검색결과)
+                                .map(검색결과 -> scopeService.요구사항_상태_매핑(요구사항_별_상태_및_관여_작업자_수, 검색결과))
+                )
+                .orElseGet(() -> {
+                    log.info("[ 스코프분석_컨트롤러 :: 요구사항_별_상태_및_관여_작업자_수 ] 매핑결과가 null 입니다.");
+                    return null;
+                });
         return ResponseEntity.ok(매핑결과);
     }
 
