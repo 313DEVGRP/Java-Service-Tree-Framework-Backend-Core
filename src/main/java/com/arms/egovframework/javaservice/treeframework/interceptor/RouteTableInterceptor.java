@@ -136,6 +136,9 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("getPdRelatedReqStats");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+            }else if(StringUtils.contains(servletPath,"req-activated-issue")){
+                String replaceTableName = (String) SessionUtil.getAttribute("req-activated-issue");
+                prepedStatement = replaceStatement(prepedStatement, replaceTableName);
             }
         } catch (Exception e) {
             log.info("RouteTableInterceptor :: onPrepareStatement :: Exception -> " + e.getMessage());
