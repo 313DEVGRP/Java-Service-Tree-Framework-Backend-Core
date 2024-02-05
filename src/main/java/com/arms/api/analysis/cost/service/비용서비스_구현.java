@@ -206,10 +206,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         Map<Long, Map<Long, List<버전별_요구사항별_활성화된_요구사항.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
                 .map(버전별_요구사항별_활성화된_요구사항::필요데이터)
-                .filter(entity -> {
-                    List<지라이슈> list = 통계엔진통신기.요구사항키로_하위이슈_조회(entity.getC_issue_key());
-                    return list != null && !list.isEmpty();
-                }).collect(Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_pds_version_link,
+                .collect(Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_pds_version_link,
                         Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_req_link)));
 
 
