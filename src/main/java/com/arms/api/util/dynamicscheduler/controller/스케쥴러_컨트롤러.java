@@ -111,21 +111,29 @@ public class 스케쥴러_컨트롤러{
 //                                요구사항_이슈_엔티티.getC_pdservice_link(),
 //                                요구사항_이슈_엔티티.getC_pds_version_link()
 //                                );
-
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
                         String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
-                        Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
-                                .filter(s -> !s.isEmpty())
-                                .map(Long::valueOf)
-                                .toArray(Long[]::new);
+                        if(!버전_목록_문자열.isEmpty()) {
+                            Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
+                                    .filter(s -> !s.isEmpty())
+                                    .map(Long::valueOf)
+                                    .toArray(Long[]::new);
 
-                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장2(
-                                Long.parseLong(지라서버.getC_jira_server_etc()),
-                                요구사항_이슈_엔티티.getC_issue_key(),
-                                요구사항_이슈_엔티티.getC_pdservice_link(),
-                                버전_아이디_목록_배열
-                                );
+                            int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장2(
+                                    Long.parseLong(지라서버.getC_jira_server_etc()),
+                                    요구사항_이슈_엔티티.getC_issue_key(),
+                                    요구사항_이슈_엔티티.getC_pdservice_link(),
+                                    버전_아이디_목록_배열
+                            );
+                            log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                        } else {
 
-                        log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                            log.error("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 버전_목록_문자열이 없습니다. 진행중인 ReqStatusEntity c_id => {} 의 버전_목록이 없습니다."
+                                    , 요구사항_이슈_엔티티.getC_id());
+                            log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key());
+                        }
                     }
 
                 }
