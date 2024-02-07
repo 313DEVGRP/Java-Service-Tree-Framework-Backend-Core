@@ -10,14 +10,9 @@ import java.util.Map;
 
 @Setter
 @Getter
-public class 버전별_요구사항별_활성화된_요구사항 {
-    private Map<Long, 요구사항별_그룹> 버전별_그룹 = new HashMap<>();
+public class 버전별_요구사항별_연결된지_지라이슈데이터 {
+    private Map<Long, Map<Long, List<요구사항_데이터>> > 버전별_요구사항별_연결된지_지라이슈 = new HashMap<>();
 
-    @Getter
-    @Setter
-    public static class 요구사항별_그룹 {
-        private Map<Long, List<요구사항_데이터>> 요구사항별_그룹 = new HashMap<>();
-    }
     @Getter
     @Setter
     public static class 요구사항_데이터{
