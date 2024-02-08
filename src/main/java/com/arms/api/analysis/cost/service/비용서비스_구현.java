@@ -263,7 +263,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         로그.info("조회 대상 테이블 searchTable :"+조회대상_지라이슈상태_테이블);
 
-        SessionUtil.setAttribute("req-activated-issue", 조회대상_지라이슈상태_테이블);
+        SessionUtil.setAttribute("req-linked-issue", 조회대상_지라이슈상태_테이블);
 
         Criterion 버전조건_질의 = Restrictions.in("c_pds_version_link", 버전);
 
@@ -271,7 +271,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         List<ReqStatusEntity> 검색결과_요구사항 = reqStatus.getChildNode(reqStatusEntity);
 
-        SessionUtil.removeAttribute("req-activated-issue");
+        SessionUtil.removeAttribute("req-linked-issue");
 
         return 검색결과_요구사항;
     }
