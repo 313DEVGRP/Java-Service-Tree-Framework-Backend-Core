@@ -1,6 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
-import com.arms.api.analysis.cost.dto.버전별_요구사항별_활성화된_요구사항;
+import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
@@ -12,7 +12,6 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.external_communicate.dto.IsReqType;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
-import com.arms.api.util.external_communicate.dto.지라이슈;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -236,7 +235,7 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     @Override
-    public 버전별_요구사항별_활성화된_요구사항 버전별_요구사항별_활성화된_요구사항(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+    public 버전별_요구사항별_연결된지_지라이슈데이터 버전별_요구사항에_연결된지_지라이슈(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
 
         Long 제품및서비스 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
 
@@ -244,19 +243,15 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
 
-        Map<Long, Map<Long, List<버전별_요구사항별_활성화된_요구사항.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
-                .map(버전별_요구사항별_활성화된_요구사항::필요데이터)
-                .collect(Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_pds_version_link,
-                        Collectors.groupingBy(버전별_요구사항별_활성화된_요구사항.요구사항_데이터::getC_req_link)));
+        버전별_요구사항별_연결된지_지라이슈데이터 결과 = new 버전별_요구사항별_연결된지_지라이슈데이터();
 
+        Map<Long, Map<Long, List<버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
+                .map(버전별_요구사항별_연결된지_지라이슈데이터::필요데이터)
+                .collect(Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_pds_version_link,
+                        Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_req_link)));
 
-        버전별_요구사항별_활성화된_요구사항 결과 = new 버전별_요구사항별_활성화된_요구사항();
+        결과.set버전별_요구사항별_연결된지_지라이슈(그룹화된_결과);
 
-        그룹화된_결과.forEach((key1, value1) -> {
-            버전별_요구사항별_활성화된_요구사항.요구사항별_그룹 그룹1 = new 버전별_요구사항별_활성화된_요구사항.요구사항별_그룹();
-            value1.forEach((key2, value2) -> 그룹1.get요구사항별_그룹().put(key2, value2));
-            결과.get버전별_그룹().put(key1, 그룹1);
-        });
         return 결과;
     }
 
