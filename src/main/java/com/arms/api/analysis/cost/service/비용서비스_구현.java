@@ -94,8 +94,6 @@ public class 비용서비스_구현 implements 비용서비스 {
 
                             버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
                                     .이름(assigneeDisplayName)
-                                    .연봉(0L)
-                                    .성과(0L)
                                     .build();
 
                             담당자데이터Map.put(assigneeAccountId, 담당자데이터);
@@ -197,6 +195,10 @@ public class 비용서비스_구현 implements 비용서비스 {
             List<ReqAddEntity> 결과 = reqAdd.getChildNode(reqAddEntity);
 
             Map<Long, ReqAddEntity> 요구사항맵 = 결과.stream()
+// 폴더 타입 요구사항은 표시되지 않도록 처리 예정
+//                    .filter(req -> {
+//                        return req.getC_type().equals("default");
+//                    })
                     .collect(Collectors.toMap(reqAdd -> reqAdd.getC_id(), reqAdd -> reqAdd));
 
             결과데이터.setRequirement(요구사항맵);
