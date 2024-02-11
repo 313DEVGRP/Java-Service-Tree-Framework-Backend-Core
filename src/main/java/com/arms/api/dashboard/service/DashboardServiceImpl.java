@@ -5,13 +5,16 @@ import com.arms.api.dashboard.model.SankeyData;
 import com.arms.api.dashboard.model.SankeyData.SankeyLink;
 import com.arms.api.dashboard.model.SankeyData.SankeyNode;
 import com.arms.api.dashboard.model.Worker;
+import com.arms.api.dashboard.model.제품버전목록;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.util.external_communicate.dto.트리맵_검색요청;
 import com.arms.api.util.external_communicate.엔진통신기;
 import com.arms.api.util.external_communicate.통계엔진통신기;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final 엔진통신기 엔진통신기;
     private final 통계엔진통신기 통계엔진통신기;
     private final PdService pdService;
+    private final PdServiceVersion pdServiceVersion;
 
     @Override
     public 검색결과_목록_메인 commonNestedAggregation(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
@@ -115,8 +119,22 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<Worker> 작업자별_요구사항_관여도(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return 통계엔진통신기.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청).getBody();
+    public List<Worker> 작업자별_요구사항_관여도(트리맵_검색요청 트리맵_검색요청) throws Exception {
+        List<Long> pdServiceVersionLinks = 트리맵_검색요청.getPdServiceVersionLinks();
+        List<제품버전목록> 제품버전목록데이터 = pdServiceVersion.getVersionListByCids(pdServiceVersionLinks).stream()
+            .map(entity -> {
+                제품버전목록 model = new 제품버전목록();
+                model.setC_id(entity.getC_id().toString());
+                model.setC_title(entity.getC_title());
+                return model;
+            })
+            .collect(Collectors.toList());
+            
+            트리맵_검색요청.set제품버전목록(제품버전목록데이터);
+        
+        List<Worker> workers = 통계엔진통신기.작업자별_요구사항_관여도(트리맵_검색요청).getBody();
+
+        return workers;
     }
 
 
