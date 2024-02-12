@@ -119,4 +119,5 @@ public interface 통계엔진통신기 {
     ResponseEntity<List<검색결과>> 제품별_버전_및_요구사항별_작업자(
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
+
 }

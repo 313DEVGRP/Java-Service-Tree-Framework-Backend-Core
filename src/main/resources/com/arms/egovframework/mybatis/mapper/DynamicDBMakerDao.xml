@@ -251,7 +251,20 @@
 
             `c_etc`                         varchar(255)    COMMENT '비고',
             `c_desc`                        text            COMMENT '설명',
-            `c_contents`                    longtext        COMMENT '내용'
+            `c_contents`                    longtext        COMMENT '내용',
+
+            `c_req_pdservice_versionset_link` text     NULL COMMENT '이슈 생성된 버전 목록',
+            `c_req_priority_link`             bigint   NULL COMMENT '요구사항 우선순위',
+            `c_req_priority_name`             text     NULL COMMENT '요구사항 우선순위명',
+            `c_req_state_link`                bigint   NULL COMMENT '요구사항 상태',
+            `c_req_state_name`                text     NULL COMMENT '요구사항 상태명',
+            `c_req_difficulty_link`           bigint   NULL COMMENT '요구사항 난이도',
+            `c_req_difficulty_name`           text     NULL COMMENT '요구사항 난이도명',
+            `c_req_total_resource`            bigint   NULL COMMENT '총 작업 MM',
+            `c_req_plan_resource`             bigint   NULL COMMENT '총 계획 MM',
+            `c_req_total_time`                bigint   NULL COMMENT '총 기간 Day',
+            `c_req_plan_time`                 bigint   NULL COMMENT '총 계획 Day',
+            `c_issue_delete_date`             DATETIME NULL COMMENT '요구사항 버전 수정으로 더 이상 집계되지 않는 이슈로 분류된 날짜'
 
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 상태 테이블 로그';
 
@@ -321,7 +334,20 @@
 
             `c_etc`                 varchar(255)    COMMENT '비고',
             `c_desc`                text            COMMENT '설명',
-            `c_contents`            longtext        COMMENT '내용'
+            `c_contents`            longtext        COMMENT '내용',
+
+            `c_req_pdservice_versionset_link` text     NULL COMMENT '이슈 생성된 버전 목록',
+            `c_req_priority_link`             bigint   NULL COMMENT '요구사항 우선순위',
+            `c_req_priority_name`             text     NULL COMMENT '요구사항 우선순위명',
+            `c_req_state_link`                bigint   NULL COMMENT '요구사항 상태',
+            `c_req_state_name`                text     NULL COMMENT '요구사항 상태명',
+            `c_req_difficulty_link`           bigint   NULL COMMENT '요구사항 난이도',
+            `c_req_difficulty_name`           text     NULL COMMENT '요구사항 난이도명',
+            `c_req_total_resource`            bigint   NULL COMMENT '총 작업 MM',
+            `c_req_plan_resource`             bigint   NULL COMMENT '총 계획 MM',
+            `c_req_total_time`                bigint   NULL COMMENT '총 기간 Day',
+            `c_req_plan_time`                 bigint   NULL COMMENT '총 계획 Day',
+            `c_issue_delete_date`             DATETIME NULL COMMENT '요구사항 버전 수정으로 더 이상 집계되지 않는 이슈로 분류된 날짜'
 
     ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='요구사항 상태 테이블';
 

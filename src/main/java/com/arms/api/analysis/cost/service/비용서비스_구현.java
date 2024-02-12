@@ -1,5 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
@@ -7,14 +8,18 @@ import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
+import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.external_communicate.dto.IsReqType;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -27,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +46,10 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     @Qualifier("reqAdd")
     private ReqAdd reqAdd;
+
+    @Autowired
+    @Qualifier("reqStatus")
+    private ReqStatus reqStatus;
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -57,13 +67,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         전체결과.addAll(요구사항_결과.getBody());
         전체결과.addAll(하위이슈_결과.getBody());
 
-        Map<String, 버전요구사항별_담당자데이터.버전데이터> 버전데이터Map = new HashMap<>();
+        Map<String, Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>>> 버전요구사항데이터Map = new HashMap<>();
         Map<String, 버전요구사항별_담당자데이터.담당자데이터> 전체담당자Map = new HashMap<>();
 
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
-                Map<String, 버전요구사항별_담당자데이터.요구사항데이터> 요구사항데이터Map = new HashMap<>();
+                Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>> 요구사항데이터Map = new HashMap<>();
 
                 String versionId = result.get필드명();
                 List<검색결과> requirements = new ArrayList<>();
@@ -74,44 +84,81 @@ public class 비용서비스_구현 implements 비용서비스 {
 
                 requirements.stream().forEach(requirement -> {
                     String requirementId = requirement.get필드명();
-
                     Map<String, 버전요구사항별_담당자데이터.담당자데이터> 담당자데이터Map = new HashMap<>();
 
                     requirement.get하위검색결과().get("assignees").forEach(assignee -> {
                         String assigneeAccountId = assignee.get필드명();
 
                         assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
-
                             String assigneeDisplayName = displayName.get필드명();
-                            String 고유아이디 = versionId + "-" + assigneeAccountId;
 
                             버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
-                                    .이름(assigneeDisplayName+"-"+assigneeAccountId)
-                                    .연봉(null)
-                                    .성과(null)
+                                    .이름(assigneeDisplayName)
                                     .build();
 
                             담당자데이터Map.put(assigneeAccountId, 담당자데이터);
                             전체담당자Map.put(assigneeAccountId, 담당자데이터);
                         });
 
-                        버전요구사항별_담당자데이터.요구사항데이터 요구사항데이터 = 버전요구사항별_담당자데이터.요구사항데이터.builder()
-                                .담당자(담당자데이터Map)
-                                .build();
-
-                        요구사항데이터Map.put(requirementId, 요구사항데이터);
+                        요구사항데이터Map.put(requirementId, 담당자데이터Map);
                     });
-
-                    버전요구사항별_담당자데이터.버전데이터 버전데이터 = 버전요구사항별_담당자데이터.버전데이터.builder()
-                            .요구사항(요구사항데이터Map)
-                            .build();
-
-                    버전데이터Map.put(versionId, 버전데이터);
                 });
+
+                버전요구사항데이터Map.put(versionId, 요구사항데이터Map);
             });
         });
+//        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
+//        optionalEsData.ifPresent(esData -> {
+//            esData.forEach(result -> {
+//                Map<String, 버전요구사항별_담당자데이터.요구사항데이터> 요구사항데이터Map = new HashMap<>();
+//
+//                String versionId = result.get필드명();
+//                List<검색결과> requirements = new ArrayList<>();
+//                if (result.get하위검색결과().get("requirement") != null)
+//                    requirements.addAll(result.get하위검색결과().get("requirement"));
+//                if (result.get하위검색결과().get("parentRequirement") != null)
+//                    requirements.addAll(result.get하위검색결과().get("parentRequirement"));
+//
+//                requirements.stream().forEach(requirement -> {
+//                    String requirementId = requirement.get필드명();
+//
+//                    Map<String, 버전요구사항별_담당자데이터.담당자데이터> 담당자데이터Map = new HashMap<>();
+//
+//                    requirement.get하위검색결과().get("assignees").forEach(assignee -> {
+//                        String assigneeAccountId = assignee.get필드명();
+//
+//                        assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+//
+//                            String assigneeDisplayName = displayName.get필드명();
+//                            String 고유아이디 = versionId + "-" + assigneeAccountId;
+//
+//                            버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
+//                                    .이름(assigneeDisplayName)
+//                                    .연봉(null)
+//                                    .성과(null)
+//                                    .build();
+//
+//                            담당자데이터Map.put(assigneeAccountId, 담당자데이터);
+//                            전체담당자Map.put(assigneeAccountId, 담당자데이터);
+//                        });
+//
+//                        버전요구사항별_담당자데이터.요구사항데이터 요구사항데이터 = 버전요구사항별_담당자데이터.요구사항데이터.builder()
+//                                .담당자(담당자데이터Map)
+//                                .build();
+//
+//                        요구사항데이터Map.put(requirementId, 요구사항데이터);
+//                    });
+//
+//                    버전요구사항별_담당자데이터.버전데이터 버전데이터 = 버전요구사항별_담당자데이터.버전데이터.builder()
+//                            .요구사항(요구사항데이터Map)
+//                            .build();
+//
+//                    버전데이터Map.put(versionId, 버전데이터);
+//                });
+//            });
+//        });
         버전요구사항별_담당자데이터 버전요구사항별_담당자데이터 = new 버전요구사항별_담당자데이터();
-        버전요구사항별_담당자데이터.set버전(버전데이터Map);
+        버전요구사항별_담당자데이터.set버전_요구사항_담당자(버전요구사항데이터Map);
         버전요구사항별_담당자데이터.set전체담당자목록(전체담당자Map);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -147,29 +194,34 @@ public class 비용서비스_구현 implements 비용서비스 {
 
             List<ReqAddEntity> 결과 = reqAdd.getChildNode(reqAddEntity);
 
-            결과데이터.setRequirement(결과);
+            Map<Long, ReqAddEntity> 요구사항맵 = 결과.stream()
+// 폴더 타입 요구사항은 표시되지 않도록 처리 예정
+//                    .filter(req -> {
+//                        return req.getC_type().equals("default");
+//                    })
+                    .collect(Collectors.toMap(reqAdd -> reqAdd.getC_id(), reqAdd -> reqAdd));
+
+            결과데이터.setRequirement(요구사항맵);
 
             Map<String, Long> 난이도결과 = new HashMap<>();
             Map<String, Long> 우선순위결과 = new HashMap<>();
 
             if (결과.isEmpty()) {
             } else {
-                for (ReqAddEntity 요구사항엔티티 : 결과) {
+                결과.stream().forEach(요구사항엔티티 -> {
                     ReqDifficultyEntity 난이도엔티티 = 요구사항엔티티.getReqDifficultyEntity();
                     ReqPriorityEntity 우선순위엔티티 = 요구사항엔티티.getReqPriorityEntity();
 
                     if (난이도엔티티 != null) {
                         String 난이도타이틀 = 난이도엔티티.getC_title();
-                        Long 난이도카운트 = 난이도결과.getOrDefault(난이도타이틀, 0L);
-                        난이도결과.put(난이도타이틀, 난이도카운트 + 1);
+                        난이도결과.merge(난이도타이틀, 1L, Long::sum);
                     }
 
-                    if(우선순위엔티티 != null) {
+                    if (우선순위엔티티 != null) {
                         String 우선순위타이틀 = 우선순위엔티티.getC_title();
-                        Long 우선순위카운트 = 우선순위결과.getOrDefault(우선순위타이틀, 0L);
-                        우선순위결과.put(우선순위타이틀, 우선순위카운트 + 1);
+                        우선순위결과.merge(우선순위타이틀, 1L, Long::sum);
                     }
-                }
+                });
             }
 
             if(우선순위결과 != null) {
@@ -182,5 +234,47 @@ public class 비용서비스_구현 implements 비용서비스 {
         }
 
         return 결과데이터;
+    }
+
+    @Override
+    public 버전별_요구사항별_연결된지_지라이슈데이터 버전별_요구사항에_연결된지_지라이슈(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+
+        Long 제품및서비스 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
+
+        List<Long> 버전 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
+
+        List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
+
+        버전별_요구사항별_연결된지_지라이슈데이터 결과 = new 버전별_요구사항별_연결된지_지라이슈데이터();
+
+        Map<Long, Map<Long, List<버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
+                .map(버전별_요구사항별_연결된지_지라이슈데이터::필요데이터)
+                .collect(Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_pds_version_link,
+                        Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_req_link)));
+
+        결과.set버전별_요구사항별_연결된지_지라이슈(그룹화된_결과);
+
+        return 결과;
+    }
+
+    public List<ReqStatusEntity> 지라이슈상태_테이블_조회(Long 제품및서비스 , List<Long> 버전) throws Exception {
+
+        ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
+
+        String 조회대상_지라이슈상태_테이블 = "T_ARMS_REQSTATUS_"+제품및서비스;
+
+        로그.info("조회 대상 테이블 searchTable :"+조회대상_지라이슈상태_테이블);
+
+        SessionUtil.setAttribute("req-linked-issue", 조회대상_지라이슈상태_테이블);
+
+        Criterion 버전조건_질의 = Restrictions.in("c_pds_version_link", 버전);
+
+        reqStatusEntity.getCriterions().add(버전조건_질의);
+
+        List<ReqStatusEntity> 검색결과_요구사항 = reqStatus.getChildNode(reqStatusEntity);
+
+        SessionUtil.removeAttribute("req-linked-issue");
+
+        return 검색결과_요구사항;
     }
 }
