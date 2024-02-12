@@ -2,10 +2,17 @@ package com.arms.api.analysis.scope.controller;
 
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.service.ScopeService;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
+import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +41,9 @@ public class 스코프분석_컨트롤러 {
     @Autowired
     private ScopeService scopeService;
 
+    @Autowired
+    private ReqAdd reqAdd;
+
     static final long dummy_jira_server = 0L;
 
     @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
@@ -49,6 +59,21 @@ public class 스코프분석_컨트롤러 {
 
         ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         return ResponseEntity.ok(집계결과.getBody());
+
+    }
+
+    @GetMapping("/req-per-version/{changeReqTableName}/getReqAddListByFilter.do")
+    public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항(@PathVariable(value ="changeReqTableName") String changeReqTableName
+                                                                , @RequestParam Long pdServiceId
+                                                                , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
+        log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
+                , pdServiceStr, pdServiceVersionLinks);
+
+        scopeService.버전_요구사항_자료(changeReqTableName, pdServiceId, pdServiceVersionLinks);
+
+        return null;
 
     }
 

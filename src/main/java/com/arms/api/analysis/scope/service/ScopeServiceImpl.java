@@ -5,6 +5,8 @@ import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
@@ -14,10 +16,15 @@ import com.arms.api.util.external_communicate.dto.요구_사항;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.내부통신기;
 import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +37,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Slf4j
 public class ScopeServiceImpl implements ScopeService {
+
+    @Autowired
+    private ReqAdd reqAdd;
+
     private static final String NO_DATA = "No Data";
     private static final String DEFAULT_BLACK_COLOR = "#000000";
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -288,5 +299,53 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         return 제품_서비스_버전_목록;
+    }
+
+    @Override
+    public void 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+
+        PdServiceEntity 검색용도_제품 = new PdServiceEntity();
+        검색용도_제품.setC_id(pdServiceId);
+        PdServiceEntity 제품_검색결과 = pdService.getNode(검색용도_제품);
+        Set<PdServiceVersionEntity> 제품_버전_세트 = 제품_검색결과.getPdServiceVersionEntities();
+        Map<Long, String> 버전_아이디_이름_맵 = 제품_버전_세트.stream()
+                .collect(Collectors.toMap(PdServiceVersionEntity::getC_id, PdServiceVersionEntity::getC_title));
+
+        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            Disjunction orCondition = Restrictions.disjunction();
+            for (Long 버전 : pdServiceVersionLinks) {
+                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+            }
+            검색용도_객체.getCriterions().add(orCondition);
+        }
+
+        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
+
+        Map<String, Long> 버전_요구사항_맵 = new HashMap<>();
+        for(ReqAddEntity 요구사항 : 검색_결과_목록) {
+            List<String> 버전목록 = List.of(요구사항.getC_req_pdservice_versionset_link().split(","));
+            Collections.sort(버전목록);
+            
+            // 정렬된 값을 문자열로 만듭니다.
+            StringBuilder keyBuilder = new StringBuilder();
+            for (String 버전 : 버전목록) {
+                String 버전이름 = 버전_아이디_이름_맵.get(Long.parseLong(버전));
+                keyBuilder.append("\""+버전이름+"\" ");
+            }
+            String key = keyBuilder.toString();
+            log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 만들어진Key ==> {}", key);
+            // Map에 해당하는 값을 증가시킵니다.
+            버전_요구사항_맵.put(key, 버전_요구사항_맵.getOrDefault(key, 0L) + 1);
+            
+        }
+
+        SessionUtil.removeAttribute("getReqAddListByFilter");
+        log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 버전_요구사항_맵 ==> {}", 버전_요구사항_맵.toString());
+
     }
 }
