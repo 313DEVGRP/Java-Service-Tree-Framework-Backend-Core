@@ -24,6 +24,7 @@ import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,7 @@ public class 스코프분석_컨트롤러 {
     }
 
     @GetMapping("/req-per-version/{changeReqTableName}/getReqAddListByFilter.do")
-    public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항(@PathVariable(value ="changeReqTableName") String changeReqTableName
+    public ResponseEntity<Map<String, Long>> 버전들_하위_요구사항(@PathVariable(value ="changeReqTableName") String changeReqTableName
                                                                 , @RequestParam Long pdServiceId
                                                                 , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
 
@@ -71,10 +72,9 @@ public class 스코프분석_컨트롤러 {
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
                 , pdServiceStr, pdServiceVersionLinks);
 
-        scopeService.버전_요구사항_자료(changeReqTableName, pdServiceId, pdServiceVersionLinks);
+        Map<String, Long> 버전_요구사항_수 = scopeService.버전_요구사항_자료(changeReqTableName, pdServiceId, pdServiceVersionLinks);
 
-        return null;
-
+        return  ResponseEntity.ok(버전_요구사항_수);
     }
 
     @PostMapping("/req-status-and-reqInvolved-unique-assignees")

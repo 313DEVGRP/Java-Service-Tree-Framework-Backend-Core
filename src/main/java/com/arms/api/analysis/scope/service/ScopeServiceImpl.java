@@ -302,7 +302,7 @@ public class ScopeServiceImpl implements ScopeService {
     }
 
     @Override
-    public void 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+    public Map<String, Long> 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
 
         SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
 
@@ -328,14 +328,19 @@ public class ScopeServiceImpl implements ScopeService {
 
         Map<String, Long> 버전_요구사항_맵 = new HashMap<>();
         for(ReqAddEntity 요구사항 : 검색_결과_목록) {
-            List<String> 버전목록 = List.of(요구사항.getC_req_pdservice_versionset_link().split(","));
-            Collections.sort(버전목록);
-            
             // 정렬된 값을 문자열로 만듭니다.
             StringBuilder keyBuilder = new StringBuilder();
-            for (String 버전 : 버전목록) {
-                String 버전이름 = 버전_아이디_이름_맵.get(Long.parseLong(버전));
-                keyBuilder.append("\""+버전이름+"\" ");
+            String 버전세트_문자열 = 요구사항.getC_req_pdservice_versionset_link();
+            Long[] 버전_아이디_배열 = convertToLongArray(버전세트_문자열);
+
+            if (버전_아이디_배열.length != 0) {
+                for (int i=0; i< 버전_아이디_배열.length; i++) {
+                    if (i==0) {
+                        keyBuilder.append(버전_아이디_이름_맵.get(버전_아이디_배열[i]));
+                    } else {
+                        keyBuilder.append(", ").append(버전_아이디_이름_맵.get(버전_아이디_배열[i]));
+                    }
+                }
             }
             String key = keyBuilder.toString();
             log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 만들어진Key ==> {}", key);
@@ -347,5 +352,40 @@ public class ScopeServiceImpl implements ScopeService {
         SessionUtil.removeAttribute("getReqAddListByFilter");
         log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 버전_요구사항_맵 ==> {}", 버전_요구사항_맵.toString());
 
+        return 버전_요구사항_맵;
+    }
+
+    private static Long[] convertToLongArray(String input) {
+        // 입력이 null이거나 비어있을 때, 길이 0 배열 반환
+        if (input == null || input.isEmpty()) {
+            return new Long[0];
+        }
+        // 문자열에서 대괄호 및 쌍따옴표를 제거하고 쉼표로 구분하여 문자열 배열로 변환
+        String[] stringArray = input.substring(1, input.length() - 1).split(",");
+
+        // 예외 처리: stringArray의 길이가 0인 경우
+        if (stringArray.length == 0) {
+            throw new IllegalArgumentException("[ScopeServiceImpl :: convertToLongArray] :: stringArray의 입력이 올바른 형식이 아닙니다.");
+        }
+
+        // Long 배열 생성
+        Long[] longArray = new Long[stringArray.length];
+
+        // 문자열 배열을 Long 배열로 변환
+        for (int i = 0; i < stringArray.length; i++) {
+            try {
+                longArray[i] = Long.parseLong(stringArray[i].replaceAll("\"", "").trim());
+            } catch (NumberFormatException e) {
+                // 숫자로 변환할 수 없는 경우에는 null을 할당
+                longArray[i] = null;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                // 배열 인덱스가 범위를 벗어나는 경우, 예외 처리
+                log.error("[ScopeServiceImpl :: convertToLongArray] :: longArray[{}]에서 배열 인덱스가 범위를 벗어났습니다.", i);
+            } catch (Exception e) {
+                log.error("[ScopeServiceImpl :: convertToLongArray] :: longArray[{}]에서 예상치 못한 예외가 발생했습니다 => {}", i, e.getMessage());
+            }
+        }
+
+        return longArray;
     }
 }

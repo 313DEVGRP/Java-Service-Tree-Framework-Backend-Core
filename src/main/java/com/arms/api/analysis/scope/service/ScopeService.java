@@ -15,5 +15,5 @@ public interface ScopeService {
 
     List<제품_서비스_버전> 요구사항_상태_매핑(List<제품_서비스_버전> resultList, Map<String,List<검색결과>> 검색결과);
 
-    void 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception;
+    Map<String, Long> 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception;
 }
