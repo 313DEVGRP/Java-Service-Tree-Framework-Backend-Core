@@ -14,5 +14,6 @@ public class 버전요구사항별_담당자데이터 {
     @Builder
     public static class 담당자데이터 {
         private String 이름;
+        private Long 연봉;
     }
 }
