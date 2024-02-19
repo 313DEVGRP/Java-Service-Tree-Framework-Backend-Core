@@ -3,22 +3,29 @@ package com.arms.api.analysis.cost.controller;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
+import com.arms.api.analysis.cost.dto.인력별_연봉데이터;
 import com.arms.api.analysis.cost.service.비용서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
+import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
+import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -83,4 +90,26 @@ public class 비용분석_컨트롤러 {
         modelAndView.addObject("result", 검색결과);
         return modelAndView;
     }
+
+    /**
+     * 연봉 입력을 위한 엑셀 템플릿 다운로드 API
+     */
+    @ApiOperation(value = "연봉 입력 엑셀 템플릿 다운로드")
+    @ResponseBody
+    @RequestMapping(value = "/excel-download.do", method = RequestMethod.POST)
+    public void 연봉입력_엑셀템플릿_다운로드(@RequestBody List<인력별_연봉데이터> 인력별_연봉데이터_리스트,
+                                @RequestParam("excelFileName") String excelFileName,
+                                HttpServletResponse httpServletResponse) throws Exception {
+
+        httpServletResponse.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + excelFileName);
+        httpServletResponse.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        httpServletResponse.addHeader("Pragma", "no-cache");
+        httpServletResponse.addHeader("Expires", "0");
+        httpServletResponse.setContentType("application/octet-stream");
+
+        ExcelUtilsBase excelUtilsBase = ExcelUtilsFactory.getInstance(httpServletResponse.getOutputStream());
+        excelUtilsBase.create(List.of(인력별_연봉데이터_리스트));
+
+    }
+
 }
