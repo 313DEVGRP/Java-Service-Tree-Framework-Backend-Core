@@ -7,6 +7,7 @@ import com.arms.api.dashboard.service.DashboardService;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.util.external_communicate.dto.트리맵_검색요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +57,8 @@ public class DashboardController {
      * Apache Echarts TreeMap Chart API - Dashboard, Analysis Resource
      */
     @GetMapping("/assignees-requirements-involvements")
-    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(지라이슈_제품_및_제품버전_검색요청)));
+    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(트리맵_검색요청 트리맵_검색요청) throws Exception {
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(트리맵_검색요청)));
     }
 
     /**
