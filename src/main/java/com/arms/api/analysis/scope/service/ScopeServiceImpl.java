@@ -11,6 +11,7 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.external_communicate.dto.제품_서비스_버전;
 import com.arms.api.util.external_communicate.dto.요구_사항;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
@@ -245,6 +246,47 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         return 제품_서비스_버전_목록;
+    }
+
+    @Override
+    public Map<String, List<요구사항_버전_이슈_키_상태_작업자수>> 버전이름_매핑하고_같은_버전_묶음끼리_배치(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+        List<요구사항_버전_이슈_키_상태_작업자수> 버전배열_요구사항_별_상태_및_관여_작업자_수 = 통계엔진통신기.버전배열_요구사항_별_상태_및_관여_작업자_수(pdServiceId, pdServiceVersionLinks).getBody();
+
+
+        Map<String, List<요구사항_버전_이슈_키_상태_작업자수>> 버전_요구사항_상태_작업자_맵 = new HashMap<>();
+
+        PdServiceEntity 검색용도_제품 = new PdServiceEntity();
+        검색용도_제품.setC_id(pdServiceId);
+        PdServiceEntity 제품_검색결과 = pdService.getNode(검색용도_제품);
+        Set<PdServiceVersionEntity> 제품_버전_세트 = 제품_검색결과.getPdServiceVersionEntities();
+        Map<Long, String> 버전_아이디_이름_맵 = 제품_버전_세트.stream()
+                .collect(Collectors.toMap(PdServiceVersionEntity::getC_id, PdServiceVersionEntity::getC_title));
+
+        for (요구사항_버전_이슈_키_상태_작업자수 묶음 : 버전배열_요구사항_별_상태_및_관여_작업자_수) {
+            Long[] versionArr = 묶음.getVersionArr();
+            StringBuilder keyBuilder = new StringBuilder();
+
+            if (versionArr.length != 0) {
+                for (int i=0; i< versionArr.length; i++) {
+                    if (i==0) {
+                        keyBuilder.append(버전_아이디_이름_맵.get(versionArr[i]));
+                    } else {
+                        keyBuilder.append(", ").append(버전_아이디_이름_맵.get(versionArr[i]));
+                    }
+                }
+            }
+            String key = keyBuilder.toString();
+            log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 만들어진Key ==> {}", key);
+
+            List<요구사항_버전_이슈_키_상태_작업자수> 리스트 = 버전_요구사항_상태_작업자_맵.get(key);
+            if(리스트 == null) {
+                리스트 = new ArrayList<>();
+                버전_요구사항_상태_작업자_맵.put(key, 리스트);
+            }
+            리스트.add(묶음);
+        }
+
+        return 버전_요구사항_상태_작업자_맵;
     }
 
     @Override
