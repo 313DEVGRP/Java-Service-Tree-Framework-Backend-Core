@@ -1,12 +1,11 @@
 package com.arms.api.analysis.cost.controller;
 
-import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
-import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
-import com.arms.api.analysis.cost.dto.인력별_연봉데이터;
+import com.arms.api.analysis.cost.dto.*;
 import com.arms.api.analysis.cost.service.비용서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
+import com.arms.api.util.external_communicate.dto.지라이슈;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.util.external_communicate.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
@@ -26,6 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -38,6 +38,9 @@ public class 비용분석_컨트롤러 {
 
     @Autowired
     private 비용서비스 비용서비스;
+
+    @Autowired
+    통계엔진통신기 통계엔진통신기;
 
     /**
      * 버전별 요구사항별 담당자 조회 API
@@ -110,6 +113,26 @@ public class 비용분석_컨트롤러 {
         ExcelUtilsBase excelUtilsBase = ExcelUtilsFactory.getInstance(httpServletResponse.getOutputStream());
         excelUtilsBase.create(List.of(인력별_연봉데이터_리스트));
 
+    }
+
+
+    /*
+    *  해당 요구사항 지라키로 업데이트 이력 조회 API
+    * */
+    @ResponseBody
+    @RequestMapping(
+            value = {"/req-updated-list"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) throws Exception {
+        로그.info(" [ " + this.getClass().getName() + " :: 요구사항_지라이슈키별_업데이트_목록 ] :: 요구사항_지라이슈키_목록 -> ");
+        로그.info(issueList.toString());
+
+        ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과= 통계엔진통신기.요구사항_지라이슈키별_업데이트_목록(issueList);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 검색결과);
+        return modelAndView;
     }
 
 }
