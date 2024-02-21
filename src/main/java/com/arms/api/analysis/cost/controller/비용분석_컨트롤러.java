@@ -1,9 +1,6 @@
 package com.arms.api.analysis.cost.controller;
 
-import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
-import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
-import com.arms.api.analysis.cost.dto.인력별_연봉데이터;
+import com.arms.api.analysis.cost.dto.*;
 import com.arms.api.analysis.cost.service.비용서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;

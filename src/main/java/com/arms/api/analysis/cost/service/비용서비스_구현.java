@@ -84,14 +84,14 @@ public class 비용서비스_구현 implements 비용서비스 {
         버전요구사항별_담당자데이터 버전요구사항별_담당자데이터 = new 버전요구사항별_담당자데이터();
         버전요구사항별_담당자데이터.set전체담당자목록(result);
 
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String json = mapper.writeValueAsString(result);
-            로그.info(" [ " + this.getClass().getName() + " :: 전체_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
-            로그.info(json);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+//        ObjectMapper mapper = new ObjectMapper();
+//        try {
+//            String json = mapper.writeValueAsString(result);
+//            로그.info(" [ " + this.getClass().getName() + " :: 전체_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
+//            로그.info(json);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
 
         return 버전요구사항별_담당자데이터;
     }
@@ -115,31 +115,34 @@ public class 비용서비스_구현 implements 비용서비스 {
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
-                Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>> 요구사항데이터Map = new HashMap<>();
-
                 String versionId = result.get필드명();
-                List<검색결과> requirements = new ArrayList<>();
-                if (result.get하위검색결과().get("requirement") != null)
-                    requirements.addAll(result.get하위검색결과().get("requirement"));
-                if (result.get하위검색결과().get("parentRequirement") != null)
-                    requirements.addAll(result.get하위검색결과().get("parentRequirement"));
+                Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>> 요구사항데이터Map = 버전요구사항데이터Map.getOrDefault(versionId, new HashMap<>());
 
-                requirements.stream().forEach(requirement -> {
-                    String requirementId = requirement.get필드명();
-                    Map<String, 버전요구사항별_담당자데이터.담당자데이터> 담당자데이터Map = new HashMap<>();
+                List<String> requirementTypes = Arrays.asList("requirement", "parentRequirement");
 
-                    requirement.get하위검색결과().get("assignees").forEach(assignee -> {
-                        String assigneeAccountId = assignee.get필드명();
+                requirementTypes.forEach(requirementType -> {
+                    List<검색결과> requirements = new ArrayList<>();
+                    if (result.get하위검색결과().get(requirementType) != null)
+                        requirements.addAll(result.get하위검색결과().get(requirementType));
 
-                        assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
-                            String assigneeDisplayName = displayName.get필드명();
+                    requirements.stream().forEach(requirement -> {
+                        String requirementId = requirement.get필드명();
+                        Map<String, 버전요구사항별_담당자데이터.담당자데이터> 담당자데이터Map = 요구사항데이터Map.getOrDefault(requirementId, new HashMap<>());
 
-                            버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
-                                    .이름(assigneeDisplayName)
-                                    .build();
+                        requirement.get하위검색결과().get("assignees").forEach(assignee -> {
+                            String assigneeAccountId = assignee.get필드명();
 
-                            담당자데이터Map.put(assigneeAccountId, 담당자데이터);
-                            전체담당자Map.put(assigneeAccountId, 담당자데이터);
+                            assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+                                String assigneeDisplayName = displayName.get필드명();
+
+                                버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
+                                        .이름(assigneeDisplayName)
+                                        .연봉(0L)
+                                        .build();
+
+                                담당자데이터Map.put(assigneeAccountId, 담당자데이터);
+                                전체담당자Map.put(assigneeAccountId, 담당자데이터);
+                            });
                         });
 
                         요구사항데이터Map.put(requirementId, 담당자데이터Map);
@@ -149,68 +152,10 @@ public class 비용서비스_구현 implements 비용서비스 {
                 버전요구사항데이터Map.put(versionId, 요구사항데이터Map);
             });
         });
-//        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
-//        optionalEsData.ifPresent(esData -> {
-//            esData.forEach(result -> {
-//                Map<String, 버전요구사항별_담당자데이터.요구사항데이터> 요구사항데이터Map = new HashMap<>();
-//
-//                String versionId = result.get필드명();
-//                List<검색결과> requirements = new ArrayList<>();
-//                if (result.get하위검색결과().get("requirement") != null)
-//                    requirements.addAll(result.get하위검색결과().get("requirement"));
-//                if (result.get하위검색결과().get("parentRequirement") != null)
-//                    requirements.addAll(result.get하위검색결과().get("parentRequirement"));
-//
-//                requirements.stream().forEach(requirement -> {
-//                    String requirementId = requirement.get필드명();
-//
-//                    Map<String, 버전요구사항별_담당자데이터.담당자데이터> 담당자데이터Map = new HashMap<>();
-//
-//                    requirement.get하위검색결과().get("assignees").forEach(assignee -> {
-//                        String assigneeAccountId = assignee.get필드명();
-//
-//                        assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
-//
-//                            String assigneeDisplayName = displayName.get필드명();
-//                            String 고유아이디 = versionId + "-" + assigneeAccountId;
-//
-//                            버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
-//                                    .이름(assigneeDisplayName)
-//                                    .연봉(null)
-//                                    .성과(null)
-//                                    .build();
-//
-//                            담당자데이터Map.put(assigneeAccountId, 담당자데이터);
-//                            전체담당자Map.put(assigneeAccountId, 담당자데이터);
-//                        });
-//
-//                        버전요구사항별_담당자데이터.요구사항데이터 요구사항데이터 = 버전요구사항별_담당자데이터.요구사항데이터.builder()
-//                                .담당자(담당자데이터Map)
-//                                .build();
-//
-//                        요구사항데이터Map.put(requirementId, 요구사항데이터);
-//                    });
-//
-//                    버전요구사항별_담당자데이터.버전데이터 버전데이터 = 버전요구사항별_담당자데이터.버전데이터.builder()
-//                            .요구사항(요구사항데이터Map)
-//                            .build();
-//
-//                    버전데이터Map.put(versionId, 버전데이터);
-//                });
-//            });
-//        });
+
         버전요구사항별_담당자데이터 버전요구사항별_담당자데이터 = new 버전요구사항별_담당자데이터();
         버전요구사항별_담당자데이터.set버전_요구사항_담당자(버전요구사항데이터Map);
         버전요구사항별_담당자데이터.set전체담당자목록(전체담당자Map);
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            String json = mapper.writeValueAsString(버전요구사항별_담당자데이터);
-            로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
-            로그.info(json);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
 
         return 버전요구사항별_담당자데이터;
     }
