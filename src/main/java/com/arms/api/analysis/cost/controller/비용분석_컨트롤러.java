@@ -9,6 +9,7 @@ import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
+import com.arms.api.util.external_communicate.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
@@ -26,11 +27,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -43,6 +44,9 @@ public class 비용분석_컨트롤러 {
 
     @Autowired
     private 비용서비스 비용서비스;
+
+    @Autowired
+    통계엔진통신기 통계엔진통신기;
 
     @GetMapping("/all-assignees")
     public ResponseEntity<CommonResponse.ApiResult<버전요구사항별_담당자데이터>> 전체_담당자가져오기(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청)  {
@@ -157,6 +161,26 @@ public class 비용분석_컨트롤러 {
         ExcelUtilsBase excelUtilsBase = ExcelUtilsFactory.getInstance(httpServletResponse.getOutputStream());
         excelUtilsBase.create(List.of(인력별_연봉데이터_리스트));
 
+    }
+
+
+    /*
+    *  해당 요구사항 지라키로 업데이트 이력 조회 API
+    * */
+    @ResponseBody
+    @RequestMapping(
+            value = {"/req-updated-list"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) throws Exception {
+        로그.info(" [ " + this.getClass().getName() + " :: 요구사항_지라이슈키별_업데이트_목록 ] :: 요구사항_지라이슈키_목록 -> ");
+        로그.info(issueList.toString());
+
+        ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과= 통계엔진통신기.요구사항_지라이슈키별_업데이트_목록(issueList);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 검색결과);
+        return modelAndView;
     }
 
 }
