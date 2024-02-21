@@ -1,9 +1,6 @@
 package com.arms.api.analysis.cost.controller;
 
-import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
-import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
-import com.arms.api.analysis.cost.dto.인력별_연봉데이터;
+import com.arms.api.analysis.cost.dto.*;
 import com.arms.api.analysis.cost.service.비용서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.external_communicate.dto.지라이슈;
@@ -127,11 +124,11 @@ public class 비용분석_컨트롤러 {
             value = {"/req-updated-list"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> 요구사항_지라키_목록) throws Exception {
+    public ModelAndView 요구사항_지라이슈키별_업데이트_목록(@RequestParam List<String> issueList) throws Exception {
         로그.info(" [ " + this.getClass().getName() + " :: 요구사항_지라이슈키별_업데이트_목록 ] :: 요구사항_지라이슈키_목록 -> ");
-        로그.info(요구사항_지라키_목록.toString());
+        로그.info(issueList.toString());
 
-        ResponseEntity<Map<String,List<지라이슈>>> 검색결과= 통계엔진통신기.요구사항_지라이슈키별_업데이트_목록(요구사항_지라키_목록);
+        ResponseEntity<Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과= 통계엔진통신기.요구사항_지라이슈키별_업데이트_목록(issueList);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);

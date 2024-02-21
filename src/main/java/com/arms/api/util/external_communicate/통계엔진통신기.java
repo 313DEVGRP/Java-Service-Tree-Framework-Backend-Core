@@ -1,5 +1,6 @@
 package com.arms.api.util.external_communicate;
 
+import com.arms.api.analysis.cost.dto.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.dashboard.model.Worker;
@@ -125,7 +126,7 @@ public interface 통계엔진통신기 {
                                                 @PathVariable("pdServiceId") Long 제품서비스_아이디,
                                                 @RequestParam List<Long> pdServiceVersionLinks);
     @GetMapping("/engine/jira/dashboard/req-updated-list")
-    ResponseEntity< Map<String,List<지라이슈>> > 요구사항_지라이슈키별_업데이트_목록(
-            @RequestParam  List<String> 요구사항_지라키_목록
+    ResponseEntity< Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> > 요구사항_지라이슈키별_업데이트_목록(
+            @RequestParam  List<String> issueList
     );
 }
