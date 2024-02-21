@@ -38,9 +38,9 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 
-    @GetMapping("/engine/jira/dashboard/assignees-requirements-involvements")
+    @PostMapping("/engine/jira/dashboard/assignees-requirements-involvements")
     ResponseEntity<List<Worker>> 작업자별_요구사항_관여도(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @RequestBody 트리맵_검색요청 트리맵_검색요청
     );
 
     @GetMapping("/engine/jira/dashboard/issue-assignee/{pdServiceId}")
@@ -120,6 +120,10 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 
+    @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees-per-version/{pdServiceId}")
+    ResponseEntity<List<요구사항_버전_이슈_키_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                                @RequestParam List<Long> pdServiceVersionLinks);
     @GetMapping("/engine/jira/dashboard/req-updated-list")
     ResponseEntity< Map<String,List<지라이슈>> > 요구사항_지라이슈키별_업데이트_목록(
             @RequestParam  List<String> 요구사항_지라키_목록
