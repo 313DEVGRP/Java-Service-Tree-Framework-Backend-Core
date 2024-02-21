@@ -120,4 +120,8 @@ public interface 통계엔진통신기 {
             @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
     );
 
+    @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees-per-version/{pdServiceId}")
+    ResponseEntity<List<요구사항_버전_이슈_키_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(
+                                                @PathVariable("pdServiceId") Long 제품서비스_아이디,
+                                                @RequestParam List<Long> pdServiceVersionLinks);
 }
