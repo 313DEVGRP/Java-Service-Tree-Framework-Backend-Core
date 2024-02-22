@@ -962,6 +962,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			createReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
 			createReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
 
+			if (reqAddEntity.getReqPriorityEntity() != null) {
+				createReqStatus.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
+				createReqStatus.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqStateEntity() != null) {
+				createReqStatus.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
+				createReqStatus.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqDifficultyEntity() != null) {
+				createReqStatus.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
+				createReqStatus.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
+			}
+
 			Optional<ReqStatusEntity> 삭제된데이터검색 = reqStatusEntityList.stream()
 					.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
 					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() != null)
@@ -1044,6 +1059,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_title(현재제목);
 			updateReqStatus.setC_contents(현재본문);
 			updateReqStatus.setC_pdservice_name(제품명);
+			updateReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
 			updateReqStatus.setC_pds_version_link(reqStatusEntity.getC_pds_version_link()); // TODO: 다중 버전 지원 시 해당 필드는 deprecated 될 예정 ?
 			updateReqStatus.setC_pds_version_name(버전명목록);
 			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
@@ -1090,6 +1106,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_req_plan_time(reqAddEntity.getC_req_plan_time());
 			updateReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
 			updateReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
+
+			if (reqAddEntity.getReqPriorityEntity() != null) {
+				updateReqStatus.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
+				updateReqStatus.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqStateEntity() != null) {
+				updateReqStatus.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
+				updateReqStatus.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqDifficultyEntity() != null) {
+				updateReqStatus.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
+				updateReqStatus.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
+			}
 
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
 
@@ -1140,7 +1171,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_title(현재제목);
 			updateReqStatus.setC_contents(현재본문);
 			updateReqStatus.setC_pdservice_name(제품명);
-			updateReqStatus.setC_pds_version_link(reqStatusEntity.getC_pds_version_link()); // TODO: 다중 버전 지원 시 해당 필드는 deprecated 될 예정 ?
+			updateReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
 			updateReqStatus.setC_pds_version_name(버전명목록);
 			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
 
@@ -1185,6 +1216,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_req_plan_time(reqAddEntity.getC_req_plan_time());
 			updateReqStatus.setC_req_total_resource(reqAddEntity.getC_req_total_resource());
 			updateReqStatus.setC_req_total_time(reqAddEntity.getC_req_total_time());
+
+			if (reqAddEntity.getReqPriorityEntity() != null) {
+				updateReqStatus.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
+				updateReqStatus.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqStateEntity() != null) {
+				updateReqStatus.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
+				updateReqStatus.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
+			}
+
+			if (reqAddEntity.getReqDifficultyEntity() != null) {
+				updateReqStatus.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
+				updateReqStatus.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
+			}
 
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + pdServiceId, updateReqStatus);
 
@@ -1291,6 +1337,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 //				"요구사항 상태 : " + 상태 + "\n" +
 				"요구사항 작성자 : " + 작성자 + "\n" +
 				"요구사항 작성일 : " + 작성일 + "\n" +
+//				"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + 제품서비스_아이디 +
+//				"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 + "\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
