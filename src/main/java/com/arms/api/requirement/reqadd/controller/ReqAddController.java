@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.*;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
@@ -42,6 +43,8 @@ import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateN
 import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.criterion.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +101,9 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         setTreeService(reqAdd);
         setTreeEntity(ReqAddEntity.class);
     }
+
+    @Autowired
+    private ReqAddControllerMapper reqAddControllerMapper;
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -290,7 +296,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
         reqAddEntity.setReqStateEntity(상태_검색결과);
 
-        ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
+        ReqAddEntity savedNode = reqAdd.addReqNodeNew(reqAddEntity, changeReqTableName);
 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
@@ -308,33 +314,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: updateReqNode");
-        log.info("[ReqAddController :: updateReqNode] :: reqAddDto");
-        log.info(reqAddDTO.toString());
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        ReqPriorityEntity 우선순위_검색 = new ReqPriorityEntity();
-        우선순위_검색.setC_id(reqAddDTO.getC_req_priority_link());
-        ReqPriorityEntity 우선순위_검색결과 = reqPriority.getNode(우선순위_검색);
-        ReqDifficultyEntity 난이도_검색 = new ReqDifficultyEntity();
-        난이도_검색.setC_id(reqAddDTO.getC_req_difficulty_link());
-        ReqDifficultyEntity 난이도_검색결과 = reqDifficulty.getNode(난이도_검색);
-        ReqStateEntity 상태_검색 = new ReqStateEntity();
-        상태_검색.setC_id(reqAddDTO.getC_req_state_link());
-        ReqStateEntity 상태_검색결과 = reqState.getNode(상태_검색);
-        reqAddEntity.setReqPriorityEntity(우선순위_검색결과);
-        reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
-        reqAddEntity.setReqStateEntity(상태_검색결과);
+        Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
-        SessionUtil.setAttribute("updateNode",changeReqTableName);
-
-        int savedReqAddEntity = reqAdd.updateNode(reqAddEntity);
-
-        SessionUtil.removeAttribute("updateNode");
-
-        log.info("ReqAddController :: updateReqNode");
-        return ResponseEntity.ok(CommonResponse.success(savedReqAddEntity));
-
+        return ResponseEntity.ok(CommonResponse.success(result));
     }
 
     @ResponseBody
@@ -435,6 +420,43 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         ) throws Exception {
 
         return  ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO,changeReqTableName));
+    }
+
+
+    @GetMapping(value = "/{changeReqTableName}/getNode.do/{c_id}")
+    public ResponseEntity<LoadReqAddDTO> loadReqNode(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
+    ) throws Exception {
+
+        log.info("ReqAddController :: getNode.do :: 단건 조회");
+
+        log.info("ReqAddController :: getNode.do :: changeReqTableName :: " + changeReqTableName);
+
+        log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
+
+        SessionUtil.setAttribute("getNode",changeReqTableName);
+
+        ReqAddEntity reqAddEntity = new ReqAddEntity();
+
+        reqAddEntity.setC_id(c_id);
+
+        ReqAddEntity response = reqAdd.getNode(reqAddEntity);
+
+        log.info("ReqAddController :: getNode.do :: response :: " + response);
+
+        LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
+
+        log.info("ReqAddController :: getNode.do :: reqAddDto :: " + reqAddDto);
+
+        SessionUtil.removeAttribute("getNode");
+
+        return ResponseEntity.ok(reqAddDto);
+    }
+
+    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+    interface ReqAddControllerMapper {
+        LoadReqAddDTO toLoadReqAddDto(ReqAddEntity reqAddEntity);
     }
 
 

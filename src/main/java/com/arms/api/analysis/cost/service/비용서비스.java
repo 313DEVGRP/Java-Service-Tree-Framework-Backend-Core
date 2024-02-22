@@ -4,9 +4,14 @@ import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
+import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 
+import java.util.List;
+
 public interface 비용서비스 {
+
+    버전요구사항별_담당자데이터 전체_담당자가져오기(Long 제품아이디, List<Long> 버전아이디_목록, 지라이슈_일반_집계_요청 일반집계요청);
 
     버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청);
 
