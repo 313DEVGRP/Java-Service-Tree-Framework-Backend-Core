@@ -296,7 +296,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
         reqAddEntity.setReqStateEntity(상태_검색결과);
 
-        ReqAddEntity savedNode = reqAdd.addReqNodeNew(reqAddEntity, changeReqTableName);
+        ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
