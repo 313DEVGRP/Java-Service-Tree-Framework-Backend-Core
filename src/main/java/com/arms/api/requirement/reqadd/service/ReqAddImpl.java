@@ -779,9 +779,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
 		// 1. 수정 전 ReqAdd 조회
 		ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
-        assert 요구사항조회.getStatusCode().is2xxSuccessful() : "요구사항 조회 API 호출 실패";
+
 		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
-        assert loadReqAddDTO != null : "요구사항 조회 API가 null을 반환함";
+
 		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
 
 		// 2. 수정 전 후 비교
@@ -907,7 +907,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈필드_데이터.담당자 암스서버담당자 = 암스서버담당자가져오기(검색된_지라서버);
 
-			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책, true);
 
 			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 					.builder()
@@ -919,17 +919,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			ReqStatusDTO createReqStatus = new ReqStatusDTO();
 
-			// TODO: ReqStatus의 기존 필드(단일 버전)는 앞으로 안쓰게 될 것. 지금은 지라프로젝트가 여러 버전에 매핑되어있는데, 아무거나 하나 입력
-			Long 버전명 = globalTreeMapEntities.stream()
-					.filter(globalTreeMap -> globalTreeMap.getPdserviceversion_link() != null)
-					.filter(globalTreeMap -> globalTreeMap.getJiraproject_link().equals(지라프로젝트링크))
-					.findFirst().orElseThrow().getPdservice_link();
-
 			/* 제품 및 버전*/
 			createReqStatus.setC_title(현재제목);
 			createReqStatus.setC_contents(현재본문);
 			createReqStatus.setC_pdservice_name(제품명);
-			createReqStatus.setC_pds_version_link(버전명);
+			createReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
 			createReqStatus.setC_pds_version_name(버전명목록);
 			createReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
 
@@ -991,6 +985,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				chat.sendMessageByEngine("삭제된데이터가 없으므로 이슈 생성");
 				지라이슈_데이터 이슈_생성하기 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 
+				createReqStatus.setRef(TreeConstant.First_Node_CID);
+				createReqStatus.setC_type(TreeConstant.Leaf_Node_TYPE);
 				createReqStatus.setC_issue_key(이슈_생성하기.getKey());
 				createReqStatus.setC_issue_url(이슈_생성하기.getSelf());
 				createReqStatus.setC_issue_reporter(암스서버보고자.getName());
@@ -1029,7 +1025,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
-			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 삭제지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 삭제지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책, false);
 
 			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 					.builder()
@@ -1126,7 +1122,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			지라이슈유형_데이터 유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
 
-			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책);
+			지라이슈필드_데이터 지라이슈생성데이터 = 지라이슈생성데이터가져오기(reqAddEntity, 프로젝트, 유형, 일반지라이슈본문, 요구사항_이슈_우선순위, 요구사항_이슈_상태, 요구사항_이슈_해결책, false);
 
 			지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 					.builder()
@@ -1220,7 +1216,15 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 암스서버보고자;
 	}
 
-	private 지라이슈필드_데이터 지라이슈생성데이터가져오기(ReqAddEntity reqAddEntity, 지라이슈필드_데이터.프로젝트 프로젝트, 지라이슈유형_데이터 유형, String 지라이슈본문, JiraIssuePriorityEntity 요구사항_이슈_우선순위, JiraIssueStatusEntity 요구사항_이슈_상태, JiraIssueResolutionEntity 요구사항_이슈_해결책) {
+	private 지라이슈필드_데이터 지라이슈생성데이터가져오기(
+			ReqAddEntity reqAddEntity,
+			지라이슈필드_데이터.프로젝트 프로젝트,
+			지라이슈유형_데이터 유형, String 지라이슈본문,
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위,
+			JiraIssueStatusEntity 요구사항_이슈_상태,
+			JiraIssueResolutionEntity 요구사항_이슈_해결책,
+			boolean isCreate
+	) {
 		지라이슈필드_데이터 지라이슈생성데이터 = new 지라이슈필드_데이터();
 		지라이슈생성데이터.setProject(프로젝트);
 		지라이슈생성데이터.setIssuetype(유형);
@@ -1232,23 +1236,25 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
 			우선순위.setSelf(요구사항_이슈_우선순위.getC_issue_priority_url());
 			우선순위.setId(요구사항_이슈_우선순위.getC_issue_priority_id());
+			우선순위.setDescription(요구사항_이슈_우선순위.getC_issue_priority_desc());
 			지라이슈생성데이터.setPriority(우선순위);
 		}
 
-		// 엔진에서 오류 발생시킴 if (필드_데이터.getStatus() != null) -> 입력 값에 수정할 수 없는 필드가 있습니다.
-//		if (요구사항_이슈_상태 != null) {
-//			지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
-//			상태.setId(요구사항_이슈_상태.getC_issue_status_id());
-//			상태.setName(요구사항_이슈_상태.getC_issue_status_name());
-//			상태.setSelf(요구사항_이슈_상태.getC_issue_status_url());
-//			지라이슈생성데이터.setStatus(상태);
-//		}
+		if (요구사항_이슈_상태 != null && isCreate) {
+			지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
+			상태.setId(요구사항_이슈_상태.getC_issue_status_id());
+			상태.setName(요구사항_이슈_상태.getC_issue_status_name());
+			상태.setSelf(요구사항_이슈_상태.getC_issue_status_url());
+			상태.setDescription(요구사항_이슈_상태.getC_issue_status_desc());
+			지라이슈생성데이터.setStatus(상태);
+		}
 
-		if (요구사항_이슈_해결책 != null) {
+		if (요구사항_이슈_해결책 != null && isCreate) {
 			지라이슈해결책_데이터 해결책 = new 지라이슈해결책_데이터();
 			해결책.setId(요구사항_이슈_해결책.getC_issue_resolution_id());
 			해결책.setName(요구사항_이슈_해결책.getC_issue_resolution_name());
 			해결책.setSelf(요구사항_이슈_해결책.getC_issue_resolution_url());
+			해결책.setDescription(요구사항_이슈_해결책.getC_issue_resolution_desc());
 			지라이슈생성데이터.setResolution(해결책);
 		}
 		return 지라이슈생성데이터;
