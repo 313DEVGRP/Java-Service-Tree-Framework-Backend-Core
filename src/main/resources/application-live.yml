@@ -43,7 +43,7 @@ logging:
         type:
           descriptor:
             sql: info
-    org.springframework.web: info
+    org.springframework.web: trace
     sql: info
     jdbc: info
     jdbc.sqlonly: info
