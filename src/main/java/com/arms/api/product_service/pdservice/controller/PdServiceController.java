@@ -178,14 +178,11 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
     )
     public ResponseEntity<?> getVersionList(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
         log.info("PdServiceController :: getVersionList");
-        ParameterParser parser = new ParameterParser(request);
-
-        if (parser.getInt("c_id") <= 0) {
-            throw new RuntimeException("c_id is minus value");
-        }
 
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
+
         PdServiceEntity pdServiceNode = pdService.getNodeWithVersionOrderByCidDesc(pdServiceEntity);
+
         return ResponseEntity.ok(CommonResponse.success(pdServiceNode.getPdServiceVersionEntities()));
     }
 
