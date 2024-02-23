@@ -271,6 +271,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			암스서버담당자.setName(검색된_지라서버.getC_jira_server_connect_id());
 			암스서버담당자.setEmailAddress("313cokr@gmail.com");
 
+			String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
+
 			String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
 					"✔ 본 이슈는 자동으로 관리되므로,\n" +
 					"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
@@ -281,7 +283,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
 					"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + 제품서비스_아이디 +
 					"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 + "\n" +
-					//"&pdServiceVersion=" + 제품서비스_버전_아이디 + "&reqAdd=" + 추가된_요구사항의_아이디 +
+					"&pdServiceVersion=" + 버전ID목록 + "&reqAdd=" + 추가된_요구사항의_아이디 +
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 					"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
@@ -1065,7 +1067,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				"※ 본 이슈 하위로 Sub-Task를 만들어서 개발(업무)을 진행 하시거나, \n" +
 				"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
-				"자세한 요구사항 내용 확인 ⇒ " + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + pdServiceId +
+				"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + pdServiceId +
 				"&pdServiceVersion=" + 버전명아이디목록 +
 				"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디.toString() + "&jiraProject=" + 지라_프로젝트_아이디.toString() + "\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
