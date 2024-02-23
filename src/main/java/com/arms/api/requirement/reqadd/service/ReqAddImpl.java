@@ -442,10 +442,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		PdServiceEntity pdServiceEntity = reqAddEntity.getPdServiceEntity();
 
-		PdServiceVersionEntity pdServiceVersionEntity = pdServiceEntity.getPdServiceVersionEntities()
+		String pdServiceVersionTitles = pdServiceEntity.getPdServiceVersionEntities()
 			.stream()
-			.filter(a -> followReqLinkDTO.getPdServiceVersion().equals(a.getC_id()))
-			.findFirst().orElseGet(() -> new PdServiceVersionEntity());
+			.filter(a -> followReqLinkDTO.getPdServiceVersion().contains(a.getC_id()))
+			.map(PdServiceVersionEntity::getC_title)
+			.collect(Collectors.joining(","));
 
 		if(followReqLinkDTO.getJiraProject()!=null){
 			JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
@@ -462,7 +463,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		return ReqAddDetailDTO.builder()
 			.pdService_c_title(pdServiceEntity.getC_title())
-			.pdServiceVersion_c_title(pdServiceVersionEntity.getC_title())
+			.pdServiceVersion_c_title(pdServiceVersionTitles)
 			.pdService_c_id(pdServiceEntity.getC_id())
 			.reqAdd_c_title(reqAddEntity.getC_title())
 			.reqAdd_c_req_writer(reqAddEntity.getC_req_writer())
