@@ -25,6 +25,7 @@ import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqpriority.service.ReqPriority;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
+import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
@@ -276,28 +277,20 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     public ResponseEntity<?> addReqNode(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             @Validated({AddNode.class}) ReqAddDTO reqAddDTO,
-            BindingResult bindingResult, ModelMap model) throws Exception {
+            BindingResult bindingResult, ModelMap model
+    ) throws Exception {
 
         log.info("ReqAddController :: addReqNode");
+
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        PdServiceEntity pdServiceEntity = new PdServiceEntity();
-        pdServiceEntity.setC_id(reqAddDTO.getC_req_pdservice_link());
-        PdServiceEntity savedPdService = pdService.getNode(pdServiceEntity);
-        reqAddEntity.setPdServiceEntity(savedPdService);
+        reqAddEntity.setPdServiceEntity(TreeServiceUtils.getNode(pdService, reqAddDTO.getC_req_pdservice_link(), PdServiceEntity.class));
 
-        ReqPriorityEntity 우선순위_검색 = new ReqPriorityEntity();
-        우선순위_검색.setC_id(reqAddDTO.getC_req_priority_link());
-        ReqPriorityEntity 우선순위_검색결과 = reqPriority.getNode(우선순위_검색);
-        ReqDifficultyEntity 난이도_검색 = new ReqDifficultyEntity();
-        난이도_검색.setC_id(reqAddDTO.getC_req_difficulty_link());
-        ReqDifficultyEntity 난이도_검색결과 = reqDifficulty.getNode(난이도_검색);
-        ReqStateEntity 상태_검색 = new ReqStateEntity();
-        상태_검색.setC_id(reqAddDTO.getC_req_state_link());
-        ReqStateEntity 상태_검색결과 = reqState.getNode(상태_검색);
-        reqAddEntity.setReqPriorityEntity(우선순위_검색결과);
-        reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
-        reqAddEntity.setReqStateEntity(상태_검색결과);
+        reqAddEntity.setReqPriorityEntity(TreeServiceUtils.getNode(reqPriority, reqAddDTO.getC_req_priority_link(), ReqPriorityEntity.class));
+
+        reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
+
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
         // 요구사항 생성일 및 시작일 업데이트 추가
         Date date = new Date();
@@ -319,26 +312,19 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     public ResponseEntity<?> updateReqNode(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
-            BindingResult bindingResult, ModelMap model) throws Exception {
+            BindingResult bindingResult, ModelMap model
+    ) throws Exception {
 
         log.info("ReqAddController :: updateReqNode");
 
-        ReqPriorityEntity 우선순위_검색 = new ReqPriorityEntity();
-        우선순위_검색.setC_id(reqAddDTO.getC_req_priority_link());
-        ReqPriorityEntity 우선순위_검색결과 = reqPriority.getNode(우선순위_검색);
-
-        ReqDifficultyEntity 난이도_검색 = new ReqDifficultyEntity();
-        난이도_검색.setC_id(reqAddDTO.getC_req_difficulty_link());
-        ReqDifficultyEntity 난이도_검색결과 = reqDifficulty.getNode(난이도_검색);
-
-        ReqStateEntity 상태_검색 = new ReqStateEntity();
-        상태_검색.setC_id(reqAddDTO.getC_req_state_link());
-        ReqStateEntity 상태_검색결과 = reqState.getNode(상태_검색);
-
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        reqAddEntity.setReqPriorityEntity(우선순위_검색결과);
-        reqAddEntity.setReqDifficultyEntity(난이도_검색결과);
+        reqAddEntity.setReqPriorityEntity(TreeServiceUtils.getNode(reqPriority, reqAddDTO.getC_req_priority_link(), ReqPriorityEntity.class));
+
+        reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
+
+        ReqStateEntity 상태_검색결과 = TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class);
+
         reqAddEntity.setReqStateEntity(상태_검색결과);
 
         Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
@@ -346,17 +332,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         if (reqAddDTO.getC_req_start_date() != null) {
             reqAddEntity.setC_req_start_date(reqAddDTO.getC_req_start_date());
         }
-        
-        // end date가 있고 요구사항 상태가 해결됨, 닫힘이고 이미  파라미터 end_date로 업데이트 로직
-        if (reqAddDTO.getC_req_end_date() != null && 완료_키워드_셋.contains(상태_검색결과.getC_title())) {
-            reqAddEntity.setC_req_end_date(reqAddDTO.getC_req_end_date());
-        }
-        // end date가 null이고 요구사항 상태가 해결됨, 닫힘일 경우 오늘을 end date로 지정
-        else if (reqAddDTO.getC_req_end_date() == null && 완료_키워드_셋.contains(상태_검색결과.getC_title())) {
-            reqAddEntity.setC_req_end_date(new Date());
-        }
-        // 그 외에 상태의 경우 모두 end date를 null로 지정
-        else {
+
+        boolean isCompleted = 완료_키워드_셋.contains(상태_검색결과.getC_title());
+
+        if (isCompleted) {
+            Date endDate = Optional.ofNullable(reqAddDTO.getC_req_end_date()).orElse(new Date());
+            reqAddEntity.setC_req_end_date(endDate);
+        } else {
             reqAddEntity.setC_req_end_date(null);
         }
 

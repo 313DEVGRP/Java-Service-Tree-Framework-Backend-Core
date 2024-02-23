@@ -30,11 +30,9 @@ import com.arms.api.requirement.reqadd.model.JiraServerType;
 import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
-import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
-import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
@@ -159,65 +157,38 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			logger.info("지라 서버 링크 = " + 지라서버_아이디);
 
-			JiraServerEntity 지라서버_검색용_엔티티 = new JiraServerEntity();
-			지라서버_검색용_엔티티.setC_id(지라서버_아이디);
-			JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
+			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 
-			JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
-			지라프로젝트_검색용_엔티티.setC_id(지라프로젝트_아이디);
-			JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라프로젝트_아이디);
 
-			Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 검색된_지라서버.getJiraIssuePriorityEntities();
-			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-					.filter(우선순위 -> StringUtils.equals(우선순위.getC_check(),"true"))
-					.findFirst().orElse(null);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
 
-			Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 검색된_지라서버.getJiraIssueResolutionEntities();
-			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-					.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
-					.findFirst().orElse(null);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
 
-			JiraIssueTypeEntity 요구사항_이슈_타입 = new JiraIssueTypeEntity();
-			JiraIssueStatusEntity 요구사항_이슈_상태 = new JiraIssueStatusEntity();
-			if( 검색된_지라서버.getC_jira_server_type().equals("클라우드")){
+			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-				Set<JiraIssueTypeEntity> 클라우드_지라서버_이슈타입_리스트 = 검색된_지라프로젝트.getJiraIssueTypeEntities();
-				요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
-						.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_check(),"true"))
-						.findFirst().orElse(null);
-				if (요구사항_이슈_타입 == null) {
+			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
+					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
+					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+
+			if (요구사항_이슈_타입 == null) {
+				if (jiraServerType.equals(JiraServerType.CLOUD)) {
+					요구사항_이슈_타입 = 검색된_지라서버.getJiraIssueTypeEntities().stream()
+							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
+							.findFirst().orElse(null);
+				} else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
 					// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
-					요구사항_이슈_타입 = 클라우드_지라서버_이슈타입_리스트.stream()
+					요구사항_이슈_타입 = 검색된_지라프로젝트.getJiraIssueTypeEntities().stream()
 							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
 							.findFirst().orElse(null);
+				} else {
+					logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
+					throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
 				}
-
-
-				Set<JiraIssueStatusEntity> 클라우드_지라서버_이슈상태_리스트 = 검색된_지라프로젝트.getJiraIssueStatusEntities();
-				요구사항_이슈_상태 = 클라우드_지라서버_이슈상태_리스트.stream()
-						.filter(이슈상태 -> StringUtils.equals(이슈상태.getC_check(),"true"))
-						.findFirst()
-						.orElse(null);
-
-			} else if( 검색된_지라서버.getC_jira_server_type().equals("온프레미스")){
-				Set<JiraIssueTypeEntity> 지라서버_이슈타입_리스트 = 검색된_지라서버.getJiraIssueTypeEntities();
-				요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-						.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_check(),"true"))
-						.findFirst().orElse(null);
-				if (요구사항_이슈_타입 == null) {
-					요구사항_이슈_타입 = 지라서버_이슈타입_리스트.stream()
-							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
-							.findFirst().orElse(null);
-				}
-
-				Set<JiraIssueStatusEntity> 지라서버_이슈상태_리스트 = 검색된_지라서버.getJiraIssueStatusEntities();
-				요구사항_이슈_상태 = 지라서버_이슈상태_리스트.stream()
-						.filter(이슈상태 -> StringUtils.equals(이슈상태.getC_check(), "true"))
-						.findFirst()
-						.orElse(null);
-			}else {
-				logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
-				throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
 			}
 
 			// 준비된 파라미터
@@ -1129,17 +1100,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	}
 
 	private JiraProjectEntity 지라프로젝트검색(Long 지라_프로젝트_아이디) throws Exception {
-		JiraProjectEntity 지라프로젝트_검색용_엔티티 = new JiraProjectEntity();
-		지라프로젝트_검색용_엔티티.setC_id(지라_프로젝트_아이디);
-		JiraProjectEntity 검색된_지라프로젝트 = jiraProject.getNode(지라프로젝트_검색용_엔티티);
-		return 검색된_지라프로젝트;
+		return TreeServiceUtils.getNode(jiraProject, 지라_프로젝트_아이디, JiraProjectEntity.class);
 	}
 
 	private JiraServerEntity 지라서버검색(Long 지라서버_아이디) throws Exception {
-		JiraServerEntity 지라서버_검색용_엔티티 = new JiraServerEntity();
-		지라서버_검색용_엔티티.setC_id(지라서버_아이디);
-		JiraServerEntity 검색된_지라서버 = jiraServer.getNode(지라서버_검색용_엔티티);
-		return 검색된_지라서버;
+		return TreeServiceUtils.getNode(jiraServer, 지라서버_아이디, JiraServerEntity.class);
 	}
 
 	private Set<Long> 유지된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
@@ -1160,9 +1125,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 삭제된버전;
 	}
 	private PdServiceEntity 제품데이터조회(String pdServiceId) throws Exception {
-		PdServiceEntity pdServiceEntity = new PdServiceEntity();
-		pdServiceEntity.setC_id(Long.valueOf(pdServiceId));
-		PdServiceEntity 제품데이터 = pdService.getNode(pdServiceEntity);
-		return 제품데이터;
+		return TreeServiceUtils.getNode(pdService, Long.valueOf(pdServiceId), PdServiceEntity.class);
 	}
 }
