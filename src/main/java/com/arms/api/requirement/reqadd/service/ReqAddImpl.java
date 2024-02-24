@@ -348,18 +348,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			//-- 이슈 우선순위 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
 			if(요구사항_이슈_우선순위 != null) {
-				// null이 아닐때만 statusDTO에 우선순위 값 넘긴다.
 				reqStatusDTO.setC_issue_priority_link(요구사항_이슈_우선순위.getC_id());
 				reqStatusDTO.setC_issue_priority_name(요구사항_이슈_우선순위.getC_issue_priority_name());
 			}
 
 			//-- 이슈 상태 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-//				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
-//				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+			if(요구사항_이슈_상태 != null) {
+				reqStatusDTO.setC_issue_status_link(요구사항_이슈_상태.getC_id());
+				reqStatusDTO.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+			}
 
 			//-- 이슈 해결책 ( 요구사항 자산의 이슈 이든, 아니면 연결된 이슈이든 )
-//				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
-//				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
+			if(요구사항_이슈_해결책 != null) {
+				reqStatusDTO.setC_issue_resolution_link(요구사항_이슈_해결책.getC_id());
+				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
+			}
 
 			reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
 			reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
@@ -471,9 +474,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
 		루프용버전셋.addAll(현재버전셋);
 
-		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
-		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
-		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList());
+		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2
+		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 2,3
+		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2,3
 
 		logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
 		logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
@@ -514,7 +517,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		PdServiceEntity 제품데이터 = 제품데이터조회(pdServiceId);
 
 		/* 지라 이슈에 사용 할 데이터 */
-		String 버전명아이디목록 = 루프용버전셋리스트.stream().map(String::valueOf).collect(Collectors.joining(","));
+		String 버전아이디목록 = 루프용버전셋리스트.stream().map(String::valueOf).collect(Collectors.joining(","));
 		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining("\",\"", "[\"", "\"]"));
 		String 제품명 = 제품데이터.getC_title();
 		String 현재제목 = reqAddEntity.getC_title();
@@ -542,11 +545,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
 				.collect(Collectors.toList());
 
-		유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, 현재제목, 현재본문, 제품명, 버전명목록, pdServiceId, 버전명아이디목록);
+		유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, 현재제목, 현재본문, 제품명, 버전명목록, pdServiceId, 버전아이디목록);
 
 		삭제된지라프로젝트처리(reqAddEntity, 삭제된지라프로젝트, 현재제목, 현재본문, 제품명, 버전명목록, pdServiceId);
 
-		추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 버전명목록, reqStatusEntityList, pdServiceId, 버전명아이디목록);
+		추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 버전명목록, reqStatusEntityList, pdServiceId, 버전아이디목록);
 
 		return 1;
 	}
@@ -561,7 +564,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			String 버전명목록,
 			List<ReqStatusEntity> reqStatusEntityList,
 			String pdServiceId,
-			String 버전명아이디목록
+			String 버전아이디목록
 	) throws Exception {
 		for (Long 지라_프로젝트_아이디 : 추가된지라프로젝트아이디) {
 			GlobalTreeMapEntity 글로벌트리맵 = globalTreeMapService.findAllByIds(Collections.singletonList(지라_프로젝트_아이디), "jiraproject_link")
@@ -571,7 +574,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			Long 지라서버_아이디 = 글로벌트리맵.getJiraserver_link();
 
-			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전명아이디목록);
+			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전아이디목록);
 
 			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
@@ -841,14 +844,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			String 제품명,
 			String 버전명목록,
 			String pdServiceId,
-			String 버전명아이디목록
+			String 버전아이디목록
 	) throws Exception {
 		for (ReqStatusEntity reqStatusEntity : 유지된지라프로젝트) {
 			Long 지라서버_아이디 = reqStatusEntity.getC_jira_server_link();
 
 			Long 지라_프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
 
-			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전명아이디목록);
+			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전아이디목록);
 
 			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 
@@ -1038,7 +1041,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			String pdServiceId,
 			Long 지라서버_아이디,
 			Long 지라_프로젝트_아이디,
-			String 버전명아이디목록
+			String 버전아이디목록
 	) {
 		String 지라이슈본문 = Optional.ofNullable(reqAddEntity.getC_req_contents()).orElse("지라이슈본문");
 
@@ -1053,7 +1056,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
 				"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + pdServiceId +
-				"&pdServiceVersion=" + 버전명아이디목록 +
+				"&pdServiceVersion=" + 버전아이디목록 +
 				"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디.toString() + "&jiraProject=" + 지라_프로젝트_아이디.toString() + "\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
