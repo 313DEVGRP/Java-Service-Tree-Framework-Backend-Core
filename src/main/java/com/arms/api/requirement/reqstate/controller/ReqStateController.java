@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -26,6 +27,13 @@ import javax.annotation.PostConstruct;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.model.ReqStateDTO;
 import com.arms.api.requirement.reqstate.service.ReqState;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Controller
@@ -44,4 +52,20 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    @Value("${requirement.state.complete.keyword}")
+    private String 완료_키워드;
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/complete-keyword"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 요구사항_완료_키워드조회() throws Exception {
+        logger.info(" [ " + this.getClass().getName() + " :: 요구사항_완료_키워드조회 ]");
+        Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 완료_키워드_셋);
+        return modelAndView;
+    }
 }
