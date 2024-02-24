@@ -18,6 +18,7 @@ import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
 import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddDateDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
@@ -343,6 +344,30 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         }
 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/updateDate.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> updateReqDate(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddDateDTO reqAddDateDTO, HttpServletRequest request,
+            BindingResult bindingResult, ModelMap model
+    ) throws Exception {
+
+        log.info("ReqAddController :: updateDate");
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
+
+        SessionUtil.setAttribute("updateDate",changeReqTableName);
+
+        int result = reqAdd.updateNode(reqAddEntity);
+
+        SessionUtil.removeAttribute("updateDate");
 
         return ResponseEntity.ok(CommonResponse.success(result));
     }
