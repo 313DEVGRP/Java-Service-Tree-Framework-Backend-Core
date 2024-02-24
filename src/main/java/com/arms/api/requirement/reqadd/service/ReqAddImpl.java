@@ -511,20 +511,15 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		List<PdServiceVersionEntity> 버전데이터 = pdServiceVersion.getVersionListByCids(루프용버전셋리스트);
 
-		List<PdServiceVersionEntity> 수정될버전데이터 = 버전데이터.stream()
+		List<PdServiceVersionEntity> 수정될버전 = 버전데이터.stream()
 				.filter(pdServiceVersionEntity -> 현재버전셋리스트.contains(pdServiceVersionEntity.getC_id()))
 				.collect(Collectors.toList());
 		PdServiceEntity 제품데이터 = 제품데이터조회(pdServiceId);
 
 		/* 지라 이슈에 사용 할 데이터 */
-		String 버전아이디목록 = 루프용버전셋리스트.stream().map(String::valueOf).collect(Collectors.joining(","));
-		String 버전명목록 = 수정될버전데이터.stream().map(PdServiceVersionEntity::getC_title).collect(Collectors.joining("\",\"", "[\"", "\"]"));
 		String 제품명 = 제품데이터.getC_title();
 		String 현재제목 = reqAddEntity.getC_title();
 		String 현재본문 = reqAddEntity.getC_req_contents();
-
-		logger.info("제품명 : {}", 제품명);
-		logger.info("버전명목록 : {}", 버전명목록);
 
 		// 3. ReqAdd 업데이트
 		SessionUtil.setAttribute("updateNode", changeReqTableName);
@@ -545,11 +540,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
 				.collect(Collectors.toList());
 
-		유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, 현재제목, 현재본문, 제품명, 버전명목록, pdServiceId, 버전아이디목록);
+		유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
 
-		삭제된지라프로젝트처리(reqAddEntity, 삭제된지라프로젝트, 현재제목, 현재본문, 제품명, 버전명목록, pdServiceId);
+		삭제된지라프로젝트처리(reqAddEntity, 삭제된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
 
-		추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 버전명목록, reqStatusEntityList, pdServiceId, 버전아이디목록);
+		추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, reqStatusEntityList, pdServiceId);
 
 		return 1;
 	}
@@ -561,10 +556,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			String 현재제목,
 			String 현재본문,
 			String 제품명,
-			String 버전명목록,
+			List<PdServiceVersionEntity> 수정될버전,
 			List<ReqStatusEntity> reqStatusEntityList,
-			String pdServiceId,
-			String 버전아이디목록
+			String pdServiceId
 	) throws Exception {
 		for (Long 지라_프로젝트_아이디 : 추가된지라프로젝트아이디) {
 			GlobalTreeMapEntity 글로벌트리맵 = globalTreeMapService.findAllByIds(Collections.singletonList(지라_프로젝트_아이디), "jiraproject_link")
@@ -573,6 +567,20 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.findFirst().orElseThrow();
 
 			Long 지라서버_아이디 = 글로벌트리맵.getJiraserver_link();
+
+			List<Long> 현재지라프로젝트에연결된버전링크들 = globalTreeMapEntities.stream()
+					.filter(globalTreeMapEntity -> globalTreeMapEntity.getJiraproject_link().equals(지라_프로젝트_아이디))
+					.map(globalTreeMapEntity -> globalTreeMapEntity.getPdserviceversion_link())
+					.collect(Collectors.toList());
+
+			String 버전명목록 = 수정될버전.stream()
+					.filter(pdServiceVersionEntity -> 현재지라프로젝트에연결된버전링크들.contains(pdServiceVersionEntity.getC_id()))
+					.map(PdServiceVersionEntity::getC_title)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			String 버전아이디목록 = 현재지라프로젝트에연결된버전링크들.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
 
 			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전아이디목록);
 
@@ -614,7 +622,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			createReqStatus.setC_pdservice_name(제품명);
 			createReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
 			createReqStatus.setC_pds_version_name(버전명목록);
-			createReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+			createReqStatus.setC_req_pdservice_versionset_link(버전아이디목록); // ["33", "35"]
 
 			/* 지라 서버 */
 			createReqStatus.setC_jira_server_link(지라서버_아이디);
@@ -717,16 +725,32 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	private void 삭제된지라프로젝트처리(
 			ReqAddEntity reqAddEntity,
 			List<ReqStatusEntity> 삭제된지라프로젝트,
+			List<GlobalTreeMapEntity> globalTreeMapEntities,
 			String 현재제목,
 			String 현재본문,
 			String 제품명,
-			String 버전명목록,
+			List<PdServiceVersionEntity> 수정될버전,
 			String pdServiceId
 	) throws Exception {
 		String 삭제지라이슈본문 = 삭제할지라이슈본문가져오기();
 		for (ReqStatusEntity reqStatusEntity : 삭제된지라프로젝트) {
 			Long 지라서버_아이디 = reqStatusEntity.getC_jira_server_link();
 			Long 지라_프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
+
+			List<Long> 현재지라프로젝트에연결된버전링크들 = globalTreeMapEntities.stream()
+					.filter(globalTreeMapEntity -> globalTreeMapEntity.getJiraproject_link().equals(지라_프로젝트_아이디))
+					.map(globalTreeMapEntity -> globalTreeMapEntity.getPdserviceversion_link())
+					.collect(Collectors.toList());
+
+			String 버전명목록 = 수정될버전.stream()
+					.filter(pdServiceVersionEntity -> 현재지라프로젝트에연결된버전링크들.contains(pdServiceVersionEntity.getC_id()))
+					.map(PdServiceVersionEntity::getC_title)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			String 버전아이디목록 = 현재지라프로젝트에연결된버전링크들.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
 			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
 			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
@@ -753,9 +777,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.fields(지라이슈생성데이터)
 					.build();
 
-			Long 지라서버링크 = 검색된_지라서버.getC_id();
-			Long 지라프로젝트링크 = 검색된_지라프로젝트.getC_id();
-
 
 			엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
 
@@ -768,15 +789,15 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
 			updateReqStatus.setC_pds_version_link(reqStatusEntity.getC_pds_version_link()); // TODO: 다중 버전 지원 시 해당 필드는 deprecated 될 예정 ?
 			updateReqStatus.setC_pds_version_name(버전명목록);
-			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+			updateReqStatus.setC_req_pdservice_versionset_link(버전아이디목록); // ["33", "35"]
 
 			/* 지라 서버 */
-			updateReqStatus.setC_jira_server_link(지라서버링크);
+			updateReqStatus.setC_jira_server_link(지라서버_아이디);
 			updateReqStatus.setC_jira_server_name(검색된_지라서버.getC_jira_server_name());
 			updateReqStatus.setC_jira_server_url(검색된_지라서버.getC_jira_server_base_url());
 
 			/* 지라 프로젝트 */
-			updateReqStatus.setC_jira_project_link(지라프로젝트링크);
+			updateReqStatus.setC_jira_project_link(지라_프로젝트_아이디);
 			updateReqStatus.setC_jira_project_name(검색된_지라프로젝트.getC_jira_name());
 			updateReqStatus.setC_jira_project_key(검색된_지라프로젝트.getC_jira_key());
 			updateReqStatus.setC_jira_project_url(검색된_지라프로젝트.getC_jira_url());
@@ -839,17 +860,31 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	private void 유지된지라프로젝트처리(
 			ReqAddEntity reqAddEntity,
 			List<ReqStatusEntity> 유지된지라프로젝트,
+			List<GlobalTreeMapEntity> globalTreeMapEntities,
 			String 현재제목,
 			String 현재본문,
 			String 제품명,
-			String 버전명목록,
-			String pdServiceId,
-			String 버전아이디목록
+			List<PdServiceVersionEntity> 수정될버전,
+			String pdServiceId
 	) throws Exception {
 		for (ReqStatusEntity reqStatusEntity : 유지된지라프로젝트) {
 			Long 지라서버_아이디 = reqStatusEntity.getC_jira_server_link();
 
 			Long 지라_프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
+
+			List<Long> 현재지라프로젝트에연결된버전링크들 = globalTreeMapEntities.stream()
+					.filter(globalTreeMapEntity -> globalTreeMapEntity.getJiraproject_link().equals(지라_프로젝트_아이디))
+					.map(globalTreeMapEntity -> globalTreeMapEntity.getPdserviceversion_link())
+					.collect(Collectors.toList());
+
+			String 버전명목록 = 수정될버전.stream()
+					.filter(pdServiceVersionEntity -> 현재지라프로젝트에연결된버전링크들.contains(pdServiceVersionEntity.getC_id()))
+					.map(PdServiceVersionEntity::getC_title)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			String 버전아이디목록 = 현재지라프로젝트에연결된버전링크들.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
 
 			String 일반지라이슈본문 = 등록및수정지라이슈본문가져오기(reqAddEntity, pdServiceId, 지라서버_아이디, 지라_프로젝트_아이디, 버전아이디목록);
 
@@ -891,8 +926,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			updateReqStatus.setC_contents(현재본문);
 			updateReqStatus.setC_pdservice_name(제품명);
 			updateReqStatus.setC_pdservice_link(Long.valueOf(pdServiceId));
-			updateReqStatus.setC_pds_version_name(버전명목록);
-			updateReqStatus.setC_req_pdservice_versionset_link(reqAddEntity.getC_req_pdservice_versionset_link()); // ["33", "35"]
+			updateReqStatus.setC_pds_version_name(버전명목록); // ["24.05","BaseVersion"]]
+			updateReqStatus.setC_req_pdservice_versionset_link(버전아이디목록); // ["33", "35"]
 
 			/* 지라 서버 */
 			updateReqStatus.setC_jira_server_link(지라서버_아이디);
