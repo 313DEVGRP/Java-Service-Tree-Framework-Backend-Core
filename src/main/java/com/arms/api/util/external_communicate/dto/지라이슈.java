@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 public class 지라이슈 {
 
     private String id;
+    private boolean recent;
+
     private Long jira_server_id;
     private Date timestamp;
     private String issueID;
