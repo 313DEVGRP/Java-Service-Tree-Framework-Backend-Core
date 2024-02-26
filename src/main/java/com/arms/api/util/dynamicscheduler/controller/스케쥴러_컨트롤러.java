@@ -177,12 +177,6 @@ public class 스케쥴러_컨트롤러{
                         chat.sendMessageByEngine("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
 
                     } else {
-//                        int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
-//                                Long.parseLong(지라서버.getC_jira_server_etc()),
-//                                요구사항_이슈_엔티티.getC_issue_key(),
-//                                요구사항_이슈_엔티티.getC_pdservice_link(),
-//                                요구사항_이슈_엔티티.getC_pds_version_link()
-//                                );
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 제품서비스 c_id => {}", 제품서비스.getC_id());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
