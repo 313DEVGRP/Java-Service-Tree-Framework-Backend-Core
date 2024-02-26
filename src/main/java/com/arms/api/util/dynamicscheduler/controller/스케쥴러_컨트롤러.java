@@ -249,6 +249,18 @@ public class 스케쥴러_컨트롤러{
 
                     } else {
 
+
+                        if ( 요구사항_이슈_엔티티.getC_issue_key() == null ){
+
+                            chat.sendMessageByServer("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 이슈키가 없습니다. C_ID = " + 요구사항_이슈_엔티티.getC_id());
+
+                        } else {
+
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 지라서버.getC_jira_server_etc());
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_issue_key());
+
+                        }
                         지라이슈 ES_지라이슈 = 엔진통신기.요구사항이슈_조회(
                             Long.parseLong(지라서버.getC_jira_server_etc()),
                             요구사항_이슈_엔티티.getC_jira_project_key(),
@@ -257,14 +269,9 @@ public class 스케쥴러_컨트롤러{
 
                         if( ES_지라이슈 == null ){
 
-                            chat.sendMessageByServer("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 지라이슈가 조회되지 않습니다. 조회키 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
                             log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 지라이슈가 조회되지 않습니다. 조회키 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
 
                         }else{
-
-                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 지라서버.getC_jira_server_etc());
-                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
-                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_issue_key());
 
                             log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = " + ES_지라이슈.getKey());
                             if (StringUtils.equals(ES_지라이슈.getStatus().getName(),"해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." )) {
