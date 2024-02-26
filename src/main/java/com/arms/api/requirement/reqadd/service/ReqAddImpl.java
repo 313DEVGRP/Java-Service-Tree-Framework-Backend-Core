@@ -364,6 +364,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				reqStatusDTO.setC_issue_resolution_name(요구사항_이슈_해결책.getC_issue_resolution_name());
 			}
 
+			reqStatusDTO.setC_req_owner("admin");
 			reqStatusDTO.setC_issue_reporter(암스서버보고자.getName());
 			reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
 
@@ -615,6 +616,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.build();
 
 			ReqStatusDTO createReqStatus = new ReqStatusDTO();
+			createReqStatus.setC_req_owner("admin");
 
 			/* 제품 및 버전*/
 			createReqStatus.setC_title(현재제목);
