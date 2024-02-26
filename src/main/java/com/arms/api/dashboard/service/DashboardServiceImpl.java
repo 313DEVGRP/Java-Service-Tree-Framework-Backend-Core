@@ -89,7 +89,7 @@ public class DashboardServiceImpl implements DashboardService {
                         String assigneeDisplayName = displayName.get필드명();
                         String workerNodeId = versionId + "-" + assigneeAccountId;
                         // 3-1. 담당자 노드 추가
-                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName, "작업자", versionId));
+                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName + " (" + displayName.get개수() + ") ", "작업자", versionId));
                         // 3-2. 제품 버전 노드와 작업자 노드를 연결하는 link 추가
                         linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
                         versionIds.remove(Long.parseLong(versionId));
