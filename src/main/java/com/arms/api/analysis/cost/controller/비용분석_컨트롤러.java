@@ -2,6 +2,7 @@ package com.arms.api.analysis.cost.controller;
 
 import com.arms.api.analysis.cost.dto.*;
 import com.arms.api.analysis.cost.service.비용서비스;
+import com.arms.api.analysis.cost.service.연봉서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
@@ -41,6 +42,9 @@ public class 비용분석_컨트롤러 {
 
     @Autowired
     private 비용서비스 비용서비스;
+
+    @Autowired
+    private 연봉서비스 연봉서비스;
 
     @Autowired
     통계엔진통신기 통계엔진통신기;
@@ -145,9 +149,11 @@ public class 비용분석_컨트롤러 {
     @ApiOperation(value = "연봉 입력 엑셀 템플릿 다운로드")
     @ResponseBody
     @RequestMapping(value = "/excel-download.do", method = RequestMethod.POST)
-    public void 연봉입력_엑셀템플릿_다운로드(@RequestBody List<인력별_연봉데이터> 인력별_연봉데이터_리스트,
+    public void 연봉입력_엑셀템플릿_다운로드(@RequestBody List<연봉데이터> 연봉데이터리스트,
                                 @RequestParam("excelFileName") String excelFileName,
                                 HttpServletResponse httpServletResponse) throws Exception {
+
+        로그.info(" [ " + this.getClass().getName() + " :: 연봉입력_엑셀템플릿_다운로드 ]");
 
         httpServletResponse.addHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + excelFileName);
         httpServletResponse.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -156,10 +162,11 @@ public class 비용분석_컨트롤러 {
         httpServletResponse.setContentType("application/octet-stream");
 
         ExcelUtilsBase excelUtilsBase = ExcelUtilsFactory.getInstance(httpServletResponse.getOutputStream());
-        excelUtilsBase.create(List.of(인력별_연봉데이터_리스트));
+        List<샘플연봉데이터> 샘플데이터 = 연봉서비스.샘플연봉정보();
+        List<연봉엔티티> 비교한_연봉리스트 = 연봉서비스.연봉정보비교(연봉데이터리스트);
+        excelUtilsBase.create(List.of(샘플데이터, 비교한_연봉리스트));
 
     }
-
 
     /*
     *  해당 요구사항 지라키로 업데이트 이력 조회 API
