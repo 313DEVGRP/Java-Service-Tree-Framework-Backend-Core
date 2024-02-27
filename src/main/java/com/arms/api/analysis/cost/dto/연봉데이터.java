@@ -1,6 +1,7 @@
 package com.arms.api.analysis.cost.dto;
 
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -19,5 +20,26 @@ public class 연봉데이터 extends TreeBaseDTO {
 
     @JsonProperty("연봉")
     private String c_annual_income;
+
+    @JsonIgnore
+    private Long c_id;
+
+    @JsonIgnore
+    private long ref;
+
+    @JsonIgnore
+    private Long c_position;
+
+    @JsonIgnore
+    private String c_title;
+
+    @JsonIgnore
+    private String c_type;
+
+    @JsonIgnore
+    private long copy;
+
+    @JsonIgnore
+    private long multiCounter;
 
 }

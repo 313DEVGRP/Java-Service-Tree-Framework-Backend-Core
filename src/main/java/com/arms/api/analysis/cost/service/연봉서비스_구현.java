@@ -93,4 +93,97 @@ public class 연봉서비스_구현 extends TreeServiceImpl implements 연봉서
 
     }
 
+    @Override
+    @Transactional
+    public List<연봉데이터> 엑셀데이터_DB저장(List<연봉엔티티> 엑셀데이터) throws Exception {
+
+        연봉엔티티 연봉엔티티 = new 연봉엔티티();
+        List<연봉엔티티> DB_데이터 = this.getNodesWithoutRoot(연봉엔티티);
+
+        List<연봉엔티티> 엑셀_데이터 = 엑셀데이터.stream()
+                .filter(엔티티 -> {
+                    String 이름 = 엔티티.getC_name();
+                    String 키 = 엔티티.getC_key();
+                    // 이름과 키 모두 값이 있어야 함
+                    return 이름 != null && !이름.isEmpty() && 키 != null && !키.isEmpty();
+                }).collect(Collectors.toList());
+
+        // DB 데이터와 비교해서 없으면 insert, 있으면 update
+        if (DB_데이터.size() != 0) {
+            // DB 데이터와 비교
+            Map<String, 연봉엔티티> DB_맵 = DB_데이터.stream()
+                    .collect(Collectors.toMap(엔티티 -> 엔티티.getC_name() + 엔티티.getC_key(), 엔티티 -> 엔티티));
+
+            Map<String, 연봉엔티티> 엑셀_맵 = 엑셀_데이터.stream()
+                    .map(엔티티 -> {
+                        String 연봉 = 엔티티.getC_annual_income();
+                        // 연봉 값이 없거나 빈 문자열인 경우 0으로 설정
+                        if (연봉 == null || 연봉.isEmpty()) {
+                            엔티티.setC_annual_income("0");
+                        }
+                        return 엔티티;
+                    })
+                    .collect(Collectors.toMap(엔티티 -> 엔티티.getC_name() + 엔티티.getC_key(), 엔티티 -> 엔티티));
+
+            for (Map.Entry<String, 연봉엔티티> entry : 엑셀_맵.entrySet()) {
+                String 키 = entry.getKey();
+                연봉엔티티 값 = entry.getValue();
+
+                // DB_맵에 같은 키의 엔티티가 있는 경우, 그 엔티티의 연봉을 업데이트
+                if (DB_맵.containsKey(키)) {
+                    연봉엔티티 DB_엔티티 = DB_맵.get(키);
+                    if (!DB_엔티티.getC_annual_income().equals(값.getC_annual_income())) {
+                        로그.info(" [ " + this.getClass().getName() + " :: 엑셀데이터_DB저장 ] :: 업데이트 -> " + 키);
+                        연봉엔티티 업데이트_엔티티 = new 연봉엔티티();
+                        업데이트_엔티티.setC_id(DB_엔티티.getC_id());
+                        업데이트_엔티티.setC_name(DB_엔티티.getC_name());
+                        업데이트_엔티티.setC_key(DB_엔티티.getC_key());
+                        업데이트_엔티티.setC_annual_income(값.getC_annual_income());
+                        this.updateNode(업데이트_엔티티);
+                        DB_엔티티.setC_annual_income(값.getC_annual_income());
+                    }
+                }
+                // DB_맵에 같은 키의 엔티티가 없는 경우, 엑셀_엔티티를 DB_맵에 추가
+                else {
+                    로그.info(" [ " + this.getClass().getName() + " :: 엑셀데이터_DB저장 ] :: 저장 -> " + 키);
+                    this.addNode(new 연봉엔티티(값.getC_name(), 값.getC_key(), 값.getC_annual_income()));
+                    DB_맵.put(키, 값);
+                }
+            }
+
+            // 변환
+            List<연봉데이터> 결과리스트 = DB_맵.values().stream()
+                    .map(엔티티 -> {
+                        연봉데이터 데이터 = new 연봉데이터();
+                        데이터.setC_name(엔티티.getC_name());
+                        데이터.setC_key(엔티티.getC_key());
+                        데이터.setC_annual_income(엔티티.getC_annual_income());
+                        return 데이터;
+                    })
+                    .collect(Collectors.toList());
+
+            return 결과리스트;
+
+        } else {
+            // DB에 처음 저장하는 경우
+            for (연봉엔티티 연봉정보 : 엑셀_데이터) {
+                로그.info(" [ " + this.getClass().getName() + " :: 엑셀데이터_DB저장 ] :: 처음 저장 -> " + 연봉정보.getC_name()+연봉정보.getC_key());
+                this.addNode(new 연봉엔티티(연봉정보.getC_name(), 연봉정보.getC_key(), 연봉정보.getC_annual_income()));
+            }
+        }
+
+        // 변환
+        List<연봉데이터> 결과리스트 = 엑셀_데이터.stream()
+                .map(엔티티 -> {
+                    연봉데이터 데이터 = new 연봉데이터();
+                    데이터.setC_name(엔티티.getC_name());
+                    데이터.setC_key(엔티티.getC_key());
+                    데이터.setC_annual_income(엔티티.getC_annual_income());
+                    return 데이터;
+                })
+                .collect(Collectors.toList());
+
+        return 결과리스트;
+    }
+
 }

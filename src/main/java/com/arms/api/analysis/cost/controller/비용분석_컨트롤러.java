@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -165,6 +166,25 @@ public class 비용분석_컨트롤러 {
         List<샘플연봉데이터> 샘플데이터 = 연봉서비스.샘플연봉정보();
         List<연봉엔티티> 비교한_연봉리스트 = 연봉서비스.연봉정보비교(연봉데이터리스트);
         excelUtilsBase.create(List.of(샘플데이터, 비교한_연봉리스트));
+
+    }
+
+    /**
+     * 연봉 입력을 위한 엑셀 템플릿 업로드 API
+     */
+    @ApiOperation(value = "연봉 입력 엑셀 템플릿 업로드")
+    @ResponseBody
+    @RequestMapping(value = "/excel-upload.do", method = RequestMethod.POST)
+    public ModelAndView 연봉입력_엑셀템플릿_업로드(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest httpServletRequest) throws Exception {
+
+        로그.info(" [ " + this.getClass().getName() + " :: 연봉입력_엑셀템플릿_업로드 ]");
+
+        ExcelUtilsBase excelUtilsBase = ExcelUtilsFactory.getInstance(excelFile.getInputStream());
+        List<연봉엔티티> 업로드한_연봉리스트 = excelUtilsBase.read(연봉엔티티.class);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 연봉서비스.엑셀데이터_DB저장(업로드한_연봉리스트));
+        return modelAndView;
 
     }
 

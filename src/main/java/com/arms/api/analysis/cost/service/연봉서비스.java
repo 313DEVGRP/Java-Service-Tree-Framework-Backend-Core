@@ -13,4 +13,5 @@ public interface 연봉서비스 extends TreeService {
 
     List<연봉엔티티> 연봉정보비교(List<연봉데이터> 연봉데이터) throws Exception;
 
+    List<연봉데이터> 엑셀데이터_DB저장(List<연봉엔티티> 엑셀데이터) throws Exception;
 }
