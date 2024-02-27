@@ -15,5 +15,5 @@ public class 요구사항_지라이슈키별_업데이트_목록_데이터 {
     String parentReqKey;
     String updated;
     String resolutiondate;
-    private 지라이슈.담당자 assignee;
+    Boolean isReq;
 }
