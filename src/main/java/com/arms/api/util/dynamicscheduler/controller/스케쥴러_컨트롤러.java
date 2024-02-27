@@ -274,7 +274,11 @@ public class 스케쥴러_컨트롤러{
                         }else{
 
                             log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = " + ES_지라이슈.getKey());
-                            if (StringUtils.equals(ES_지라이슈.getStatus().getName(),"해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." )) {
+                            if ( ES_지라이슈.getKey() == null ){
+                                log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = null 이며, 확인이 필요합니다." );
+                                log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = " + ES_지라이슈.getId());
+                            }
+                            else if (StringUtils.equals(ES_지라이슈.getStatus().getName(),"해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." )) {
                                 log.info("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다. ES_지라이슈 = " + ES_지라이슈.getKey());
                             } else {
                                 log.info("ES_지라이슈 = " + ES_지라이슈.getUpdated());
