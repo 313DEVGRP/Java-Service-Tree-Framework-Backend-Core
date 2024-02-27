@@ -52,10 +52,15 @@ public class ScopeServiceImpl implements ScopeService {
         Long pdServiceLink = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
         List<Long> pdServiceVersionLinks = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
     
-        List<ReqStatusEntity> reqStatuses = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceLink, reqStatusDTO);
-    
         List<TreeBarDTO> treeBarList = new ArrayList<>();
-    
+
+        List<ReqStatusEntity> reqStatuses = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceLink, reqStatusDTO);
+
+        if (reqStatuses == null) {
+            log.info("ScopeServiceImpl :: treebar :: reqStatuses is null");
+            return treeBarList;
+        }
+
         // 1. 제품 조회
         PdServiceEntity pdServiceEntity = new PdServiceEntity();
         pdServiceEntity.setC_id(pdServiceLink);
@@ -77,11 +82,16 @@ public class ScopeServiceImpl implements ScopeService {
     
         // 5. 각 요구사항 별 담당자와 빈도수를 조회 (Top 10)
         ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청);
-    
-        검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(외부API응답.getBody()).orElse(new 검색결과_목록_메인());
+
+        검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(외부API응답.getBody()).orElse(null);
+
+        if (검색결과목록메인 == null) {
+            log.info("ScopeServiceImpl :: treebar :: 검색결과목록메인 is null");
+            return treeBarList;
+        }
     
         Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록메인.get검색결과()).orElse(Collections.emptyMap());
-    
+
         List<검색결과> groupByParentReqKey = Optional.ofNullable(검색결과.get("group_by_parentReqKey")).orElse(Collections.emptyList());
     
         // 6. 담당자가 많은 요구사항 Top 10 추출. 담당자가 없는 요구사항은 제외됩니다.
@@ -96,7 +106,6 @@ public class ScopeServiceImpl implements ScopeService {
         List<String> issueKeys = top10Requirements.stream()
                 .map(com.arms.api.util.external_communicate.dto.search.검색결과::get필드명)
                 .collect(Collectors.toList());
-    
     
         // 8. requirements 리스트를 필터링하여 id 값이 issueKeys 에 있는 요소만 선택
         List<TreeBarDTO> filteredRequirements = filteredRequirements(requirements, issueKeys);
