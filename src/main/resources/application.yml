@@ -1,6 +1,6 @@
 spring:
   application:
-    name: javaServiceTreeFrameworkBakcendCore
+    name: javaServiceTreeFrameworkBackendCore
   mvc:
     async:
       request-timeout: 7200
@@ -48,8 +48,3 @@ requirement:
     complete:
       keyword: 해결됨,닫힘
 
-slack:
-  service-name: ${spring.application.name}
-  token: xoxb-6506875664277-6522692878945-YggrQZUrJpi5y85DF7DcVxmP
-  profile: ${spring.profiles.active}
-  url: https://slack.com/
