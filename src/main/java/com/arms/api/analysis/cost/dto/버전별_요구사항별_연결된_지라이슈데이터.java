@@ -10,8 +10,8 @@ import java.util.Map;
 
 @Setter
 @Getter
-public class 버전별_요구사항별_연결된지_지라이슈데이터 {
-    private Map<Long, Map<Long, List<요구사항_데이터>> > 버전별_요구사항별_연결된지_지라이슈 = new HashMap<>();
+public class 버전별_요구사항별_연결된_지라이슈데이터 {
+    private Map<String, Map<Long, List<요구사항_데이터>> > 버전별_요구사항별_연결된지_지라이슈 = new HashMap<>();
 
     @Getter
     @Setter
@@ -26,6 +26,7 @@ public class 버전별_요구사항별_연결된지_지라이슈데이터 {
         private String c_req_name;
         private String c_issue_key;
         private Long cost;
+        private String c_req_pdservice_versionset_link;
     }
     public static 요구사항_데이터 필요데이터(ReqStatusEntity entity) {
         요구사항_데이터 요구사항_데이터 = new 요구사항_데이터();
@@ -38,6 +39,7 @@ public class 버전별_요구사항별_연결된지_지라이슈데이터 {
         요구사항_데이터.setC_req_link(entity.getC_req_link());
         요구사항_데이터.setC_req_name(entity.getC_req_name());
         요구사항_데이터.setC_issue_key(entity.getC_issue_key());
+        요구사항_데이터.setC_req_pdservice_versionset_link(entity.getC_req_pdservice_versionset_link());
 
         return 요구사항_데이터;
     }
