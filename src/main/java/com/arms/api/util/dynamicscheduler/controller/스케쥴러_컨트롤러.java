@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -104,25 +105,102 @@ public class 스케쥴러_컨트롤러{
                         chat.sendMessageByEngine("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
 
                     } else {
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 제품서비스 c_id => {}", 제품서비스.getC_id());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
+                        String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
+                        if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
+                            Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
+                                    .filter(s -> !s.isEmpty())
+                                    .map(Long::valueOf)
+                                    .toArray(Long[]::new);
 
-                        int 저장결과 = 0;
-
-                        if( 요구사항_이슈_엔티티.getC_pds_version_link() == null ){
-
-                            저장결과 = 0;
-
-                        }else{
-
-                            저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
+                            int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
                                     Long.parseLong(지라서버.getC_jira_server_etc()),
                                     요구사항_이슈_엔티티.getC_issue_key(),
                                     요구사항_이슈_엔티티.getC_pdservice_link(),
-                                    요구사항_이슈_엔티티.getC_pds_version_link()
+                                    버전_아이디_목록_배열
                             );
 
-                        }
+                            if( 저장결과 == 1){
+                                chat.sendMessageByServer("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES에 저장되었습니다");
+                            }else{
+                                chat.sendMessageByServer("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES에 중복 저장되었습니다, 확인이 필요합니다.");
+                            }
 
-                        log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                        } else {
+                            chat.sendMessageByServer("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 버전_목록_문자열이 없습니다. 진행중인 ReqStatusEntity c_id => "
+                                    + 요구사항_이슈_엔티티.getC_id());
+                            log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key());
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+        return "success";
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/pdservice/reqstatus/increment/loadToES"},
+            method = {RequestMethod.GET}
+    )
+    public String 증분이슈_검색엔진_벌크_저장(ModelMap model, HttpServletRequest request) throws Exception {
+
+        //제품을 조회해 온다.
+        PdServiceEntity 제품서비스_조회 = new PdServiceEntity();
+        List<PdServiceEntity> 제품서비스_리스트 = pdService.getNodesWithoutRoot(제품서비스_조회);
+
+        for( PdServiceEntity 제품서비스 : 제품서비스_리스트 ){
+
+            Long 제품서비스_아이디 = 제품서비스.getC_id();
+
+            ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+            List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+
+            if(결과 == null){
+                chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");
+            }else {
+
+                for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
+                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
+                    지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
+                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
+
+                    if( 지라서버 == null ){
+
+                        chat.sendMessageByEngine("지라서버가 삭제된것 같습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
+
+                    } else {
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 제품서비스 c_id => {}", 제품서비스.getC_id());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
+                        String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
+                        if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
+                            Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
+                                    .filter(s -> !s.isEmpty())
+                                    .map(Long::valueOf)
+                                    .toArray(Long[]::new);
+
+                            int 저장결과 = 엔진통신기.증분이슈_검색엔진_벌크_저장(
+                                    Long.parseLong(지라서버.getC_jira_server_etc()),
+                                    요구사항_이슈_엔티티.getC_issue_key(),
+                                    요구사항_이슈_엔티티.getC_pdservice_link(),
+                                    버전_아이디_목록_배열
+                            );
+                            log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
+                        } else {
+
+                            log.error("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 버전_목록_문자열이 없습니다. 진행중인 ReqStatusEntity c_id => {} 의 버전_목록이 없습니다."
+                                    , 요구사항_이슈_엔티티.getC_id());
+                            log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key());
+                        }
                     }
 
                 }
@@ -171,11 +249,18 @@ public class 스케쥴러_컨트롤러{
 
                     } else {
 
-                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 지라서버.getC_jira_server_etc());
-                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
-                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_issue_key());
 
+                        if ( 요구사항_이슈_엔티티.getC_issue_key() == null ){
 
+                            chat.sendMessageByServer("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 이슈키가 없습니다. C_ID = " + 요구사항_이슈_엔티티.getC_id());
+
+                        } else {
+
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 지라서버.getC_jira_server_etc());
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
+                            log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_issue_key());
+
+                        }
                         지라이슈 ES_지라이슈 = 엔진통신기.요구사항이슈_조회(
                             Long.parseLong(지라서버.getC_jira_server_etc()),
                             요구사항_이슈_엔티티.getC_jira_project_key(),
@@ -189,7 +274,11 @@ public class 스케쥴러_컨트롤러{
                         }else{
 
                             log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = " + ES_지라이슈.getKey());
-                            if (StringUtils.equals(ES_지라이슈.getStatus().getName(),"해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." )) {
+                            if ( ES_지라이슈.getKey() == null ){
+                                log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = null 이며, 확인이 필요합니다." );
+                                log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: ES_지라이슈 = " + ES_지라이슈.getId());
+                            }
+                            else if (StringUtils.equals(ES_지라이슈.getStatus().getName(),"해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다." )) {
                                 log.info("해당 요구사항은 지라서버에서 조회가 되지 않는 상태입니다. ES_지라이슈 = " + ES_지라이슈.getKey());
                             } else {
                                 log.info("ES_지라이슈 = " + ES_지라이슈.getUpdated());
@@ -203,7 +292,7 @@ public class 스케쥴러_컨트롤러{
                                     요구사항_이슈_엔티티.setC_issue_status_name(ES_지라이슈.getStatus().getName());
 
                                     ReqStatusDTO statusDTO = modelMapper.map(요구사항_이슈_엔티티, ReqStatusDTO.class);
-                                    내부통신기.updateStatusNode("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
+                                    내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
                                 }
                             }
                         }

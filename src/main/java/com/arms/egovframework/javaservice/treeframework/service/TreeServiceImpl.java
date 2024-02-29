@@ -396,6 +396,23 @@ public class TreeServiceImpl implements TreeService {
                 field.set(alterTargetNode, value);
             }
 
+            /**
+             * 이 조건문은 필드 이름이 "c_issue_delete_date", "c_req_end_date" 인 경우 특정 동작을 수행합니다.
+             * 원칙적으로 updateNode 메소드의 경우 null 값인 필드는 업데이트 하지 않도록 설계되어 있으나,
+             * Soft Delete 처리를 위해 예외사항을 추가.
+             * @author dumbbelloper
+             * @since 2024-02-02
+             */
+            if("c_issue_delete_date".equals(field.getName())) {
+                field.setAccessible(true);
+                field.set(alterTargetNode, value);
+            }
+
+            if("c_req_end_date".equals(field.getName())) {
+                field.setAccessible(true);
+                field.set(alterTargetNode, value);
+            }
+
         }
 
         treeDao.merge(alterTargetNode);

@@ -76,6 +76,7 @@ public class ErrorControllerAdvice {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> onException(Exception e) {
 
+        e.printStackTrace();
         log.error("[onException] ,cause = {}, errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e), NestedExceptionUtils.getMostSpecificCause(e).getMessage());
 
         return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);

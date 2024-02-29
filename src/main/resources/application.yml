@@ -42,3 +42,8 @@ server:
     session:
       timeout: 7200
   contextPath: /
+
+requirement:
+  state:
+    complete:
+      keyword: 해결됨,닫힘

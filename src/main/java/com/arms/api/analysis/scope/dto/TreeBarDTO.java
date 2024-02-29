@@ -19,7 +19,7 @@ public class TreeBarDTO {
     public TreeBarDTO(ReqStatusEntity reqStatusEntity) {
         this.id = reqStatusEntity.getC_issue_key();
         this.name = reqStatusEntity.getC_issue_key() + " - " +reqStatusEntity.getC_title();
-        this.parent = reqStatusEntity.getC_pds_version_link().toString();
+        this.parent = reqStatusEntity.getC_req_pdservice_versionset_link().toString();
         this.value = 0;
         this.color = "";
         this.type = "requirement";

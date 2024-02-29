@@ -19,8 +19,17 @@ public interface 엔진통신기 {
      * 공통
      */
     @PostMapping("/{connectId}/jira/issue")
-    public 지라이슈_데이터 이슈_생성하기(@PathVariable("connectId") Long 연결_아이디,
-                            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터);
+    public 지라이슈_데이터 이슈_생성하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
+    );
+
+    @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}")
+    public Map<String,Object> 이슈_수정하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+            @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
+    );
 
     @GetMapping("/{connectId}/jira/project/list")
     public List<지라프로젝트_데이터> 지라_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
@@ -62,12 +71,19 @@ public interface 엔진통신기 {
             @PathVariable("connectId") Long 지라서버_아이디,
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
-            @RequestParam("pdServiceVersion") Long 제품서비스_버전_아이디);
+            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열);
+
+    @GetMapping("/engine/jira/{connectId}/issue/increment/loadToES/bulk/{issueKey}")
+    public int 증분이슈_검색엔진_벌크_저장(
+            @PathVariable("connectId") Long 지라서버_아이디,
+            @PathVariable("issueKey") String 이슈_키,
+            @RequestParam("pdServiceId") Long 제품서비스_아이디,
+            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열);
 
     @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
                                               @PathVariable("pdService") Long 제품서비스_아이디,
-                                              @PathVariable("pdServiceVersion") Long 제품서비스_버전_아이디);
+                                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디);
 
     /*
      * 요구사항 상세 페이지

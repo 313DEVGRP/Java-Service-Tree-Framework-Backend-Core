@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -17,6 +19,8 @@ import java.util.List;
 public class 지라이슈 {
 
     private String id;
+    private boolean recent;
+
     private Long jira_server_id;
     private Date timestamp;
     private String issueID;
@@ -49,6 +53,9 @@ public class 지라이슈 {
     private String summary;
 
     private Long pdServiceId;
+
+    private Long[] pdServiceVersions;
+
     private Long pdServiceVersion;
 
     private String _class; //추가
@@ -297,5 +304,15 @@ public class 지라이슈 {
         private String accountId;
         @JsonProperty("worklogs_updateAuthor_emailAddress")
         private String emailAddress;
+    }
+
+    public List<지라이슈> 지라버전별로_분해가져오기(){
+        return Arrays.stream(this.getPdServiceVersions()).map(
+                a->{
+                    this.pdServiceVersion = a.longValue();
+                    return this;
+                }
+        ).collect(Collectors.toList());
+
     }
 }

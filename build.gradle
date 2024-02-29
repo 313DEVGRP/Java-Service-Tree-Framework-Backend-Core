@@ -100,7 +100,7 @@ ext {
 
     //version 정보
     majorVersion = 24
-    minorVersion = 02
+    minorVersion = 03
     //patchVersion = auto generation
 
     //mac 사용자 아래 114까지 주석처리!!
@@ -254,6 +254,12 @@ dependencies {
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.6.15.Final'
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.5'
     implementation group: 'javax.mail', name: 'mail', version: '1.4.7'
+
+    // mapstruct
+    implementation "org.mapstruct:mapstruct:1.5.5.Final"
+    testImplementation "org.mapstruct:mapstruct:1.5.5.Final"
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
 
     // modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'
