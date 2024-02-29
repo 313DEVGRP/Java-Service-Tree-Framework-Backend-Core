@@ -2,6 +2,7 @@ package com.arms.api.analysis.cost.service;
 
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
+import com.arms.api.analysis.cost.dto.연봉엔티티;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
@@ -19,9 +20,8 @@ import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품
 import com.arms.api.util.external_communicate.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -53,6 +53,9 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     @Qualifier("reqStatus")
     private ReqStatus reqStatus;
+
+    @Autowired
+    private 연봉서비스 연봉서비스;
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -112,6 +115,15 @@ public class 비용서비스_구현 implements 비용서비스 {
         Map<String, Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>>> 버전요구사항데이터Map = new HashMap<>();
         Map<String, 버전요구사항별_담당자데이터.담당자데이터> 전체담당자Map = new HashMap<>();
 
+        // 연봉 정보 DB 조회
+        Map<String, 연봉엔티티> 연봉정보_맵 = null;
+        try {
+            연봉정보_맵 = 연봉서비스.모든_연봉정보_맵();
+        } catch (Exception e) {
+            로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 디비에서 연봉 정보를 조회하는 데 실패했습니다.");
+        }
+        Map<String, 연봉엔티티> 최종_연봉정보_맵 = 연봉정보_맵;
+
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
@@ -132,12 +144,20 @@ public class 비용서비스_구현 implements 비용서비스 {
                         requirement.get하위검색결과().get("assignees").forEach(assignee -> {
                             String assigneeAccountId = assignee.get필드명();
 
+                            // 연봉 값 세팅
+                            Long 연봉 = Optional.ofNullable(최종_연봉정보_맵)
+                                    .flatMap(맵 -> Optional.ofNullable(맵.get(assigneeAccountId)))
+                                    .map(연봉엔티티::getC_annual_income)
+                                    .filter(s -> !s.trim().isEmpty())
+                                    .map(NumberUtils::toLong)
+                                    .orElse(0L);
+
                             assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
                                 String assigneeDisplayName = displayName.get필드명();
 
                                 버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
                                         .이름(assigneeDisplayName)
-                                        .연봉(0L)
+                                        .연봉(연봉)
                                         .build();
 
                                 담당자데이터Map.put(assigneeAccountId, 담당자데이터);
