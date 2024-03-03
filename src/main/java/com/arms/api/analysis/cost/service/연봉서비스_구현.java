@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -186,4 +187,12 @@ public class 연봉서비스_구현 extends TreeServiceImpl implements 연봉서
         return 결과리스트;
     }
 
+    @Override
+    public Map<String, 연봉엔티티> 모든_연봉정보_맵() throws Exception {
+
+        연봉엔티티 엔티티 = new 연봉엔티티();
+        Function<연봉엔티티, String> 키 = 연봉엔티티::getC_key;
+        Function<연봉엔티티, 연봉엔티티> 값 = Function.identity();
+        return this.getNodesWithoutRootMap(엔티티, 키, 값);
+    }
 }

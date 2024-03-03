@@ -19,6 +19,10 @@ import com.arms.egovframework.javaservice.treeframework.errors.exception.Invalid
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.arms.notification.slack.SlackNotificationService;
+import com.arms.notification.slack.SlackProperty;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.core.NestedExceptionUtils;
@@ -41,8 +45,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 **/
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class ErrorControllerAdvice {
     private static final List<ErrorCode> SPECIFIC_ALERT_TARGET_ERROR_CODE_LIST = new ArrayList<>();
+    private final SlackNotificationService slackNotificationService;
 
     private ResponseEntity<ApiResult<?>> newResponse(Throwable throwable, HttpStatus status) {
         return newResponse(throwable.getMessage(), status);
@@ -75,10 +81,9 @@ public class ErrorControllerAdvice {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<?> onException(Exception e) {
-
+        slackNotificationService.sendMessageToChannel(SlackProperty.Channel.backend, e);
         e.printStackTrace();
         log.error("[onException] ,cause = {}, errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e), NestedExceptionUtils.getMostSpecificCause(e).getMessage());
-
         return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
     /**
@@ -88,7 +93,7 @@ public class ErrorControllerAdvice {
      */
     @ExceptionHandler(value = BaseException.class)
     public ResponseEntity<?> onBaseException(BaseException e) {
-
+        slackNotificationService.sendMessageToChannel(SlackProperty.Channel.backend, e);
         if (SPECIFIC_ALERT_TARGET_ERROR_CODE_LIST.contains(e.getErrorCode())) {
             log.error("[BaseException] ,cause = {}, errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e), NestedExceptionUtils.getMostSpecificCause(e).getMessage());
         } else {
