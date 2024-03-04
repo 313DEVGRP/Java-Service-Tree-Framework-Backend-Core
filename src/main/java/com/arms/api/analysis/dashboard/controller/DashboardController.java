@@ -38,7 +38,7 @@ public class DashboardController {
     }
 
     @GetMapping("/aggregation/flat")
-    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonFlatAggregation(AggregationRequestDTO aggregationRequestDTO) {
+    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonFlatAggregation(@Validated AggregationRequestDTO aggregationRequestDTO) {
         EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
         return ResponseEntity.ok(CommonResponse.success(dashboardService.commonFlatAggregation(engineAggregationRequestDTO)));
     }
