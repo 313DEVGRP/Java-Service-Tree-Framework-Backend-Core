@@ -16,7 +16,7 @@ import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
-import com.arms.api.util.external_communicate.dto.IsReqType;
+import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.external_communicate.dto.지라이슈;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;

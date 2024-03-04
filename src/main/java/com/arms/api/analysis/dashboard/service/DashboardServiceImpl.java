@@ -1,15 +1,16 @@
-package com.arms.api.dashboard.service;
+package com.arms.api.analysis.dashboard.service;
 
-import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.dashboard.model.SankeyData;
-import com.arms.api.dashboard.model.SankeyData.SankeyLink;
-import com.arms.api.dashboard.model.SankeyData.SankeyNode;
-import com.arms.api.dashboard.model.Worker;
-import com.arms.api.dashboard.model.제품버전목록;
+import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.analysis.dashboard.model.SankeyData;
+import com.arms.api.analysis.dashboard.model.SankeyData.SankeyLink;
+import com.arms.api.analysis.dashboard.model.SankeyData.SankeyNode;
+import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.analysis.dashboard.model.제품버전목록;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
@@ -34,13 +35,13 @@ public class DashboardServiceImpl implements DashboardService {
     private final PdServiceVersion pdServiceVersion;
 
     @Override
-    public 검색결과_목록_메인 commonNestedAggregation(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(지라이슈_제품_및_제품버전_검색요청).getBody();
+    public 검색결과_목록_메인 commonNestedAggregation(final EngineAggregationRequestDTO engineAggregationRequestDTO) {
+        return 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(engineAggregationRequestDTO).getBody();
     }
 
     @Override
-    public 검색결과_목록_메인 commonFlatAggregation(final 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청).getBody();
+    public 검색결과_목록_메인 commonFlatAggregation(final EngineAggregationRequestDTO engineAggregationRequestDTO) {
+        return 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody();
     }
 
     @Override
@@ -119,8 +120,8 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<Worker> 작업자별_요구사항_관여도(트리맵_검색요청 트리맵_검색요청) throws Exception {
-        List<Long> pdServiceVersionLinks = 트리맵_검색요청.getPdServiceVersionLinks();
+    public List<Worker> 작업자별_요구사항_관여도(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+        List<Long> pdServiceVersionLinks = engineAggregationRequestDTO.getPdServiceVersionLinks();
         List<제품버전목록> 제품버전목록데이터 = pdServiceVersion.getVersionListByCids(pdServiceVersionLinks).stream()
             .map(entity -> {
                 제품버전목록 model = new 제품버전목록();
@@ -129,10 +130,8 @@ public class DashboardServiceImpl implements DashboardService {
                 return model;
             })
             .collect(Collectors.toList());
-            
-            트리맵_검색요청.set제품버전목록(제품버전목록데이터);
-        
-        List<Worker> workers = 통계엔진통신기.작업자별_요구사항_관여도(트리맵_검색요청).getBody();
+
+        List<Worker> workers = 통계엔진통신기.작업자별_요구사항_관여도(트리맵_검색요청.of(engineAggregationRequestDTO, 제품버전목록데이터)).getBody();
 
         return workers;
     }

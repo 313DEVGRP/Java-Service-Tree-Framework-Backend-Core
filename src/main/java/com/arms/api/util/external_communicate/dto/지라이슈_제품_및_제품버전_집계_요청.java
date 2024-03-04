@@ -1,5 +1,6 @@
 package com.arms.api.util.external_communicate.dto;
 
+import com.arms.api.analysis.common.IsReqType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

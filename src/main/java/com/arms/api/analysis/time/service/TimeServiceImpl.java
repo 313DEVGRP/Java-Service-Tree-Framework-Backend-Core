@@ -5,6 +5,7 @@ import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_�
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.내부통신기;
