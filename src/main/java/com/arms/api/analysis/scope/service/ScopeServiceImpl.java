@@ -9,10 +9,10 @@ import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
-import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.external_communicate.내부통신기;
 import com.arms.api.util.external_communicate.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -35,22 +34,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ScopeServiceImpl implements ScopeService {
-
-    @Autowired
-    private ReqAdd reqAdd;
-
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private final ReqAdd reqAdd;
+
     private final PdService pdService;
+
     private final 내부통신기 내부통신기;
+
     private final 통계엔진통신기 통계엔진통신기;
+
     private final Gson gson;
 
     @Override
-    public List<TreeBarDTO> treeBar(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+    public List<TreeBarDTO> treeBar(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
         ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-        Long pdServiceLink = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
-        List<Long> pdServiceVersionLinks = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
+        Long pdServiceLink = engineAggregationRequestDTO.getPdServiceLink();
+        List<Long> pdServiceVersionLinks = engineAggregationRequestDTO.getPdServiceVersionLinks();
     
         List<TreeBarDTO> treeBarList = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public class ScopeServiceImpl implements ScopeService {
     
         // 3. 제품 버전 조회
         List<PdServiceVersionEntity> productVersions = product.getPdServiceVersionEntities().stream().filter(
-                pdServiceVersionEntity -> 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
+                pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
         ).sorted(Comparator.comparing(PdServiceVersionEntity::getC_id)).collect(Collectors.toList());
     
         // 4. 요구사항 조회
@@ -81,7 +81,7 @@ public class ScopeServiceImpl implements ScopeService {
         List<TreeBarDTO> requirements = reqStatusEntityList.stream().map(TreeBarDTO::new).collect(Collectors.toList());
     
         // 5. 각 요구사항 별 담당자와 빈도수를 조회 (Top 10)
-        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청);
+        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(외부API응답.getBody()).orElse(null);
 

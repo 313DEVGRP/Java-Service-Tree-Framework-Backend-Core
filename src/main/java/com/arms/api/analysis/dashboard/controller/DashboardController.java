@@ -1,18 +1,21 @@
-package com.arms.api.dashboard.controller;
+package com.arms.api.analysis.dashboard.controller;
 
-import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.dashboard.model.SankeyData;
-import com.arms.api.dashboard.model.Worker;
-import com.arms.api.dashboard.service.DashboardService;
+import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.AggregationMapper;
+import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.analysis.dashboard.model.SankeyData;
+import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.analysis.dashboard.service.DashboardService;
+import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.api.util.external_communicate.dto.트리맵_검색요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,15 +29,18 @@ import java.util.Map;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final AggregationMapper aggregationMapper;
 
     @GetMapping("/aggregation/nested")
-    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonNestedAggregation(지라이슈_제품_및_제품버전_검색요청)));
+    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonNestedAggregation(@Validated AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonNestedAggregation(engineAggregationRequestDTO)));
     }
 
     @GetMapping("/aggregation/flat")
-    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonFlatAggregation(지라이슈_제품_및_제품버전_검색요청)));
+    public ResponseEntity<ApiResult<검색결과_목록_메인>> commonFlatAggregation(AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.commonFlatAggregation(engineAggregationRequestDTO)));
     }
 
     /**
@@ -57,8 +63,9 @@ public class DashboardController {
      * Apache Echarts TreeMap Chart API - Dashboard, Analysis Resource
      */
     @GetMapping("/assignees-requirements-involvements")
-    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(트리맵_검색요청 트리맵_검색요청) throws Exception {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(트리맵_검색요청)));
+    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(engineAggregationRequestDTO)));
     }
 
     /**

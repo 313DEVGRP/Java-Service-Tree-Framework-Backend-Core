@@ -2,8 +2,9 @@ package com.arms.api.util.external_communicate;
 
 import com.arms.api.analysis.cost.dto.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.dashboard.model.Worker;
+import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.api.util.external_communicate.dto.search.검색결과;
 import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
@@ -21,12 +22,12 @@ public interface 통계엔진통신기 {
 
     @GetMapping("/engine/jira/dashboard/aggregation/nested")
     ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_집계_nested(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @GetMapping("/engine/jira/dashboard/aggregation/flat")
     ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_집계_flat(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @GetMapping("/engine/jira/dashboard/requirements-jira-issue-statuses")
