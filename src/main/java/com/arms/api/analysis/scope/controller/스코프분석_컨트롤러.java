@@ -5,7 +5,7 @@ import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자�
 import com.arms.api.analysis.scope.service.ScopeService;
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.common.AggregationMapper;
-import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
@@ -15,8 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.arms.api.util.external_communicate.통계엔진통신기;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 
 import java.util.*;
 

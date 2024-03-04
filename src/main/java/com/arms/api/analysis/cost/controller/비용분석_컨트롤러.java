@@ -7,7 +7,7 @@ import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;

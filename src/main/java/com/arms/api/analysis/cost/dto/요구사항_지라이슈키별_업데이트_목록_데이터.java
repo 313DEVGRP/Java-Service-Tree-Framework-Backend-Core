@@ -1,6 +1,5 @@
 package com.arms.api.analysis.cost.dto;
 
-import com.arms.api.util.external_communicate.dto.지라이슈;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -42,10 +42,10 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private com.arms.api.util.external_communicate.엔진통신기 엔진통신기;
+	private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
 
 	@Autowired
-	private com.arms.api.util.external_communicate.내부통신기 내부통신기;
+	private com.arms.api.util.communicate.internal.내부통신기 내부통신기;
 
 	@Autowired
 	private GlobalTreeMapService globalTreeMapService;

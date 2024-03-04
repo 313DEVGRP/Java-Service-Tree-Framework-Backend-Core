@@ -1,7 +1,7 @@
 package com.arms.api.analysis.scope.service;
 
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
-import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
 
 import java.util.List;
