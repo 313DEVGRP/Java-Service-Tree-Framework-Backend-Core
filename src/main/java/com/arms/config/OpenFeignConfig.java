@@ -4,6 +4,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableFeignClients("com.arms.api.util.external_communicate")
+@EnableFeignClients("com.arms.api.util.communicate")
 public class OpenFeignConfig {
 }

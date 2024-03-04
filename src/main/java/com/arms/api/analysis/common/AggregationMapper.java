@@ -1,6 +1,6 @@
 package com.arms.api.analysis.common;
 
-import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 

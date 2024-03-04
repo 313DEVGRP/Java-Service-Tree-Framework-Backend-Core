@@ -9,12 +9,12 @@ import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
-import com.arms.api.util.communicate.external.request.EngineAggregationRequestDTO;
-import com.arms.api.util.external_communicate.dto.search.검색결과;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
-import com.arms.api.util.external_communicate.내부통신기;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -104,7 +104,7 @@ public class ScopeServiceImpl implements ScopeService {
     
         // 7. top10 요소들의 필드명 추출
         List<String> issueKeys = top10Requirements.stream()
-                .map(com.arms.api.util.external_communicate.dto.search.검색결과::get필드명)
+                .map(com.arms.api.util.communicate.external.response.aggregation.검색결과::get필드명)
                 .collect(Collectors.toList());
     
         // 8. requirements 리스트를 필터링하여 id 값이 issueKeys 에 있는 요소만 선택
