@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost","http://127.0.0.1","http://localhost:9999","http://127.0.0.1:9999","http://313.co.kr","http://www.313.co.kr","https://313.co.kr","https://www.313.co.kr","http://313.co.kr:9999","http://www.313.co.kr:9999","http://a-rms.net","http://www.a-rms.net","https://a-rms.net","https://www.a-rms.net","http://www.a-rms.net:9999","http://a-rms.net:9999","http://mad-dev.megazone.com","192.168.4.141")
+                .allowedOrigins("http://localhost","http://127.0.0.1","http://localhost:9999","http://127.0.0.1:9999","http://313.co.kr","http://www.313.co.kr","https://313.co.kr","https://www.313.co.kr","http://313.co.kr:9999","http://www.313.co.kr:9999","http://a-rms.net","http://www.a-rms.net","https://a-rms.net","https://www.a-rms.net","http://www.a-rms.net:9999","http://a-rms.net:9999","http://mad-dev.megazone.com","http://192.168.4.141")
                 .allowedMethods(
                         HttpMethod.GET.name(),
                         HttpMethod.HEAD.name(),
