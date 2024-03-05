@@ -34,12 +34,12 @@ public interface 통계엔진통신기 {
 
     @GetMapping("/engine/jira/dashboard/requirements-jira-issue-statuses")
     ResponseEntity<Map<String, RequirementJiraIssueAggregationResponse>> 제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @GetMapping("/engine/jira/dashboard/version-assignees")
     ResponseEntity<List<검색결과>> 제품_혹은_제품버전들의_담당자목록(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @PostMapping("/engine/jira/dashboard/assignees-requirements-involvements")
@@ -57,7 +57,7 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/normal/{pdServiceId}")
     ResponseEntity<검색결과_목록_메인> 제품서비스_일반_통계(
             @PathVariable("pdServiceId") Long 제품서비스_아이디,
-            @SpringQueryMap 지라이슈_일반_집계_요청 지라이슈_검색_일반_요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @GetMapping("/engine/jira/dashboard/isreq-normal/{pdServiceId}")
@@ -69,7 +69,7 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/exclusion-isreq-normal/{pdServiceId}")
     ResponseEntity<Map<String, Object>> 제품서비스_요구사항제외_일반_통계(
             @PathVariable("pdServiceId") Long 제품서비스_아이디,
-            @SpringQueryMap 지라이슈_일반_집계_요청 지라이슈_검색_일반_요청);
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO);
 
     @GetMapping("/engine/jira/dashboard/normal-version/{pdServiceId}")
     ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계(
