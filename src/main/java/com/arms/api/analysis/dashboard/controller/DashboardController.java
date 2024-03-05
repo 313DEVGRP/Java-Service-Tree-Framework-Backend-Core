@@ -8,8 +8,6 @@ import com.arms.api.analysis.dashboard.model.Worker;
 import com.arms.api.analysis.dashboard.service.DashboardService;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
-import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-
 @Slf4j
 @RestController
 @RequestMapping(value = "/arms/dashboard")
@@ -29,6 +26,7 @@ import java.util.Map;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+
     private final AggregationMapper aggregationMapper;
 
     @GetMapping("/aggregation/nested")
@@ -47,23 +45,25 @@ public class DashboardController {
      * C3 Donut Chart API - Dashboard
      */
     @GetMapping("/requirements-jira-issue-statuses")
-    public ResponseEntity<ApiResult<Map<String, RequirementJiraIssueAggregationResponse>>> requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.requirementsJiraIssueStatuses(지라이슈_제품_및_제품버전_검색요청)));
+    public ResponseEntity<ApiResult<Map<String, RequirementJiraIssueAggregationResponse>>> requirementsJiraIssueStatuses(@Validated AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.requirementsJiraIssueStatuses(engineAggregationRequestDTO)));
     }
 
     /**
      * D3 Sankey Chart API - Dashboard, Analysis Resource
      */
     @GetMapping("/version-assignees")
-    public ResponseEntity<ApiResult<SankeyData>> assigneesByPdServiceVersion(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.sankeyChartAPI(지라이슈_제품_및_제품버전_검색요청)));
+    public ResponseEntity<ApiResult<SankeyData>> assigneesByPdServiceVersion(@Validated AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.sankeyChartAPI(engineAggregationRequestDTO)));
     }
 
     /**
-     * Apache Echarts TreeMap Chart API - Dashboard, Analysis Resource
+     * TreeMap Chart API - Dashboard, Analysis Resource
      */
     @GetMapping("/assignees-requirements-involvements")
-    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+    ResponseEntity<ApiResult<List<Worker>>> 작업자별_요구사항_관여도(@Validated AggregationRequestDTO aggregationRequestDTO) throws Exception {
         EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
         return ResponseEntity.ok(CommonResponse.success(dashboardService.작업자별_요구사항_관여도(engineAggregationRequestDTO)));
     }
@@ -80,32 +80,27 @@ public class DashboardController {
      * Dashboard
      */
     @GetMapping("/normal/{pdServiceId}")
-    ResponseEntity<ApiResult<검색결과_목록_메인>> normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_일반_통계(pdServiceId, 검색요청_데이터)));
-    }
-
-    /**
-     * 현재 미사용
-     */
-    @GetMapping("/exclusion-isreq-normal/{pdServiceId}")
-    ResponseEntity<ApiResult<Map<String, Object>>> exclusionIsReqNormalAggregation(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계(pdServiceId, 검색요청_데이터)));
+    ResponseEntity<ApiResult<검색결과_목록_메인>> normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_일반_통계(pdServiceId, engineAggregationRequestDTO)));
     }
 
     /**
      * Dashboard
      */
     @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
-    ResponseEntity<ApiResult<List<Object>>> getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계_TOP_5(pdServiceId, 검색요청_데이터)));
+    ResponseEntity<ApiResult<List<Object>>> getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계_TOP_5(pdServiceId, engineAggregationRequestDTO)));
     }
 
     /**
      * Dashboard
      */
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
-    ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, 지라이슈_일반_집계_요청 검색요청_데이터) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.getIssueResponsibleStatusTop5(pdServiceId, 검색요청_데이터)));
+    ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(dashboardService.getIssueResponsibleStatusTop5(pdServiceId, engineAggregationRequestDTO)));
     }
 
 }
