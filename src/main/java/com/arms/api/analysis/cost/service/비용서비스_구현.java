@@ -1,7 +1,8 @@
 package com.arms.api.analysis.cost.service;
 
-import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된지_지라이슈데이터;
+import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
+import com.arms.api.analysis.cost.dto.연봉엔티티;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
@@ -11,18 +12,16 @@ import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.API호출변수;
-import com.arms.api.util.external_communicate.dto.IsReqType;
-import com.arms.api.util.external_communicate.dto.search.검색결과;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.analysis.common.IsReqType;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.criterion.Criterion;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -53,6 +52,9 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     @Qualifier("reqStatus")
     private ReqStatus reqStatus;
+
+    @Autowired
+    private 연봉서비스 연봉서비스;
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -112,6 +114,15 @@ public class 비용서비스_구현 implements 비용서비스 {
         Map<String, Map<String, Map<String, 버전요구사항별_담당자데이터.담당자데이터>>> 버전요구사항데이터Map = new HashMap<>();
         Map<String, 버전요구사항별_담당자데이터.담당자데이터> 전체담당자Map = new HashMap<>();
 
+        // 연봉 정보 DB 조회
+        Map<String, 연봉엔티티> 연봉정보_맵 = null;
+        try {
+            연봉정보_맵 = 연봉서비스.모든_연봉정보_맵();
+        } catch (Exception e) {
+            로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 디비에서 연봉 정보를 조회하는 데 실패했습니다.");
+        }
+        Map<String, 연봉엔티티> 최종_연봉정보_맵 = 연봉정보_맵;
+
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
@@ -132,12 +143,20 @@ public class 비용서비스_구현 implements 비용서비스 {
                         requirement.get하위검색결과().get("assignees").forEach(assignee -> {
                             String assigneeAccountId = assignee.get필드명();
 
+                            // 연봉 값 세팅
+                            Long 연봉 = Optional.ofNullable(최종_연봉정보_맵)
+                                    .flatMap(맵 -> Optional.ofNullable(맵.get(assigneeAccountId)))
+                                    .map(연봉엔티티::getC_annual_income)
+                                    .filter(s -> !s.trim().isEmpty())
+                                    .map(NumberUtils::toLong)
+                                    .orElse(0L);
+
                             assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
                                 String assigneeDisplayName = displayName.get필드명();
 
                                 버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
                                         .이름(assigneeDisplayName)
-                                        .연봉(0L)
+                                        .연봉(연봉)
                                         .build();
 
                                 담당자데이터Map.put(assigneeAccountId, 담당자데이터);
@@ -224,7 +243,7 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     @Override
-    public 버전별_요구사항별_연결된지_지라이슈데이터 버전별_요구사항에_연결된지_지라이슈(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+    public 버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
 
         Long 제품및서비스 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
 
@@ -232,14 +251,52 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
 
-        버전별_요구사항별_연결된지_지라이슈데이터 결과 = new 버전별_요구사항별_연결된지_지라이슈데이터();
+        버전별_요구사항별_연결된_지라이슈데이터 결과 = new 버전별_요구사항별_연결된_지라이슈데이터();
 
-        Map<Long, Map<Long, List<버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터>>> 그룹화된_결과 = 상태_테이블_조회결과.stream()
-                .map(버전별_요구사항별_연결된지_지라이슈데이터::필요데이터)
-                .collect(Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_pds_version_link,
-                        Collectors.groupingBy(버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터::getC_req_link)));
+//        Map<String, Map<Long, List<버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터>>> 그룹화결과 = new HashMap<>();
+//
+//        for (ReqStatusEntity 요구사항 : 검색결과_요구사항) {
+//            버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터 데이터 = 결과.필요데이터(요구사항);
+//
+//            String 버전_목록_문자열 = 데이터.getC_req_pdservice_versionset_link();
+//            Long reqLink = 데이터.getC_req_link();
+//
+//            if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
+//                String[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
+//                        .filter(s -> !s.isEmpty())
+//                        .toArray(String[]::new);
+//
+//                for (String 버전데이터 : 버전_아이디_목록_배열) {
+//                    그룹화결과.putIfAbsent(버전데이터, new HashMap<>());
+//
+//                    Map<Long, List<버전별_요구사항별_연결된지_지라이슈데이터.요구사항_데이터>> innerMap = 그룹화결과.get(버전데이터);
+//                    innerMap.putIfAbsent(reqLink, new ArrayList<>());
+//                    innerMap.get(reqLink).add(데이터);
+//                }
+//            }
+//        }
 
-        결과.set버전별_요구사항별_연결된지_지라이슈(그룹화된_결과);
+        Map<String, Map<Long, List<버전별_요구사항별_연결된_지라이슈데이터.요구사항_데이터>>> 그룹화결과 =
+                상태_테이블_조회결과.stream()
+                        .map(버전별_요구사항별_연결된_지라이슈데이터::필요데이터)
+                        .filter(데이터 -> 데이터.getC_req_pdservice_versionset_link() != null && !데이터.getC_req_pdservice_versionset_link().isEmpty())
+                        .flatMap(데이터 -> Arrays.stream(데이터.getC_req_pdservice_versionset_link().split("[\\[\\],\"]"))
+                                .filter(s -> !s.isEmpty())
+                                .map(버전데이터 -> new AbstractMap.SimpleImmutableEntry<>(버전데이터, 데이터)))
+                        .collect(Collectors.groupingBy(Map.Entry::getKey,
+                                Collectors.groupingBy(entry -> entry.getValue().getC_req_link(),
+                                        Collectors.mapping(Map.Entry::getValue, Collectors.toList()))));
+
+//        ObjectMapper mapper = new ObjectMapper();
+//        try {
+//            String json = mapper.writeValueAsString(그룹화결과);
+//            로그.info(" [ " + this.getClass().getName() + " :: 전체_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
+//            로그.info(json);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+
+        결과.set버전별_요구사항별_연결된지_지라이슈(그룹화결과);
 
         return 결과;
     }
@@ -250,13 +307,21 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         String 조회대상_지라이슈상태_테이블 = "T_ARMS_REQSTATUS_"+제품및서비스;
 
-        로그.info("조회 대상 테이블 searchTable :"+조회대상_지라이슈상태_테이블);
+        로그.info("조회 대상 테이블 searchTable :" + 조회대상_지라이슈상태_테이블);
 
         SessionUtil.setAttribute("req-linked-issue", 조회대상_지라이슈상태_테이블);
 
-        Criterion 버전조건_질의 = Restrictions.in("c_pds_version_link", 버전);
+        String[] versionStrArr = 버전.stream()
+                .map(Object::toString)
+                .toArray(String[]::new);
 
-        reqStatusEntity.getCriterions().add(버전조건_질의);
+        Disjunction orCondition = Restrictions.disjunction();
+        for ( String versionStr : versionStrArr ){
+            versionStr = "\\\"" + versionStr + "\\\"";
+            orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
+        }
+
+        reqStatusEntity.getCriterions().add(orCondition);
 
         List<ReqStatusEntity> 검색결과_요구사항 = reqStatus.getChildNode(reqStatusEntity);
 
@@ -264,4 +329,5 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         return 검색결과_요구사항;
     }
+
 }

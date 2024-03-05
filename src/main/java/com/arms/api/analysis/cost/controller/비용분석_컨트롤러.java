@@ -7,7 +7,7 @@ import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
@@ -135,10 +135,10 @@ public class 비용분석_컨트롤러 {
             value = {"/req-linked-issue"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView 버전별_요구사항에_연결된지_지라이슈(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
-        로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항에_연결된지_지라이슈 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
+    public ModelAndView 버전별_요구사항_연결된_지라이슈키(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+        로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항_연결된_지라이슈키 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
         로그.info(지라이슈_제품_및_제품버전_검색요청.toString());
-        버전별_요구사항별_연결된지_지라이슈데이터 검색결과 = 비용서비스.버전별_요구사항에_연결된지_지라이슈(지라이슈_제품_및_제품버전_검색요청);
+        버전별_요구사항별_연결된_지라이슈데이터 검색결과 = 비용서비스.버전별_요구사항_연결된_지라이슈키(지라이슈_제품_및_제품버전_검색요청);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);
         return modelAndView;

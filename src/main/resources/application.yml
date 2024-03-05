@@ -1,6 +1,6 @@
 spring:
   application:
-    name: javaServiceTreeFrameworkBakcendCore
+    name: javaServiceTreeFrameworkBackendCore
   mvc:
     async:
       request-timeout: 7200
@@ -47,3 +47,4 @@ requirement:
   state:
     complete:
       keyword: 해결됨,닫힘
+

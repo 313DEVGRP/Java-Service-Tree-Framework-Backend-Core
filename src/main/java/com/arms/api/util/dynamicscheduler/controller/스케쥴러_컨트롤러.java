@@ -19,7 +19,7 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.dynamicscheduler.service.스케쥴러;
-import com.arms.api.util.external_communicate.dto.지라이슈;
+import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class 스케쥴러_컨트롤러{
     private PdService pdService;
 
     @Autowired
-    private com.arms.api.util.external_communicate.엔진통신기 엔진통신기;
+    private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
 
     @Autowired
     @Qualifier("reqStatus")
@@ -64,7 +64,7 @@ public class 스케쥴러_컨트롤러{
     private JiraServer jiraServer;
 
     @Autowired
-    private com.arms.api.util.external_communicate.내부통신기 내부통신기;
+    private com.arms.api.util.communicate.internal.내부통신기 내부통신기;
 
     @Autowired
     protected Chat chat;

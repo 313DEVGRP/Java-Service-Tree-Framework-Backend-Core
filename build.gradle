@@ -261,6 +261,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
 
+    // Slack Notification
+    implementation "com.slack.api:slack-api-client:1.25.1"
+
     // modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'
 
