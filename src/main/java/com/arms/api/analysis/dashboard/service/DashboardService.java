@@ -1,13 +1,10 @@
 package com.arms.api.analysis.dashboard.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.analysis.dashboard.model.SankeyData;
 import com.arms.api.analysis.dashboard.model.Worker;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
-import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 
 import java.util.List;
 import java.util.Map;

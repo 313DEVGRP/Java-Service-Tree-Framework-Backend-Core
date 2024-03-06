@@ -1,6 +1,6 @@
 package com.arms.api.analysis.scope.dto;
 
-import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

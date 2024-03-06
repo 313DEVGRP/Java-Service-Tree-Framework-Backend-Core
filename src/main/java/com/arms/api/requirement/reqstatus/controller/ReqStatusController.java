@@ -16,9 +16,8 @@ import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
-import com.arms.api.analysis.common.IsReqType;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_검색_요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -142,12 +141,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
         Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
 
-        IsReqType isReqType = IsReqType.ALL;
-
-        지라이슈_일반_검색_요청 요청= 지라이슈_일반_검색_요청
-                .builder()
-                .isReqType(isReqType)
-                .build();
+        EngineAggregationRequestDTO 요청 = new EngineAggregationRequestDTO();
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 엔진통신기.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));

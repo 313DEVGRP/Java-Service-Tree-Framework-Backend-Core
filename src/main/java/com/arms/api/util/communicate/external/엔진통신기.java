@@ -1,6 +1,7 @@
 package com.arms.api.util.communicate.external;
 
 import com.arms.api.analysis.time.model.히트맵데이터;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.api.util.communicate.external.response.jira.지라이슈_데이터;
 import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
@@ -9,7 +10,6 @@ import com.arms.api.util.communicate.external.response.jira.지라이슈우선�
 import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
 import com.arms.api.util.communicate.external.response.jira.지라이슈해결책_데이터;
 import com.arms.api.util.communicate.external.response.jira.지라프로젝트_데이터;
-import com.arms.api.util.external_communicate.dto.*;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.response.jira.지라서버정보_엔티티;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -129,9 +129,8 @@ public interface 엔진통신기 {
                                @RequestParam Long pdServiceLink,
                                @RequestParam List<Long> pdServiceVersionLinks);
 
-
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
-                                                @RequestBody 지라이슈_일반_검색_요청 지라이슈_일반_검색_요청);
+                                                @RequestBody EngineAggregationRequestDTO engineAggregationRequestDTO);
 
 }

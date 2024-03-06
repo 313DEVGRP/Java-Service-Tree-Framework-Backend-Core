@@ -1,4 +1,4 @@
-package com.arms.api.util.external_communicate.dto;
+package com.arms.api.util.communicate.external.request.notuse;
 
 import java.util.Objects;
 
