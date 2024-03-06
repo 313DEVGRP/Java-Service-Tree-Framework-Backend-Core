@@ -5,6 +5,8 @@ import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_�
 import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.analysis.dashboard.model.Worker;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.util.communicate.external.request.aggregation.트리맵_검색요청;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.api.util.external_communicate.dto.*;
@@ -106,19 +108,13 @@ public interface 통계엔진통신기 {
 
     @GetMapping("/engine/jira/dashboard/normal-version/resolution/{pdServiceId}")
     ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_해결책유무_통계(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청,
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO,
             @RequestParam String resolution
     );
 
-    @GetMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
-    ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(
-            @PathVariable("pdServiceId") Long 제품서비스_아이디,
-            @RequestParam List<Long> pdServiceVersionLinks,
-            @SpringQueryMap 지라이슈_일반_검색_요청 지라이슈_일반_검색_요청);
-
     @GetMapping("/engine/jira/dashboard/version-req-assignees")
     ResponseEntity<List<검색결과>> 제품별_버전_및_요구사항별_작업자(
-            @SpringQueryMap 지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO
     );
 
     @GetMapping("/engine/jira/dashboard/req-status-and-reqInvolved-unique-assignees-per-version/{pdServiceId}")

@@ -13,10 +13,10 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
-import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
@@ -98,13 +98,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         return 버전요구사항별_담당자데이터;
     }
 
-    public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) {
+    public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(EngineAggregationRequestDTO engineAggregationRequestDTO) {
 
-        지라이슈_제품_및_제품버전_검색요청.setIsReqType(IsReqType.REQUIREMENT);
-        ResponseEntity<List<검색결과>> 요구사항_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(지라이슈_제품_및_제품버전_검색요청);
+        engineAggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
+        ResponseEntity<List<검색결과>> 요구사항_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
-        지라이슈_제품_및_제품버전_검색요청.setIsReqType(IsReqType.ISSUE);
-        ResponseEntity<List<검색결과>> 하위이슈_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(지라이슈_제품_및_제품버전_검색요청);
+        engineAggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
+        ResponseEntity<List<검색결과>> 하위이슈_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
         List<검색결과> 전체결과 = new ArrayList<>();
 
@@ -243,11 +243,11 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     @Override
-    public 버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+    public 버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
 
-        Long 제품및서비스 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
+        Long 제품및서비스 = engineAggregationRequestDTO.getPdServiceLink();
 
-        List<Long> 버전 = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
+        List<Long> 버전 = engineAggregationRequestDTO.getPdServiceVersionLinks();
 
         List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
 
