@@ -40,8 +40,6 @@ public class RouteTableInterceptor extends EmptyInterceptor{
             HttpServletRequest httpServletRequest = SessionUtil.getUrl();
             String servletPath = httpServletRequest.getServletPath();
 
-            ///auth-user/api/arms/reqAdd/T_ARMS_REQADD_145/getChildNode.do
-
             if(StringUtils.contains(servletPath,"T_ARMS_REQADD_")){
                 if(StringUtils.contains(servletPath,"getMonitor.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("getMonitor");
@@ -57,6 +55,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 }
                 if(StringUtils.contains(servletPath,"getChildNode.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("getChildNode");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
+                if(StringUtils.contains(servletPath,"getNodesWithoutRoot.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("getNodesWithoutRoot");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
                 if(StringUtils.contains(servletPath,"getChildNodeWithParent.do")){
@@ -195,6 +197,9 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                 }
                 if(StringUtils.contains(servletPath,"getChildNode.do")){
                     tableName = (String) SessionUtil.getAttribute("getChildNode");
+                }
+                if(StringUtils.contains(servletPath,"getNodesWithoutRoot.do")){
+                    tableName = (String) SessionUtil.getAttribute("getNodesWithoutRoot");
                 }
                 if(StringUtils.contains(servletPath,"getChildNodeWithParent.do")){
                     tableName = (String) SessionUtil.getAttribute("getChildNodeWithParent");

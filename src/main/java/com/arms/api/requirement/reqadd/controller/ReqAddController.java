@@ -34,6 +34,7 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -131,6 +132,35 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
 
         SessionUtil.removeAttribute("getMonitor");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", list);
+        return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getNodesWithoutRoot.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView getNodesWithoutRoot(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqAddDTO reqAddDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqAddController :: getNodesWithoutRoot");
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        SessionUtil.setAttribute("getNodesWithoutRoot",changeReqTableName);
+
+        Criterion criterion = Restrictions.not(
+                // replace "id" below with property name, depending on what you're filtering against
+                Restrictions.in("c_id", new Object[] {TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
+        );
+        reqAddEntity.getCriterions().add(criterion);
+        reqAddEntity.setOrder(Order.asc("c_position"));
+        List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+
+        SessionUtil.removeAttribute("getNodesWithoutRoot");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
