@@ -86,4 +86,16 @@ public class 스코프분석_컨트롤러 {
     }
 
 
+    // TopMenuApi용
+    @GetMapping("/top-menu/{changeReqTableName}/getReqAddListByFilter.do")
+    public ResponseEntity<Map<String, Long>> 분석_톱메뉴_요구사항_상태_합계(@PathVariable(value ="changeReqTableName") String changeReqTableName
+            , @RequestParam Long pdServiceId
+            , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
+        log.info("스코프분석_컨트롤러 :: 분석_톱메뉴_요구사항_상태_합계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
+                , pdServiceStr, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(scopeService.톱메뉴_버전별_요구사항_상태_합계(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+    }
 }

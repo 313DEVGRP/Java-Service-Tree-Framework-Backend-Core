@@ -7,6 +7,7 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -249,6 +250,41 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         return 버전_요구사항_상태_작업자_맵;
+    }
+
+    @Override
+    public Map<String, Long> 톱메뉴_버전별_요구사항_상태_합계(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+
+        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            Disjunction orCondition = Restrictions.disjunction();
+            for (Long 버전 : pdServiceVersionLinks) {
+                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+            }
+            검색용도_객체.getCriterions().add(orCondition);
+        }
+
+        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
+
+        Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
+                .collect(Collectors.groupingBy(
+                        entity -> entity.getReqStateEntity().getC_id() == 10L ? "open" : "not-open",
+                        Collectors.counting()
+                ));
+
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size()));
+
+        
+        
+        SessionUtil.removeAttribute("getReqAddListByFilter");
+        log.info("[ScopeServiceImple  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
+                버전_요구사항_상태별_합계.get("total"),버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
+
+        return 버전_요구사항_상태별_합계;
     }
 
     @Override
