@@ -4,9 +4,9 @@ import com.arms.api.salary.model.SalaryDTO;
 import com.arms.api.salary.model.SalaryEntity;
 import com.arms.api.salary.model.SampleDTO;
 import com.arms.api.salary.service.SalaryService;
+import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
-import com.arms.egovframework.javaservice.treeframework.errors.response.ErrorCode;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import io.swagger.annotations.ApiOperation;
@@ -88,14 +88,21 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
     }
 
     @PutMapping("/update.do")
-    public ResponseEntity<CommonResponse.ApiResult<Integer>> 연봉정보수정(SalaryDTO salaryDTO) throws Exception {
+    public ResponseEntity<CommonResponse.ApiResult<SalaryEntity>> updateOrCreate(SalaryDTO salaryDTO) throws Exception {
         Map<String, SalaryEntity> 모든_연봉정보_맵 = salaryService.모든_연봉정보_맵();
         SalaryEntity salaryEntity = 모든_연봉정보_맵.get(salaryDTO.getC_key());
-        int result = 0;
-        if(salaryEntity != null) {
+        if (salaryEntity != null) {
             salaryEntity.setC_annual_income(salaryDTO.getC_annual_income());
-            result = salaryService.updateNode(salaryEntity);
+            salaryService.updateNode(salaryEntity);
+            return ResponseEntity.ok(CommonResponse.success(salaryEntity));
         }
-        return ResponseEntity.ok(CommonResponse.success(result));
+        return ResponseEntity.ok(CommonResponse.success(salaryService.addNode(createNewSalaryEntity(salaryDTO))));
+    }
+
+    private SalaryEntity createNewSalaryEntity(SalaryDTO salaryDTO) {
+        SalaryEntity addSalaryEntity = modelMapper.map(salaryDTO, SalaryEntity.class);
+        addSalaryEntity.setRef(TreeConstant.First_Node_CID);
+        addSalaryEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
+        return addSalaryEntity;
     }
 }
