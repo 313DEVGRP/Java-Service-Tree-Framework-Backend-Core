@@ -2,7 +2,7 @@ package com.arms.api.analysis.cost.service;
 
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.analysis.cost.dto.연봉엔티티;
+import com.arms.api.salary.model.SalaryEntity;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
@@ -11,6 +11,7 @@ import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -54,7 +55,7 @@ public class 비용서비스_구현 implements 비용서비스 {
     private ReqStatus reqStatus;
 
     @Autowired
-    private 연봉서비스 연봉서비스;
+    private SalaryService 연봉서비스;
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -115,13 +116,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         Map<String, 버전요구사항별_담당자데이터.담당자데이터> 전체담당자Map = new HashMap<>();
 
         // 연봉 정보 DB 조회
-        Map<String, 연봉엔티티> 연봉정보_맵 = null;
+        Map<String, SalaryEntity> 연봉정보_맵 = null;
         try {
             연봉정보_맵 = 연봉서비스.모든_연봉정보_맵();
         } catch (Exception e) {
             로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 디비에서 연봉 정보를 조회하는 데 실패했습니다.");
         }
-        Map<String, 연봉엔티티> 최종_연봉정보_맵 = 연봉정보_맵;
+        Map<String, SalaryEntity> 최종_연봉정보_맵 = 연봉정보_맵;
 
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(전체결과);
         optionalEsData.ifPresent(esData -> {
@@ -146,7 +147,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                             // 연봉 값 세팅
                             Long 연봉 = Optional.ofNullable(최종_연봉정보_맵)
                                     .flatMap(맵 -> Optional.ofNullable(맵.get(assigneeAccountId)))
-                                    .map(연봉엔티티::getC_annual_income)
+                                    .map(SalaryEntity::getC_annual_income)
                                     .filter(s -> !s.trim().isEmpty())
                                     .map(NumberUtils::toLong)
                                     .orElse(0L);
