@@ -1,4 +1,4 @@
-package com.arms.api.analysis.cost.dto;
+package com.arms.api.salary.model;
 
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelClassAnnotation;
@@ -29,9 +29,9 @@ import java.io.Serializable;
 @ExcelClassAnnotation(sheetName = "Sheet2", headerRowSize = 1, headerTitleName = "연봉 정보")
 @AllArgsConstructor
 @NoArgsConstructor
-public class 연봉엔티티 extends TreeSearchEntity implements Serializable {
+public class SalaryEntity extends TreeSearchEntity implements Serializable {
 
-    public 연봉엔티티(String c_name, String c_key, String c_annual_income) {
+    public SalaryEntity(String c_name, String c_key, String c_annual_income) {
         this.c_name = c_name;
         this.c_key = c_key;
         this.c_annual_income = c_annual_income;

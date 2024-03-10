@@ -1,4 +1,4 @@
-package com.arms.api.analysis.cost.dto;
+package com.arms.api.salary.model;
 
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelClassAnnotation;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelFieldAnnotation;
@@ -15,7 +15,7 @@ import org.hibernate.annotations.*;
 @ExcelClassAnnotation(sheetName = "Sheet1", headerRowSize = 1, headerTitleName = "[샘플] 연봉 정보")
 @AllArgsConstructor
 @NoArgsConstructor
-public class 샘플연봉데이터 {
+public class SampleDTO {
 
 
     @ExcelFieldAnnotation(columnIndex = 0, formatting = "%.0f", headerName = "번호")

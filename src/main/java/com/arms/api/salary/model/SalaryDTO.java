@@ -1,4 +1,4 @@
-package com.arms.api.analysis.cost.dto;
+package com.arms.api.salary.model;
 
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class 연봉데이터 extends TreeBaseDTO {
+public class SalaryDTO extends TreeBaseDTO {
 
     @JsonProperty("이름")
     private String c_name;
