@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -100,11 +102,21 @@ public class PdServiceVersionController extends TreeAbstractController<PdService
     public ModelAndView getVersionListByAjax(PdServiceVersionDTO pdServiceVersionDTO,
                                                 @RequestParam("c_ids") List<Long> c_ids) throws Exception {
 
-        log.info("PdServiceVersionController :: getVersionStartEndDates");
+        log.info("[PdServiceVersionController :: getVersionStartEndDates] :: c_ids => {}", c_ids);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", pdServiceVersion.getVersionListByAjax(c_ids));
 
         return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(value="/versionPeriod.do",method= RequestMethod.GET)
+    public ResponseEntity<Map<String, String>> versionPeriod(PdServiceVersionDTO pdServiceVersionDTO,
+                                                             @RequestParam("c_ids") List<Long> c_ids) throws Exception {
+
+        log.info("[PdServiceVersionController :: versionPeriod] :: c_ids => {}", c_ids);
+
+        return ResponseEntity.ok(pdServiceVersion.versionPeriod(c_ids));
     }
 }

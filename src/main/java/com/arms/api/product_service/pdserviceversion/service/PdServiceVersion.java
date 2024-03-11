@@ -26,4 +26,6 @@ public interface PdServiceVersion extends TreeService {
     Map<Long, String> getVersionStartDates(List<Long> pdServiceVersionList) throws Exception;
 
     public List<PdServiceVersionEntity> getVersionListByAjax(List<Long> pdServiceVersionList) throws Exception;
+
+    public Map<String,String> versionPeriod(List<Long> c_ids) throws Exception;
 }

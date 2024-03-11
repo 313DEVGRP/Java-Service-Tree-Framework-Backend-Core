@@ -44,7 +44,7 @@ public class 스코프분석_컨트롤러 {
                 .컨텐츠보기여부(false)
                 .build();
 
-        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         return ResponseEntity.ok(집계결과.getBody());
 
     }
@@ -97,5 +97,13 @@ public class 스코프분석_컨트롤러 {
                 , pdServiceStr, pdServiceVersionLinks);
 
         return  ResponseEntity.ok(scopeService.톱메뉴_버전별_요구사항_상태_합계(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+    }
+
+    @GetMapping("/top-menu/issue/reqAndSubtask/{pdServiceId}")
+    public ResponseEntity<Map<String, Long>> 분석_톱메뉴_이슈_집계(@PathVariable("pdServiceId") Long pdServiceId
+                                          ,@RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+        log.info("스코프분석_컨트롤러 :: 분석_톱메뉴_이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(scopeService.톱메뉴_요구사항_하위이슈_집계(pdServiceId, pdServiceVersionLinks));
     }
 }
