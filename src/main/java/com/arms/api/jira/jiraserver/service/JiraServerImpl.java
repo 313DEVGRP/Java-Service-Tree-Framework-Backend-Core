@@ -548,7 +548,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		JiraIssuePriorityEntity 갱신결과_이슈_우선순위_엔티티= 갱신할_대상_이슈_우선순위;
 		갱신할_대상_이슈_우선순위.setC_issue_priority_name(가져온_이슈_우선순위.getName());
 		갱신할_대상_이슈_우선순위.setC_issue_priority_desc(가져온_이슈_우선순위.getDescription());
-		if( 서버유형.equals("클라우드") ) {
+		if (서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 			갱신할_대상_이슈_우선순위.setC_etc(String.valueOf(가져온_이슈_우선순위.isDefault()));
 		}
 		jiraIssuePriority.updateNode(갱신할_대상_이슈_우선순위);
@@ -565,7 +565,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_우선순위.setC_check("false");
 		저장할_이슈_우선순위.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_우선순위.setC_type(TreeConstant.Leaf_Node_TYPE);
-		if( 서버유형.equals("클라우드")) {
+		if( 서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 			저장할_이슈_우선순위.setC_etc(String.valueOf(이슈_우선순위.isDefault()));
 		}
 		JiraIssuePriorityEntity 저장된_지라_이슈_우선순위 = jiraIssuePriority.addNode(저장할_이슈_우선순위);
@@ -793,7 +793,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (priorityEntity.getC_issue_priority_url().equals(가져온_이슈_우선순위.getSelf())) {
 				priorityEntity.setC_issue_priority_name(가져온_이슈_우선순위.getName());
 				priorityEntity.setC_issue_priority_desc(가져온_이슈_우선순위.getDescription());
-				if(서버유형.equals("클라우드")) {
+				if(서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 					priorityEntity.setC_etc(String.valueOf(가져온_이슈_우선순위.isDefault()));
 				}
 				갱신_횟수 += jiraIssuePriority.updateNode(priorityEntity);
