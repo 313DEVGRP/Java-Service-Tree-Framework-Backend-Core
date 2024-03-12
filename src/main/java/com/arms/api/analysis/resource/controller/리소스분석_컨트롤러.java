@@ -48,7 +48,7 @@ public class 리소스분석_컨트롤러 {
         log.info("리소스분석_컨트롤러 :: 리소스_작업자_통계.제품서비스의 c_id ==> {}, 선택된버전의 c_id ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = 통계엔진통신기.일반_버전필터_검색(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();

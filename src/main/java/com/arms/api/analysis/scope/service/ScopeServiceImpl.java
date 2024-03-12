@@ -7,7 +7,6 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
-import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -16,11 +15,13 @@ import com.arms.api.util.communicate.external.response.aggregation.검색결과_
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.external_communicate.dto.지라이슈_단순_집계_요청;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -285,6 +286,53 @@ public class ScopeServiceImpl implements ScopeService {
                 버전_요구사항_상태별_합계.get("total"),버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
 
         return 버전_요구사항_상태별_합계;
+    }
+
+    @Override
+    public Map<String, Long> 톱메뉴_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+
+
+        지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
+                                    .메인그룹필드("isReq")
+                                    .컨텐츠보기여부(false)
+                                    .크기(1000)
+                                    .build();
+        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
+        Map<String, Long> 이슈_맵 = new HashMap<>();
+        이슈_맵.put("total", null);
+        이슈_맵.put("req", null);
+        이슈_맵.put("subtask", null);
+
+        검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
+        if (집계결과목록 != null) {
+            이슈_맵.put("total", 집계결과목록.get전체합계()); // 총 이슈
+
+            Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
+            if (메인그룹_집계결과 != null) {
+                List<검색결과> 요구사항_하위이슈_구분 = 메인그룹_집계결과.get("group_by_isReq");
+                if (요구사항_하위이슈_구분 != null) {
+                    for (검색결과 이슈 : 요구사항_하위이슈_구분) {
+                        String 필드명 = 이슈.get필드명();
+                        Long 이슈_개수 = 이슈.get개수();
+                        if (필드명 != null && 이슈_개수 != null) {
+                            이슈_맵.put(StringUtils.equals(필드명, "true") ? "req" : "subtask", 이슈_개수);
+                        }
+                    }
+                } else {
+                    log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 요구사항_하위이슈_구분 집계(group_by_isReq) => null" );
+                }
+            } else {
+                log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 메인그룹_집계결과 => null" );
+                // 검색결과가 null인 경우 처리
+            }
+        } else {
+            log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 집계결과목록 => null" );
+        }
+        log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 이슈_맵 :: 총합 = {}, 요구사항_이슈 = {}, 연결이슈_하위이슈 = {}",
+                이슈_맵.get("total"),이슈_맵.get("req"), 이슈_맵.get("subtask"));
+
+        return 이슈_맵;
     }
 
     @Override
