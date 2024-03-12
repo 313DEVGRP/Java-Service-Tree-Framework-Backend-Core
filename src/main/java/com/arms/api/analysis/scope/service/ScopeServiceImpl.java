@@ -7,14 +7,15 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
-import com.arms.api.util.external_communicate.dto.search.검색결과;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.api.util.external_communicate.dto.요구사항_버전_이슈_키_상태_작업자수;
-import com.arms.api.util.external_communicate.dto.지라이슈_제품_및_제품버전_검색요청;
-import com.arms.api.util.external_communicate.내부통신기;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -35,22 +35,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ScopeServiceImpl implements ScopeService {
-
-    @Autowired
-    private ReqAdd reqAdd;
-
     private static final SecureRandom RANDOM = new SecureRandom();
 
+    private final ReqAdd reqAdd;
+
     private final PdService pdService;
+
     private final 내부통신기 내부통신기;
+
     private final 통계엔진통신기 통계엔진통신기;
+
     private final Gson gson;
 
     @Override
-    public List<TreeBarDTO> treeBar(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청) throws Exception {
+    public List<TreeBarDTO> treeBar(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
         ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-        Long pdServiceLink = 지라이슈_제품_및_제품버전_검색요청.getPdServiceLink();
-        List<Long> pdServiceVersionLinks = 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks();
+        Long pdServiceLink = engineAggregationRequestDTO.getPdServiceLink();
+        List<Long> pdServiceVersionLinks = engineAggregationRequestDTO.getPdServiceVersionLinks();
     
         List<TreeBarDTO> treeBarList = new ArrayList<>();
 
@@ -71,7 +72,7 @@ public class ScopeServiceImpl implements ScopeService {
     
         // 3. 제품 버전 조회
         List<PdServiceVersionEntity> productVersions = product.getPdServiceVersionEntities().stream().filter(
-                pdServiceVersionEntity -> 지라이슈_제품_및_제품버전_검색요청.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
+                pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
         ).sorted(Comparator.comparing(PdServiceVersionEntity::getC_id)).collect(Collectors.toList());
     
         // 4. 요구사항 조회
@@ -81,7 +82,7 @@ public class ScopeServiceImpl implements ScopeService {
         List<TreeBarDTO> requirements = reqStatusEntityList.stream().map(TreeBarDTO::new).collect(Collectors.toList());
     
         // 5. 각 요구사항 별 담당자와 빈도수를 조회 (Top 10)
-        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(지라이슈_제품_및_제품버전_검색요청);
+        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(외부API응답.getBody()).orElse(null);
 
@@ -104,7 +105,7 @@ public class ScopeServiceImpl implements ScopeService {
     
         // 7. top10 요소들의 필드명 추출
         List<String> issueKeys = top10Requirements.stream()
-                .map(com.arms.api.util.external_communicate.dto.search.검색결과::get필드명)
+                .map(com.arms.api.util.communicate.external.response.aggregation.검색결과::get필드명)
                 .collect(Collectors.toList());
     
         // 8. requirements 리스트를 필터링하여 id 값이 issueKeys 에 있는 요소만 선택
@@ -249,6 +250,41 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         return 버전_요구사항_상태_작업자_맵;
+    }
+
+    @Override
+    public Map<String, Long> 톱메뉴_버전별_요구사항_상태_합계(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+
+        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            Disjunction orCondition = Restrictions.disjunction();
+            for (Long 버전 : pdServiceVersionLinks) {
+                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+            }
+            검색용도_객체.getCriterions().add(orCondition);
+        }
+
+        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
+
+        Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
+                .collect(Collectors.groupingBy(
+                        entity -> entity.getReqStateEntity().getC_id() == 10L ? "open" : "not-open",
+                        Collectors.counting()
+                ));
+
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size()));
+
+        
+        
+        SessionUtil.removeAttribute("getReqAddListByFilter");
+        log.info("[ScopeServiceImple  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
+                버전_요구사항_상태별_합계.get("total"),버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
+
+        return 버전_요구사항_상태별_합계;
     }
 
     @Override

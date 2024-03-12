@@ -1,17 +1,13 @@
 package com.arms.api.analysis.resource.controller;
 
-import com.arms.api.util.external_communicate.dto.search.검색결과;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
 import com.arms.api.util.external_communicate.dto.지라이슈_단순_집계_요청;
-import com.arms.api.util.external_communicate.통계엔진통신기;
-import lombok.AllArgsConstructor;
+import com.arms.api.util.communicate.external.통계엔진통신기;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -22,24 +18,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Controller
 @RestController
-@AllArgsConstructor
 @RequestMapping(value = "/arms/analysis/resource")
+@RequiredArgsConstructor
 public class 리소스분석_컨트롤러 {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Autowired
-    private 통계엔진통신기 통계엔진통신기;
-
-    static final long dummy_jira_server = 0L;
-
-    @ResponseBody
+    private final 통계엔진통신기 통계엔진통신기;
     @GetMapping("/normal-version/{pdServiceId}")
     public ModelAndView 제품서비스_일반_버전_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                        @RequestParam List<Long> pdServiceVersionLinks,
-                                       지라이슈_일반_집계_요청 검색요청_데이터) throws Exception {
+                                       지라이슈_일반_집계_요청 검색요청_데이터) {
 
         log.info("리소스분석_컨트롤러 :: 제품서비스_버전_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
@@ -52,7 +40,6 @@ public class 리소스분석_컨트롤러 {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/workerStatus/{pdServiceId}")
     public ModelAndView 리소스_작업자_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                         @RequestParam List<Long> pdServiceVersionLinks,
@@ -69,7 +56,6 @@ public class 리소스분석_컨트롤러 {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/normal-versionAndMail-filter/{pdServiceId}")
     public ModelAndView 리소스_버전필터_작업자필터_통계(@PathVariable("pdServiceId") Long pdServiceId,
                                        @RequestParam List<Long> pdServiceVersionLinks,
@@ -91,7 +77,6 @@ public class 리소스분석_컨트롤러 {
         return modelAndView;
     }
 
-    @ResponseBody
     @GetMapping("/reqInAction/{pdServiceId}")
     public ModelAndView 서브태스크_부모_요구사항_집계(@PathVariable("pdServiceId") Long pdServiceId,
                                          @RequestParam List<Long> pdServiceVersionLinks,

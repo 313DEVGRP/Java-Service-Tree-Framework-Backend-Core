@@ -2,14 +2,18 @@ package com.arms.api.analysis.time.service;
 
 import com.arms.api.analysis.time.model.등고선데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
+import com.arms.api.analysis.time.model.히트맵데이터;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import com.arms.api.util.external_communicate.dto.*;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
-import com.arms.api.util.external_communicate.내부통신기;
-import com.arms.api.util.external_communicate.엔진통신기;
-import com.arms.api.util.external_communicate.통계엔진통신기;
+import com.arms.api.analysis.common.IsReqType;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일자별_제품_및_제품버전_검색요청;
+import com.arms.api.util.communicate.external.response.jira.지라이슈;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
+import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,9 +54,9 @@ public class TimeServiceImpl implements TimeService{
     }
 
     @Override
-    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청, String resolution) {
+    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(EngineAggregationRequestDTO engineAggregationRequestDTO, String resolution) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계  =
-                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(지라이슈_제품_및_제품버전_검색요청, resolution);
+                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, resolution);
 
         검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
 

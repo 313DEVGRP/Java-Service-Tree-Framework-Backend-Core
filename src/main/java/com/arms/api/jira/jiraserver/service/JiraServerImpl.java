@@ -26,10 +26,14 @@ import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.util.external_communicate.dto.*;
-import com.arms.api.util.external_communicate.엔진통신기;
-import com.arms.api.util.external_communicate.지라서버정보_데이터;
-import com.arms.api.util.external_communicate.지라서버정보_엔티티;
+import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
+import com.arms.api.util.communicate.external.response.jira.지라이슈우선순위_데이터;
+import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
+import com.arms.api.util.communicate.external.response.jira.지라이슈해결책_데이터;
+import com.arms.api.util.communicate.external.response.jira.지라프로젝트_데이터;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
+import com.arms.api.util.communicate.external.response.jira.지라서버정보_엔티티;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.Util_TitleChecker;
@@ -347,6 +351,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	@Override
 	@Transactional
 	public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception {
+		// 프로젝트 생성 //
 		String randomConnectId = String.valueOf(RANDOM.nextLong() & Long.MAX_VALUE);
 
 		jiraServerEntity.setC_title(Util_TitleChecker.StringReplace(jiraServerEntity.getC_title()));
@@ -372,12 +377,18 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 			int 연결할_프로젝트_수 = 0;
 			Set<JiraProjectEntity> 지라서버에_붙일_프로젝트_리스트 = new HashSet<>();
+
 			연결할_프로젝트_수 = 지라서버_엔티티에_지라_프로젝트들을_연결(지라서버에_붙일_프로젝트_리스트, 엔진통신기.지라_프로젝트_목록_가져오기(등록결과.getConnectId()), 등록결과.getType(), 연결_아이디);
 			if (연결할_프로젝트_수 > 0) {
 				addedNodeEntity.setJiraProjectEntities(지라서버에_붙일_프로젝트_리스트);
 			}
-			chat.sendMessageByEngine("지라 프로젝트 데이터 연결 완료.");
-			
+
+			if (등록결과.getType().equals("레드마인_온프레미스")) {
+				chat.sendMessageByEngine("레드마인 프로젝트 데이터 연결 완료.");
+			}else{
+				chat.sendMessageByEngine("지라 프로젝트 데이터 연결 완료.");
+			}
+
 			int 연결할_이슈_유형_수 = 0;
 			Set<JiraIssueTypeEntity> 지라서버에_붙일_이슈_유형_리스트 = new HashSet<>();
 			if (등록결과.getType().equals("온프레미스")) {
@@ -386,34 +397,53 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (연결할_이슈_유형_수 > 0) {
 				addedNodeEntity.setJiraIssueTypeEntities(지라서버에_붙일_이슈_유형_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
-			
+			//chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
+			if (등록결과.getType().equals("레드마인_온프레미스")) {
+				chat.sendMessageByEngine("레드마인 이슈유형 데이터 연결 완료.");
+			}else{
+				chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
+			}
+
 			int 연결할_이슈_우선순위_수 = 0;
 			Set<JiraIssuePriorityEntity> 지라서버에_붙일_이슈_우선순위_리스트 = new HashSet<>();
 			연결할_이슈_우선순위_수 = 지라서버_엔티티에_지라_이슈_우선순위들을_연결(지라서버에_붙일_이슈_우선순위_리스트, 엔진통신기.지라_이슈_우선순위_가져오기(등록결과.getConnectId()), 등록결과.getType());
 			if (연결할_이슈_우선순위_수 > 0) {
 				addedNodeEntity.setJiraIssuePriorityEntities(지라서버에_붙일_이슈_우선순위_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈우선순위 데이터 연결 완료.");
-			
+
+			if (등록결과.getType().equals("레드마인_온프레미스")) {
+				chat.sendMessageByEngine("레드마인 이슈우선순위 데이터 연결 완료.");
+			}else{
+				chat.sendMessageByEngine("지라 이슈우선순위 데이터 연결 완료.");
+			}
+
 			int 연결할_이슈_해결책_수 = 0;
 			Set<JiraIssueResolutionEntity> 지라서버에_붙일_이슈_해결책_리스트 = new HashSet<>();
-			연결할_이슈_해결책_수 = 지라서버_엔티티에_지라_이슈_해결책들을_연결(지라서버에_붙일_이슈_해결책_리스트, 엔진통신기.지라_이슈_해결책_가져오기(등록결과.getConnectId()), 등록결과.getType());
+			if(!등록결과.getType().equals("레드마인_온프레미스")){ // 레드마인_온프레미스에는 이슈 해결책이 존재하지 않음
+				연결할_이슈_해결책_수 = 지라서버_엔티티에_지라_이슈_해결책들을_연결(지라서버에_붙일_이슈_해결책_리스트, 엔진통신기.지라_이슈_해결책_가져오기(등록결과.getConnectId()), 등록결과.getType());
+			}
 			if (연결할_이슈_해결책_수 > 0) {
 				addedNodeEntity.setJiraIssueResolutionEntities(지라서버에_붙일_이슈_해결책_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈해결책 데이터 연결 완료.");
-			
+			if (!등록결과.getType().equals("레드마인_온프레미스")) {
+				chat.sendMessageByEngine("지라 이슈해결책 데이터 연결 완료.");
+			}
+
 			int 연결할_이슈_상태_수 = 0;
 			Set<JiraIssueStatusEntity> 지라서버에_붙일_이슈_상태_리스트 = new HashSet<>();
-			if (등록결과.getType().equals("온프레미스")) {
+			if (!등록결과.getType().equals("클라우드")) { // if (등록결과.getType().equals("온프레미스")){ // 지라 온프레미스와 레드마인_온프레미스는 이슈 상태를 공통으로 사용
 				연결할_이슈_상태_수 = 지라서버_엔티티에_지라_이슈_상태들을_연결(지라서버에_붙일_이슈_상태_리스트, 엔진통신기.지라_이슈_상태_가져오기(등록결과.getConnectId()), 등록결과.getType());
 			}
 			if (연결할_이슈_상태_수 > 0) {
 				addedNodeEntity.setJiraIssueStatusEntities(지라서버에_붙일_이슈_상태_리스트);
 			}
-			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
 			
+			if (등록결과.getType().equals("레드마인_온프레미스")) {
+				chat.sendMessageByEngine("레드마인 이슈상태 데이터 연결 완료.");
+			}else{
+				chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
+			}
+
 			this.updateNode(addedNodeEntity);
 		}
 
@@ -518,7 +548,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		JiraIssuePriorityEntity 갱신결과_이슈_우선순위_엔티티= 갱신할_대상_이슈_우선순위;
 		갱신할_대상_이슈_우선순위.setC_issue_priority_name(가져온_이슈_우선순위.getName());
 		갱신할_대상_이슈_우선순위.setC_issue_priority_desc(가져온_이슈_우선순위.getDescription());
-		if( 서버유형.equals("클라우드") ) {
+		if (서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 			갱신할_대상_이슈_우선순위.setC_etc(String.valueOf(가져온_이슈_우선순위.isDefault()));
 		}
 		jiraIssuePriority.updateNode(갱신할_대상_이슈_우선순위);
@@ -535,7 +565,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		저장할_이슈_우선순위.setC_check("false");
 		저장할_이슈_우선순위.setRef(TreeConstant.First_Node_CID);
 		저장할_이슈_우선순위.setC_type(TreeConstant.Leaf_Node_TYPE);
-		if( 서버유형.equals("클라우드")) {
+		if( 서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 			저장할_이슈_우선순위.setC_etc(String.valueOf(이슈_우선순위.isDefault()));
 		}
 		JiraIssuePriorityEntity 저장된_지라_이슈_우선순위 = jiraIssuePriority.addNode(저장할_이슈_우선순위);
@@ -631,8 +661,10 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 		지라프로젝트_저장.setC_type(TreeConstant.Leaf_Node_TYPE);
 
 		JiraProjectEntity 저장된_프로젝트 = jiraProject.addNode(지라프로젝트_저장);
-
+		// 클라우드와 레드마인_온프레미스의 경우 프로젝트별 "이슈 유형"이 다름
+		// 레드마인_온프레미스는 "이슈 상태"는 전역으로 사용함.
 		if (서버유형.equals("클라우드")) {
+			// 이슈 유형 저장
 			List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if(클라우드_프로젝트별_이슈_유형_목록.size() != 0) {
 				for (지라이슈유형_데이터 이슈_유형 : 클라우드_프로젝트별_이슈_유형_목록) {
@@ -644,7 +676,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 			지라프로젝트_저장.setJiraIssueTypeEntities(프로젝트에_붙일_이슈_유형들);
 			chat.sendMessageByEngine("지라 이슈유형 데이터 연결 완료.");
-
+			// 이슈 상태 저장
 			List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 지라_프로젝트.getId());
 			if (클라우드_프로젝트별_이슈_상태_목록.size() !=0 ) {
 				for (지라이슈상태_데이터 이슈_상태 : 클라우드_프로젝트별_이슈_상태_목록) {
@@ -656,6 +688,19 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 			지라프로젝트_저장.setJiraIssueStatusEntities(프로젝트에_붙일_이슈_상태들);
 			chat.sendMessageByEngine("지라 이슈상태 데이터 연결 완료.");
+		}
+		if(서버유형.equals("레드마인_온프레미스")){
+			List<지라이슈유형_데이터> 레드마인_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 지라_프로젝트.getId());
+			if(레드마인_프로젝트별_이슈_유형_목록.size() != 0) {
+				for (지라이슈유형_데이터 이슈_유형 : 레드마인_프로젝트별_이슈_유형_목록) {
+					JiraIssueTypeEntity 이슈_유형_검색_결과 = 지라_이슈_유형_엔티티_검색(이슈_유형);
+					if (이슈_유형_검색_결과 == null) {
+						프로젝트에_붙일_이슈_유형들.add(미등록_이슈_유형_저장_및_저장된_엔티티("레드마인_온프레미스", 이슈_유형));
+					}
+				}
+			}
+			지라프로젝트_저장.setJiraIssueTypeEntities(프로젝트에_붙일_이슈_유형들);
+			//chat.sendMessageByEngine("레드마인 이슈유형 데이터 연결 완료.");
 		}
 
 		jiraProject.updateNode(저장된_프로젝트);
@@ -748,7 +793,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			if (priorityEntity.getC_issue_priority_url().equals(가져온_이슈_우선순위.getSelf())) {
 				priorityEntity.setC_issue_priority_name(가져온_이슈_우선순위.getName());
 				priorityEntity.setC_issue_priority_desc(가져온_이슈_우선순위.getDescription());
-				if(서버유형.equals("클라우드")) {
+				if(서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 					priorityEntity.setC_etc(String.valueOf(가져온_이슈_우선순위.isDefault()));
 				}
 				갱신_횟수 += jiraIssuePriority.updateNode(priorityEntity);

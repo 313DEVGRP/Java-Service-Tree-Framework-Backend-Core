@@ -3,47 +3,35 @@ package com.arms.api.analysis.scope.controller;
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자수;
 import com.arms.api.analysis.scope.service.ScopeService;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.AggregationMapper;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.external_communicate.dto.*;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
-import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.arms.api.util.external_communicate.통계엔진통신기;
-import com.arms.api.util.external_communicate.dto.search.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@AllArgsConstructor
 @RequestMapping(value = "/arms/analysis/scope")
+@RequiredArgsConstructor
 public class 스코프분석_컨트롤러 {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final 통계엔진통신기 통계엔진통신기;
 
-    @Autowired
-    private 통계엔진통신기 통계엔진통신기;
+    private final ScopeService scopeService;
 
-    @Autowired
-    private ScopeService scopeService;
-
-    @Autowired
-    private ReqAdd reqAdd;
-
-    static final long dummy_jira_server = 0L;
+    private final AggregationMapper aggregationMapper;
 
     @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
@@ -91,10 +79,23 @@ public class 스코프분석_컨트롤러 {
 
     @GetMapping("/tree-bar-top10")
     public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(
-            지라이슈_제품_및_제품버전_검색요청 지라이슈_제품_및_제품버전_검색요청
+            @Validated AggregationRequestDTO aggregationRequestDTO
     ) throws Exception {
-        return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(지라이슈_제품_및_제품버전_검색요청)));
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(engineAggregationRequestDTO)));
     }
 
 
+    // TopMenuApi용
+    @GetMapping("/top-menu/{changeReqTableName}/getReqAddListByFilter.do")
+    public ResponseEntity<Map<String, Long>> 분석_톱메뉴_요구사항_상태_합계(@PathVariable(value ="changeReqTableName") String changeReqTableName
+            , @RequestParam Long pdServiceId
+            , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
+        log.info("스코프분석_컨트롤러 :: 분석_톱메뉴_요구사항_상태_합계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
+                , pdServiceStr, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(scopeService.톱메뉴_버전별_요구사항_상태_합계(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+    }
 }
