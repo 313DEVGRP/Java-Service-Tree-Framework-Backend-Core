@@ -626,6 +626,12 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 	private int 지라서버_엔티티에_지라_프로젝트들을_연결(Set<JiraProjectEntity> 지라서버에_붙일_프로젝트_목록,
 									   List<지라프로젝트_데이터> 가져온_지라_프로젝트_목록,
 									   String 서버유형, String 엔진_연결_아이디 ) throws Exception {
+
+		if (가져온_지라_프로젝트_목록 == null || 가져온_지라_프로젝트_목록.isEmpty()) {
+			logger.info("연결할 프로젝트가 없습니다.");
+			return 0;
+		}
+
 		for (지라프로젝트_데이터 가져온_지라_프로젝트 : 가져온_지라_프로젝트_목록) {
 			JiraProjectEntity 검색된_지라_프로젝트 = 지라_프로젝트_엔티티_검색(가져온_지라_프로젝트);// 검색은 self, 서버유형 안탐
 			if( 검색된_지라_프로젝트 == null ) {
