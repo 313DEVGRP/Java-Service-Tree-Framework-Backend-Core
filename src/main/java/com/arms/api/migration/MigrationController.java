@@ -8,7 +8,9 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/arms/migration")
 @RequiredArgsConstructor
+@Slf4j
 public class MigrationController {
 
     private final PdService pdService;
@@ -31,7 +34,7 @@ public class MigrationController {
     private final 엔진통신기 externalCommunicator;
 
     @GetMapping("/v1/update-req-link")
-    public String updateReqLink() throws Exception {
+    public ResponseEntity<CommonResponse.ApiResult<String>> updateReqLink() throws Exception {
         long startTime = System.currentTimeMillis();
         List<PdServiceEntity> pdServiceEntities = pdService.getNodesWithoutRoot(new PdServiceEntity());
 
@@ -66,16 +69,19 @@ public class MigrationController {
             });
         }
 
-
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
 
-        System.out.println("Method started at: " + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(startTime)));
-        System.out.println("Method ended at: " + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(endTime)));
-        System.out.println("Total execution time: " + elapsedTime + " milliseconds");
-        ResponseEntity<String> engineResponse = externalCommunicator.reqUpdate(response);
-        String body = engineResponse.getBody();
-        return body;
+        for (UpdateReqLinkDTO updateReqLinkDTO : response) {
+            ResponseEntity<String> engineResponse = externalCommunicator.reqUpdate(updateReqLinkDTO);
+        }
+
+        log.info("Method started at: " + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(startTime)));
+        log.info("Method ended at: " + new java.text.SimpleDateFormat("HH:mm:ss").format(new java.util.Date(endTime)));
+        log.info("Total execution time: " + elapsedTime + " milliseconds");
+        log.info("Total size: " + response.size());
+
+        return ResponseEntity.ok(CommonResponse.success("ok"));
     }
 
 }

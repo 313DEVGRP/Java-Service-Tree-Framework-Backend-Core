@@ -135,7 +135,7 @@ public interface 엔진통신기 {
                                                 @RequestBody EngineAggregationRequestDTO engineAggregationRequestDTO);
 
     @PostMapping("/engine/jira/field/update/c_req_link")
-    ResponseEntity<String> reqUpdate(@RequestBody List<UpdateReqLinkDTO> updateReqLinkDTOS);
+    ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
 
 
 }
