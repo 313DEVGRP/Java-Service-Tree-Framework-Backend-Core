@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/arms/migration")
@@ -33,12 +32,12 @@ public class MigrationController {
     private final 내부통신기 internalCommunicator;
     private final 엔진통신기 externalCommunicator;
 
-    @GetMapping("/v1/update-req-link")
+    @GetMapping("/update-req-link")
     public ResponseEntity<CommonResponse.ApiResult<String>> updateReqLink() throws Exception {
         long startTime = System.currentTimeMillis();
         List<PdServiceEntity> pdServiceEntities = pdService.getNodesWithoutRoot(new PdServiceEntity());
 
-        if (pdServiceEntities.size() == 0) {
+        if (pdServiceEntities.isEmpty()) {
             throw new Exception("No pdServiceEntity found");
         }
 
@@ -46,7 +45,7 @@ public class MigrationController {
         Function<JiraServerEntity, JiraServerEntity> value = Function.identity();
         Map<Long, JiraServerEntity> jiraServerEntityMap = jiraServer.getNodesWithoutRootMap(new JiraServerEntity(), key, value);
 
-        if (jiraServerEntityMap.size() == 0) {
+        if (jiraServerEntityMap.isEmpty()) {
             throw new Exception("No JiraServerEntity found");
         }
 
@@ -56,7 +55,7 @@ public class MigrationController {
             ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
             Long cId = pdServiceEntity.getC_id();
             List<ReqStatusEntity> reqStatuses = internalCommunicator.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + cId, reqStatusDTO);
-            if (reqStatuses.size() == 0) {
+            if (reqStatuses.isEmpty()) {
                 continue;
             }
             reqStatuses.forEach(reqStatusEntity -> {
