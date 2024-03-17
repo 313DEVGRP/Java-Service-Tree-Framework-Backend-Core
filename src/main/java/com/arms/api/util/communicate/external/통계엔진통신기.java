@@ -6,10 +6,11 @@ import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResp
 import com.arms.api.analysis.dashboard.model.Worker;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.util.communicate.external.request.aggregation.트리맵_검색요청;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.external_communicate.dto.*;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import org.springframework.cloud.openfeign.FeignClient;
