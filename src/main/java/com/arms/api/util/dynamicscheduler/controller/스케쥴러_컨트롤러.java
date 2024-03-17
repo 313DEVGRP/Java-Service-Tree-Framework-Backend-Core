@@ -109,6 +109,7 @@ public class 스케쥴러_컨트롤러{
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_link => {}", 요구사항_이슈_엔티티.getC_req_link());
                         String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
                         if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
                             Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
@@ -120,7 +121,8 @@ public class 스케쥴러_컨트롤러{
                                     Long.parseLong(지라서버.getC_jira_server_etc()),
                                     요구사항_이슈_엔티티.getC_issue_key(),
                                     요구사항_이슈_엔티티.getC_pdservice_link(),
-                                    버전_아이디_목록_배열
+                                    버전_아이디_목록_배열,
+                                    요구사항_이슈_엔티티.getC_req_link()
                             );
 
                             if( 저장결과 == 1){
@@ -181,6 +183,7 @@ public class 스케쥴러_컨트롤러{
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_id => {}", 요구사항_이슈_엔티티.getC_id());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_link => {}", 요구사항_이슈_엔티티.getC_req_link());
                         String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
                         if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
                             Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
@@ -192,7 +195,8 @@ public class 스케쥴러_컨트롤러{
                                     Long.parseLong(지라서버.getC_jira_server_etc()),
                                     요구사항_이슈_엔티티.getC_issue_key(),
                                     요구사항_이슈_엔티티.getC_pdservice_link(),
-                                    버전_아이디_목록_배열
+                                    버전_아이디_목록_배열,
+                                    요구사항_이슈_엔티티.getC_req_link()
                             );
                             log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
                         } else {
