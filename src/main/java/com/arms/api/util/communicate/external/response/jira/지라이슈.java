@@ -58,6 +58,8 @@ public class 지라이슈 {
 
     private Long pdServiceVersion;
 
+    private Long cReqLink;
+
     private String _class; //추가
 
     @Getter
