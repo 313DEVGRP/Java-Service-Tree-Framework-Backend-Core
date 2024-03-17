@@ -515,8 +515,8 @@ public class TreeServiceImpl implements TreeService {
         logger.debug("-----------------------position 값이 over될때 방어코드-----------------------");
         DetachedCriteria getChildNodeByPositionCriteria = DetachedCriteria.forClass(treeSearchEntity.getClass());
 
-        Criterion postion_criterion = Restrictions.eq(TreeConstant.Node_ParentID_Column, treeSearchEntity.getRef());
-        getChildNodeByPositionCriteria.add(postion_criterion);
+        Criterion position_criterion = Restrictions.eq(TreeConstant.Node_ParentID_Column, treeSearchEntity.getRef());
+        getChildNodeByPositionCriteria.add(position_criterion);
         int refChildCount = treeDao.getListWithoutPaging(getChildNodeByPositionCriteria).size();
         if (treeSearchEntity.getC_position() > refChildCount) {
             treeSearchEntity.setC_position(Long.valueOf(refChildCount));
@@ -559,14 +559,14 @@ public class TreeServiceImpl implements TreeService {
             this.cutMyself(nodeById, spaceOfTargetNode, c_idsByChildNodeFromNodeById);
         }
 
-        logger.debug("-----------------------calculatePostion 완료-----------------------");
+        logger.debug("-----------------------calculatePosition 완료-----------------------");
 
         //bug fix: 세션 값이 유지되므로, 구분자를 줘야 하는 문제를 테이블 명으로 잡았음.
         Table table = treeSearchEntity.getClass().getAnnotation(Table.class);
         String tableName = table.name();
 
         tableName = RouteTableInterceptor.setReplaceTableName(request, tableName);
-        this.calculatePostion(treeSearchEntity, nodeById, childNodesFromNodeByRef, request, tableName);
+        this.calculatePosition(treeSearchEntity, nodeById, childNodesFromNodeByRef, request, tableName);
 
         if (rightPointFromNodeByRef < 1) {
             rightPointFromNodeByRef = 1;
@@ -804,7 +804,7 @@ public class TreeServiceImpl implements TreeService {
 
     }
 
-    public <T extends TreeSearchEntity> void calculatePostion(T treeSearchEntity, T nodeById,
+    public <T extends TreeSearchEntity> void calculatePosition(T treeSearchEntity, T nodeById,
                                                               List<T> childNodesFromNodeByRef, HttpServletRequest request, String tableName) throws Exception {
         HttpSession session = request.getSession();
 
