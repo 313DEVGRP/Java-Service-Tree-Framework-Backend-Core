@@ -13,5 +13,5 @@ import java.util.Set;
 public class 히트맵날짜데이터 {
     private Set<String> items;
     private Set<String> contents;
-    private int count = 0;
+    @Builder.Default private int count = 0;
 }
