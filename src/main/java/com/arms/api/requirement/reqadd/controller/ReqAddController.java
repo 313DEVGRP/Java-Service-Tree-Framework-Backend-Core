@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.criterion.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -536,6 +537,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
     @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
     interface ReqAddControllerMapper {
+        @Mapping(source = "pdServiceEntity.c_id", target = "c_req_pdservice_link")
+        @Mapping(source = "reqPriorityEntity.c_id", target = "c_req_priority_link")
+        @Mapping(source = "reqStateEntity.c_id", target = "c_req_state_link")
+        @Mapping(source = "reqDifficultyEntity.c_id", target = "c_req_difficulty_link")
         LoadReqAddDTO toLoadReqAddDto(ReqAddEntity reqAddEntity);
     }
 
