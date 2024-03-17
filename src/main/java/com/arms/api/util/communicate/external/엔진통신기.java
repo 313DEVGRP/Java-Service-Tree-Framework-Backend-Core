@@ -1,6 +1,7 @@
 package com.arms.api.util.communicate.external;
 
 import com.arms.api.analysis.time.model.히트맵데이터;
+import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.api.util.communicate.external.response.jira.지라이슈_데이터;
@@ -82,14 +83,18 @@ public interface 엔진통신기 {
             @PathVariable("connectId") Long 지라서버_아이디,
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
-            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열);
+            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열,
+            @RequestParam("cReqLink") Long cReqLink
+    );
 
     @GetMapping("/engine/jira/{connectId}/issue/increment/loadToES/bulk/{issueKey}")
     public int 증분이슈_검색엔진_벌크_저장(
             @PathVariable("connectId") Long 지라서버_아이디,
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
-            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열);
+            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열,
+            @RequestParam("cReqLink") Long cReqLink
+    );
 
     @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
@@ -132,5 +137,9 @@ public interface 엔진통신기 {
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
                                                 @RequestBody EngineAggregationRequestDTO engineAggregationRequestDTO);
+
+    @PostMapping("/engine/jira/field/update/c_req_link")
+    ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
+
 
 }
