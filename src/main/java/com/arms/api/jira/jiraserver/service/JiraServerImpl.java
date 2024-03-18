@@ -312,7 +312,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			Set<JiraIssueTypeEntity> 해당_서버_이슈_유형_목록 = 검색된_지라_서버.getJiraIssueTypeEntities();
 			해당_서버_이슈_유형_갱신(해당_서버_이슈_유형_목록, 서버유형, 엔진_통신_아이디);
 		}
-		if (StringUtils.equals(갱신할_항목,"issueType") && 서버유형.equals("클라우드")) {
+		if (StringUtils.equals(갱신할_항목,"issueType") && 서버유형.equals("클라우드") || 서버유형.equals("레드마인_온프레미스")) {
 			Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_지라_서버.getJiraProjectEntities();
 			for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
 				Set<JiraIssueTypeEntity> 프로젝트의_이슈_유형_목록 = 프로젝트.getJiraIssueTypeEntities();
@@ -320,7 +320,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 			}
 		}
 
-		if (StringUtils.equals(갱신할_항목,"issueStatus") && 서버유형.equals("온프레미스")) {
+		if (StringUtils.equals(갱신할_항목,"issueStatus") && 서버유형.equals("온프레미스") || 서버유형.equals("레드마인_온프레미스")) {
 			Set<JiraIssueStatusEntity> 해당_서버_이슈_상태_목록 = 검색된_지라_서버.getJiraIssueStatusEntities();
 			해당_서버_이슈_상태_갱신(해당_서버_이슈_상태_목록, 서버유형, 엔진_통신_아이디);
 		}

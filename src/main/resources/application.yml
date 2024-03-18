@@ -28,6 +28,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+logging:
+  config: classpath:logback/logback-${spring.profiles.active}.xml
+
 springfox:
   documentation:
     swagger:
