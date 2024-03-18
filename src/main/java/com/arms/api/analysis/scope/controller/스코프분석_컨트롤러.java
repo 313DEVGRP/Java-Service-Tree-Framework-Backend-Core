@@ -7,7 +7,7 @@ import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.common.AggregationMapper;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
-import com.arms.api.util.external_communicate.dto.*;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;

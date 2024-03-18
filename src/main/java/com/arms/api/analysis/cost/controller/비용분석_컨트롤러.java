@@ -7,7 +7,7 @@ import com.arms.api.analysis.cost.service.비용서비스;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;

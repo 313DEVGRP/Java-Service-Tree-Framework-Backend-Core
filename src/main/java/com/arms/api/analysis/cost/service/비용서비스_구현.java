@@ -17,7 +17,7 @@ import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;

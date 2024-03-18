@@ -5,7 +5,7 @@ import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
-import com.arms.api.util.external_communicate.dto.지라이슈_일반_집계_요청;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 
 import java.util.List;
 
