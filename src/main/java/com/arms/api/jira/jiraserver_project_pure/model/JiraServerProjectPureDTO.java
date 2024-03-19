@@ -1,6 +1,6 @@
 package com.arms.api.jira.jiraserver_project_pure.model;
 
-import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
+import com.arms.api.jira.jiraproject_issuetype_pure.model.JiraProjectIssueTypePureEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
 
@@ -29,5 +29,7 @@ public class JiraServerProjectPureDTO extends TreeBaseDTO {
 
     private String c_jira_server_etc;
 
-    private Set<JiraProjectPureEntity> jiraProjectPureEntities;
+    // private Set<JiraProjectPureEntity> jiraProjectPureEntities;
+
+    private Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities;
 }
