@@ -37,11 +37,4 @@ public class LoadReqAddDTO extends TreeBaseDTO {
     private String c_req_etc;
     private String c_req_desc;
     private String c_req_contents;
-
-    public static LoadReqAddDTO of(Long c_id) {
-        LoadReqAddDTO dto = new LoadReqAddDTO();
-        dto.setC_id(c_id);
-        return dto;
-    }
-
 }
