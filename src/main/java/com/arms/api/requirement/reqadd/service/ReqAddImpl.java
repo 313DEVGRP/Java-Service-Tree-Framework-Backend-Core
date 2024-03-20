@@ -217,6 +217,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			if(요구사항_이슈_타입 == null) {
 				logger.error("요구사항_이슈_타입이 없습니다.");
+				throw new RuntimeException("선택된 요구사항_이슈_타입이 없습니다.");
 			} else {
 				logger.info("요구사항_이슈_타입 = " + 요구사항_이슈_타입.getC_issue_type_name());
 			}
