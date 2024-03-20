@@ -11,7 +11,7 @@
  */
 package com.arms.api.jira.jiraserver_project_pure.model;
 
-import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
+import com.arms.api.jira.jiraproject_issuetype_pure.model.JiraProjectIssueTypePureEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -79,7 +79,7 @@ public class JiraServerProjectPureEntity extends TreeSearchEntity implements Ser
     private String c_jira_server_etc;
 
     // -- 1:N table 연계 - 단방향
-    private Set<JiraProjectPureEntity> jiraProjectPureEntities;
+/*    private Set<JiraProjectPureEntity> jiraProjectPureEntities;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @JsonManagedReference
@@ -102,6 +102,32 @@ public class JiraServerProjectPureEntity extends TreeSearchEntity implements Ser
 
     public void setJiraProjectPureEntities(Set<JiraProjectPureEntity> jiraProjectPureEntities) {
         this.jiraProjectPureEntities = jiraProjectPureEntities;
+    }*/
+
+    // -- 1:N table 연계 - 단방향
+    private Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraserver_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraproject_link")
+    )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+            "pdservice_link IS NULL and " +
+            "pdserviceversion_link IS NULL and " +
+            "jiraissuepriority_link IS NULL and " +
+            "jiraissueresolution_link IS NULL and " +
+            "jiraissuestatus_link IS NULL and " +
+            "jiraissuetype_link IS NULL")
+    public Set<JiraProjectIssueTypePureEntity> getJiraProjectIssueTypePureEntities() {
+        return jiraProjectIssueTypePureEntities;
+    }
+
+    public void setJiraProjectIssueTypePureEntities(Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities) {
+        this.jiraProjectIssueTypePureEntities = jiraProjectIssueTypePureEntities;
     }
     /*
      * Extend Bean Field
