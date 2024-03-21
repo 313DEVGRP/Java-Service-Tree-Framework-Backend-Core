@@ -2,7 +2,8 @@ package com.arms.api.requirement.reqadd.model;
 
 public enum JiraServerType {
     CLOUD("클라우드"),
-    ON_PREMISE("온프레미스");
+    ON_PREMISE("온프레미스"),
+    REDMINE_ON_PREMISE("레드마인_온프레미스");
 
     private final String type;
 
