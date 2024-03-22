@@ -173,16 +173,32 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
 					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
 
 			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
+
+			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			}
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
 
 			if (요구사항_이슈_타입 == null) {
-				if (jiraServerType.equals(JiraServerType.CLOUD)) {
+				if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
 					요구사항_이슈_타입 = 검색된_지라서버.getJiraIssueTypeEntities().stream()
 							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
 							.findFirst().orElse(null);
@@ -599,13 +615,29 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
 					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
 
 			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
+
+			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			}
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -767,13 +799,29 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
+			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
 					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
 
 			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
 					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
+
+			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			}
+
+			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -907,13 +955,21 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraServerType jiraServerType = JiraServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.CLOUD)
-					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
-					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			}
 
-			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.CLOUD)
-					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			if (jiraServerType.equals(JiraServerType.CLOUD) || jiraServerType.equals(JiraServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+			}
+			else if (jiraServerType.equals(JiraServerType.ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
