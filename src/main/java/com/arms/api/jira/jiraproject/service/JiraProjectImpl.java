@@ -107,7 +107,9 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream().collect(Collectors.toList());
+        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
+                .filter(entity -> !"true".equals(entity.getC_desc()) || !"-1".equals(entity.getC_contents()))
+                .collect(Collectors.toList());
     }
 
     @Override
