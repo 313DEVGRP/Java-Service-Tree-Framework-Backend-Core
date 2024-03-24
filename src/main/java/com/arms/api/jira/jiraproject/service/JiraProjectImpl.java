@@ -36,10 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -225,11 +222,22 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         int 갱신_횟수 = 0;
         for (JiraIssueTypeEntity issueTypeEntity : 기존_이슈_유형_목록) {
             if (issueTypeEntity.getC_issue_type_url().equals(가져온_이슈_유형.getSelf())) {
-                issueTypeEntity.setC_issue_type_name(가져온_이슈_유형.getName());
-                issueTypeEntity.setC_issue_type_desc(가져온_이슈_유형.getDescription());
-                issueTypeEntity.setC_desc(가져온_이슈_유형.getSubtask().toString());
-                issueTypeEntity.setC_etc(가져온_이슈_유형.getUntranslatedName());
-                issueTypeEntity.setC_contents(가져온_이슈_유형.getHierarchyLevel().toString());
+                if (가져온_이슈_유형.getName() != null) {
+                    issueTypeEntity.setC_issue_type_name(가져온_이슈_유형.getName());
+                }
+                if (가져온_이슈_유형.getDescription() != null) {
+                    issueTypeEntity.setC_issue_type_desc(가져온_이슈_유형.getDescription());
+                }
+                if (가져온_이슈_유형.getSubtask() != null) {
+                    issueTypeEntity.setC_desc(가져온_이슈_유형.getSubtask().toString());
+                }
+                if (가져온_이슈_유형.getUntranslatedName() != null) {
+                    issueTypeEntity.setC_etc(가져온_이슈_유형.getUntranslatedName());
+                }
+                if (가져온_이슈_유형.getHierarchyLevel() != null) {
+                    issueTypeEntity.setC_contents(가져온_이슈_유형.getHierarchyLevel().toString());
+                }
+
                 갱신_횟수 += jiraIssueType.updateNode(issueTypeEntity);
             }
         }
