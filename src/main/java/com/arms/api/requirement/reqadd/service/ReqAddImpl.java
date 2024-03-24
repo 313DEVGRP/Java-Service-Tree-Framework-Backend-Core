@@ -276,8 +276,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
 					"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + 제품서비스_아이디 +
-					"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 + "\n" +
-					"&pdServiceVersion=" + 버전ID목록 +
+					"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 +
+					"&pdServiceVersion=" + 버전ID목록 + "\n" +
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 					"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
