@@ -8,6 +8,7 @@ import com.arms.api.util.communicate.external.request.aggregation.EngineAggregat
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 
 import java.util.List;
+import java.util.Map;
 
 public interface 비용서비스 {
 
@@ -16,5 +17,10 @@ public interface 비용서비스 {
     버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(EngineAggregationRequestDTO engineAggregationRequestDTO);
 
     요구사항목록_난이도_및_우선순위통계데이터 요구사항목록_난이도_및_우선순위통계_가져오기(ReqAddDTO reqAddDTO) throws Exception;
+
     버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
+
+    Map<String, Long> calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
+
+    Long 연봉총합(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws Exception;
 }
