@@ -16,6 +16,8 @@ import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
+import com.arms.api.product_service.pdservice_pure.model.PdServicePureEntity;
+import com.arms.api.product_service.pdservice_pure.service.PdServicePure;
 import com.arms.api.util.dynamicdbmaker.service.DynamicDBMaker;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
 import com.arms.api.util.filerepository.service.FileRepository;
@@ -392,25 +394,28 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
                                                 try {
                                                     JiraServerPureEntity 지라서버퓨어_엔티티 = jiraServerPure.getNode(지라서버검색);
-                                                    지라서버명 += "["+지라서버퓨어_엔티티.getC_jira_server_name()+"] ";
+                                                    지라서버명 += "["+지라서버퓨어_엔티티.getC_jira_server_name()+"]";
                                                 } catch (Exception e) {
-                                                    log.info("PdServiceImpl :: getD3ChartData :: 지라서버명 = " + 지라서버명);
-                                                    throw new RuntimeException("검색된 지라 서버가 없습니다.");
+                                                    log.info("PdServiceImpl :: getD3ChartData :: error = " + e.getMessage());
+                                                    continue;
                                                 }
                                                 if(!지라서버명.isBlank()) {
                                                     레벨4_지라프로젝트_목록.add(PdServiceD3Chart.builder()
                                                             .type("Jira")
-                                                            .name(지라서버명 + 지라프로젝트_명)
+                                                            .name(지라서버명 +" "+지라프로젝트_명)
                                                             .build());
                                                 }
                                             }
-                                            return PdServiceD3Chart.builder().type("Version")
+                                            return PdServiceD3Chart.builder()
+                                                    .type("Version")
                                                     .name(버전.getC_title())
                                                     .children(레벨4_지라프로젝트_목록).build();
 
                                 }).collect(Collectors.toList()); //레벨3
 
-                                return PdServiceD3Chart.builder().type("PdService").name(서비스.getC_title())
+                                return PdServiceD3Chart.builder()
+                                        .type("PdService")
+                                        .name(서비스.getC_title())
                                         .children(레벨3_버전_리스트).build();
 
                             }).collect(Collectors.toList()); // 레벨2_서비스_리스트
