@@ -326,6 +326,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
     @Override
     public PdServiceD3Chart getD3ChartData() throws Exception {
+
         List<PdServiceEntity> 서비스_리스트 = this.getNodesWithoutRoot(new PdServiceEntity());
 
         if (서비스_리스트.isEmpty()) {
@@ -393,6 +394,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                                     JiraServerPureEntity 지라서버퓨어_엔티티 = jiraServerPure.getNode(지라서버검색);
                                                     지라서버명 += "["+지라서버퓨어_엔티티.getC_jira_server_name()+"] ";
                                                 } catch (Exception e) {
+                                                    log.info("PdServiceImpl :: getD3ChartData :: 지라서버명 = " + 지라서버명);
                                                     throw new RuntimeException("검색된 지라 서버가 없습니다.");
                                                 }
                                                 if(!지라서버명.isBlank()) {
