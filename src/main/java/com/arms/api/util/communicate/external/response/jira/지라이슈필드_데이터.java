@@ -1,6 +1,7 @@
 package com.arms.api.util.communicate.external.response.jira;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class 지라이슈필드_데이터 {
 
 
@@ -46,6 +48,7 @@ public class 지라이슈필드_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class 프로젝트 {
         private String self;
         private String id;
@@ -60,6 +63,7 @@ public class 지라이슈필드_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class 보고자 {
         private String name;
         private String emailAddress;
@@ -73,6 +77,7 @@ public class 지라이슈필드_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class 담당자 {
         private String name;
         private String emailAddress;
@@ -86,6 +91,7 @@ public class 지라이슈필드_데이터 {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class 연결된_이슈 {
         private String self;
         private String id;

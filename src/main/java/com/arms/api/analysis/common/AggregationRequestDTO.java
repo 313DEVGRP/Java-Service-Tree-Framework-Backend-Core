@@ -18,12 +18,12 @@ import java.util.List;
 public class AggregationRequestDTO {
     @NotNull private Long pdServiceLink;
     @NotEmpty private List<Long> pdServiceVersionLinks;
-    private IsReqType isReqType = IsReqType.ALL;
+    @Builder.Default private IsReqType isReqType = IsReqType.ALL;
     private Boolean isReq;
     private String 메인그룹필드;
     private List<String> 하위그룹필드들;
     private boolean 컨텐츠보기여부;
-    private int 크기 = 1000;
-    private int 하위크기 = 1000;
+    @Builder.Default private int 크기 = 1000;
+    @Builder.Default private int 하위크기 = 1000;
 
 }

@@ -51,6 +51,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.arms.egovframework.javaservice.treeframework.remote.Global.chat;
 
@@ -228,9 +229,13 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
 		JiraIssueTypeEntity 이슈유형_검색전용 = new JiraIssueTypeEntity();
 		이슈유형_검색전용.setWhereIn("c_id",이슈유형_cId_목록);
-		List<JiraIssueTypeEntity> 지라이슈유형_목록 = jiraIssueType.getChildNode(이슈유형_검색전용);
 
-		return 지라이슈유형_목록;
+		List<JiraIssueTypeEntity> 지라이슈유형_목록 = jiraIssueType.getChildNode(이슈유형_검색전용);
+		List<JiraIssueTypeEntity> 반환결과 = 지라이슈유형_목록.stream()
+				.filter(entity -> !"true".equals(entity.getC_desc()))
+				.collect(Collectors.toList());
+
+		return 반환결과;
 	}
 
 	@Override

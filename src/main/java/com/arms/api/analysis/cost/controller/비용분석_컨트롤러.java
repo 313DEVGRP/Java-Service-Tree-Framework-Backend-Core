@@ -137,4 +137,17 @@ public class 비용분석_컨트롤러 {
         return modelAndView;
     }
 
+    /**
+     * 제품에 대한 누적 월 별 비용 조회 API
+     */
+    @GetMapping("/product-accumulate-cost-by-month")
+    public ResponseEntity<CommonResponse.ApiResult<ProductCostResponse>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        Long 연봉총합 = 비용서비스.연봉총합(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
+        Map<String, Long> response = 비용서비스.calculateInvestmentPerformance(engineAggregationRequestDTO);
+        ProductCostResponse productCostResponse = new ProductCostResponse();
+        productCostResponse.setTotalAnnualIncome(연봉총합);
+        productCostResponse.setMonthlyCost(response);
+        return ResponseEntity.ok(CommonResponse.success(productCostResponse));
+    }
 }

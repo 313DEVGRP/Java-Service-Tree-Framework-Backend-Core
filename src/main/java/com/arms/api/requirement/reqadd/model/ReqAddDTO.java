@@ -45,7 +45,7 @@ public class ReqAddDTO extends TreeBaseDTO {
 
     private String c_req_writer;
 
-    private String c_req_owner = "admin";
+    @Builder.Default private String c_req_owner = "admin";
 
     private Date c_req_create_date;
 

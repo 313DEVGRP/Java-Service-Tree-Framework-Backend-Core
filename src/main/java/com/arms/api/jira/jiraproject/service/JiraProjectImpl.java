@@ -36,10 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -107,7 +104,9 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream().collect(Collectors.toList());
+        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
+                .filter(entity -> !"true".equals(entity.getC_desc()) || !"-1".equals(entity.getC_contents()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -223,11 +222,22 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         int 갱신_횟수 = 0;
         for (JiraIssueTypeEntity issueTypeEntity : 기존_이슈_유형_목록) {
             if (issueTypeEntity.getC_issue_type_url().equals(가져온_이슈_유형.getSelf())) {
-                issueTypeEntity.setC_issue_type_name(가져온_이슈_유형.getName());
-                issueTypeEntity.setC_issue_type_desc(가져온_이슈_유형.getDescription());
-                issueTypeEntity.setC_desc(가져온_이슈_유형.getSubtask().toString());
-                issueTypeEntity.setC_etc(가져온_이슈_유형.getUntranslatedName());
-                issueTypeEntity.setC_contents(가져온_이슈_유형.getHierarchyLevel().toString());
+                if (가져온_이슈_유형.getName() != null) {
+                    issueTypeEntity.setC_issue_type_name(가져온_이슈_유형.getName());
+                }
+                if (가져온_이슈_유형.getDescription() != null) {
+                    issueTypeEntity.setC_issue_type_desc(가져온_이슈_유형.getDescription());
+                }
+                if (가져온_이슈_유형.getSubtask() != null) {
+                    issueTypeEntity.setC_desc(가져온_이슈_유형.getSubtask().toString());
+                }
+                if (가져온_이슈_유형.getUntranslatedName() != null) {
+                    issueTypeEntity.setC_etc(가져온_이슈_유형.getUntranslatedName());
+                }
+                if (가져온_이슈_유형.getHierarchyLevel() != null) {
+                    issueTypeEntity.setC_contents(가져온_이슈_유형.getHierarchyLevel().toString());
+                }
+
                 갱신_횟수 += jiraIssueType.updateNode(issueTypeEntity);
             }
         }
@@ -237,11 +247,21 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
     private JiraIssueTypeEntity 미등록_이슈_유형_저장_및_저장된_엔티티(지라이슈유형_데이터 이슈_유형) throws Exception {
         JiraIssueTypeEntity 저장할_이슈_유형 = new JiraIssueTypeEntity();
         // 공통
-        저장할_이슈_유형.setC_issue_type_id(이슈_유형.getId());
-        저장할_이슈_유형.setC_issue_type_name(이슈_유형.getName());
-        저장할_이슈_유형.setC_issue_type_url(이슈_유형.getSelf());
-        저장할_이슈_유형.setC_issue_type_desc(이슈_유형.getDescription());
-        저장할_이슈_유형.setC_desc(이슈_유형.getSubtask().toString()); //Boolean
+        if (이슈_유형.getId() != null) {
+            저장할_이슈_유형.setC_issue_type_id(이슈_유형.getId());
+        }
+        if (이슈_유형.getName() != null) {
+            저장할_이슈_유형.setC_issue_type_name(이슈_유형.getName());
+        }
+        if (이슈_유형.getSelf() != null) {
+            저장할_이슈_유형.setC_issue_type_url(이슈_유형.getSelf());
+        }
+        if (이슈_유형.getDescription() != null) {
+            저장할_이슈_유형.setC_issue_type_desc(이슈_유형.getDescription());
+        }
+        if (이슈_유형.getSubtask() != null) {
+            저장할_이슈_유형.setC_desc(이슈_유형.getSubtask().toString()); //Boolean
+        }
         if (이슈_유형.getName().equals("arms-requirement")) {
             저장할_이슈_유형.setC_check("true"); //기본값 false 설정
         } else {
@@ -249,8 +269,12 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         }
         저장할_이슈_유형.setRef(TreeConstant.First_Node_CID);
         저장할_이슈_유형.setC_type(TreeConstant.Leaf_Node_TYPE);
-        저장할_이슈_유형.setC_etc(이슈_유형.getUntranslatedName());
-        저장할_이슈_유형.setC_contents(이슈_유형.getHierarchyLevel().toString()); //Integer
+        if (이슈_유형.getUntranslatedName() != null) {
+            저장할_이슈_유형.setC_etc(이슈_유형.getUntranslatedName());
+        }
+        if (이슈_유형.getHierarchyLevel() != null) {
+            저장할_이슈_유형.setC_contents(이슈_유형.getHierarchyLevel().toString()); //Integer
+        }
 
         JiraIssueTypeEntity 저장된_이슈_유형 = jiraIssueType.addNode(저장할_이슈_유형);
 
