@@ -12,10 +12,15 @@
 package com.arms.egovframework.javaservice.treeframework.errors.response;
 
 import static com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.error;
+import static com.arms.egovframework.javaservice.treeframework.util.UUIDTimeProvider.getCurrentTimeUUID;
 
+import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
 import com.arms.egovframework.javaservice.treeframework.errors.exception.BaseException;
 import com.arms.egovframework.javaservice.treeframework.errors.exception.InvalidParamException;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,11 +81,13 @@ public class ErrorControllerAdvice {
      *
      */
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<?> onException(Exception e) {
-        e.printStackTrace();
-        log.error("[onException] ,cause = {}, errorMsg = {}", NestedExceptionUtils.getMostSpecificCause(e), NestedExceptionUtils.getMostSpecificCause(e).getMessage());
-        return newResponse(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<CommonResponse.ApiResult<?>> onException(Exception e) {
+        StringWriter errors = new StringWriter();
+        e.printStackTrace(new PrintWriter(errors));
+        String timeUUID = getCurrentTimeUUID();
+        log.error("[Exception], timeCode = {} ,cause = {}, errorMsg = {}", timeUUID ,errors , NestedExceptionUtils.getMostSpecificCause(e).getMessage());
+        return this.newResponse(e.getMessage() + ", timeCode = " + timeUUID, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     /**
      * http status: 200 AND result: FAIL
