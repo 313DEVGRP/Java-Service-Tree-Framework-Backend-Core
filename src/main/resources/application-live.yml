@@ -37,13 +37,6 @@ arms:
 
 logging:
   level:
-    org:
-      hibernate:
-        SQL: info
-        type:
-          descriptor:
-            sql: info
-    org.springframework.web: trace
+    root: info
     sql: info
-    jdbc: info
-    jdbc.sqlonly: info
+    web: info

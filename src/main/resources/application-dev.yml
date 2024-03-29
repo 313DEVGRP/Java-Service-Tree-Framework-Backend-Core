@@ -37,13 +37,6 @@ arms:
 
 logging:
   level:
-    org:
-      hibernate:
-        SQL: debug
-        type:
-          descriptor:
-            sql: debug
-    org.springframework.web: debug
+    root: debug
     sql: debug
-    jdbc: debug
-    jdbc.sqlonly: debug
+    web: debug
