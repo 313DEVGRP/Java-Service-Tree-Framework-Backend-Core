@@ -40,3 +40,9 @@ logging:
     root: debug
     sql: debug
     web: debug
+    com.arms: debug
+    org.hibernate: debug
+    org.springframework: debug
+    feign: debug
+    lombok: debug
+    logback: debug

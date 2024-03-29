@@ -40,3 +40,9 @@ logging:
     root: info
     sql: info
     web: info
+    com.arms: info
+    org.hibernate: info
+    org.springframework: info
+    feign: info
+    lombok: info
+    logback: info
