@@ -186,4 +186,19 @@ public class SalaryServiceImpl extends TreeServiceImpl implements SalaryService 
         Function<SalaryEntity, SalaryEntity> 값 = Function.identity();
         return this.getNodesWithoutRootMap(엔티티, 키, 값);
     }
+
+    @Override
+    @Transactional
+    public int updateSalary(Map<String, String> salaryMaps) throws Exception {
+        Map<String, SalaryEntity> 모든_연봉정보_맵 = this.모든_연봉정보_맵();
+        for (Map.Entry<String, String> salaryMap : salaryMaps.entrySet()) {
+            SalaryEntity salaryEntity = 모든_연봉정보_맵.get(salaryMap.getKey());
+            if (salaryEntity != null) {
+                String value = salaryMap.getValue();
+                salaryEntity.setC_annual_income(value);
+                this.updateNode(salaryEntity);
+            }
+        }
+        return 1;
+    }
 }

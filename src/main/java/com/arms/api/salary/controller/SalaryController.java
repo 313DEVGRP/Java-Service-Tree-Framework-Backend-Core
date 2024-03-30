@@ -4,7 +4,6 @@ import com.arms.api.salary.model.SalaryDTO;
 import com.arms.api.salary.model.SalaryEntity;
 import com.arms.api.salary.model.SampleDTO;
 import com.arms.api.salary.service.SalaryService;
-import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
@@ -13,7 +12,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -87,22 +86,11 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
 
     }
 
-    @PutMapping("/update.do")
-    public ResponseEntity<CommonResponse.ApiResult<SalaryEntity>> updateOrCreate(SalaryDTO salaryDTO) throws Exception {
-        Map<String, SalaryEntity> 모든_연봉정보_맵 = salaryService.모든_연봉정보_맵();
-        SalaryEntity salaryEntity = 모든_연봉정보_맵.get(salaryDTO.getC_key());
-        if (salaryEntity != null) {
-            salaryEntity.setC_annual_income(salaryDTO.getC_annual_income());
-            salaryService.updateNode(salaryEntity);
-            return ResponseEntity.ok(CommonResponse.success(salaryEntity));
-        }
-        return ResponseEntity.ok(CommonResponse.success(salaryService.addNode(createNewSalaryEntity(salaryDTO))));
-    }
-
-    private SalaryEntity createNewSalaryEntity(SalaryDTO salaryDTO) {
-        SalaryEntity addSalaryEntity = modelMapper.map(salaryDTO, SalaryEntity.class);
-        addSalaryEntity.setRef(TreeConstant.First_Node_CID);
-        addSalaryEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
-        return addSalaryEntity;
+    @PutMapping
+    public ResponseEntity<CommonResponse.ApiResult<List<SalaryDTO>>> bulkUpdate(@RequestBody Map<String, String> salaryMap) throws Exception {
+        salaryService.updateSalary(salaryMap);
+        Map<String, SalaryEntity> fetchSalary = salaryService.모든_연봉정보_맵();
+        List<SalaryDTO> response = fetchSalary.values().stream().map(entity -> modelMapper.map(entity, SalaryDTO.class)).collect(Collectors.toList());
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 }
