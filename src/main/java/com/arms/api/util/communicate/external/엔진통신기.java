@@ -1,6 +1,7 @@
 package com.arms.api.util.communicate.external;
 
 import com.arms.api.analysis.time.model.히트맵데이터;
+import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
@@ -14,6 +15,7 @@ import com.arms.api.util.communicate.external.response.jira.지라프로젝트_�
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.response.jira.지라서버정보_엔티티;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -129,6 +131,9 @@ public interface 엔진통신기 {
 
     @PostMapping("/engine/jira/field/update/c_req_link")
     ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
+
+    @GetMapping("/alm/account/verify")
+    계정정보_데이터 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
 
 
 }
