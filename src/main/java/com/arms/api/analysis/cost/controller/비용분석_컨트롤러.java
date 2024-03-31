@@ -150,4 +150,11 @@ public class 비용분석_컨트롤러 {
         productCostResponse.setMonthlyCost(response);
         return ResponseEntity.ok(CommonResponse.success(productCostResponse));
     }
+
+    @GetMapping("/product-accumulate-cost-by-month/v2")
+    public ResponseEntity<CommonResponse.ApiResult<String>> v2(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+        비용서비스.v2(engineAggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success("result"));
+    }
 }

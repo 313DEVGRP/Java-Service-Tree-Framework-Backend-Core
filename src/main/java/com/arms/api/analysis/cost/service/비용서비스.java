@@ -23,4 +23,6 @@ public interface 비용서비스 {
     Map<String, Long> calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
 
     Long 연봉총합(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws Exception;
+
+    void v2(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
 }
