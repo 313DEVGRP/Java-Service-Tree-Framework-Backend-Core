@@ -12,6 +12,8 @@
 package com.arms.api.jira.jiraserver.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
+import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
+import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -43,6 +45,9 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     @Autowired
     @Qualifier("jiraServer")
     private JiraServer jiraServer;
+
+    @Autowired
+    private 엔진통신기 엔진통신기;
 
     @PostConstruct
     public void initialize() {
@@ -178,9 +183,6 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     }
 
 
-
-
-
     @ResponseBody
     @RequestMapping(
             value = {"/{defaultTarget}/makeDefault.do"},
@@ -207,6 +209,21 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", jiraServer.암스_및_엔진_서버정보수정(treeSearchEntity));
         return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/verifyAccount.do"},
+            method={RequestMethod.GET}
+    )
+    public ModelAndView 계정정보_검증하기(지라서버정보_데이터 지라서버정보_데이터) throws Exception {
+
+        log.info("JiraServerController :: 계정정보_검증하기");
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 엔진통신기.계정정보_검증하기(지라서버정보_데이터));
+        return modelAndView;
+
     }
 
 }
