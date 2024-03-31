@@ -118,7 +118,8 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
                                                   JiraProjectDTO jiraProjectDTO) throws Exception {
         JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
 
-        logger.info("JiraProjectController :: 클라우드서버_지라프로젝트_항목별_갱신, 서버_c_id: {}, 프로젝트_c_id: {}, 설정할_항목: {}", 서버_c_id, jiraProjectEntity.getC_id(),설정할_항목);
+        logger.info("JiraProjectController :: 클라우드서버_지라프로젝트_항목별_갱신, 서버_c_id: {}, 프로젝트_c_id: {}, 설정할_항목: {}"
+                                                                                    , 서버_c_id, jiraProjectEntity.getC_id(),설정할_항목);
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_갱신(서버_c_id, jiraProjectEntity, 설정할_항목)));
     }

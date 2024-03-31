@@ -104,9 +104,18 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
-                .filter(entity -> !"true".equals(entity.getC_desc()) || !"-1".equals(entity.getC_contents()))
+
+        List<JiraIssueTypeEntity> 결과 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
+                .filter(Objects::nonNull)
+                .filter(entity ->
+                        // 프로젝트별 이슈유형 조회 후 서브테스크 타입 확인 && 소프트 딜리트 처리 확인 후 반환
+                        (entity.getC_desc() != null && !"true".equals(entity.getC_desc())
+                                || (entity.getC_contents() != null && !"-1".equals(entity.getC_contents())))
+                                && (entity.getC_etc() == null || !StringUtils.equals("delete", entity.getC_etc()))
+                )
                 .collect(Collectors.toList());
+
+        return 결과;
     }
 
     @Override
@@ -114,7 +123,10 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream().collect(Collectors.toList());
+        return 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream()
+                .filter(entity -> entity.getC_etc() == null
+                                    || !StringUtils.equals("delete", entity.getC_etc()))
+                .collect(Collectors.toList());
     }
 
     @Override
