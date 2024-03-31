@@ -23,6 +23,8 @@ import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractC
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
+import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.external.엔진통신기;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -70,7 +72,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     private JiraIssueStatus jiraIssueStatus;
 
     @Autowired
-    private com.arms.api.util.communicate.external.통계엔진통신기 통계엔진통신기;
+    private 통계엔진통신기 통계엔진통신기;
 
     @PostConstruct
     public void initialize() {
@@ -227,7 +229,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     }
 
     @Autowired
-    private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
+    private 엔진통신기 엔진통신기;
 
     static final long dummy_jira_server = 0L;
     @ResponseBody
@@ -243,15 +245,13 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         Long pdService = Long.parseLong(pdServiceStr);
 
         ParameterParser parser = new ParameterParser(request);
-        Long pds_version = parser.getLong("version");
-        if(pds_version == null){
-            pds_version = 0L;
-        }
+        String pds_version = parser.get("version");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result",
-                엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService,
-                        List.of(pds_version).stream().toArray(Long[]::new)));
+        /*        엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService,
+                        List.of(pds_version).stream().toArray(Long[]::new)));*/
+                        통계엔진통신기.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
         return modelAndView;
 
     }

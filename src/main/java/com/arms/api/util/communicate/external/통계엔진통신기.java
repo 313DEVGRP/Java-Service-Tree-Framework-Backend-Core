@@ -138,4 +138,8 @@ public interface 통계엔진통신기 {
                                                     @RequestParam List<Long> pdServiceVersionLinks);
 
 
+    @GetMapping("/engine/jira/dashboard/getProgress/{pdService}/{pdServiceVersion}")
+    public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("pdService") Long 제품서비스_아이디,
+                                                            @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디);
+
 }
