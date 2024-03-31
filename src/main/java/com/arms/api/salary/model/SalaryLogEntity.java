@@ -26,7 +26,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,8 +33,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.io.Serializable;
+import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -49,8 +52,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalaryLogEntity extends TreeLogBaseEntity implements Serializable {
-
-
     @Override
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +59,17 @@ public class SalaryLogEntity extends TreeLogBaseEntity implements Serializable {
     public Long getC_id() {
         return super.getC_id();
     }
+
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="c_date")
+    private Date c_date;
+
+    @Column(name="c_method")
+    private String c_method;
+
+    @Column(name="c_state")
+    private String c_state;
 
     @Column(name = "c_name")
     private String c_name;

@@ -3,6 +3,8 @@ package com.arms.api.analysis.cost.service;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
@@ -15,6 +17,8 @@ import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.salary.model.SalaryLogEntity;
+import com.arms.api.salary.service.SalaryLog;
 import com.arms.api.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
@@ -41,6 +45,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -61,6 +66,12 @@ public class 비용서비스_구현 implements 비용서비스 {
 
     @Autowired
     private PdService pdService;
+
+    @Autowired
+    private PdServiceVersion pdServiceVersion;
+
+    @Autowired
+    private SalaryLog salaryLog;
 
     @Autowired
     private 내부통신기 internalCommunicator;
@@ -462,5 +473,77 @@ public class 비용서비스_구현 implements 비용서비스 {
             accumulatedMonthlySalaries.put(entry.getKey(), accumulatedValue);
         }
         return accumulatedMonthlySalaries;
+    }
+
+
+    @Override
+    public void v2(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+        List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity());
+
+        String startDateOrNull = pdServiceVersionEntities.stream()
+                .map(PdServiceVersionEntity::getC_pds_version_start_date)
+                .min(String::compareTo).orElse(null);
+
+        String endDateOrNull = pdServiceVersionEntities.stream()
+                .map(PdServiceVersionEntity::getC_pds_version_end_date)
+                .max(String::compareTo).orElse(null);
+
+        if (startDateOrNull == null || startDateOrNull == null) {
+            throw new RuntimeException("startDate or endDate is null.");
+        }
+
+        String formattedStartDate = convertDateTimeFormat(startDateOrNull);
+        String formattedEndDate = convertDateTimeFormat(endDateOrNull);
+
+        TreeMap<String, Integer> dailySalaryCosts = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
+
+        int totalDays = dailySalaryCosts.size();
+
+        int salaryCost = 연봉서비스.모든_연봉정보_맵().values().stream().mapToInt(salaryEntity -> Integer.parseInt(salaryEntity.getC_annual_income())).sum();
+
+        int dailySalaryCost = salaryCost * 10000 / totalDays;
+
+        로그.info("startDate: " + formattedStartDate + ", endDate: " + formattedEndDate);
+        로그.info("총 일 수 : " + totalDays);
+        로그.info("연봉 총합 : " + salaryCost * 10000);
+        로그.info("하루 연봉 : " + dailySalaryCost);
+
+        dailySalaryCosts.replaceAll((k, v) -> dailySalaryCost);
+
+//        for (String s : dailySalaryCosts.keySet()) {
+//            로그.info("key: " + s + ", value: " + dailySalaryCosts.get(s));
+//        }
+
+        List<SalaryLogEntity> nodesWithoutRoot = salaryLog.getNodesWithoutRoot(new SalaryLogEntity());
+        for (SalaryLogEntity salaryLogEntity : nodesWithoutRoot) {
+            로그.info(salaryLogEntity.toString());
+        }
+    }
+
+    public String convertDateTimeFormat(String localDate) {
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDateTime parse = LocalDateTime.parse(localDate, inputFormatter);
+
+        return parse.format(outputFormatter);
+    }
+
+    public TreeMap<String, Integer> generateDailyCostsMap(String startDateStr, String endDateStr, Integer dailyCost) {
+
+        TreeMap<String, Integer> dailySalaryCosts = new TreeMap<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate startDate = LocalDate.parse(startDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            dailySalaryCosts.put(date.format(formatter), dailyCost);
+        }
+
+        return dailySalaryCosts;
     }
 }
