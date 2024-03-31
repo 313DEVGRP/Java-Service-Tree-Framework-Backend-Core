@@ -11,6 +11,8 @@ import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 public class SalaryController extends TreeAbstractController<SalaryService, SalaryDTO, SalaryEntity> {
 
     private final SalaryService salaryService;
+    private final SalaryControllerMapper salaryControllerMapper;
 
     @PostConstruct
     public void initialize() {
@@ -87,10 +90,19 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
     }
 
     @PutMapping
-    public ResponseEntity<CommonResponse.ApiResult<List<SalaryDTO>>> bulkUpdate(@RequestBody Map<String, String> salaryMap) throws Exception {
-        salaryService.updateSalary(salaryMap);
+    public ResponseEntity<CommonResponse.ApiResult<List<SalaryDTO>>> bulkUpdate(@RequestBody Map<String, SalaryDTO> salaryMaps) throws Exception {
+        List<SalaryDTO> salaryDTOList = salaryMaps.values().stream().collect(Collectors.toList());
+        List<SalaryEntity> salaryEntityList = salaryControllerMapper.toSalaryEntityList(salaryDTOList);
+        salaryService.updateSalary(salaryEntityList);
         Map<String, SalaryEntity> fetchSalary = salaryService.모든_연봉정보_맵();
         List<SalaryDTO> response = fetchSalary.values().stream().map(entity -> modelMapper.map(entity, SalaryDTO.class)).collect(Collectors.toList());
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+    public interface SalaryControllerMapper {
+        SalaryEntity toSalaryEntity(SalaryDTO salaryDTO);
+
+        List<SalaryEntity> toSalaryEntityList(List<SalaryDTO> salaryDTOList);
     }
 }
