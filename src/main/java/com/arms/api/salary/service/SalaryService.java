@@ -19,5 +19,5 @@ public interface SalaryService extends TreeService {
 
     Map<String, SalaryEntity> 모든_연봉정보_맵() throws Exception;
 
-    int updateSalary(@RequestBody Map<String, String> salaryMaps) throws Exception;
+    int updateSalary(List<SalaryEntity> salaryEntityList) throws Exception;
 }
