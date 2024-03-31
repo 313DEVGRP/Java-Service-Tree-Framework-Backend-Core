@@ -115,12 +115,6 @@ public interface 엔진통신기 {
                                              @PathVariable("issueKey") String 이슈키,
                                              @RequestParam("assigneeEmail") String 담당자_이메일);
 
-
-    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions")
-    List<지라이슈> 제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                               @RequestParam Long pdServiceLink,
-                               @RequestParam List<Long> pdServiceVersionLinks);
-
     /*
      * 이슈 가져오기.
      */
@@ -128,11 +122,6 @@ public interface 엔진통신기 {
     지라이슈 요구사항이슈_조회(@PathVariable("connectId") Long 지라서버_아이디,
                    @PathVariable("reqProjectKey") String 지라프로젝트_키,
                    @PathVariable("reqIssueKey") String 지라이슈_키);
-
-    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions/heatmap")
-    히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                               @RequestParam Long pdServiceLink,
-                               @RequestParam List<Long> pdServiceVersionLinks);
 
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,

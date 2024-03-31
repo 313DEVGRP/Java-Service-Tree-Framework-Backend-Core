@@ -4,6 +4,7 @@ import com.arms.api.analysis.cost.dto.요구사항_지라이슈키별_업데이�
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.analysis.time.model.히트맵데이터;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
@@ -53,6 +54,7 @@ public interface 통계엔진통신기 {
     @GetMapping("/engine/jira/dashboard/issue-assignee/{pdServiceId}")
     Map<String, Long> 제품서비스별_담당자_이름_통계(@PathVariable("pdServiceId") Long 제품서비스_아이디);
 
+    //사용 X - 삭제대상
     @GetMapping("/engine/jira/dashboard/assignee-jira-issue-statuses")
     Map<String, Map<String, Map<String, Integer>>> 담당자_요구사항여부_상태별집계(
             @RequestParam Long pdServiceLink) throws IOException;
@@ -126,4 +128,14 @@ public interface 통계엔진통신기 {
     ResponseEntity< Map<String,List<요구사항_지라이슈키별_업데이트_목록_데이터>> > 요구사항_지라이슈키별_업데이트_목록(
             @RequestParam  List<String> issueList
     );
+
+    @GetMapping("/engine/jira/dashboard/pdService/pdServiceVersions")
+    List<지라이슈> 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                                @RequestParam List<Long> pdServiceVersionLinks);
+
+    @GetMapping("/engine/jira/dashboard/pdService/pdServiceVersions/heatmap")
+    히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                                    @RequestParam List<Long> pdServiceVersionLinks);
+
+
 }
