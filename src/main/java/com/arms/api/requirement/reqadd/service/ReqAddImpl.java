@@ -1147,6 +1147,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		String 추가된_요구사항의_아이디 = reqAddEntity.getC_id().toString();
 
+		String 버전아이디목록_파싱 = 버전아이디목록.replaceAll("\\[|\\]|\"", "").replaceAll(",", ",");
+
 		String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
 				"✔ 본 이슈는 자동으로 관리되므로,\n" +
 				"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
@@ -1156,7 +1158,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				"※ 관련한 이슈를 연결 (LINK) 하시면, 현황 통계에 자동으로 수집됩니다.\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n" +
 				"자세한 요구사항 내용 확인 ⇒ http://" + armsDetailUrlConfig.getAddress() + "/arms/detail.html?page=detail&pdService=" + pdServiceId +
-				"&pdServiceVersion=" + 버전아이디목록 +
+				"&pdServiceVersion=" + 버전아이디목록_파싱 +
 				"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디.toString() + "&jiraProject=" + 지라_프로젝트_아이디.toString() + "\n" +
 				"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
 				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
