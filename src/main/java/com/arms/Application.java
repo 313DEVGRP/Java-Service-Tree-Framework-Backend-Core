@@ -20,8 +20,10 @@ import org.modelmapper.ModelMapper;
 
 @EnableSwagger2
 @SpringBootApplication
-@ImportResource(value= {"classpath:com/arms/egovframework/spring/context-common.xml",
-        "classpath:com/arms/egovframework/spring/context-hibernate.xml"
+@ImportResource(value= {
+        "classpath:com/arms/egovframework/spring/context-common.xml",
+        "classpath:com/arms/egovframework/spring/context-hibernate.xml",
+        "classpath:com/arms/egovframework/spring/context-jdbc.xml"
 })
 public class Application {
     public static void main(String[] args) {
