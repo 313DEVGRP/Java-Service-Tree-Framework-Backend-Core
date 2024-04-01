@@ -8,7 +8,7 @@ import com.arms.api.util.communicate.external.request.aggregation.EngineAggregat
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 
 import java.util.List;
-import java.util.Map;
+import java.util.TreeMap;
 
 public interface 비용서비스 {
 
@@ -20,9 +20,5 @@ public interface 비용서비스 {
 
     버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
 
-    Map<String, Long> calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
-
-    Long 연봉총합(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws Exception;
-
-    void v2(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
+    TreeMap<String, Integer> v2(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
 }

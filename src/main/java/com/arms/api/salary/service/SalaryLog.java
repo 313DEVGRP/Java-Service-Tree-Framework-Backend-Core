@@ -11,10 +11,13 @@
  */
 package com.arms.api.salary.service;
 
+import com.arms.api.salary.model.SalaryLogJdbcDTO;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
+
+import java.util.List;
 
 public interface SalaryLog extends TreeService {
 
-
+    List<SalaryLogJdbcDTO> findSalaryLogsBetweenDates(String startDate, String endDate);
 
 }
