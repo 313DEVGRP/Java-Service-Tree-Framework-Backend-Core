@@ -11,7 +11,9 @@ import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +103,13 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
 
     @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
     public interface SalaryControllerMapper {
+
+        @BeanMapping(ignoreByDefault = true)
+        @Mapping(target = "c_id", source = "c_id")
+        @Mapping(target = "c_name", source = "c_name")
+        @Mapping(target = "c_key", source = "c_key")
+        @Mapping(target = "c_annual_income", source = "c_annual_income")
+        @Mapping(target = "c_title", source = "c_title")
         SalaryEntity toSalaryEntity(SalaryDTO salaryDTO);
 
         List<SalaryEntity> toSalaryEntityList(List<SalaryDTO> salaryDTOList);
