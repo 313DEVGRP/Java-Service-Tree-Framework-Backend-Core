@@ -13,6 +13,7 @@ package com.arms.api.jira.jiraserver.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
+import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -97,13 +98,16 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             value={"{renewTarget}/renewNode.do"},
             method = {RequestMethod.PUT }
     )
-    public ResponseEntity<?> 지라_서버_항목별_갱신(
-            @PathVariable String renewTarget, JiraServerDTO jiraServerDTO) throws Exception{
+    public ResponseEntity<?> 지라_서버_항목별_갱신(@PathVariable String renewTarget,
+                                          String projectCId,
+                                          JiraServerDTO jiraServerDTO) throws Exception{
 
         log.info("JiraServerController :: 지라_서버_항목별_갱신 갱신종류=> {}", renewTarget);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(renewTarget, jiraServerEntity)));
+        EntityType 갱신항목 = EntityType.fromString(renewTarget);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(갱신항목, projectCId, jiraServerEntity)));
     }
 
     @ResponseBody
@@ -197,7 +201,9 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         log.info("JiraServerController :: 온프레미스_항목별_기본값_설정, 설정할_항목 : {}, 항목_c_id : {}", 설정할_항목, 항목_c_id);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(설정할_항목,항목_c_id,jiraServerEntity)));
+        EntityType 갱신항목 = EntityType.fromString(설정할_항목);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(갱신항목, 항목_c_id, jiraServerEntity)));
     }
 
     @ResponseBody

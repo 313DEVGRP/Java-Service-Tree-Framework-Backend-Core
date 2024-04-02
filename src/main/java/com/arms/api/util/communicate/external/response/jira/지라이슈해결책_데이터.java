@@ -12,12 +12,9 @@ import lombok.*;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class 지라이슈해결책_데이터 {
+public class 지라이슈해결책_데이터  extends ALM_데이터 {
 
-    private String self;
-    private String id;
     private String name;
     private String description;
     private boolean isDefault;
-
 }
