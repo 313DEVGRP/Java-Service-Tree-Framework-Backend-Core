@@ -129,7 +129,7 @@ public interface 엔진통신기 {
     ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
 
     @GetMapping("/alm/account/verify")
-    계정정보_데이터 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
+    ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
 
 
 }

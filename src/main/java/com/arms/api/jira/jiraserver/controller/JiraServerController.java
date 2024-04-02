@@ -12,6 +12,7 @@
 package com.arms.api.jira.jiraserver.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
+import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.엔진통신기;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -222,14 +224,18 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             value = {"/verifyAccount.do"},
             method={RequestMethod.GET}
     )
-    public ModelAndView 계정정보_검증하기(지라서버정보_데이터 지라서버정보_데이터) throws Exception {
+    public ResponseEntity<?> 계정정보_검증하기(지라서버정보_데이터 지라서버정보_데이터) throws Exception {
 
         log.info("JiraServerController :: 계정정보_검증하기");
 
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 엔진통신기.계정정보_검증하기(지라서버정보_데이터));
-        return modelAndView;
-
+        try{
+            계정정보_데이터 검증결과 = 엔진통신기.계정정보_검증하기(지라서버정보_데이터).getBody();
+            return ResponseEntity.ok(CommonResponse.success( 검증결과));
+        }catch (Exception e){
+            log.error("온프라미스 계정 정보 조회시 오류가 발생하였습니다." + e.getMessage());
+            CommonResponse.ApiResult<?> errorResult = CommonResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
