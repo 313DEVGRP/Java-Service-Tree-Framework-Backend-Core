@@ -8,10 +8,8 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class 지라프로젝트_데이터 {
+public class 지라프로젝트_데이터  extends ALM_데이터{
 
-    private String self;
-    private String id;
     private String key;
     private String name;
 }

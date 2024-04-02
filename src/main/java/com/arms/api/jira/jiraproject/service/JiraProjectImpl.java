@@ -18,6 +18,7 @@ import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
@@ -61,6 +62,7 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
     @Autowired
     @Qualifier("jiraIssueStatus")
     private JiraIssueStatus jiraIssueStatus;
+
     @Override
     @Transactional
     public List<JiraProjectEntity> getConnectionInfo(ReqAddEntity reqAddEntity) throws Exception {
@@ -125,20 +127,22 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
         return 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream()
                 .filter(entity -> entity.getC_etc() == null
-                                    || !StringUtils.equals("delete", entity.getC_etc()))
+                                    || !StringUtils.equals("delete", entity.getC_etc())
+                )
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public JiraProjectEntity 프로젝트_항목별_기본값_설정(String 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception {
+    public JiraProjectEntity 프로젝트_항목별_기본값_설정(EntityType 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
 
-        if(설정할_항목.equals("issueType")) {
+        // 이슈유형
+        if (EntityType.이슈유형 == 설정할_항목) {
             Set<JiraIssueTypeEntity> 이슈_유형_목록 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities();
-            if(이슈_유형_목록.size() != 0) {
+            if (이슈_유형_목록 != null && 이슈_유형_목록.size() != 0) {
                 for (JiraIssueTypeEntity 이슈_유형 : 이슈_유형_목록) {
                     if (Objects.equals(이슈_유형.getC_id(), 항목_c_id)) {
                         이슈_유형.setC_check("true");
@@ -148,10 +152,11 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
                 }
             }
         }
-        //이슈 상태
-        if(설정할_항목.equals("issueStatus")) {
+
+        //이슈상태
+        if (EntityType.이슈상태 == 설정할_항목) {
             Set<JiraIssueStatusEntity> 이슈_상태_목록 = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities();
-            if(이슈_상태_목록.size() != 0 ) {
+            if (이슈_상태_목록 != null && 이슈_상태_목록.size() != 0 ) {
                 for (JiraIssueStatusEntity 이슈_상태 : 이슈_상태_목록) {
                     if (Objects.equals(이슈_상태.getC_id(), 항목_c_id)) {
                         이슈_상태.setC_check("true");
@@ -161,13 +166,14 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
                 }
             }
         }
+
         this.updateNode(검색된_프로젝트_엔티티);
         return 검색된_프로젝트_엔티티;
     }
 
     @Override
     @Transactional
-    public JiraProjectEntity 프로젝트_항목별_갱신(Long 서버_c_id, JiraProjectEntity jiraProjectEntity, String 설정할_항목) throws Exception {
+    public JiraProjectEntity 프로젝트_항목별_갱신(EntityType 설정할_항목, Long 서버_c_id, JiraProjectEntity jiraProjectEntity) throws Exception {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
@@ -176,7 +182,7 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         검색용_지라서버_엔티티.setC_id(서버_c_id);
         String 연결_아이디 = jiraServerPure.getNode(검색용_지라서버_엔티티).getC_jira_server_etc();
 
-        if(StringUtils.equals(설정할_항목,"issueType")) {
+        if (EntityType.이슈유형 == 설정할_항목) {
             Set<JiraIssueTypeEntity> 프로젝트_이슈유형_세트 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities();
             List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(연결_아이디, 검색된_프로젝트_엔티티.getC_desc());
 
@@ -187,7 +193,8 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
             }
             this.updateNode(검색된_프로젝트_엔티티);
         }
-        if(StringUtils.equals(설정할_항목,"issueStatus")) {
+
+        if (EntityType.이슈상태 == 설정할_항목) {
             Set<JiraIssueStatusEntity> 프로젝트_이슈상태_세트 = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities();
             List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(연결_아이디, 검색된_프로젝트_엔티티.getC_desc());
 
