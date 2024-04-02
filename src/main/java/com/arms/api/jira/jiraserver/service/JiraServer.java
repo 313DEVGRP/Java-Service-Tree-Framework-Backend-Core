@@ -18,6 +18,7 @@ import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
+import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public interface JiraServer extends TreeService {
 
     public JiraServerEntity addJiraServer(JiraServerEntity jiraServerEntity) throws Exception;
 
-    public JiraServerEntity 서버_엔티티_항목별_갱신(String 갱신할_항목, JiraServerEntity jiraServerEntity) throws Exception;
+    public JiraServerEntity 서버_엔티티_항목별_갱신(EntityType 갱신할_항목, String 프로젝트_C아이디, JiraServerEntity jiraServerEntity) throws Exception;
 
     public List<JiraProjectEntity> 서버_프로젝트_가져오기(JiraServerEntity jiraServerEntity) throws Exception;
 
@@ -42,7 +43,7 @@ public interface JiraServer extends TreeService {
 
     public List<JiraIssueResolutionEntity> 서버_이슈해결책_가져오기(JiraServerEntity jiraServerEntity) throws Exception;
 
-    public JiraServerEntity 서버_항목별_기본값_설정(String 설정할_항목, Long 항목_c_id, JiraServerEntity jiraServerEntity) throws Exception;
+    public JiraServerEntity 서버_항목별_기본값_설정(EntityType 설정할_항목, Long 항목_c_id, JiraServerEntity jiraServerEntity) throws Exception;
 
     public int 암스_및_엔진_서버정보수정(JiraServerEntity jiraServerEntity) throws Exception;
 }
