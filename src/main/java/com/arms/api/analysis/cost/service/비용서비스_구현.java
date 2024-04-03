@@ -1,11 +1,13 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.cost.dto.ProductCostResponse;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
+import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.salary.model.SalaryLogJdbcDTO;
 import com.arms.api.salary.model.SalaryEntity;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
@@ -44,8 +46,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,8 +64,6 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     private 통계엔진통신기 통계엔진통신기;
 
-    @Autowired
-    private PdService pdService;
 
     @Autowired
     private PdServiceVersion pdServiceVersion;
@@ -328,122 +330,6 @@ public class 비용서비스_구현 implements 비용서비스 {
         return 검색결과_요구사항;
     }
 
-
-    @Override
-    public TreeMap<String, Integer> v2(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
-        List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity())
-                .stream().filter(pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())).collect(Collectors.toList());
-
-        String startDateOrNull = pdServiceVersionEntities.stream()
-                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_start_date().equals("start"))
-                .map(PdServiceVersionEntity::getC_pds_version_start_date)
-                .min(String::compareTo).orElse(null);
-
-        String endDateOrNull = pdServiceVersionEntities.stream()
-                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_end_date().equals("end"))
-                .map(PdServiceVersionEntity::getC_pds_version_end_date)
-                .max(String::compareTo).orElse(null);
-
-        if (startDateOrNull == null || startDateOrNull == null) {
-            return new TreeMap<>();
-        }
-
-        // 제품의 경우 메타데이터가 없고, 버전이 없는 경우 비용을 계산하기 애매함.
-        // 따라서 해당 제품의 모든 버전을 조회해서 시작일과 종료일을 구한다.
-        String formattedStartDate = convertDateTimeFormat(startDateOrNull);
-        String formattedEndDate = convertDateTimeFormat(endDateOrNull);
-
-        Map<String, SalaryEntity> 모든_연봉정보_맵 = 연봉서비스.모든_연봉정보_맵();
-
-        int totalSalaryCost = 모든_연봉정보_맵.values().stream().mapToInt(salaryEntity -> Integer.parseInt(salaryEntity.getC_annual_income())).sum();
-
-        // 1. 최신 연봉의 합을 삽입. 현재는 각 일 별 동일한 값이 삽입됨. 모든 담당자의 연봉의 합이 들어가있음.
-        TreeMap<String, Integer> dailySalaryCosts = generateDailyCostsMap(formattedStartDate, formattedEndDate, totalSalaryCost);
-
-        // 2. 연봉 데이터 수정 로그 조회
-        List<SalaryLogJdbcDTO> salaryLogEntries = salaryLog.findSalaryLogsBetweenDates(formattedStartDate, formattedEndDate);
-
-        // 3. 연봉 로그를 그룹화
-        Map<String, Map<String, List<SalaryLogJdbcDTO>>> groupedEntries = salaryLogEntries.stream()
-                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date,
-                        Collectors.groupingBy(SalaryLogJdbcDTO::getC_key)));
-
-        // 3-1. 각 그룹에서 가장 먼저 등록 된 "변경이전데이터"와 가장 마지막에 등록 된 "변경이후데이터"를 선택. 같은 날 연봉 데이터를 여러 번 수정할 경우 대응
-        List<SalaryLogJdbcDTO> filteredLogs = getIncomeDifferenceEntries(groupedEntries);
-
-        // 4. 연봉 수정 로그를 그룹화
-        Map<String, List<SalaryLogJdbcDTO>> groupedLogs = filteredLogs.stream()
-                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getC_key));
-
-        // 5. 각 담당자 간 연봉 수정 로그를 기반으로 구간을 나눈다. 각 구간 별 연봉에 따라 비용을 계산한다.
-        // 먼저 현재 연봉을 삽입한 상태에서, 현재 연봉과 각 구간 별 연봉을 비교하여 증감액을 구한 뒤 해당 구간에 대한 일별 비용을 계산한다.
-        for (Map.Entry<String, List<SalaryLogJdbcDTO>> groupedLog : groupedLogs.entrySet()) {
-
-            List<SalaryLogJdbcDTO> 담당자의연봉수정내역 = groupedLog.getValue();
-
-            담당자의연봉수정내역.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
-
-            for (int i = 0; i < 담당자의연봉수정내역.size(); i++) {
-                if (i % 2 == 0) {
-                    int 최신연봉 = Integer.valueOf(모든_연봉정보_맵.get(담당자의연봉수정내역.get(i).getC_key()).getC_annual_income());
-                    int 구간증감액 = 최신연봉 > 담당자의연봉수정내역.get(i).getC_annual_income() ? 최신연봉 - 담당자의연봉수정내역.get(i).getC_annual_income() : 담당자의연봉수정내역.get(i).getC_annual_income() - 최신연봉;
-                    if (구간증감액 != 0) {
-                        if (i == 0) {
-                            LocalDate start = LocalDate.parse(formattedStartDate);
-                            LocalDate end = LocalDate.parse(담당자의연봉수정내역.get(i).getFormatted_date()).minusDays(1);
-                            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                                String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                if (dailySalaryCosts.containsKey(dateString)) {
-                                    dailySalaryCosts.put(dateString, dailySalaryCosts.get(dateString) + 구간증감액);
-                                }
-                            }
-                        } else {
-                            LocalDate start = LocalDate.parse(담당자의연봉수정내역.get(i - 2).getFormatted_date());
-                            LocalDate end = LocalDate.parse(담당자의연봉수정내역.get(i).getFormatted_date()).minusDays(1);
-
-                            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                                String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                if (dailySalaryCosts.containsKey(dateString)) {
-                                    dailySalaryCosts.put(dateString, dailySalaryCosts.get(dateString) + 구간증감액);
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // 마지막 루프만 처리.
-                    if (i + 1 == 담당자의연봉수정내역.size()) {
-                        int 최신연봉 = Integer.valueOf(모든_연봉정보_맵.get(담당자의연봉수정내역.get(i).getC_key()).getC_annual_income());
-                        int 구간증감액 = 최신연봉 > 담당자의연봉수정내역.get(i).getC_annual_income() ? 최신연봉 - 담당자의연봉수정내역.get(i).getC_annual_income() : 담당자의연봉수정내역.get(i).getC_annual_income() - 최신연봉;
-                        if (구간증감액 != 0) {
-                            // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
-                            LocalDate start = LocalDate.parse(담당자의연봉수정내역.get(i).getFormatted_date());
-                            LocalDate end = LocalDate.parse(formattedEndDate);
-
-                            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                                String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                                if (dailySalaryCosts.containsKey(dateString)) {
-                                    dailySalaryCosts.put(dateString, dailySalaryCosts.get(dateString) + 구간증감액);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 6. 연봉 데이터를 기반으로 일 별 금액을 계산한다.
-        dailySalaryCosts.replaceAll((k, v) -> v * 10000 / 365);
-
-        // 7. 일 별 연봉 데이터를 누적 시킨다.
-        int sum = 0;
-        for (Map.Entry<String, Integer> entry : dailySalaryCosts.entrySet()) {
-            sum += entry.getValue();
-            dailySalaryCosts.put(entry.getKey(), sum);
-        }
-
-        return dailySalaryCosts;
-    }
-
     private List<SalaryLogJdbcDTO> getIncomeDifferenceEntries(Map<String, Map<String, List<SalaryLogJdbcDTO>>> groupedEntries) {
         List<SalaryLogJdbcDTO> allLogs = new ArrayList<>();
 
@@ -497,4 +383,310 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         return dailySalaryCosts;
     }
+
+
+    @Override
+    public ProductCostResponse calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+        // 1. 해결 된 이슈를 찾기 위해 해결 상태값을 조회함. (ReqState)
+        List<ReqStateEntity> reqStateEntities = getReqStateEntities();
+        List<Long> filteredReqStateId = filterResolvedStateIds(reqStateEntities);
+
+        // 2. ReqStatus(요구사항)을 조회함
+        List<ReqStatusEntity> reqStatusEntities = getReqStatusEntities(engineAggregationRequestDTO);
+
+        // 3. 요구사항의 ReqStateLink 값을 가지고 필터링함. ReqState 값이 완료 키워드인 ReqStatus 만 가져옴
+        List<ReqStatusEntity> filteredReqStatusEntities = filterResolvedReqStatusEntities(reqStatusEntities, filteredReqStateId);
+
+        // 4. 엔진 통신으로 담당자 데이터를 가져옴
+        검색결과_목록_메인 engineResponseBody = getAggregationData(engineAggregationRequestDTO);
+        Map<String, List<검색결과>> searchResults = engineResponseBody.get검색결과();
+        List<검색결과> groupByAssignee = searchResults.get("group_by_" + engineAggregationRequestDTO.get메인그룹필드());
+
+        // 5. 제품 버전을 기준으로 x 축에 해당하는 시작일, 종료일 구하기
+        List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity())
+                .stream().filter(pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())).collect(Collectors.toList());
+
+        String startDateOrNull = pdServiceVersionEntities.stream()
+                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_start_date().equals("start"))
+                .map(PdServiceVersionEntity::getC_pds_version_start_date)
+                .min(String::compareTo).orElse(null);
+
+        String endDateOrNull = pdServiceVersionEntities.stream()
+                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_end_date().equals("end"))
+                .map(PdServiceVersionEntity::getC_pds_version_end_date)
+                .max(String::compareTo).orElse(null);
+
+        if (startDateOrNull == null || startDateOrNull == null) {
+            throw new RuntimeException("제품 버전의 시작일과 종료일이 없습니다.");
+        }
+
+        String formattedStartDate = convertDateTimeFormat(startDateOrNull);
+        String formattedEndDate = convertDateTimeFormat(endDateOrNull);
+
+        List<SalaryLogJdbcDTO> salaryLogEntries = salaryLog.findSalaryLogsBetweenDates(formattedStartDate, formattedEndDate).stream().filter(
+                sle -> sle.getC_method().equals("create") || sle.getC_method().equals("update")
+        ).collect(Collectors.toList());
+
+        Map<String, TreeMap<String, Integer>> allAssigneeSalaries = new HashMap<>();
+
+        groupByAssignee.stream().map(검색결과::get필드명).forEach(assigneeKey -> {
+            LocalDate versionStartDate = LocalDate.parse(formattedStartDate);
+            LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
+            List<SalaryLogJdbcDTO> salaryCreateLogs = salaryLogEntries.stream().filter(sle -> sle.getC_key().equals(assigneeKey)).collect(Collectors.toList());
+            List<SalaryLogJdbcDTO> salaryUpdateLogs = salaryCreateLogs.stream().filter(sle -> sle.getC_method().equals("update")).collect(Collectors.toList());
+            Map<String, Map<String, List<SalaryLogJdbcDTO>>> groupedEntries = salaryUpdateLogs.stream()
+                    .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date,
+                            Collectors.groupingBy(SalaryLogJdbcDTO::getC_key)));
+
+            // 3-1. 각 그룹에서 가장 먼저 등록 된 "변경이전데이터"와 가장 마지막에 등록 된 "변경이후데이터"를 선택. 같은 날 연봉 데이터를 여러 번 수정할 경우 대응
+            List<SalaryLogJdbcDTO> filteredLogs = getIncomeDifferenceEntries(groupedEntries);
+            filteredLogs.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
+
+            salaryCreateLogs.stream().filter(sle -> sle.getC_method().equals("create")).forEach(sle -> {
+                LocalDate salaryCreateDate = LocalDate.parse(sle.getFormatted_date());
+                if (versionStartDate.isBefore(salaryCreateDate)) {
+                    for (LocalDate date = versionStartDate; !date.isAfter(salaryCreateDate.minusDays(1)); date = date.plusDays(1)) {
+                        TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                        assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 0);
+                        allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                    }
+
+                    if (salaryUpdateLogs.isEmpty()) {
+                        for (LocalDate date = salaryCreateDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                            TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                            assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), sle.getC_annual_income());
+                            allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                        }
+                    }
+
+                    for (int i = 0; i < filteredLogs.size(); i++) {
+                        if (i % 2 == 0) {
+                            if (i == 0) {
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = salaryCreateDate; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            } else {
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i - 2).getFormatted_date());
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        } else {
+                            if (i + 1 == filteredLogs.size()) {
+                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
+                                for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        }
+                    }
+
+                } else if (versionStartDate.isEqual(salaryCreateDate)) {
+                    if (salaryUpdateLogs.isEmpty()) {
+                        for (LocalDate date = salaryCreateDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                            TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                            assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), 0);
+                            allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                        }
+                    } else {
+                        TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                        assigneeSalaries.put(salaryCreateDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), sle.getC_annual_income());
+                        allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                    }
+
+                    for (int i = 0; i < filteredLogs.size(); i++) {
+                        if (i % 2 == 0) {
+                            if (i == 0) {
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = salaryCreateDate; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            } else {
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i - 2).getFormatted_date());
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        } else {
+                            if (i + 1 == filteredLogs.size()) {
+                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
+                                for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        }
+                    }
+
+                } else if (versionStartDate.isAfter(salaryCreateDate)) {
+                    if (salaryUpdateLogs.isEmpty()) {
+                        for (LocalDate date = versionStartDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                            TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                            assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), sle.getC_annual_income());
+                            allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                        }
+                    }
+
+                    for (int i = 0; i < filteredLogs.size(); i++) {
+                        if (i % 2 == 0) {
+                            // 여기는 변경이전데이터
+                            if (i == 0) {
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = versionStartDate; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            } else {
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i - 2).getFormatted_date());
+                                LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
+                                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        } else {
+                            // 마지막 루프만 처리. 마지막이니까 변경이후 데이터부터 end까지.
+                            if (i + 1 == filteredLogs.size()) {
+                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
+                                LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
+                                for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+                                    String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                                    Integer updatedSalary = filteredLogs.get(i).getC_annual_income();
+                                    TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+                                    assigneeSalaries.put(dateString, updatedSalary);
+                                    allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        TreeMap<String, Integer> barCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
+
+        for (ReqStatusEntity filteredReqStatusEntity : filteredReqStatusEntities) {
+            LocalDate 요구사항시작일 = filteredReqStatusEntity.getC_req_start_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate 요구사항종료일 = filteredReqStatusEntity.getC_req_end_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            String 이슈키 = filteredReqStatusEntity.getC_issue_key();
+            LocalDate endDate = LocalDate.parse(formattedEndDate);
+
+            AtomicBoolean foundAssignee = new AtomicBoolean(false);
+
+            for (검색결과 searchResult : groupByAssignee) {
+                String assigneeKey = searchResult.get필드명();
+                searchResult.get하위검색결과().get("group_by_key").stream().filter(subSearchResult -> subSearchResult.get필드명().equals(이슈키)).findFirst().ifPresentOrElse(subSearchResult -> {
+                    Optional.ofNullable(allAssigneeSalaries.get(assigneeKey)).ifPresent(assigneeSalaries -> {
+                        assigneeSalaries.entrySet().stream().filter(entry -> {
+                            LocalDate date = LocalDate.parse(entry.getKey());
+                            LocalDate realEndDate = 요구사항종료일.isAfter(endDate) ? endDate : 요구사항종료일;
+                            return (date.isAfter(요구사항시작일) || date.isEqual(요구사항시작일)) && (date.isBefore(realEndDate) || date.isEqual(realEndDate));
+                        }).forEach(entry -> {
+                            barCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
+                        });
+                    });
+                    foundAssignee.set(true);
+                }, () -> {
+                    foundAssignee.set(false);
+                });
+                if (foundAssignee.get()) {
+                    break;
+                }
+            }
+        }
+
+        barCost.replaceAll((k, v) -> v * 10000 / 365);
+
+        int barSum = 0;
+        for (Map.Entry<String, Integer> entry : barCost.entrySet()) {
+            barSum += entry.getValue();
+            barCost.put(entry.getKey(), barSum);
+        }
+
+        TreeMap<String, Integer> lineCost = new TreeMap<>();
+
+        for (TreeMap<String, Integer> assigneeSalaries : allAssigneeSalaries.values()) {
+            for (Map.Entry<String, Integer> entry : assigneeSalaries.entrySet()) {
+                lineCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
+            }
+        }
+
+        lineCost.replaceAll((k, v) -> v * 10000 / 365);
+
+        int lineSum = 0;
+        for (Map.Entry<String, Integer> entry : lineCost.entrySet()) {
+            lineSum += entry.getValue();
+            lineCost.put(entry.getKey(), lineSum);
+        }
+
+        return new ProductCostResponse(lineCost, barCost);
+    }
+
+    private List<ReqStateEntity> getReqStateEntities() throws Exception {
+        return reqStateService.getNodesWithoutRoot(new ReqStateEntity());
+    }
+
+    private List<Long> filterResolvedStateIds(List<ReqStateEntity> reqStateEntities) {
+        return reqStateEntities.stream()
+                .filter(reqStateEntity -> resolvedKeyword.contains(reqStateEntity.getC_title()))
+                .map(ReqStateEntity::getC_id)
+                .collect(Collectors.toList());
+    }
+
+    private List<ReqStatusEntity> getReqStatusEntities(EngineAggregationRequestDTO requestDTO) {
+        return internalCommunicator.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + requestDTO.getPdServiceLink(), new ReqStatusDTO());
+    }
+
+    private List<ReqStatusEntity> filterResolvedReqStatusEntities(List<ReqStatusEntity> reqStatusEntities, List<Long> filteredReqStateId) {
+        return reqStatusEntities.stream()
+                .filter(reqStatusEntity -> reqStatusEntity.getC_req_start_date() != null)
+                .filter(reqStatusEntity -> reqStatusEntity.getC_req_end_date() != null)
+                .filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+                .filter(reqStatusEntity -> filteredReqStateId.contains(reqStatusEntity.getC_req_state_link()))
+                .collect(Collectors.toList());
+    }
+
+    private 검색결과_목록_메인 getAggregationData(EngineAggregationRequestDTO requestDTO) {
+        ResponseEntity<검색결과_목록_메인> response = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(requestDTO);
+        return response.getBody();
+    }
+
+    private Map<String, SalaryEntity> getSalaryData() throws Exception {
+        return 연봉서비스.모든_연봉정보_맵();
+    }
+
 }

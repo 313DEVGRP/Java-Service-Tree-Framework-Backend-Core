@@ -34,6 +34,7 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
 
     @Override
     public List<SalaryLogJdbcDTO> findSalaryLogsBetweenDates(String startDate, String endDate) {
+//        String method = "create";
         String sql = "SELECT " +
                 "    c_date, " +
                 "    DATE_FORMAT(c_date, '%Y-%m-%d') AS formatted_date, " +
@@ -46,6 +47,8 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
                 "    T_ARMS_ANNUAL_INCOME_LOG " +
                 "WHERE " +
                 "    c_date BETWEEN ? AND ? " +
+                "AND c_type = 'default' " +
+//                "AND c_method = ? " +
                 "ORDER BY c_date DESC";
 
         List<SalaryLogJdbcDTO> results = jdbcTemplate.query(
