@@ -618,9 +618,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         }
                         처리결과 = jiraProject.updateNode(프로젝트);
 
-                        if(처리결과 == 1) {
-                            반환결과 = (T) 프로젝트;
-                        }
+                        반환결과 = (T) 프로젝트;
                     }
                     else if (엔티티 instanceof JiraIssueTypeEntity) {
                         JiraIssueTypeEntity 이슈유형 = (JiraIssueTypeEntity) 엔티티;
@@ -630,9 +628,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         }
                         처리결과 = jiraIssueType.updateNode(이슈유형);
 
-                        if(처리결과 == 1) {
-                            반환결과 = (T) 이슈유형;
-                        }
+                        반환결과 = (T) 이슈유형;
                     }
                     else if (엔티티 instanceof JiraIssueStatusEntity) {
                         JiraIssueStatusEntity 이슈상태 = (JiraIssueStatusEntity) 엔티티;
@@ -642,9 +638,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         }
                         처리결과 = jiraIssueStatus.updateNode(이슈상태);
 
-                        if(처리결과 == 1) {
-                            반환결과 = (T) 이슈상태;
-                        }
+                        반환결과 = (T) 이슈상태;
                     }
                     else if (엔티티 instanceof JiraIssuePriorityEntity) {
                         JiraIssuePriorityEntity 이슈우선순위 = (JiraIssuePriorityEntity) 엔티티;
@@ -654,9 +648,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         }
                         처리결과 = jiraIssuePriority.updateNode(이슈우선순위);
 
-                        if(처리결과 == 1) {
-                            반환결과 = (T) 이슈우선순위;
-                        }
+                        반환결과 = (T) 이슈우선순위;
                     }
                     else if (엔티티 instanceof JiraIssueResolutionEntity) {
                         JiraIssueResolutionEntity 이슈해결책 = (JiraIssueResolutionEntity) 엔티티;
@@ -666,18 +658,16 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         }
                         처리결과 = jiraIssueResolution.updateNode(이슈해결책);
 
-                        if(처리결과 == 1) {
-                            반환결과 = (T) 이슈해결책;
-                        }
+                        반환결과 = (T) 이슈해결책;
+                    }
+
+                    if(처리결과 == 1) {
+                        등록된_엔티티_목록.add(반환결과);
                     }
                     // 반환결과 = 소프트딜리트_설정(엔티티);
                 }
                 catch (Exception e) {
                     logger.error("소프트 딜리트 처리 오류 발생 :: 엔티티 ::  {}", 엔티티.toString());
-                }
-
-                if (반환결과 != null) {
-                    등록된_엔티티_목록.add(반환결과);
                 }
             });
         }
@@ -868,352 +858,5 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
             int 업데이트결과 = jiraIssueResolution.updateNode(백엔드_이슈해결책);
             return 업데이트결과 == 1 ? 백엔드_이슈해결책 : null;
         }
-    }
-
-    // 미사용 코드 정리 예정
-    private <T extends TreeSearchEntity> T 소프트딜리트_설정(T treeSearchEntity) throws Exception {
-
-        T 반환할트리엔티티 = null;
-        int 처리결과 = 0;
-
-        if (treeSearchEntity instanceof JiraProjectEntity) {
-            JiraProjectEntity 프로젝트 = (JiraProjectEntity) treeSearchEntity;
-            프로젝트.setC_etc("delete");
-            처리결과 = jiraProject.updateNode(프로젝트);
-
-            반환할트리엔티티 = (T) 프로젝트;
-        }
-        else if (treeSearchEntity instanceof JiraIssueTypeEntity) {
-            JiraIssueTypeEntity 이슈유형 = (JiraIssueTypeEntity) treeSearchEntity;
-            이슈유형.setC_etc("delete");
-            이슈유형.setC_check("false");
-            처리결과 = jiraIssueType.updateNode(이슈유형);
-
-            반환할트리엔티티 = (T) 이슈유형;
-        }
-        else if (treeSearchEntity instanceof JiraIssueStatusEntity) {
-            JiraIssueStatusEntity 이슈상태 = (JiraIssueStatusEntity) treeSearchEntity;
-            이슈상태.setC_etc("delete");
-            이슈상태.setC_check("false");
-            처리결과 = jiraIssueStatus.updateNode(이슈상태);
-
-            반환할트리엔티티 = (T) 이슈상태;
-        }
-        else if (treeSearchEntity instanceof JiraIssuePriorityEntity) {
-            JiraIssuePriorityEntity 이슈우선순위 = (JiraIssuePriorityEntity) treeSearchEntity;
-            이슈우선순위.setC_etc("delete");
-            이슈우선순위.setC_check("false");
-            처리결과 = jiraIssuePriority.updateNode(이슈우선순위);
-
-            반환할트리엔티티 = (T) 이슈우선순위;
-        }
-        else if (treeSearchEntity instanceof JiraIssueResolutionEntity) {
-            JiraIssueResolutionEntity 이슈해결책 = (JiraIssueResolutionEntity) treeSearchEntity;
-            이슈해결책.setC_etc("delete");
-            이슈해결책.setC_check("false");
-            처리결과 = jiraIssueResolution.updateNode(이슈해결책);
-
-            반환할트리엔티티 = (T) 이슈해결책;
-        }
-
-        if(처리결과 == 1) {
-            return 반환할트리엔티티;
-        }
-        else {
-            return null;
-        }
-    }
-
-    private Set<JiraProjectEntity> 서버_프로젝트_엔티티_동기화(Set<JiraProjectEntity> 등록된_프로젝트_목록,
-                                                   String 서버유형, String 엔진_연결_아이디 ) {
-        List<지라프로젝트_데이터> 가져온_프로젝트_목록 = 엔진통신기.지라_프로젝트_목록_가져오기(엔진_연결_아이디);
-
-        Map<String, JiraProjectEntity> 기존프로젝트_맵 = Optional.ofNullable(등록된_프로젝트_목록)
-                .orElseGet(Collections::emptySet)
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(프로젝트 -> 프로젝트.getC_jira_url(), 프로젝트 -> 프로젝트));
-
-        for (지라프로젝트_데이터 엔진_프로젝트 : 가져온_프로젝트_목록) {
-            JiraProjectEntity 백엔드_프로젝트 = null;
-            boolean 프로젝트존재여부 = 기존프로젝트_맵 != null && 기존프로젝트_맵.containsKey(엔진_프로젝트.getSelf());
-
-            if(프로젝트존재여부) {
-                백엔드_프로젝트 = 기존프로젝트_맵.get(엔진_프로젝트.getSelf());
-            }
-
-            JiraProjectEntity 결과 = null;
-            try {
-                결과 = 프로젝트_저장_또는_업데이트(엔진_프로젝트, 백엔드_프로젝트);
-            }
-            catch (Exception e) {
-                logger.error("프로젝트_저장_또는_업데이트 오류 발생 :: 서버유형 :: {} :: 프로젝트 ::  {}"
-                        , 서버유형, 엔진_프로젝트.toString());
-            }
-
-            if (결과 != null && !프로젝트존재여부) {
-                등록된_프로젝트_목록.add(결과);
-            }
-
-            기존프로젝트_맵.remove(엔진_프로젝트.getSelf());
-        }
-
-        if (기존프로젝트_맵 != null && 기존프로젝트_맵.size() > 0) {
-            기존프로젝트_맵.forEach((프로젝트키, 프로젝트) -> {
-                JiraProjectEntity 반환결과 = null;
-                // "delete"가 아닌 프로젝트만 필터링
-                if (프로젝트.getC_etc() == null || !StringUtils.equals("delete", 프로젝트.getC_etc())) {
-                    try {
-                        반환결과 = 소프트딜리트_설정(프로젝트);
-                    }
-                    catch (Exception e) {
-                        logger.error("소프트 딜리트 처리 오류 발생 :: 서버유형 :: {} :: 프로젝트 ::  {}"
-                                , 서버유형, 프로젝트.toString());
-                    }
-                }
-
-                if (반환결과 != null) {
-                    등록된_프로젝트_목록.add(반환결과);
-                }
-            });
-        }
-
-        return 등록된_프로젝트_목록;
-    }
-
-    private Set<JiraIssueTypeEntity> 서버_이슈유형_엔티티_동기화(Set<JiraIssueTypeEntity> 등록된_이슈유형_목록,
-                                                     String 서버유형, String 엔진_연결_아이디, String 프로젝트_아이디) {
-
-        List<지라이슈유형_데이터> 가져온_이슈유형_목록 = null;
-        if (StringUtils.equals(ServerType.JIRA_ON_PREMISE.getType(), 서버유형)
-                && 프로젝트_아이디 == null) {
-            가져온_이슈유형_목록 = 엔진통신기.지라_이슈_유형_가져오기(엔진_연결_아이디);
-        }
-        else if ((StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 서버유형)
-                || StringUtils.equals(ServerType.REDMINE_ON_PREMISE.getType(), 서버유형))
-                && 프로젝트_아이디 != null) {
-            가져온_이슈유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_연결_아이디, 프로젝트_아이디);
-        }
-
-        Map<String, JiraIssueTypeEntity> 기존이슈유형_맵 = Optional.ofNullable(등록된_이슈유형_목록)
-                .orElseGet(Collections::emptySet)
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(이슈유형 -> 이슈유형.getC_issue_type_url(), 이슈유형 -> 이슈유형));
-
-        for (지라이슈유형_데이터 엔진_이슈유형 : 가져온_이슈유형_목록) {
-            JiraIssueTypeEntity 백엔드_이슈유형 = null;
-            boolean 이슈유형존재여부 = 기존이슈유형_맵 != null && 기존이슈유형_맵.containsKey(엔진_이슈유형.getSelf());
-
-            if(이슈유형존재여부) {
-                백엔드_이슈유형 = 기존이슈유형_맵.get(엔진_이슈유형.getSelf());
-            }
-
-            JiraIssueTypeEntity 결과 = null;
-            try {
-                결과 = 이슈유형_저장_또는_업데이트(엔진_이슈유형, 백엔드_이슈유형, 서버유형);
-            }
-            catch (Exception e) {
-                logger.error("이슈유형_저장_또는_업데이트 오류 발생 :: 서버유형 :: {} :: 이슈유형 ::  {}"
-                        , 서버유형, 엔진_이슈유형.toString());
-            }
-
-            if (!이슈유형존재여부) {
-                등록된_이슈유형_목록.add(결과);
-            }
-
-            기존이슈유형_맵.remove(엔진_이슈유형.getSelf());
-        }
-
-        if (기존이슈유형_맵 != null && 기존이슈유형_맵.size() > 0) {
-            기존이슈유형_맵.forEach((이슈유형키, 이슈유형) -> {
-                try {
-                    JiraIssueTypeEntity 반환결과 = null;
-                    if (이슈유형.getC_etc() == null || !StringUtils.equals("delete", 이슈유형.getC_etc())) {
-                        반환결과 = 소프트딜리트_설정(이슈유형);
-                    }
-
-                    if (반환결과 != null) {
-                        등록된_이슈유형_목록.add(반환결과);
-                    }
-                } catch (Exception e) {
-                    logger.error("소프트 딜리트 처리 오류 발생 :: " + 이슈유형.toString());
-                }
-            });
-        }
-
-        return 등록된_이슈유형_목록;
-    }
-
-
-    private Set<JiraIssueStatusEntity> 서버_이슈상태_엔티티_동기화(Set<JiraIssueStatusEntity> 등록된_이슈상태_목록,
-                                                       String 서버유형, String 엔진_연결_아이디, String 프로젝트_아이디) {
-
-        List<지라이슈상태_데이터> 가져온_이슈상태_목록 = null;
-        if ((StringUtils.equals(ServerType.JIRA_ON_PREMISE.getType(), 서버유형) || StringUtils.equals(ServerType.REDMINE_ON_PREMISE.getType(), 서버유형)) && 프로젝트_아이디 == null) {
-            가져온_이슈상태_목록 = 엔진통신기.지라_이슈_상태_가져오기(엔진_연결_아이디);
-        }
-        else if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 서버유형) && 프로젝트_아이디 != null) {
-            가져온_이슈상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_연결_아이디, 프로젝트_아이디);
-        }
-
-        Map<String, JiraIssueStatusEntity> 기존이슈상태_맵 = Optional.ofNullable(등록된_이슈상태_목록)
-                .orElseGet(Collections::emptySet)
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(이슈상태 -> 이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
-
-        for (지라이슈상태_데이터 엔진_이슈상태 : 가져온_이슈상태_목록) {
-            JiraIssueStatusEntity 백엔드_이슈상태 = null;
-            boolean 이슈상태존재여부 = 기존이슈상태_맵 != null && 기존이슈상태_맵.containsKey(엔진_이슈상태.getSelf());
-
-            if(이슈상태존재여부) {
-                백엔드_이슈상태 = 기존이슈상태_맵.get(엔진_이슈상태.getSelf());
-            }
-
-            JiraIssueStatusEntity 결과 = null;
-            try {
-                결과 = 이슈상태_저장_또는_업데이트(엔진_이슈상태, 백엔드_이슈상태);
-            }
-            catch (Exception e) {
-                logger.error("이슈상태_저장_또는_업데이트 오류 발생 :: 서버유형 :: {} :: 이슈상태 ::  {}"
-                        , 서버유형, 엔진_이슈상태.toString());
-            }
-
-            if (!이슈상태존재여부) {
-                등록된_이슈상태_목록.add(결과);
-            }
-
-            기존이슈상태_맵.remove(엔진_이슈상태.getSelf());
-        }
-
-        if (기존이슈상태_맵 != null && 기존이슈상태_맵.size() > 0) {
-            기존이슈상태_맵.forEach((이슈상태키, 이슈상태) -> {
-                try {
-                    JiraIssueStatusEntity 반환결과 = null;
-                    if (이슈상태.getC_etc() == null || !StringUtils.equals("delete", 이슈상태.getC_etc())) {
-                        반환결과 = 소프트딜리트_설정(이슈상태);
-                    }
-
-                    if (반환결과 != null) {
-                        등록된_이슈상태_목록.add(반환결과);
-                    }
-                } catch (Exception e) {
-                    logger.error("소프트 딜리트 처리 오류 발생 :: " + 이슈상태.toString());
-                }
-            });
-        }
-
-        return 등록된_이슈상태_목록;
-    }
-
-    private Set<JiraIssuePriorityEntity> 서버_이슈우선순위_엔티티_동기화(Set<JiraIssuePriorityEntity> 등록된_이슈우선순위_목록,
-                                                           String 서버유형, String 엔진_연결_아이디) {
-
-        List<지라이슈우선순위_데이터> 가져온_이슈우선순위_목록 = 엔진통신기.지라_이슈_우선순위_가져오기(엔진_연결_아이디);
-
-        Map<String, JiraIssuePriorityEntity> 기존이슈우선순위_맵 = Optional.ofNullable(등록된_이슈우선순위_목록)
-                .orElseGet(Collections::emptySet)
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(이슈유형 -> 이슈유형.getC_issue_priority_url(), 이슈유형 -> 이슈유형));
-
-        for (지라이슈우선순위_데이터 엔진_이슈우선순위 : 가져온_이슈우선순위_목록) {
-            JiraIssuePriorityEntity 백엔드_이슈우선순위 = null;
-            boolean 이슈상태존재여부 = 기존이슈우선순위_맵 != null && 기존이슈우선순위_맵.containsKey(엔진_이슈우선순위.getSelf());
-
-            if(이슈상태존재여부) {
-                백엔드_이슈우선순위 = 기존이슈우선순위_맵.get(엔진_이슈우선순위.getSelf());
-            }
-
-            JiraIssuePriorityEntity 결과 = null;
-            try {
-                결과 = 이슈우선순위_저장_또는_업데이트(엔진_이슈우선순위, 백엔드_이슈우선순위, 서버유형);
-            }
-            catch (Exception e) {
-                logger.error("이슈상태_저장_또는_업데이트 오류 발생 :: 서버유형 :: {} :: 이슈상태 ::  {}"
-                        , 서버유형, 엔진_이슈우선순위.toString());
-            }
-
-            if (!이슈상태존재여부) {
-                등록된_이슈우선순위_목록.add(결과);
-            }
-
-            기존이슈우선순위_맵.remove(엔진_이슈우선순위.getSelf());
-        }
-
-        if (기존이슈우선순위_맵 != null && 기존이슈우선순위_맵.size() > 0) {
-            기존이슈우선순위_맵.forEach((이슈우선순위키, 이슈우선순위) -> {
-                try {
-                    JiraIssuePriorityEntity 반환결과 = null;
-                    if (이슈우선순위.getC_etc() == null || !StringUtils.equals("delete", 이슈우선순위.getC_etc())) {
-                        반환결과 = 소프트딜리트_설정(이슈우선순위);
-                    }
-
-                    if (반환결과 != null) {
-                        등록된_이슈우선순위_목록.add(반환결과);
-                    }
-                } catch (Exception e) {
-                    logger.error("소프트 딜리트 처리 오류 발생 :: " + 이슈우선순위.toString());
-                }
-            });
-        }
-
-        return 등록된_이슈우선순위_목록;
-    }
-
-    private Set<JiraIssueResolutionEntity> 서버_이슈해결책_엔티티_동기화(Set<JiraIssueResolutionEntity> 등록된_이슈해결책_목록,
-                                                            String 서버유형, String 엔진_연결_아이디) {
-
-        List<지라이슈해결책_데이터> 가져온_이슈해결책_목록 = 엔진통신기.지라_이슈_해결책_가져오기(엔진_연결_아이디);
-
-        Map<String, JiraIssueResolutionEntity> 기존이슈해결책_맵 = Optional.ofNullable(등록된_이슈해결책_목록)
-                .orElseGet(Collections::emptySet)
-                .stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(이슈해결책 -> 이슈해결책.getC_issue_resolution_url(), 이슈해결책 -> 이슈해결책));
-
-        for (지라이슈해결책_데이터 엔진_이슈해결책 : 가져온_이슈해결책_목록) {
-            JiraIssueResolutionEntity 백엔드_이슈해결책 = null;
-            boolean 이슈상태존재여부 = 기존이슈해결책_맵 != null && 기존이슈해결책_맵.containsKey(엔진_이슈해결책.getSelf());
-
-            if(이슈상태존재여부) {
-                백엔드_이슈해결책 = 기존이슈해결책_맵.get(엔진_이슈해결책.getSelf());
-            }
-
-            JiraIssueResolutionEntity 결과 = null;
-            try {
-                결과 = 이슈해결책_저장_또는_업데이트(엔진_이슈해결책, 백엔드_이슈해결책, 서버유형);
-            }
-            catch (Exception e) {
-                logger.error("이슈상태_저장_또는_업데이트 오류 발생 :: 서버유형 :: {} :: 이슈해결책 ::  {}"
-                        , 서버유형, 엔진_이슈해결책.toString());
-            }
-
-            if (!이슈상태존재여부) {
-                등록된_이슈해결책_목록.add(결과);
-            }
-
-            기존이슈해결책_맵.remove(엔진_이슈해결책.getSelf());
-        }
-
-        if (기존이슈해결책_맵 != null && 기존이슈해결책_맵.size() > 0) {
-            기존이슈해결책_맵.forEach((이슈해결책키, 백엔드_이슈해결책) -> {
-                try {
-                    JiraIssueResolutionEntity 반환결과 = null;
-                    if (백엔드_이슈해결책.getC_etc() == null || !StringUtils.equals("delete", 백엔드_이슈해결책.getC_etc())) {
-                        반환결과 = 소프트딜리트_설정(백엔드_이슈해결책);
-                    }
-
-                    if (반환결과 != null) {
-                        등록된_이슈해결책_목록.add(반환결과);
-                    }
-                } catch (Exception e) {
-                    logger.error("소프트 딜리트 처리 오류 발생 :: " + 백엔드_이슈해결책.toString());
-                }
-            });
-        }
-
-        return 등록된_이슈해결책_목록;
     }
 }
