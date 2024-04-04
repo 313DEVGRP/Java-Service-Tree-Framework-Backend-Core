@@ -64,7 +64,6 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Autowired
     private 통계엔진통신기 통계엔진통신기;
 
-
     @Autowired
     private PdServiceVersion pdServiceVersion;
 
@@ -397,10 +396,16 @@ public class 비용서비스_구현 implements 비용서비스 {
         // 3. 요구사항의 ReqStateLink 값을 가지고 필터링함. ReqState 값이 완료 키워드인 ReqStatus 만 가져옴
         List<ReqStatusEntity> filteredReqStatusEntities = filterResolvedReqStatusEntities(reqStatusEntities, filteredReqStateId);
 
-        // 4. 엔진 통신으로 담당자 데이터를 가져옴
-        검색결과_목록_메인 engineResponseBody = getAggregationData(engineAggregationRequestDTO);
-        Map<String, List<검색결과>> searchResults = engineResponseBody.get검색결과();
-        List<검색결과> groupByAssignee = searchResults.get("group_by_" + engineAggregationRequestDTO.get메인그룹필드());
+        // 4. 엔진 통신 cReqLink 기준 집계
+        List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
+
+        engineAggregationRequestDTO.setCReqLinks(cReqLinks);
+
+        List<검색결과> groupByCReqLink = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_cReqLink");
+
+        List<검색결과> assigneeList = groupByCReqLink.stream()
+                .flatMap(link -> link.get하위검색결과().get("group_by_assignee.assignee_accountId.keyword").stream())
+                .collect(Collectors.toList());
 
         // 5. 제품 버전을 기준으로 x 축에 해당하는 시작일, 종료일 구하기
         List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity())
@@ -423,21 +428,22 @@ public class 비용서비스_구현 implements 비용서비스 {
         String formattedStartDate = convertDateTimeFormat(startDateOrNull);
         String formattedEndDate = convertDateTimeFormat(endDateOrNull);
 
+        LocalDate versionStartDate = LocalDate.parse(formattedStartDate);
+        LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
+
         List<SalaryLogJdbcDTO> salaryLogEntries = salaryLog.findSalaryLogsBetweenDates(formattedStartDate, formattedEndDate).stream().filter(
                 sle -> sle.getC_method().equals("create") || sle.getC_method().equals("update")
         ).collect(Collectors.toList());
 
+        // 6. 담당자 별 연봉 캘린더 생성
         Map<String, TreeMap<String, Integer>> allAssigneeSalaries = new HashMap<>();
-
-        groupByAssignee.stream().map(검색결과::get필드명).forEach(assigneeKey -> {
-            LocalDate versionStartDate = LocalDate.parse(formattedStartDate);
-            LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
+        assigneeList.forEach(assignee -> {
+            String assigneeKey = assignee.get필드명();
             List<SalaryLogJdbcDTO> salaryCreateLogs = salaryLogEntries.stream().filter(sle -> sle.getC_key().equals(assigneeKey)).collect(Collectors.toList());
             List<SalaryLogJdbcDTO> salaryUpdateLogs = salaryCreateLogs.stream().filter(sle -> sle.getC_method().equals("update")).collect(Collectors.toList());
             Map<String, Map<String, List<SalaryLogJdbcDTO>>> groupedEntries = salaryUpdateLogs.stream()
                     .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date,
                             Collectors.groupingBy(SalaryLogJdbcDTO::getC_key)));
-
             // 3-1. 각 그룹에서 가장 먼저 등록 된 "변경이전데이터"와 가장 마지막에 등록 된 "변경이후데이터"를 선택. 같은 날 연봉 데이터를 여러 번 수정할 경우 대응
             List<SalaryLogJdbcDTO> filteredLogs = getIncomeDifferenceEntries(groupedEntries);
             filteredLogs.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
@@ -483,7 +489,6 @@ public class 비용서비스_구현 implements 비용서비스 {
                             }
                         } else {
                             if (i + 1 == filteredLogs.size()) {
-                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
                                 LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
                                 for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
                                     String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -533,7 +538,6 @@ public class 비용서비스_구현 implements 비용서비스 {
                             }
                         } else {
                             if (i + 1 == filteredLogs.size()) {
-                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
                                 LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
                                 for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
                                     String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -557,7 +561,6 @@ public class 비용서비스_구현 implements 비용서비스 {
 
                     for (int i = 0; i < filteredLogs.size(); i++) {
                         if (i % 2 == 0) {
-                            // 여기는 변경이전데이터
                             if (i == 0) {
                                 LocalDate end = LocalDate.parse(filteredLogs.get(i).getFormatted_date()).minusDays(1);
                                 for (LocalDate date = versionStartDate; !date.isAfter(end); date = date.plusDays(1)) {
@@ -579,9 +582,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                                 }
                             }
                         } else {
-                            // 마지막 루프만 처리. 마지막이니까 변경이후 데이터부터 end까지.
                             if (i + 1 == filteredLogs.size()) {
-                                // TODO: 최신 연봉 말고, formattedEndDate와 가장 가까이에 있는 연봉 수정 로그의 변경이전데이터과 비교해서 section 을 계산해야할듯?
                                 LocalDate start = LocalDate.parse(filteredLogs.get(i).getFormatted_date());
                                 for (LocalDate date = start; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
                                     String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -602,14 +603,11 @@ public class 비용서비스_구현 implements 비용서비스 {
         for (ReqStatusEntity filteredReqStatusEntity : filteredReqStatusEntities) {
             LocalDate 요구사항시작일 = filteredReqStatusEntity.getC_req_start_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate 요구사항종료일 = filteredReqStatusEntity.getC_req_end_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            String 이슈키 = filteredReqStatusEntity.getC_issue_key();
             LocalDate endDate = LocalDate.parse(formattedEndDate);
-
-            AtomicBoolean foundAssignee = new AtomicBoolean(false);
-
-            for (검색결과 searchResult : groupByAssignee) {
-                String assigneeKey = searchResult.get필드명();
-                searchResult.get하위검색결과().get("group_by_key").stream().filter(subSearchResult -> subSearchResult.get필드명().equals(이슈키)).findFirst().ifPresentOrElse(subSearchResult -> {
+            groupByCReqLink.stream().filter(link -> Long.parseLong(link.get필드명()) == filteredReqStatusEntity.getC_req_link()).findFirst().ifPresent(result -> {
+                List<검색결과> assignees = result.get하위검색결과().get("group_by_assignee.assignee_accountId.keyword").stream().collect(Collectors.toList());
+                for (검색결과 assignee : assignees) {
+                    String assigneeKey = assignee.get필드명();
                     Optional.ofNullable(allAssigneeSalaries.get(assigneeKey)).ifPresent(assigneeSalaries -> {
                         assigneeSalaries.entrySet().stream().filter(entry -> {
                             LocalDate date = LocalDate.parse(entry.getKey());
@@ -619,14 +617,8 @@ public class 비용서비스_구현 implements 비용서비스 {
                             barCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
                         });
                     });
-                    foundAssignee.set(true);
-                }, () -> {
-                    foundAssignee.set(false);
-                });
-                if (foundAssignee.get()) {
-                    break;
                 }
-            }
+            });
         }
 
         barCost.replaceAll((k, v) -> v * 10000 / 365);
@@ -672,12 +664,14 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     private List<ReqStatusEntity> filterResolvedReqStatusEntities(List<ReqStatusEntity> reqStatusEntities, List<Long> filteredReqStateId) {
-        return reqStatusEntities.stream()
+        Map<Long, ReqStatusEntity> uniqueMap = reqStatusEntities.stream()
                 .filter(reqStatusEntity -> reqStatusEntity.getC_req_start_date() != null)
                 .filter(reqStatusEntity -> reqStatusEntity.getC_req_end_date() != null)
                 .filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
                 .filter(reqStatusEntity -> filteredReqStateId.contains(reqStatusEntity.getC_req_state_link()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(ReqStatusEntity::getC_req_link, reqStatusEntity -> reqStatusEntity, (existing, replacement) -> existing));
+
+        return new ArrayList<>(uniqueMap.values());
     }
 
     private 검색결과_목록_메인 getAggregationData(EngineAggregationRequestDTO requestDTO) {
