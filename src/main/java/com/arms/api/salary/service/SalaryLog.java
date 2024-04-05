@@ -15,9 +15,12 @@ import com.arms.api.salary.model.SalaryLogJdbcDTO;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SalaryLog extends TreeService {
 
-    List<SalaryLogJdbcDTO> findSalaryLogsBetweenDates(String startDate, String endDate);
+    List<SalaryLogJdbcDTO> findAllLogs(String cMethod, String startDate, String endDate);
+
+    Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod, String startDate, String endDate);
 
 }
