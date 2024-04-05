@@ -22,6 +22,5 @@ public class EngineAggregationRequestDTO {
     private boolean 컨텐츠보기여부;
     private int 크기 = 1000;
     private int 하위크기 = 1000;
-    private List<Long> cReqLinks;
 
 }
