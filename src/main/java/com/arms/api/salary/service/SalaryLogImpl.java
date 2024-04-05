@@ -16,12 +16,11 @@ import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -33,8 +32,7 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<SalaryLogJdbcDTO> findSalaryLogsBetweenDates(String startDate, String endDate) {
-//        String method = "create";
+    public List<SalaryLogJdbcDTO> findAllLogs(String cMethod, String startDate, String endDate) {
         String sql = "SELECT " +
                 "    c_date, " +
                 "    DATE_FORMAT(c_date, '%Y-%m-%d') AS formatted_date, " +
@@ -46,28 +44,68 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
                 "FROM " +
                 "    T_ARMS_ANNUAL_INCOME_LOG " +
                 "WHERE " +
+                "    c_method = ? AND " +
                 "    c_date BETWEEN ? AND ? " +
                 "AND c_type = 'default' " +
-//                "AND c_method = ? " +
-                "ORDER BY c_date DESC";
+                "ORDER BY c_date ASC";
+
+        return jdbcTemplate.query(
+                sql,
+                new Object[]{cMethod, startDate, endDate},
+                (rs, rowNum) -> {
+                    SalaryLogJdbcDTO entry = new SalaryLogJdbcDTO();
+                    entry.setC_date(rs.getTimestamp("c_date"));
+                    entry.setFormatted_date(rs.getString("formatted_date"));
+                    entry.setC_method(rs.getString("c_method"));
+                    entry.setC_name(rs.getString("c_name"));
+                    entry.setC_key(rs.getString("c_key"));
+                    entry.setC_state(rs.getString("c_state"));
+                    entry.setC_annual_income(rs.getInt("c_annual_income"));
+                    return entry;
+                }
+        );
+    }
+
+    @Override
+    public Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod, String startDate, String endDate) {
+        String sql = "SELECT " +
+                "    c_date, " +
+                "    DATE_FORMAT(c_date, '%Y-%m-%d') AS formatted_date, " +
+                "    c_method, " +
+                "    c_name, " +
+                "    c_state, " +
+                "    c_key, " +
+                "    c_annual_income " +
+                "FROM " +
+                "    T_ARMS_ANNUAL_INCOME_LOG " +
+                "WHERE " +
+                "    c_method = ? AND " +
+                "    c_date BETWEEN ? AND ? " +
+                "AND c_type = 'default' " +
+                "ORDER BY c_date ASC";
 
         List<SalaryLogJdbcDTO> results = jdbcTemplate.query(
                 sql,
-                new Object[]{startDate, endDate},
-                new RowMapper<SalaryLogJdbcDTO>() {
-                    public SalaryLogJdbcDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        SalaryLogJdbcDTO entry = new SalaryLogJdbcDTO();
-                        entry.setC_date(rs.getTimestamp("c_date"));
-                        entry.setFormatted_date(rs.getString("formatted_date"));
-                        entry.setC_method(rs.getString("c_method"));
-                        entry.setC_name(rs.getString("c_name"));
-                        entry.setC_key(rs.getString("c_key"));
-                        entry.setC_state(rs.getString("c_state"));
-                        entry.setC_annual_income(rs.getInt("c_annual_income"));
-                        return entry;
-                    }
-                });
-        return results;
+                new Object[]{cMethod, startDate, endDate},
+                (rs, rowNum) -> {
+                    SalaryLogJdbcDTO entry = new SalaryLogJdbcDTO();
+                    entry.setC_date(rs.getTimestamp("c_date"));
+                    entry.setFormatted_date(rs.getString("formatted_date"));
+                    entry.setC_method(rs.getString("c_method"));
+                    entry.setC_name(rs.getString("c_name"));
+                    entry.setC_key(rs.getString("c_key"));
+                    entry.setC_state(rs.getString("c_state"));
+                    entry.setC_annual_income(rs.getInt("c_annual_income"));
+                    return entry;
+                }
+        );
 
+        Map<String, SalaryLogJdbcDTO> resultMap = new HashMap<>();
+        for (SalaryLogJdbcDTO result : results) {
+            resultMap.put(result.getC_key(), result);
+        }
+
+        return resultMap;
     }
+
 }
