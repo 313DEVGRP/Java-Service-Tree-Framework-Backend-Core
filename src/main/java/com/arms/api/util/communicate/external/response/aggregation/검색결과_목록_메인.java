@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class 검색결과_목록_메인 {
 
 	private Long 전체합계;
-	private Map<String,List<com.arms.api.util.communicate.external.response.aggregation.검색결과>> 검색결과 = new HashMap<>();
+	private Map<String,List<검색결과>> 검색결과 = new HashMap<>();
 
 }
