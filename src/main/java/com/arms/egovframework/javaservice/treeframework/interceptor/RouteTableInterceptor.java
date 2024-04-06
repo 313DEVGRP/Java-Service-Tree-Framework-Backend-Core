@@ -69,6 +69,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("addNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+                if(StringUtils.contains(servletPath,"addFolderNode.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("addReqFolderNode");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
                 if(StringUtils.contains(servletPath,"updateNode.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("updateNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
@@ -97,7 +101,8 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("req-difficulty-priority-list");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
-            }else if(StringUtils.contains(servletPath,"T_ARMS_REQSTATUS_")){
+            }
+            else if(StringUtils.contains(servletPath,"T_ARMS_REQSTATUS_")){
                 if(StringUtils.contains(servletPath,"getStatusMonitor.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("getStatusMonitor");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
@@ -150,7 +155,8 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("getPdRelatedReqStats");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
-            }else if(StringUtils.contains(servletPath,"req-linked-issue")){
+            }
+            else if(StringUtils.contains(servletPath,"req-linked-issue")){
                 String replaceTableName = (String) SessionUtil.getAttribute("req-linked-issue");
                 prepedStatement = replaceStatement(prepedStatement, replaceTableName);
             }

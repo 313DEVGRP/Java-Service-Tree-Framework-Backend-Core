@@ -111,7 +111,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		SessionUtil.removeAttribute("addNode");
 
-
 		Long 추가된_요구사항의_아이디 = savedReqAddEntity.getC_id();
 		PdServiceEntity 추가된_요구사항의_제품서비스 = savedReqAddEntity.getPdServiceEntity();
 		String 추가된_요구사항의_제품서비스_버전리스트 = savedReqAddEntity.getC_req_pdservice_versionset_link();
@@ -414,6 +413,17 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		//JIRA 연결 정보를 가져와서
 		//이슈가 이미 있는지 확인? <- 이게 필요할까?
 		//각 연결정보의 프로젝트에 이슈를 생성한다.
+
+		return savedReqAddEntity;
+	}
+
+	@Override
+	@Transactional
+	public ReqAddEntity addReqFolderNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
+
+		SessionUtil.setAttribute("addReqFolderNode",changeReqTableName);
+		ReqAddEntity savedReqAddEntity = this.addNode(reqAddEntity);
+		SessionUtil.removeAttribute("addReqFolderNode");
 
 		return savedReqAddEntity;
 	}
