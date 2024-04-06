@@ -1,4 +1,4 @@
-package com.arms.api.salary.model;
+package com.arms.api.analysis.salary.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

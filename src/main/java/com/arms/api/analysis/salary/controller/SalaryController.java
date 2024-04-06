@@ -1,9 +1,9 @@
-package com.arms.api.salary.controller;
+package com.arms.api.analysis.salary.controller;
 
-import com.arms.api.salary.model.SalaryDTO;
-import com.arms.api.salary.model.SalaryEntity;
-import com.arms.api.salary.model.SampleDTO;
-import com.arms.api.salary.service.SalaryService;
+import com.arms.api.analysis.salary.model.SalaryDTO;
+import com.arms.api.analysis.salary.model.SalaryEntity;
+import com.arms.api.analysis.salary.model.SampleDTO;
+import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;

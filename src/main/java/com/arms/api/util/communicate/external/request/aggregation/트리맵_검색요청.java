@@ -4,7 +4,7 @@ import lombok.*;
 
 import java.util.List;
 
-import com.arms.api.analysis.dashboard.model.제품버전목록;
+import com.arms.api.dashboard.model.제품버전목록;
 
 
 @Getter

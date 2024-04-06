@@ -1,11 +1,11 @@
-package com.arms.api.analysis.dashboard.controller;
+package com.arms.api.dashboard.controller;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.common.AggregationMapper;
-import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.analysis.dashboard.model.SankeyData;
-import com.arms.api.analysis.dashboard.model.Worker;
-import com.arms.api.analysis.dashboard.service.DashboardService;
+import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.dashboard.model.SankeyData;
+import com.arms.api.dashboard.model.Worker;
+import com.arms.api.dashboard.service.DashboardService;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;

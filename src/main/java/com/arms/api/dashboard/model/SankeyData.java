@@ -1,4 +1,4 @@
-package com.arms.api.analysis.dashboard.model;
+package com.arms.api.dashboard.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

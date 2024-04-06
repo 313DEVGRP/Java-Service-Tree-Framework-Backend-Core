@@ -1,8 +1,8 @@
-package com.arms.api.analysis.dashboard.service;
+package com.arms.api.dashboard.service;
 
-import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.analysis.dashboard.model.SankeyData;
-import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.dashboard.model.SankeyData;
+import com.arms.api.dashboard.model.Worker;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 
