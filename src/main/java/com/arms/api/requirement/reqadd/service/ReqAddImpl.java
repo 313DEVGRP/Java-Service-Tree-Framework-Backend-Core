@@ -489,88 +489,100 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
 
-		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
+		if(StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Branch_TYPE)){
 
-		// 2. 수정 전 후 비교
-		ObjectMapper objectMapper = new ObjectMapper();
-		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
-		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
-		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
-		루프용버전셋.addAll(현재버전셋);
+			// 3. ReqAdd 업데이트
+			SessionUtil.setAttribute("updateNode", changeReqTableName);
+			this.updateNode(reqAddEntity);
+			SessionUtil.removeAttribute("updateNode");
 
-		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2
-		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 2,3
-		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2,3
+			return 1;
 
-		logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
-		logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
-		logger.info("루프용버전셋리스트 : {}", 루프용버전셋리스트);
+		}else{
+			String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
 
-		List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
-				.stream()
-				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
-				.collect(Collectors.toList());
+			// 2. 수정 전 후 비교
+			ObjectMapper objectMapper = new ObjectMapper();
+			Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+			Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
+			Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+			루프용버전셋.addAll(현재버전셋);
 
-		Set<Long> 수정전버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
-				.filter(globalTreeMap -> 수정전버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
-				.map(GlobalTreeMapEntity::getJiraproject_link)
-				.collect(Collectors.toSet());
+			List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2
+			List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 2,3
+			List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2,3
 
-		logger.info("수정전버전에연결된지라프로젝트아이디 : {}", 수정전버전에연결된지라프로젝트아이디);
+			logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
+			logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
+			logger.info("루프용버전셋리스트 : {}", 루프용버전셋리스트);
 
-		Set<Long> 현재버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
-				.filter(globalTreeMap -> 현재버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
-				.map(GlobalTreeMapEntity::getJiraproject_link)
-				.collect(Collectors.toSet());
+			List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
+					.stream()
+					.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
+					.collect(Collectors.toList());
 
-		logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
+			Set<Long> 수정전버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+					.filter(globalTreeMap -> 수정전버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+					.map(GlobalTreeMapEntity::getJiraproject_link)
+					.collect(Collectors.toSet());
 
-		Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
-		Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
-		Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+			logger.info("수정전버전에연결된지라프로젝트아이디 : {}", 수정전버전에연결된지라프로젝트아이디);
 
-		logger.info("유지된지라프로젝트아이디 : {}", 유지된지라프로젝트아이디);
-		logger.info("추가된지라프로젝트아이디 : {}", 추가된지라프로젝트아이디);
-		logger.info("삭제된지라프로젝트아이디 : {}", 삭제된지라프로젝트아이디);
+			Set<Long> 현재버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+					.filter(globalTreeMap -> 현재버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+					.map(GlobalTreeMapEntity::getJiraproject_link)
+					.collect(Collectors.toSet());
 
-		List<PdServiceVersionEntity> 버전데이터 = pdServiceVersion.getVersionListByCids(루프용버전셋리스트);
+			logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
 
-		List<PdServiceVersionEntity> 수정될버전 = 버전데이터.stream()
-				.filter(pdServiceVersionEntity -> 현재버전셋리스트.contains(pdServiceVersionEntity.getC_id()))
-				.collect(Collectors.toList());
-		PdServiceEntity 제품데이터 = 제품데이터조회(pdServiceId);
+			Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+			Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+			Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
 
-		/* 지라 이슈에 사용 할 데이터 */
-		String 제품명 = 제품데이터.getC_title();
-		String 현재제목 = reqAddEntity.getC_title();
-		String 현재본문 = reqAddEntity.getC_req_contents();
+			logger.info("유지된지라프로젝트아이디 : {}", 유지된지라프로젝트아이디);
+			logger.info("추가된지라프로젝트아이디 : {}", 추가된지라프로젝트아이디);
+			logger.info("삭제된지라프로젝트아이디 : {}", 삭제된지라프로젝트아이디);
 
-		// 3. ReqAdd 업데이트
-		SessionUtil.setAttribute("updateNode", changeReqTableName);
-		this.updateNode(reqAddEntity);
-		SessionUtil.removeAttribute("updateNode");
+			List<PdServiceVersionEntity> 버전데이터 = pdServiceVersion.getVersionListByCids(루프용버전셋리스트);
 
-		List<ReqStatusEntity> reqStatusEntityList = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, new ReqStatusDTO());
+			List<PdServiceVersionEntity> 수정될버전 = 버전데이터.stream()
+					.filter(pdServiceVersionEntity -> 현재버전셋리스트.contains(pdServiceVersionEntity.getC_id()))
+					.collect(Collectors.toList());
+			PdServiceEntity 제품데이터 = 제품데이터조회(pdServiceId);
 
-		List<ReqStatusEntity> 유지된지라프로젝트 = reqStatusEntityList.stream()
-				.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
-				.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
-				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
-				.collect(Collectors.toList());
+			/* 지라 이슈에 사용 할 데이터 */
+			String 제품명 = 제품데이터.getC_title();
+			String 현재제목 = reqAddEntity.getC_title();
+			String 현재본문 = reqAddEntity.getC_req_contents();
 
-		List<ReqStatusEntity> 삭제된지라프로젝트 = reqStatusEntityList.stream()
-				.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
-				.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
-				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
-				.collect(Collectors.toList());
+			// 3. ReqAdd 업데이트
+			SessionUtil.setAttribute("updateNode", changeReqTableName);
+			this.updateNode(reqAddEntity);
+			SessionUtil.removeAttribute("updateNode");
 
-		유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
+			List<ReqStatusEntity> reqStatusEntityList = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, new ReqStatusDTO());
 
-		삭제된지라프로젝트처리(reqAddEntity, 삭제된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
+			List<ReqStatusEntity> 유지된지라프로젝트 = reqStatusEntityList.stream()
+					.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
+					.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+					.collect(Collectors.toList());
 
-		추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, reqStatusEntityList, pdServiceId);
+			List<ReqStatusEntity> 삭제된지라프로젝트 = reqStatusEntityList.stream()
+					.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
+					.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+					.collect(Collectors.toList());
 
-		return 1;
+			유지된지라프로젝트처리(reqAddEntity, 유지된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
+
+			삭제된지라프로젝트처리(reqAddEntity, 삭제된지라프로젝트, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, pdServiceId);
+
+			추가된지라프로젝트처리(reqAddEntity, 추가된지라프로젝트아이디, globalTreeMapEntities, 현재제목, 현재본문, 제품명, 수정될버전, reqStatusEntityList, pdServiceId);
+
+			return 1;
+		}
+
 	}
 
 	private void 추가된지라프로젝트처리(
