@@ -15,4 +15,5 @@ import java.util.TreeMap;
 public class ProductCostResponse {
     TreeMap<String, Integer> line;
     TreeMap<String, Integer> bar;
+    TreeMap<String, Integer> candleStick;
 }
