@@ -3,6 +3,7 @@ package com.arms.api.salary.service;
 import com.arms.api.salary.model.SampleDTO;
 import com.arms.api.salary.model.SalaryDTO;
 import com.arms.api.salary.model.SalaryEntity;
+import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -185,5 +186,23 @@ public class SalaryServiceImpl extends TreeServiceImpl implements SalaryService 
         Function<SalaryEntity, String> 키 = SalaryEntity::getC_key;
         Function<SalaryEntity, SalaryEntity> 값 = Function.identity();
         return this.getNodesWithoutRootMap(엔티티, 키, 값);
+    }
+
+    @Override
+    @Transactional
+    public int updateSalary(List<SalaryEntity> salaryEntityList) throws Exception {
+        Map<String, SalaryEntity> 모든_연봉정보_맵 = this.모든_연봉정보_맵();
+        for (SalaryEntity salaryEntity : salaryEntityList) {
+            SalaryEntity salary = 모든_연봉정보_맵.get(salaryEntity.getC_key());
+            if (salary == null) {
+                salaryEntity.setRef(TreeConstant.First_Node_CID);
+                salaryEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
+                this.addNode(salaryEntity);
+            } else {
+                salary.setC_annual_income(salaryEntity.getC_annual_income());
+                this.updateNode(salary);
+            }
+        }
+        return 1;
     }
 }

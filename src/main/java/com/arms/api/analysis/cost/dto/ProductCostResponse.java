@@ -6,12 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductCostResponse {
-    private Long totalAnnualIncome;
-    private Map<String, Long> monthlyCost;
+    TreeMap<String, Integer> line;
+    TreeMap<String, Integer> bar;
 }

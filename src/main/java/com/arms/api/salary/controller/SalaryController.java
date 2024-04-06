@@ -4,7 +4,6 @@ import com.arms.api.salary.model.SalaryDTO;
 import com.arms.api.salary.model.SalaryEntity;
 import com.arms.api.salary.model.SampleDTO;
 import com.arms.api.salary.service.SalaryService;
-import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsBase;
@@ -12,8 +11,11 @@ import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -38,6 +41,7 @@ import java.util.Map;
 public class SalaryController extends TreeAbstractController<SalaryService, SalaryDTO, SalaryEntity> {
 
     private final SalaryService salaryService;
+    private final SalaryControllerMapper salaryControllerMapper;
 
     @PostConstruct
     public void initialize() {
@@ -87,22 +91,27 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
 
     }
 
-    @PutMapping("/update.do")
-    public ResponseEntity<CommonResponse.ApiResult<SalaryEntity>> updateOrCreate(SalaryDTO salaryDTO) throws Exception {
-        Map<String, SalaryEntity> 모든_연봉정보_맵 = salaryService.모든_연봉정보_맵();
-        SalaryEntity salaryEntity = 모든_연봉정보_맵.get(salaryDTO.getC_key());
-        if (salaryEntity != null) {
-            salaryEntity.setC_annual_income(salaryDTO.getC_annual_income());
-            salaryService.updateNode(salaryEntity);
-            return ResponseEntity.ok(CommonResponse.success(salaryEntity));
-        }
-        return ResponseEntity.ok(CommonResponse.success(salaryService.addNode(createNewSalaryEntity(salaryDTO))));
+    @PutMapping
+    public ResponseEntity<CommonResponse.ApiResult<List<SalaryDTO>>> bulkUpdate(@RequestBody Map<String, SalaryDTO> salaryMaps) throws Exception {
+        List<SalaryDTO> salaryDTOList = salaryMaps.values().stream().collect(Collectors.toList());
+        List<SalaryEntity> salaryEntityList = salaryControllerMapper.toSalaryEntityList(salaryDTOList);
+        salaryService.updateSalary(salaryEntityList);
+        Map<String, SalaryEntity> fetchSalary = salaryService.모든_연봉정보_맵();
+        List<SalaryDTO> response = fetchSalary.values().stream().map(entity -> modelMapper.map(entity, SalaryDTO.class)).collect(Collectors.toList());
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
-    private SalaryEntity createNewSalaryEntity(SalaryDTO salaryDTO) {
-        SalaryEntity addSalaryEntity = modelMapper.map(salaryDTO, SalaryEntity.class);
-        addSalaryEntity.setRef(TreeConstant.First_Node_CID);
-        addSalaryEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
-        return addSalaryEntity;
+    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+    public interface SalaryControllerMapper {
+
+        @BeanMapping(ignoreByDefault = true)
+        @Mapping(target = "c_id", source = "c_id")
+        @Mapping(target = "c_name", source = "c_name")
+        @Mapping(target = "c_key", source = "c_key")
+        @Mapping(target = "c_annual_income", source = "c_annual_income")
+        @Mapping(target = "c_title", source = "c_title")
+        SalaryEntity toSalaryEntity(SalaryDTO salaryDTO);
+
+        List<SalaryEntity> toSalaryEntityList(List<SalaryDTO> salaryDTOList);
     }
 }
