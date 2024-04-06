@@ -1,11 +1,11 @@
-package com.arms.api.analysis.dashboard.service;
+package com.arms.api.dashboard.service;
 
-import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.analysis.dashboard.model.SankeyData;
-import com.arms.api.analysis.dashboard.model.SankeyData.SankeyLink;
-import com.arms.api.analysis.dashboard.model.SankeyData.SankeyNode;
-import com.arms.api.analysis.dashboard.model.Worker;
-import com.arms.api.analysis.dashboard.model.제품버전목록;
+import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.dashboard.model.SankeyData;
+import com.arms.api.dashboard.model.SankeyData.SankeyLink;
+import com.arms.api.dashboard.model.SankeyData.SankeyNode;
+import com.arms.api.dashboard.model.Worker;
+import com.arms.api.dashboard.model.제품버전목록;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
