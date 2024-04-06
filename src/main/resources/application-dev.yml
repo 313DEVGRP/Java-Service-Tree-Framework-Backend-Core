@@ -34,15 +34,3 @@ arms:
       url: 127.0.0.1:9999
   engine:
     url: http://127.0.0.1:33333
-
-logging:
-  level:
-    root: debug
-    sql: debug
-    web: debug
-    com.arms: debug
-    org.hibernate: debug
-    org.springframework: debug
-    feign: debug
-    lombok: debug
-    logback: debug

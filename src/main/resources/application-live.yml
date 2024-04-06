@@ -34,15 +34,3 @@ arms:
       url: ${ARMS_DETAIL_CONNECT_URL}
   engine:
     url: http://engine-fire:33333
-
-logging:
-  level:
-    root: info
-    sql: info
-    web: info
-    com.arms: info
-    org.hibernate: info
-    org.springframework: info
-    feign: info
-    lombok: info
-    logback: info
