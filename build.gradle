@@ -100,7 +100,7 @@ ext {
 
     //version 정보
     majorVersion = 24
-    minorVersion = 03
+    minorVersion = 04
     //patchVersion = auto generation
 
     //mac 사용자 아래 114까지 주석처리!!
