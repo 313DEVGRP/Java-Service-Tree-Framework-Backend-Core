@@ -51,7 +51,20 @@ public class TopMenuServiceImpl implements  TopMenuService{
 
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
-                        entity -> entity.getReqStateEntity().getC_id() == 10L ? "open" : "not-open",
+                        entity -> {
+                            long stateId = entity.getReqStateEntity().getC_id();
+                            if (stateId == 10L) {
+                                return "open";
+                            } else if (stateId == 11L) {
+                                return "in-progress";
+                            } else if (stateId == 12L) {
+                                return "resolved";
+                            } else if (stateId == 13L) {
+                                return "closed";
+                            } else {
+                                return "other";
+                            }
+                        },
                         Collectors.counting()
                 ));
 
