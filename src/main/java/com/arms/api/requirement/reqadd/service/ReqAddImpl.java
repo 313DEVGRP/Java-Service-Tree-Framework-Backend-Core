@@ -100,7 +100,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Autowired
 	private PdService pdService;
 
-	//새로 작성중인 요구사항 생성 - 중간 작성.
 	@Override
 	@Transactional
 	public ReqAddEntity addReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {

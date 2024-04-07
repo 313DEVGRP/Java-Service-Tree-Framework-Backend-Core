@@ -8,8 +8,8 @@ import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
-import com.arms.api.salary.model.SalaryLogJdbcDTO;
-import com.arms.api.salary.model.SalaryEntity;
+import com.arms.api.analysis.salary.model.SalaryLogJdbcDTO;
+import com.arms.api.analysis.salary.model.SalaryEntity;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
@@ -18,8 +18,8 @@ import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import com.arms.api.salary.service.SalaryLog;
-import com.arms.api.salary.service.SalaryService;
+import com.arms.api.analysis.salary.service.SalaryLog;
+import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -351,7 +351,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         if (startDateOrNull == null || startDateOrNull == null) {
             chat.sendMessageByEngine("제품 버전의 시작일과 종료일이 없습니다.");
-            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>());
+            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>(), new TreeMap<>());
         }
 
         String formattedStartDate = convertDateTimeFormat(startDateOrNull);
@@ -365,7 +365,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         if (salaryCreateLogs.isEmpty()) {
             chat.sendMessageByEngine("연봉 데이터를 등록해 주세요.");
-            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>());
+            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>(), new TreeMap<>());
         }
 
         // 7. 작업자 별 최초 연봉 수정 시 쌓인 "update" log 조회
@@ -376,11 +376,13 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         filteredLogs.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
 
-        // 6. 담당자 별 연봉 캘린더 생성
+        // 9. 담당자 별 연봉 캘린더 생성
         Map<String, TreeMap<String, Integer>> allAssigneeSalaries = assigneeCostCalendar(salaryCreateLogs, filteredLogs, versionStartDate, versionEndDate);
 
+        // 10. 완료 된 요구사항에 대한 비용 캘린더 생성. 기본값으로 0을 세팅
         TreeMap<String, Integer> barCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
 
+        // 10-1. 완료 된 요구사항으로 루프를 돌면서, 각 요구사항의 시작일과 종료일에 맞는 담당자의 연봉 데이터를 기반으로 성과 비용을 책정한다.
         for (ReqStatusEntity filteredReqStatusEntity : filteredReqStatusEntities) {
             LocalDate 요구사항시작일 = filteredReqStatusEntity.getC_req_start_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate 요구사항종료일 = filteredReqStatusEntity.getC_req_end_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -404,31 +406,39 @@ public class 비용서비스_구현 implements 비용서비스 {
                     });
         }
 
+        // 10-2. 요구사항의 연봉 캘린더는 만원 단위이기 때문에, 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
         barCost.replaceAll((k, v) -> v * 10000 / 365);
 
+        // 10-3. 요구사항의 연봉 캘린더를 일 별 누적시킨다.
         int barSum = 0;
         for (Map.Entry<String, Integer> entry : barCost.entrySet()) {
             barSum += entry.getValue();
             barCost.put(entry.getKey(), barSum);
         }
 
+        // TODO: 여러 요구사항에 관여 한 개발자의 경우, 각 요구사항의 일정이 겹치게 되면, 성과 기준선을 뛰어 넘을 수도 있음.
+        // 11. 성과 기준선을 책정하기 위한 변수 세팅
         TreeMap<String, Integer> lineCost = new TreeMap<>();
 
+        // 11-1. 담당자 별 연봉 캘린더를 활용하여 각 날짜에 해당하는 연봉 데이터를 가져와서 합산한다.
+        // 담당자를 별도로 구분하지 않고, 모든 성과를 각 날짜 별로 합치는 과정임에 주의한다.
         for (TreeMap<String, Integer> assigneeSalaries : allAssigneeSalaries.values()) {
             for (Map.Entry<String, Integer> entry : assigneeSalaries.entrySet()) {
                 lineCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
             }
         }
 
+        // 11-2. 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
         lineCost.replaceAll((k, v) -> v * 10000 / 365);
 
+        // 11-3. 성과 기준선의 비용을 누적시킨다.
         int lineSum = 0;
         for (Map.Entry<String, Integer> entry : lineCost.entrySet()) {
             lineSum += entry.getValue();
             lineCost.put(entry.getKey(), lineSum);
         }
 
-        return new ProductCostResponse(lineCost, barCost);
+        return new ProductCostResponse(lineCost, barCost, new TreeMap<>());
     }
 
     private Map<String, TreeMap<String, Integer>> assigneeCostCalendar(Map<String, SalaryLogJdbcDTO> salaryCreateLogs, List<SalaryLogJdbcDTO> filteredLogs, LocalDate versionStartDate, LocalDate versionEndDate) {
@@ -443,56 +453,46 @@ public class 비용서비스_구현 implements 비용서비스 {
 
             // 1-1. 정상적인 케이스. 버전 먼저 등록하고, 이후에 연봉 데이터를 입력한 경우.
             if (versionStartDate.isBefore(salaryCreateDate)) {
-                addSalaryDataForPeriod(versionStartDate, salaryCreateDate.minusDays(1), 0, assigneeKey, allAssigneeSalaries);
+                addSalaryForPeriod(versionStartDate, salaryCreateDate.minusDays(1), 0, assigneeKey, allAssigneeSalaries);
 
                 if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    for (int i = 0; i < updateLogSize; i++) {
-                        if (i == 0) {
-                            updateSalaryForFirstLog(i, salaryUpdateLogsByAssignee, salaryCreateDate, assigneeKey, allAssigneeSalaries, createdSalary);
-                        } else {
-                            updateSalaryForMiddleLog(i, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries);
-                        }
-                        updateSalaryForLastLog(i, updateLogSize, salaryUpdateLogsByAssignee, versionEndDate, assigneeKey, allAssigneeSalaries);
-                    }
+                    updateSalaryForSection(salaryCreateDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
                 }
                 if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    addSalaryDataForPeriod(salaryCreateDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                    addSalaryForPeriod(salaryCreateDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
                 }
             }
             // 1-2. 정상적인 케이스. 제품 버전 시작일과 연봉 데이터 입력일이 같은 경우.
             if (versionStartDate.isEqual(salaryCreateDate)) {
                 if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    for (int i = 0; i < updateLogSize; i++) {
-                        if (i == 0) {
-                            updateSalaryForFirstLog(i, salaryUpdateLogsByAssignee, versionStartDate, assigneeKey, allAssigneeSalaries, createdSalary);
-                        } else {
-                            updateSalaryForMiddleLog(i, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries);
-                        }
-                        updateSalaryForLastLog(i, updateLogSize, salaryUpdateLogsByAssignee, versionEndDate, assigneeKey, allAssigneeSalaries);
-                    }
+                    updateSalaryForSection(versionStartDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
                 }
                 if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    addSalaryDataForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                    addSalaryForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
                 }
             }
             // 1-3. 비정상적인 케이스. 버전 생성 전 연봉 데이터를 먼저 넣은 경우.
             if (versionStartDate.isAfter(salaryCreateDate)) {
                 if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    for (int i = 0; i < updateLogSize; i++) {
-                        if (i == 0) {
-                            updateSalaryForFirstLog(i, salaryUpdateLogsByAssignee, versionStartDate, assigneeKey, allAssigneeSalaries, createdSalary);
-                        } else {
-                            updateSalaryForMiddleLog(i, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries);
-                        }
-                        updateSalaryForLastLog(i, updateLogSize, salaryUpdateLogsByAssignee, versionEndDate, assigneeKey, allAssigneeSalaries);
-                    }
+                    updateSalaryForSection(versionStartDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
                 }
                 if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
-                    addSalaryDataForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                    addSalaryForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
                 }
             }
         }
         return allAssigneeSalaries;
+    }
+
+    private void updateSalaryForSection(LocalDate startDate, LocalDate endDate, int updateLogSize, List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries, int createdSalary) {
+        for (int i = 0; i < updateLogSize; i++) {
+            if (i == 0) {
+                updateSalaryForFirstLog(i, salaryUpdateLogsByAssignee, startDate, assigneeKey, allAssigneeSalaries, createdSalary);
+            } else {
+                updateSalaryForMiddleLog(i, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries);
+            }
+            updateSalaryForLastLog(i, updateLogSize, salaryUpdateLogsByAssignee, endDate, assigneeKey, allAssigneeSalaries);
+        }
     }
 
 
@@ -521,7 +521,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         return new ArrayList<>(uniqueMap.values());
     }
 
-    private void addSalaryDataForPeriod(LocalDate startDate, LocalDate endDate, int salary, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries) {
+    private void addSalaryForPeriod(LocalDate startDate, LocalDate endDate, int salary, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries) {
         TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), salary);

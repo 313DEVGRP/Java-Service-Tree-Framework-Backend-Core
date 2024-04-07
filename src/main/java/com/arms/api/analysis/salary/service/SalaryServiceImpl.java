@@ -1,8 +1,8 @@
-package com.arms.api.salary.service;
+package com.arms.api.analysis.salary.service;
 
-import com.arms.api.salary.model.SampleDTO;
-import com.arms.api.salary.model.SalaryDTO;
-import com.arms.api.salary.model.SalaryEntity;
+import com.arms.api.analysis.salary.model.SampleDTO;
+import com.arms.api.analysis.salary.model.SalaryDTO;
+import com.arms.api.analysis.salary.model.SalaryEntity;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;

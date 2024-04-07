@@ -9,7 +9,7 @@
  *  Written by 313 developer group <313@313.co.kr>, December 2010
  * </pre>
  */
-package com.arms.api.salary.model;
+package com.arms.api.analysis.salary.model;
 
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeLogBaseEntity;

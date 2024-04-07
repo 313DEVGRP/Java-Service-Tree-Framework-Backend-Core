@@ -9,11 +9,11 @@
  *  Written by 313 developer group <313@313.co.kr>, December 2010
  * </pre>
  */
-package com.arms.api.salary.controller;
+package com.arms.api.analysis.salary.controller;
 
-import com.arms.api.salary.model.SalaryLogDTO;
-import com.arms.api.salary.model.SalaryLogEntity;
-import com.arms.api.salary.service.SalaryLog;
+import com.arms.api.analysis.salary.model.SalaryLogDTO;
+import com.arms.api.analysis.salary.model.SalaryLogEntity;
+import com.arms.api.analysis.salary.service.SalaryLog;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
