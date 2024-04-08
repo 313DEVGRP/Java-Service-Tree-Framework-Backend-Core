@@ -3,6 +3,7 @@ package com.arms.api.analysis.common.service;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -52,23 +53,31 @@ public class TopMenuServiceImpl implements  TopMenuService{
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            long stateId = entity.getReqStateEntity().getC_id();
-                            if (stateId == 10L) {
-                                return "open";
-                            } else if (stateId == 11L) {
-                                return "in-progress";
-                            } else if (stateId == 12L) {
-                                return "resolved";
-                            } else if (stateId == 13L) {
-                                return "closed";
+                            ReqStateEntity reqStateEntity = entity.getReqStateEntity();
+                            if (StringUtils.equals(entity.getC_type(),"folder") ) {
+                                return "folder";
                             } else {
-                                return "other";
+                                if (reqStateEntity == null) {
+                                    return "null";
+                                }
+                                long stateId = entity.getReqStateEntity().getC_id();
+                                if (stateId == 10L) {
+                                    return "open";
+                                } else if (stateId == 11L) {
+                                    return "in-progress";
+                                } else if (stateId == 12L) {
+                                    return "resolved";
+                                } else if (stateId == 13L) {
+                                    return "closed";
+                                } else {
+                                    return "other";
+                                }
                             }
                         },
                         Collectors.counting()
                 ));
 
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size()));
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.get("folder")));
 
 
 
