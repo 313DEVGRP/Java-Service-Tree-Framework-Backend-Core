@@ -11,15 +11,12 @@
  */
 package com.arms.api.requirement.reqadd.controller;
 
-import static java.util.Comparator.*;
-import static java.util.stream.Collectors.*;
-
+import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
-import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
-import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddDateDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
+import com.arms.api.requirement.reqadd.model.*;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
@@ -29,11 +26,6 @@ import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
-import com.arms.api.product_service.pdservice.model.PdServiceEntity;
-import com.arms.api.product_service.pdservice.service.PdService;
-import com.arms.api.requirement.reqadd.model.ReqAddDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
@@ -44,7 +36,6 @@ import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode
 import com.arms.egovframework.javaservice.treeframework.validation.group.MoveNode;
 import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
-
 import org.hibernate.criterion.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -60,21 +51,17 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.*;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Controller
@@ -334,6 +321,40 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
 
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/addFolderNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> addReqFolderNode(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @Validated({AddNode.class}) ReqAddDTO reqAddDTO
+    ) throws Exception {
+
+        log.info("ReqAddController :: addReqFolderNode");
+
+        boolean 폴더타입여부 = Optional.ofNullable(reqAddDTO)
+                .map(ReqAddDTO::getC_type)
+                .filter(cType -> !cType.equals(TreeConstant.Branch_TYPE))
+                .isPresent();
+
+        if (폴더타입여부) {
+            throw new IllegalArgumentException("요구사항 폴더 타입이 아닙니다.");
+        }
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        // 요구사항 폴더 생성일 추가
+        Date date = new Date();
+        reqAddEntity.setC_req_create_date(date);
+
+        ReqAddEntity savedNode = reqAdd.addReqFolderNode(reqAddEntity, changeReqTableName);
+
+        log.info("ReqAddController :: addReqFolderNode");
+
+        return ResponseEntity.ok(CommonResponse.success(savedNode));
     }
 
     @ResponseBody

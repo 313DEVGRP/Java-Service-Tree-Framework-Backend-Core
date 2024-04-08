@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -142,10 +141,10 @@ public class 비용분석_컨트롤러 {
      * 제품에 대한 누적 월 별 비용 조회 API
      */
     @GetMapping("/product-accumulate-cost-by-month")
-    public ResponseEntity<CommonResponse.ApiResult<TreeMap<String, Integer>>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+    public ResponseEntity<CommonResponse.ApiResult<ProductCostResponse>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
-        TreeMap<String, Integer> response = 비용서비스.v2(engineAggregationRequestDTO);
-        return ResponseEntity.ok(CommonResponse.success(response));
+        ProductCostResponse productCostResponse = 비용서비스.calculateInvestmentPerformance(engineAggregationRequestDTO);
+        return ResponseEntity.ok(CommonResponse.success(productCostResponse));
     }
 
 

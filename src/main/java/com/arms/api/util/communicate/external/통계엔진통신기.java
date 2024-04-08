@@ -2,8 +2,8 @@ package com.arms.api.util.communicate.external;
 
 import com.arms.api.analysis.cost.dto.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
-import com.arms.api.analysis.dashboard.model.RequirementJiraIssueAggregationResponse;
-import com.arms.api.analysis.dashboard.model.Worker;
+import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
+import com.arms.api.dashboard.model.Worker;
 import com.arms.api.analysis.time.model.히트맵데이터;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;

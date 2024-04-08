@@ -4,25 +4,15 @@
     <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
 
     <property name="LOG_PATTERN"
-              value="[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %(%-5level) %([%C.%M:%(%L)]) - %msg%n"/>
+              value="[%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %highlight(%-5level) %([%C.%M:%(%L)]) - %highlight(%msg%n)"/>
 
     <include resource="logback/console-appender.xml"/>
-    <include resource="logback/file-error-appender.xml"/>
-    <include resource="logback/file-info-appender.xml"/>
-    <include resource="logback/file-warn-appender.xml"/>
 
-    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE-INFO"/>
-        <appender-ref ref="FILE-WARN"/>
-        <appender-ref ref="FILE-ERROR"/>
+    <logger name="com.arms" level="DEBUG">
     </logger>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE-INFO"/>
-        <appender-ref ref="FILE-WARN"/>
-        <appender-ref ref="FILE-ERROR"/>
+        <appender-ref ref="CONSOLE" />
     </root>
 
 
