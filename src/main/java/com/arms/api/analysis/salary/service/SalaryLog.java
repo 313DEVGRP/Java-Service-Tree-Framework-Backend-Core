@@ -21,6 +21,6 @@ public interface SalaryLog extends TreeService {
 
     List<SalaryLogJdbcDTO> findAllLogs(String cMethod, String startDate, String endDate);
 
-    Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod, String startDate, String endDate);
+    Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod);
 
 }
