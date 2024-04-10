@@ -1,5 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.cost.dto.CandleStick;
 import com.arms.api.analysis.cost.dto.ProductCostResponse;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
@@ -361,7 +362,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
 
         // 6. 작업자 별 최초 연봉 데이터 추가 시 쌓인 "create" log 조회
-        Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create", formattedStartDate, formattedEndDate);
+        Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create");
 
         if (salaryCreateLogs.isEmpty()) {
             chat.sendMessageByEngine("연봉 데이터를 등록해 주세요.");
@@ -438,7 +439,80 @@ public class 비용서비스_구현 implements 비용서비스 {
             lineCost.put(entry.getKey(), lineSum);
         }
 
-        return new ProductCostResponse(lineCost, barCost, new TreeMap<>());
+        // 12. 총 연봉 비용의 변동 추이를 보여주기 위한 캔들스틱 차트 데이터 세팅
+        // 12-1. 업데이트 로그를 담당자, 날짜 별로 그루핑
+        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = salaryUpdateLogs.stream()
+                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getC_key,
+                        Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date)));
+
+        // 12-2. 담당자 별 연봉 캘린더를 활용하여 캔들스틱 차트 데이터 생성. 연봉 캘린더의 금액으로 시가, 종가를 알 수 있다.
+        Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks = new HashMap<>();
+        for (Map.Entry<String, TreeMap<String, Integer>> assigneeEntry : allAssigneeSalaries.entrySet()) {
+            String assignee = assigneeEntry.getKey();
+            TreeMap<String, Integer> salaryMap = assigneeEntry.getValue();
+            Map<String, List<SalaryLogJdbcDTO>> updateLogsByAssignee = updatesGroupedByDateAndKey.get(assignee);
+            TreeMap<String, CandleStick> candleStickMap = new TreeMap<>();
+            String previousDate = null;
+            for (Map.Entry<String, Integer> salaryEntry : salaryMap.entrySet()) {
+                String date = salaryEntry.getKey();
+                Integer salary = salaryEntry.getValue();
+                int min = 0;
+                int max = 0;
+                int open = 0;
+                if (previousDate != null) {
+                    CandleStick previousCandleStick = candleStickMap.get(previousDate);
+                    open = previousCandleStick.get종가(); // 이전 날짜의 종가를 현재 날짜의 시가로 설정
+                }
+                // 12-3. 시가, 종가, 최저가, 최고가 기본 세팅
+                min = open > salary ? salary : open;
+                max = open > salary ? open : salary;
+
+                // 12-4. 업데이트 로그가 있는 날짜엔 해당 날짜의 최소값과 최대값을 찾아서 min, max 를 업데이트한다.
+                if (updateLogsByAssignee != null && updateLogsByAssignee.get(date) != null) {
+                    List<SalaryLogJdbcDTO> salaryLogJdbcDTOList = updateLogsByAssignee.get(date).stream().sorted(Comparator.comparing(SalaryLogJdbcDTO::getC_annual_income)).collect(Collectors.toList());
+                    if (!salaryLogJdbcDTOList.isEmpty()) {
+                        if (salaryLogJdbcDTOList.size() == 1) {
+                            Integer updateLogSalary = salaryLogJdbcDTOList.get(0).getC_annual_income();
+                            min = min > updateLogSalary ? updateLogSalary : min;
+                            max = max > updateLogSalary ? max : updateLogSalary;
+                        } else {
+                            // 해당 담당자의 해당 날짜의 모든 업데이트 로그를 정렬하여 최소값(인덱스 0)과 최대값(인덱스 size - 1)을 찾는다.
+                            Integer updateLogMinSalary = salaryLogJdbcDTOList.get(0).getC_annual_income();
+                            Integer updateLogMaxSalary = salaryLogJdbcDTOList.get(salaryLogJdbcDTOList.size() - 1).getC_annual_income();
+                            min = min > updateLogMinSalary ? updateLogMinSalary : min;
+                            max = max > updateLogMaxSalary ? max : updateLogMaxSalary;
+                        }
+                    }
+                }
+
+                CandleStick candleStick = new CandleStick(open, salary, min, max);
+                candleStickMap.put(date, candleStick);
+
+                previousDate = date;
+            }
+
+            allAssigneeCandleSticks.put(assignee, candleStickMap);
+        }
+
+        TreeMap<String, List<Integer>> candleStickCost = new TreeMap<>();
+
+        // 12-5. 모든 담당자의 캔들스틱 데이터를 하나로 합친다. 최종 연봉 비용의 변동 추이를 보여주기 위함.
+        for (TreeMap<String, CandleStick> assigneeCandleSticks : allAssigneeCandleSticks.values()) {
+            for (Map.Entry<String, CandleStick> entry : assigneeCandleSticks.entrySet()) {
+                String date = entry.getKey();
+                CandleStick candleStick = entry.getValue();
+                List<Integer> sums = candleStickCost.getOrDefault(date, Arrays.asList(0, 0, 0, 0));
+
+                sums.set(0, sums.get(0) + (candleStick.get시가() * 10000));
+                sums.set(1, sums.get(1) + (candleStick.get종가() * 10000));
+                sums.set(2, sums.get(2) + (candleStick.get최저가() * 10000));
+                sums.set(3, sums.get(3) + (candleStick.get최고가() * 10000));
+
+                candleStickCost.put(date, sums);
+            }
+        }
+
+        return new ProductCostResponse(lineCost, barCost, candleStickCost);
     }
 
     private Map<String, TreeMap<String, Integer>> assigneeCostCalendar(Map<String, SalaryLogJdbcDTO> salaryCreateLogs, List<SalaryLogJdbcDTO> filteredLogs, LocalDate versionStartDate, LocalDate versionEndDate) {

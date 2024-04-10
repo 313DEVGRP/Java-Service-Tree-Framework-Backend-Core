@@ -67,7 +67,7 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
     }
 
     @Override
-    public Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod, String startDate, String endDate) {
+    public Map<String, SalaryLogJdbcDTO> findAllLogsToMaps(String cMethod) {
         String sql = "SELECT " +
                 "    c_date, " +
                 "    DATE_FORMAT(c_date, '%Y-%m-%d') AS formatted_date, " +
@@ -80,13 +80,13 @@ public class SalaryLogImpl extends TreeServiceImpl implements SalaryLog {
                 "    T_ARMS_ANNUAL_INCOME_LOG " +
                 "WHERE " +
                 "    c_method = ? AND " +
-                "    c_date BETWEEN ? AND ? " +
-                "AND c_type = 'default' " +
+//                "    c_date BETWEEN ? AND ? " +
+                "    c_type = 'default' " +
                 "ORDER BY c_date ASC";
 
         List<SalaryLogJdbcDTO> results = jdbcTemplate.query(
                 sql,
-                new Object[]{cMethod, startDate, endDate},
+                new Object[]{cMethod},
                 (rs, rowNum) -> {
                     SalaryLogJdbcDTO entry = new SalaryLogJdbcDTO();
                     entry.setC_date(rs.getTimestamp("c_date"));
