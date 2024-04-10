@@ -58,7 +58,7 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Value("${requirement.state.complete.keyword}")
     private String resolvedKeyword;
 
-    private final 통계엔진통신기 통계엔진통신기;
+    private final 통계엔진통신기 engineCommunicator;
 
     private final PdServiceVersion pdServiceVersion;
 
@@ -82,7 +82,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                                      지라이슈_일반_집계_요청 일반집계요청) {
 
         ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계_통신결과 =
-                통계엔진통신기.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
+                engineCommunicator.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
 
         검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(제품서비스_일반_버전_통계_통신결과.getBody()).orElse(new 검색결과_목록_메인());
 
@@ -120,10 +120,10 @@ public class 비용서비스_구현 implements 비용서비스 {
     public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(EngineAggregationRequestDTO engineAggregationRequestDTO) {
 
         engineAggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
-        ResponseEntity<List<검색결과>> 요구사항_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 요구사항_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
         engineAggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
-        ResponseEntity<List<검색결과>> 하위이슈_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 하위이슈_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
         List<검색결과> 전체결과 = new ArrayList<>();
 
@@ -332,7 +332,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
         List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        List<검색결과> engineResponse = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_cReqLink");
+        List<검색결과> engineResponse = engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_cReqLink");
 
         List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
@@ -362,27 +362,60 @@ public class 비용서비스_구현 implements 비용서비스 {
         LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
 
         // 6. 작업자 별 최초 연봉 데이터 추가 시 쌓인 "create" log 조회
-        Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create");
+        Set<String> getAssignees = this.getAssignees(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
+        Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create", endDateOrNull);
+        Map<String, SalaryLogJdbcDTO> filteredSalaryCreateLogs = salaryCreateLogs.entrySet().stream()
+                .filter(entry -> getAssignees.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        if (salaryCreateLogs.isEmpty()) {
-            chat.sendMessageByEngine("연봉 데이터를 등록해 주세요.");
-            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>(), new TreeMap<>());
+        if (filteredSalaryCreateLogs.isEmpty()) {
+            chat.sendMessageByEngine("버전의 기간 이후 연봉을 등록한 경우, 해당 버전은 비용 산정이 되지 않습니다.");
+            TreeMap<String, Integer> dailyCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
+            return new ProductCostResponse(dailyCost, dailyCost, generateDailyCostsCandleStick(versionStartDate, versionEndDate, 0));
         }
 
         // 7. 작업자 별 최초 연봉 수정 시 쌓인 "update" log 조회
         List<SalaryLogJdbcDTO> salaryUpdateLogs = salaryLog.findAllLogs("update", formattedStartDate, formattedEndDate);
 
         // 8. 같은 날 연봉 데이터를 여러번 수정한 경우, 가장 마지막에 등록한 연봉 데이터 1개만 꺼내온다.
-        List<SalaryLogJdbcDTO> filteredLogs = getLatestSalaryUpdates(salaryUpdateLogs);
+        List<SalaryLogJdbcDTO> filteredLogs = getLatestSalaryUpdates(salaryUpdateLogs, getAssignees);
 
         filteredLogs.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
 
         // 9. 담당자 별 연봉 캘린더 생성
-        Map<String, TreeMap<String, Integer>> allAssigneeSalaries = assigneeCostCalendar(salaryCreateLogs, filteredLogs, versionStartDate, versionEndDate);
+        Map<String, TreeMap<String, Integer>> allAssigneeSalaries = assigneeCostCalendar(filteredSalaryCreateLogs, filteredLogs, versionStartDate, versionEndDate);
 
         // 10. 완료 된 요구사항에 대한 비용 캘린더 생성. 기본값으로 0을 세팅
         TreeMap<String, Integer> barCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
 
+        // 10-1. 완료 된 요구사항으로 루프를 돌면서, 각 요구사항의 시작일과 종료일에 맞는 담당자의 연봉 데이터를 기반으로 성과 비용을 책정한다.
+        calculateBarCost(filteredReqStatusEntities, versionEndDate, groupByCReqLink, allAssigneeSalaries, barCost);
+
+        // TODO: 여러 요구사항에 관여 한 개발자의 경우, 각 요구사항의 일정이 겹치게 되면, 성과 기준선을 뛰어 넘을 수도 있음.
+        // 11. 성과 기준선을 책정하기 위한 변수 세팅
+        TreeMap<String, Integer> lineCost = getLineCost(allAssigneeSalaries);
+
+        // 12. 총 연봉 비용의 변동 추이를 보여주기 위한 캔들스틱 차트 데이터 세팅
+        // 12-1. 업데이트 로그를 담당자, 날짜 별로 그루핑
+        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = salaryUpdateLogs.stream()
+                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getC_key,
+                        Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date)));
+
+        // 12-2. 담당자 별 연봉 캘린더를 활용하여 캔들스틱 차트 데이터 생성. 연봉 캘린더의 금액으로 시가, 종가를 알 수 있다.
+        Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks = getAllAssigneeCandleSticks(allAssigneeSalaries, updatesGroupedByDateAndKey);
+
+        TreeMap<String, List<Integer>> candleStickCost = getCandleStickCost(allAssigneeCandleSticks);
+
+        return new ProductCostResponse(lineCost, barCost, candleStickCost);
+    }
+
+    private static void calculateBarCost(
+            List<ReqStatusEntity> filteredReqStatusEntities,
+            LocalDate versionEndDate,
+            List<검색결과> groupByCReqLink,
+            Map<String, TreeMap<String, Integer>> allAssigneeSalaries,
+            TreeMap<String, Integer> barCost
+    ) {
         // 10-1. 완료 된 요구사항으로 루프를 돌면서, 각 요구사항의 시작일과 종료일에 맞는 담당자의 연봉 데이터를 기반으로 성과 비용을 책정한다.
         for (ReqStatusEntity filteredReqStatusEntity : filteredReqStatusEntities) {
             LocalDate 요구사항시작일 = filteredReqStatusEntity.getC_req_start_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -416,36 +449,30 @@ public class 비용서비스_구현 implements 비용서비스 {
             barSum += entry.getValue();
             barCost.put(entry.getKey(), barSum);
         }
+    }
 
-        // TODO: 여러 요구사항에 관여 한 개발자의 경우, 각 요구사항의 일정이 겹치게 되면, 성과 기준선을 뛰어 넘을 수도 있음.
-        // 11. 성과 기준선을 책정하기 위한 변수 세팅
-        TreeMap<String, Integer> lineCost = new TreeMap<>();
+    private TreeMap<String, List<Integer>> getCandleStickCost(Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks) {
+        TreeMap<String, List<Integer>> candleStickCost = new TreeMap<>();
 
-        // 11-1. 담당자 별 연봉 캘린더를 활용하여 각 날짜에 해당하는 연봉 데이터를 가져와서 합산한다.
-        // 담당자를 별도로 구분하지 않고, 모든 성과를 각 날짜 별로 합치는 과정임에 주의한다.
-        for (TreeMap<String, Integer> assigneeSalaries : allAssigneeSalaries.values()) {
-            for (Map.Entry<String, Integer> entry : assigneeSalaries.entrySet()) {
-                lineCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
+        // 12-5. 모든 담당자의 캔들스틱 데이터를 하나로 합친다. 최종 연봉 비용의 변동 추이를 보여주기 위함.
+        for (TreeMap<String, CandleStick> assigneeCandleSticks : allAssigneeCandleSticks.values()) {
+            for (Map.Entry<String, CandleStick> entry : assigneeCandleSticks.entrySet()) {
+                String date = entry.getKey();
+                CandleStick candleStick = entry.getValue();
+                List<Integer> sums = candleStickCost.getOrDefault(date, Arrays.asList(0, 0, 0, 0));
+
+                sums.set(0, sums.get(0) + (candleStick.get시가() * 10000));
+                sums.set(1, sums.get(1) + (candleStick.get종가() * 10000));
+                sums.set(2, sums.get(2) + (candleStick.get최저가() * 10000));
+                sums.set(3, sums.get(3) + (candleStick.get최고가() * 10000));
+
+                candleStickCost.put(date, sums);
             }
         }
+        return candleStickCost;
+    }
 
-        // 11-2. 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
-        lineCost.replaceAll((k, v) -> v * 10000 / 365);
-
-        // 11-3. 성과 기준선의 비용을 누적시킨다.
-        int lineSum = 0;
-        for (Map.Entry<String, Integer> entry : lineCost.entrySet()) {
-            lineSum += entry.getValue();
-            lineCost.put(entry.getKey(), lineSum);
-        }
-
-        // 12. 총 연봉 비용의 변동 추이를 보여주기 위한 캔들스틱 차트 데이터 세팅
-        // 12-1. 업데이트 로그를 담당자, 날짜 별로 그루핑
-        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = salaryUpdateLogs.stream()
-                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getC_key,
-                        Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date)));
-
-        // 12-2. 담당자 별 연봉 캘린더를 활용하여 캔들스틱 차트 데이터 생성. 연봉 캘린더의 금액으로 시가, 종가를 알 수 있다.
+    private Map<String, TreeMap<String, CandleStick>> getAllAssigneeCandleSticks(Map<String, TreeMap<String, Integer>> allAssigneeSalaries, Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey) {
         Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks = new HashMap<>();
         for (Map.Entry<String, TreeMap<String, Integer>> assigneeEntry : allAssigneeSalaries.entrySet()) {
             String assignee = assigneeEntry.getKey();
@@ -493,26 +520,30 @@ public class 비용서비스_구현 implements 비용서비스 {
 
             allAssigneeCandleSticks.put(assignee, candleStickMap);
         }
+        return allAssigneeCandleSticks;
+    }
 
-        TreeMap<String, List<Integer>> candleStickCost = new TreeMap<>();
+    private TreeMap<String, Integer> getLineCost(Map<String, TreeMap<String, Integer>> allAssigneeSalaries) {
+        TreeMap<String, Integer> lineCost = new TreeMap<>();
 
-        // 12-5. 모든 담당자의 캔들스틱 데이터를 하나로 합친다. 최종 연봉 비용의 변동 추이를 보여주기 위함.
-        for (TreeMap<String, CandleStick> assigneeCandleSticks : allAssigneeCandleSticks.values()) {
-            for (Map.Entry<String, CandleStick> entry : assigneeCandleSticks.entrySet()) {
-                String date = entry.getKey();
-                CandleStick candleStick = entry.getValue();
-                List<Integer> sums = candleStickCost.getOrDefault(date, Arrays.asList(0, 0, 0, 0));
-
-                sums.set(0, sums.get(0) + (candleStick.get시가() * 10000));
-                sums.set(1, sums.get(1) + (candleStick.get종가() * 10000));
-                sums.set(2, sums.get(2) + (candleStick.get최저가() * 10000));
-                sums.set(3, sums.get(3) + (candleStick.get최고가() * 10000));
-
-                candleStickCost.put(date, sums);
+        // 11-1. 담당자 별 연봉 캘린더를 활용하여 각 날짜에 해당하는 연봉 데이터를 가져와서 합산한다.
+        // 담당자를 별도로 구분하지 않고, 모든 성과를 각 날짜 별로 합치는 과정임에 주의한다.
+        for (TreeMap<String, Integer> assigneeSalaries : allAssigneeSalaries.values()) {
+            for (Map.Entry<String, Integer> entry : assigneeSalaries.entrySet()) {
+                lineCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
             }
         }
 
-        return new ProductCostResponse(lineCost, barCost, candleStickCost);
+        // 11-2. 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
+        lineCost.replaceAll((k, v) -> v * 10000 / 365);
+
+        // 11-3. 성과 기준선의 비용을 누적시킨다.
+        int lineSum = 0;
+        for (Map.Entry<String, Integer> entry : lineCost.entrySet()) {
+            lineSum += entry.getValue();
+            lineCost.put(entry.getKey(), lineSum);
+        }
+        return lineCost;
     }
 
     private Map<String, TreeMap<String, Integer>> assigneeCostCalendar(Map<String, SalaryLogJdbcDTO> salaryCreateLogs, List<SalaryLogJdbcDTO> filteredLogs, LocalDate versionStartDate, LocalDate versionEndDate) {
@@ -666,9 +697,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         return false;
     }
 
-    private List<SalaryLogJdbcDTO> getLatestSalaryUpdates(List<SalaryLogJdbcDTO> salaryUpdateLogs) {
+    private List<SalaryLogJdbcDTO> getLatestSalaryUpdates(List<SalaryLogJdbcDTO> salaryUpdateLogs, Set<String> getAssignees) {
 
-        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = salaryUpdateLogs.stream()
+        List<SalaryLogJdbcDTO> filteredUpdateLogs = salaryUpdateLogs.stream()
+                .filter(salaryLogJdbcDTO -> getAssignees.contains(salaryLogJdbcDTO.getC_key()))
+                .collect(Collectors.toList());
+
+        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = filteredUpdateLogs.stream()
                 .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date,
                         Collectors.groupingBy(SalaryLogJdbcDTO::getC_key)));
 
@@ -710,6 +745,26 @@ public class 비용서비스_구현 implements 비용서비스 {
         }
 
         return dailySalaryCosts;
+    }
+
+    public TreeMap<String, List<Integer>> generateDailyCostsCandleStick(LocalDate versionStartDate, LocalDate versionEndDate, Integer dailyCost) {
+        TreeMap<String, List<Integer>> candleStick = new TreeMap<>();
+        for (LocalDate date = versionStartDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+            candleStick.put(date.toString(), Arrays.asList(0, 0, 0, 0));
+        }
+
+        return candleStick;
+    }
+
+    @Override
+    public Set<String> getAssignees(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = new EngineAggregationRequestDTO();
+        engineAggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
+        engineAggregationRequestDTO.setIsReqType(IsReqType.ALL);
+        engineAggregationRequestDTO.setPdServiceLink(pdServiceLink);
+        engineAggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
+        List<검색결과> result = engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_assignee.assignee_accountId.keyword");
+        return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
 }
 

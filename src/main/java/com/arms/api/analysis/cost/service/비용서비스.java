@@ -9,6 +9,7 @@ import com.arms.api.util.communicate.external.request.aggregation.EngineAggregat
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
 
 import java.util.List;
+import java.util.Set;
 
 public interface 비용서비스 {
 
@@ -21,4 +22,6 @@ public interface 비용서비스 {
     버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
 
     ProductCostResponse calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception;
+
+    Set<String> getAssignees(Long pdServiceLink, List<Long> pdServiceVersionLinks);
 }
