@@ -16,7 +16,9 @@ import com.arms.api.jira.jiraserver_project_pure.model.JiraServerProjectPureEnti
 import com.arms.api.jira.jiraserver_project_pure.service.JiraServerProjectPure;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,11 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -59,5 +63,29 @@ public class JiraServerProjectPureController extends TreeAbstractController<Jira
         JiraServerProjectPureEntity jiraServerProjectPureEntity = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(jiraServerProjectPure.getNodesWithoutRoot(jiraServerProjectPureEntity)));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getChildNodeWithoutSoftDelete.do", method = RequestMethod.GET)
+    public ModelAndView getChildNodeWithoutSoftDelete(JiraServerProjectPureDTO jiraServerProjectPureDTO, HttpServletRequest request)
+            throws Exception {
+
+        log.info("JiraServerProjectPureController :: getChildNode");
+        JiraServerProjectPureEntity jiraServerProjectPureEntity
+                = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
+
+        ParameterParser parser = new ParameterParser(request);
+
+         if (parser.getInt("c_id") <= 0) {
+            throw new RuntimeException("c_id is minus value");
+        }
+
+        jiraServerProjectPureEntity.setWhere("c_parentid", new Long(parser.get("c_id")));
+        jiraServerProjectPureEntity.setOrder(Order.desc("c_position"));
+        List<JiraServerProjectPureEntity> list = jiraServerProjectPure.getChildNodeWithoutSoftDelete(jiraServerProjectPureEntity);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", list);
+        return modelAndView;
     }
 }

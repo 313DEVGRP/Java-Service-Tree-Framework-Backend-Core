@@ -79,32 +79,6 @@ public class JiraServerProjectPureEntity extends TreeSearchEntity implements Ser
     private String c_jira_server_etc;
 
     // -- 1:N table 연계 - 단방향
-/*    private Set<JiraProjectPureEntity> jiraProjectPureEntities;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "GLOBAL_TREE_MAP",
-            joinColumns = @JoinColumn(name = "jiraserver_link"),
-            inverseJoinColumns = @JoinColumn(name = "jiraproject_link")
-    )
-    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
-            "pdservice_link IS NULL and " +
-            "pdserviceversion_link IS NULL and " +
-            "jiraissuepriority_link IS NULL and " +
-            "jiraissueresolution_link IS NULL and " +
-            "jiraissuestatus_link IS NULL and " +
-            "jiraissuetype_link IS NULL")
-    public Set<JiraProjectPureEntity> getJiraProjectPureEntities() {
-        return jiraProjectPureEntities;
-    }
-
-    public void setJiraProjectPureEntities(Set<JiraProjectPureEntity> jiraProjectPureEntities) {
-        this.jiraProjectPureEntities = jiraProjectPureEntities;
-    }*/
-
-    // -- 1:N table 연계 - 단방향
     private Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities;
 
     @LazyCollection(LazyCollectionOption.FALSE)

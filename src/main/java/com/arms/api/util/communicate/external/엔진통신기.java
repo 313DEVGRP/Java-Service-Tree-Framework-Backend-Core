@@ -1,19 +1,10 @@
 package com.arms.api.util.communicate.external;
 
-import com.arms.api.analysis.time.model.히트맵데이터;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
-import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.external.response.jira.지라이슈_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈생성_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈우선순위_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈해결책_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라프로젝트_데이터;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라서버정보_엔티티;
+import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
