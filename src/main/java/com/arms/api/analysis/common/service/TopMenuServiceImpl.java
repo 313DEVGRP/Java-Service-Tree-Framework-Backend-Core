@@ -3,6 +3,8 @@ package com.arms.api.analysis.common.service;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -52,23 +54,31 @@ public class TopMenuServiceImpl implements  TopMenuService{
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            long stateId = entity.getReqStateEntity().getC_id();
-                            if (stateId == 10L) {
-                                return "open";
-                            } else if (stateId == 11L) {
-                                return "in-progress";
-                            } else if (stateId == 12L) {
-                                return "resolved";
-                            } else if (stateId == 13L) {
-                                return "closed";
+                            ReqStateEntity reqStateEntity = entity.getReqStateEntity();
+                            if (StringUtils.equals(entity.getC_type(),"folder") ) {
+                                return "folder";
                             } else {
-                                return "other";
+                                if (reqStateEntity == null) {
+                                    return "null";
+                                }
+                                long stateId = entity.getReqStateEntity().getC_id();
+                                if (stateId == 10L) {
+                                    return "open";
+                                } else if (stateId == 11L) {
+                                    return "in-progress";
+                                } else if (stateId == 12L) {
+                                    return "resolved";
+                                } else if (stateId == 13L) {
+                                    return "closed";
+                                } else {
+                                    return "other";
+                                }
                             }
                         },
                         Collectors.counting()
                 ));
 
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size()));
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.get("folder")));
 
 
 
@@ -125,7 +135,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
     }
 
     @Override
-    public Map<String, Map<String, Long>> 톱메뉴_작업자별_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+    public Map<String, Long> 톱메뉴_작업자별_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
         지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
                 .메인그룹필드("assignee.assignee_emailAddress.keyword")
                 .하위그룹필드들(Arrays.asList("isReq"))
@@ -134,27 +144,55 @@ public class TopMenuServiceImpl implements  TopMenuService{
                 .하위크기(100)
                 .build();
 
+        Map<String, Long> 요구사항_서브테스크_종합 = new HashMap<>();
+        요구사항_서브테스크_종합.put("resource",0L);
+        요구사항_서브테스크_종합.put("req",0L);
+        요구사항_서브테스크_종합.put("subtask",0L);
+        요구사항_서브테스크_종합.put("req_max", 0L);
+        요구사항_서브테스크_종합.put("req_min", 1000000L);
+        요구사항_서브테스크_종합.put("sub_max", 0L);
+        요구사항_서브테스크_종합.put("sub_min", 1000000L);
+
         ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
         // 전체 작업자 수 => 필드
         검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
         Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
-        List<검색결과> 작업자_검색결과 = 메인그룹_집계결과.get("group_by_assignee.assignee_emailAddress.keyword");
+        List<검색결과> 작업자_검색결과_목록 = 메인그룹_집계결과.get("group_by_assignee.assignee_emailAddress.keyword");
+        요구사항_서브테스크_종합.put("resource", Long.valueOf(작업자_검색결과_목록.size()));
 
-        Map<String, Map<String, Long>> 작업자_요구사항_서브태스크_맵 = new HashMap<>();
+        for (검색결과 작업자_검색결과 : 작업자_검색결과_목록) {
+            String 작업자_메일 = 작업자_검색결과.get필드명();
+            List<검색결과> 이슈_검색결과_목록 = 작업자_검색결과.get하위검색결과().get("group_by_isReq");
 
-        for (검색결과 작업자_정보 : 작업자_검색결과) {
-            String assignee_email = 작업자_정보.get필드명();
-            List<검색결과> 요구사항_연결이슈_정보 = 작업자_정보.get하위검색결과().get("group_by_isReq");
+            for(검색결과 이슈 : 이슈_검색결과_목록) {
+                String 필드명 = 이슈.get필드명();
+                Long count = 이슈.get개수();
+                if(필드명.equals("true")) {
+                    // 종합 Max, Min 세팅
+                    요구사항_서브테스크_종합.put("req_max", 요구사항_서브테스크_종합.get("req_max") < count ? count : 요구사항_서브테스크_종합.get("req_max"));
+                    요구사항_서브테스크_종합.put("req_min", 요구사항_서브테스크_종합.get("req_min") > count ? count : 요구사항_서브테스크_종합.get("req_min"));
+                } else {
+                    // 종합 Max, Min 세팅
+                    요구사항_서브테스크_종합.put("sub_max", 요구사항_서브테스크_종합.get("sub_max") < count ? count : 요구사항_서브테스크_종합.get("sub_max"));
+                    요구사항_서브테스크_종합.put("sub_min", 요구사항_서브테스크_종합.get("sub_min") > count ? count : 요구사항_서브테스크_종합.get("sub_min"));
+                }
 
-            Map<String, Long> reqAndSubtaskMap = new HashMap<>();
-            for(검색결과 reqOrSubtask : 요구사항_연결이슈_정보) {
-                String 필드명 = reqOrSubtask.get필드명();
-                Long count = reqOrSubtask.get개수();
-                reqAndSubtaskMap.put(필드명.equals("true") ? "req" : "subtask", count);
+                Long total_count = 요구사항_서브테스크_종합.get(필드명.equals("true") ? "req" : "subtask");
+                요구사항_서브테스크_종합.put(필드명.equals("true") ? "req" : "subtask", total_count+count);
             }
-            작업자_요구사항_서브태스크_맵.put(assignee_email, reqAndSubtaskMap);
         }
 
-        return 작업자_요구사항_서브태스크_맵;
+        //작업자_이슈_개수_맵.put("overall",요구사항_서브테스크_종합);
+        return 요구사항_서브테스크_종합;
+    }
+
+    @Override
+    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(EngineAggregationRequestDTO engineAggregationRequestDTO, String resolution) {
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계  =
+                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, resolution);
+
+        검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
+
+        return 통계결과;
     }
 }

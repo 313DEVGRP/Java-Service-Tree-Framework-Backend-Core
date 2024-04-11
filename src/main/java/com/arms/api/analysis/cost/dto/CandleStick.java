@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.TreeMap;
+import java.io.Serializable;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductCostResponse {
-    TreeMap<String, Integer> line;
-    TreeMap<String, Integer> bar;
-    TreeMap<String, List<Integer>> candleStick;
+public class CandleStick implements Serializable {
+    Integer 시가;
+    Integer 종가;
+    Integer 최저가;
+    Integer 최고가;
 }
