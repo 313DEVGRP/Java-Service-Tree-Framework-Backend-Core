@@ -34,3 +34,9 @@ arms:
       url: ${ARMS_DETAIL_CONNECT_URL}
   engine:
     url: http://engine-fire:33333
+
+slack:
+  service-name: ${spring.application.name}
+  token: xoxb-6506875664277-6522692878945-HskjLlwVilRWrFqfWdyI2E4y
+  profile: ${spring.profiles.active}
+  url: https://slack.com/
