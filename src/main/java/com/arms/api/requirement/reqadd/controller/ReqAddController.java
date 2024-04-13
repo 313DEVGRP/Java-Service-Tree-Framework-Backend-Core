@@ -100,7 +100,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     private ReqAddControllerMapper reqAddControllerMapper;
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @ResponseBody
     @RequestMapping(
@@ -108,13 +108,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getMonitor(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             ReqAddDTO reqAddDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getMonitor");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getMonitor",changeReqTableName);
+        SessionUtil.setAttribute("getMonitor", changeReqTableName);
 
         reqAddEntity.setOrder(Order.asc("c_position"));
         List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
@@ -132,17 +132,17 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getNodesWithoutRoot(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             ReqAddDTO reqAddDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getNodesWithoutRoot");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getNodesWithoutRoot",changeReqTableName);
+        SessionUtil.setAttribute("getNodesWithoutRoot", changeReqTableName);
 
         Criterion criterion = Restrictions.not(
                 // replace "id" below with property name, depending on what you're filtering against
-                Restrictions.in("c_id", new Object[] {TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
+                Restrictions.in("c_id", new Object[]{TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
         );
         reqAddEntity.getCriterions().add(criterion);
         reqAddEntity.setOrder(Order.asc("c_position"));
@@ -160,7 +160,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             value = {"/{changeReqTableName}/getChildNode.do"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView getSwitchDBChildNode(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+    public ModelAndView getSwitchDBChildNode(@PathVariable(value = "changeReqTableName") String changeReqTableName,
                                              ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBChildNode");
@@ -171,7 +171,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getChildNode",changeReqTableName);
+            SessionUtil.setAttribute("getChildNode", changeReqTableName);
 
             reqAddEntity.setWhere("c_parentid", new Long(parser.get("c_id")));
             reqAddEntity.setOrder(Order.asc("c_position"));
@@ -190,8 +190,8 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             value = {"/{changeReqTableName}/getChildNodeWithParent.do"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView getSwitchDBChildNodeWithParent(@PathVariable(value ="changeReqTableName") String changeReqTableName,
-                                               ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+    public ModelAndView getSwitchDBChildNodeWithParent(@PathVariable(value = "changeReqTableName") String changeReqTableName,
+                                                       ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBChildNodeWithParent");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
@@ -201,7 +201,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getChildNodeWithParent",changeReqTableName);
+            SessionUtil.setAttribute("getChildNodeWithParent", changeReqTableName);
 
             Long targetId = new Long(parser.get("c_id"));
             Criterion criterion1 = Restrictions.eq("c_parentid", targetId);
@@ -226,8 +226,8 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getSwitchDBNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName
-            ,ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+            @PathVariable(value = "changeReqTableName") String changeReqTableName
+            , ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
@@ -238,7 +238,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getNode",changeReqTableName);
+            SessionUtil.setAttribute("getNode", changeReqTableName);
 
             ReqAddEntity returnVO = reqAdd.getNode(reqAddEntity);
 
@@ -256,23 +256,23 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getReqAddListByFilter(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName
-            ,ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+            @PathVariable(value = "changeReqTableName") String changeReqTableName
+            , ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("[ ReqAddController :: getSwitchDBNode ]");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+        SessionUtil.setAttribute("getReqAddListByFilter", changeReqTableName);
 
         String[] versionStrArr = StringUtils.split(reqAddEntity.getC_req_pdservice_versionset_link(), ",");
 
-        if ( versionStrArr == null || versionStrArr.length == 0){
+        if (versionStrArr == null || versionStrArr.length == 0) {
             ModelAndView modelAndView = new ModelAndView("jsonView");
             modelAndView.addObject("result", "result is empty");
             return modelAndView;
-        }else{
+        } else {
             Disjunction orCondition = Restrictions.disjunction();
-            for ( String versionStr : versionStrArr ){
+            for (String versionStr : versionStrArr) {
                 versionStr = "\\\"" + versionStr + "\\\"";
                 orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
             }
@@ -294,7 +294,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> addReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({AddNode.class}) ReqAddDTO reqAddDTO,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -329,7 +329,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> addReqFolderNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({AddNode.class}) ReqAddDTO reqAddDTO
     ) throws Exception {
 
@@ -363,7 +363,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> updateReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -406,7 +406,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> updateReqDate(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDateDTO reqAddDateDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -415,7 +415,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("updateDate",changeReqTableName);
+        SessionUtil.setAttribute("updateDate", changeReqTableName);
 
         int result = reqAdd.updateNode(reqAddEntity);
 
@@ -430,14 +430,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> removeReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: removeNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("removeNode",changeReqTableName);
+        SessionUtil.setAttribute("removeNode", changeReqTableName);
 
         int removedReqAddEntity = reqAdd.removeNode(reqAddEntity);
 
@@ -454,14 +454,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> moveReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({MoveNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: moveReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("moveNode",changeReqTableName);
+        SessionUtil.setAttribute("moveNode", changeReqTableName);
 
         ReqAddEntity savedReqAddEntity = reqAdd.moveNode(reqAddEntity, request);
 
@@ -473,7 +473,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     }
 
     @ResponseBody
-    @RequestMapping(value="/uploadFileToNode.do", method = RequestMethod.POST)
+    @RequestMapping(value = "/uploadFileToNode.do", method = RequestMethod.POST)
     public ModelAndView uploadFileToNode(final MultipartHttpServletRequest multiRequest,
                                          HttpServletRequest request, Model model) throws Exception {
 
@@ -507,21 +507,21 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
         //확인후에 저장을 하기 위한 샘플입니다.
         return ResponseEntity.ok(CommonResponse.success(
-            new ExcelGantUpload(excelFile.getInputStream())
-                .getGetWebScheduleList()
-                .stream()
-                .sorted(comparing(WbsSchedule::getDepth).reversed())
-                .collect(toList())
-            )
+                        new ExcelGantUpload(excelFile.getInputStream())
+                                .getGetWebScheduleList()
+                                .stream()
+                                .sorted(comparing(WbsSchedule::getDepth).reversed())
+                                .collect(toList())
+                )
         );
     }
 
     @ResponseBody
     @GetMapping(value = "/{changeReqTableName}/getDetail.do")
-    public ResponseEntity<ReqAddDetailDTO> followReqLink(FollowReqLinkDTO followReqLinkDTO,@PathVariable(value ="changeReqTableName") String changeReqTableName
-        ) throws Exception {
+    public ResponseEntity<ReqAddDetailDTO> followReqLink(FollowReqLinkDTO followReqLinkDTO, @PathVariable(value = "changeReqTableName") String changeReqTableName
+    ) throws Exception {
 
-        return  ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO,changeReqTableName));
+        return ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO, changeReqTableName));
     }
 
 
@@ -537,7 +537,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
 
-        SessionUtil.setAttribute("getNode",changeReqTableName);
+        SessionUtil.setAttribute("getNode", changeReqTableName);
 
         ReqAddEntity reqAddEntity = new ReqAddEntity();
 
@@ -554,6 +554,34 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         SessionUtil.removeAttribute("getNode");
 
         return ResponseEntity.ok(reqAddDto);
+    }
+
+
+    @GetMapping(value = "/{changeReqTableName}/getNodeWhereInIds.do")
+    public ResponseEntity<List<LoadReqAddDTO>> getNodeWhereInIds(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @RequestParam List<Long> ids, HttpServletRequest request
+    ) throws Exception {
+
+        log.info("ReqAddController :: getNodeWhereInIds :: changeReqTableName :: {} :: ids {} ", changeReqTableName, ids);
+
+        SessionUtil.setAttribute("getNodeWhereInIds", changeReqTableName);
+
+        ReqAddEntity reqAddEntity = new ReqAddEntity();
+
+        Criterion criterion = Restrictions.in("c_id", ids);
+
+        reqAddEntity.getCriterions().add(criterion);
+
+        reqAddEntity.setOrder(Order.asc("c_position"));
+
+        List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+
+        SessionUtil.removeAttribute("getNodeWhereInIds");
+
+        List<LoadReqAddDTO> loadReqAddDTOList = list.stream().map(reqAddControllerMapper::toLoadReqAddDto).collect(toList());
+
+        return ResponseEntity.ok(loadReqAddDTOList);
     }
 
     @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
