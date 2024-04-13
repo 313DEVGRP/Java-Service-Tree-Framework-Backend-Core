@@ -81,6 +81,10 @@ public class RouteTableInterceptor extends EmptyInterceptor{
                     String replaceTableName = (String) SessionUtil.getAttribute("updateDate");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);
                 }
+                if(StringUtils.contains(servletPath,"getNodeWhereInIds.do")){
+                    String replaceTableName = (String) SessionUtil.getAttribute("getNodeWhereInIds");
+                    prepedStatement = replaceStatement(prepedStatement, replaceTableName);
+                }
                 if(StringUtils.contains(servletPath,"removeNode.do")){
                     String replaceTableName = (String) SessionUtil.getAttribute("removeNode");
                     prepedStatement = replaceStatement(prepedStatement, replaceTableName);

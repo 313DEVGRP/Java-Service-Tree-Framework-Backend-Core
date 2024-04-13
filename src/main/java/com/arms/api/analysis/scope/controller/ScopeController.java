@@ -25,9 +25,9 @@ import java.util.*;
 @RestController
 @RequestMapping(value = "/arms/analysis/scope")
 @RequiredArgsConstructor
-public class 스코프분석_컨트롤러 {
+public class ScopeController {
 
-    private final 통계엔진통신기 통계엔진통신기;
+    private final 통계엔진통신기 engineCommunicator;
 
     private final ScopeService scopeService;
 
@@ -44,7 +44,7 @@ public class 스코프분석_컨트롤러 {
                 .컨텐츠보기여부(false)
                 .build();
 
-        ResponseEntity<검색결과_목록_메인> 집계결과 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+        ResponseEntity<검색결과_목록_메인> 집계결과 = engineCommunicator.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
         return ResponseEntity.ok(집계결과.getBody());
 
     }

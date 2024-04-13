@@ -1,6 +1,7 @@
 package com.arms.api.util.communicate.internal;
 
 import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -28,5 +29,11 @@ public interface 내부통신기 {
     @GetMapping("/arms/reqAdd/{changeReqTableName}/getNode.do/{c_id}")
     ResponseEntity<LoadReqAddDTO> 요구사항조회(@PathVariable(value = "changeReqTableName") String changeReqTableName,
             @PathVariable(value = "c_id") Long c_id);
+
+    @GetMapping("/arms/reqAdd/{changeReqTableName}/getNodeWhereInIds.do")
+    ResponseEntity<List<LoadReqAddDTO>> 요구사항목록조회(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @RequestParam List<Long> ids
+    );
 
 }
