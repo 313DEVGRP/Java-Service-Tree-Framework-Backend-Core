@@ -30,7 +30,7 @@ public interface 내부통신기 {
     ResponseEntity<LoadReqAddDTO> 요구사항조회(@PathVariable(value = "changeReqTableName") String changeReqTableName,
             @PathVariable(value = "c_id") Long c_id);
 
-    @GetMapping("/arms/reqAdd/{changeReqTableName}/getNodeWhereInIds.do")
+    @GetMapping("/arms/reqAdd/{changeReqTableName}/getNodesWhereInIds.do")
     ResponseEntity<List<LoadReqAddDTO>> 요구사항목록조회(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @RequestParam List<Long> ids

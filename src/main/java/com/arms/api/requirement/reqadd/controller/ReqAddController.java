@@ -557,15 +557,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     }
 
 
-    @GetMapping(value = "/{changeReqTableName}/getNodeWhereInIds.do")
-    public ResponseEntity<List<LoadReqAddDTO>> getNodeWhereInIds(
+    @GetMapping(value = "/{changeReqTableName}/getNodesWhereInIds.do")
+    public ResponseEntity<List<LoadReqAddDTO>> getNodesWhereInIds(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @RequestParam List<Long> ids, HttpServletRequest request
     ) throws Exception {
 
-        log.info("ReqAddController :: getNodeWhereInIds :: changeReqTableName :: {} :: ids {} ", changeReqTableName, ids);
+        log.info("ReqAddController :: getNodesWhereInIds :: changeReqTableName :: {} :: ids {} ", changeReqTableName, ids);
 
-        SessionUtil.setAttribute("getNodeWhereInIds", changeReqTableName);
+        SessionUtil.setAttribute("getNodesWhereInIds", changeReqTableName);
 
         ReqAddEntity reqAddEntity = new ReqAddEntity();
 
@@ -577,7 +577,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
 
-        SessionUtil.removeAttribute("getNodeWhereInIds");
+        SessionUtil.removeAttribute("getNodesWhereInIds");
 
         List<LoadReqAddDTO> loadReqAddDTOList = list.stream().map(reqAddControllerMapper::toLoadReqAddDto).collect(toList());
 
