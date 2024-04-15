@@ -16,6 +16,7 @@ import com.arms.api.util.communicate.external.request.aggregation.요구사항_�
 import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
+import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
@@ -244,7 +245,7 @@ public class ScopeServiceImpl implements ScopeService {
             // 정렬된 값을 문자열로 만듭니다.
             StringBuilder keyBuilder = new StringBuilder();
             String 버전세트_문자열 = 요구사항.getC_req_pdservice_versionset_link();
-            Long[] 버전_아이디_배열 = convertToLongArray(버전세트_문자열);
+            Long[] 버전_아이디_배열 = 버전유틸.convertToLongArray(버전세트_문자열);
 
             if (버전_아이디_배열.length != 0) {
                 for (int i = 0; i < 버전_아이디_배열.length; i++) {
@@ -266,40 +267,6 @@ public class ScopeServiceImpl implements ScopeService {
         log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 버전_요구사항_맵 ==> {}", 버전_요구사항_맵.toString());
 
         return 버전_요구사항_맵;
-    }
-
-    private static Long[] convertToLongArray(String input) {
-        // 입력이 null이거나 비어있을 때, 길이 0 배열 반환
-        if (input == null || input.isEmpty()) {
-            return new Long[0];
-        }
-        // 문자열에서 대괄호 및 쌍따옴표를 제거하고 쉼표로 구분하여 문자열 배열로 변환
-        String[] stringArray = input.substring(1, input.length() - 1).split(",");
-
-        // 예외 처리: stringArray의 길이가 0인 경우
-        if (stringArray.length == 0) {
-            throw new IllegalArgumentException("[ScopeServiceImpl :: convertToLongArray] :: stringArray의 입력이 올바른 형식이 아닙니다.");
-        }
-
-        // Long 배열 생성
-        Long[] longArray = new Long[stringArray.length];
-
-        // 문자열 배열을 Long 배열로 변환
-        for (int i = 0; i < stringArray.length; i++) {
-            try {
-                longArray[i] = Long.parseLong(stringArray[i].replaceAll("\"", "").trim());
-            } catch (NumberFormatException e) {
-                // 숫자로 변환할 수 없는 경우에는 null을 할당
-                longArray[i] = null;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // 배열 인덱스가 범위를 벗어나는 경우, 예외 처리
-                log.error("[ScopeServiceImpl :: convertToLongArray] :: longArray[{}]에서 배열 인덱스가 범위를 벗어났습니다.", i);
-            } catch (Exception e) {
-                log.error("[ScopeServiceImpl :: convertToLongArray] :: longArray[{}]에서 예상치 못한 예외가 발생했습니다 => {}", i, e.getMessage());
-            }
-        }
-
-        return longArray;
     }
 
     @Override
