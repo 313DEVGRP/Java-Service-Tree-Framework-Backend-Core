@@ -1,6 +1,9 @@
 package com.arms.api.analysis.common.controller;
 
+import com.arms.api.analysis.common.AggregationMapper;
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.common.service.TopMenuService;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
@@ -20,6 +23,8 @@ import java.util.Map;
 public class TopMenuController {
 
     private final TopMenuService topMenuService;
+
+    private final AggregationMapper aggregationMapper;
 
     // TopMenuApi용
     @GetMapping("/{changeReqTableName}/getReqAddListByFilter.do")
@@ -50,5 +55,22 @@ public class TopMenuController {
 
         return  ResponseEntity.ok(topMenuService.톱메뉴_작업자별_요구사항_하위이슈_집계(pdServiceId, pdServiceVersionLinks));
     }
+    
+    @GetMapping("/normal-version/resolution") //추가 리팩토링 필요
+    public ModelAndView 제품서비스_일반_버전_해결책유무_집계(AggregationRequestDTO aggregationRequestDTO,
+                                             @RequestParam(required = false) String resolution) {
+        log.info(" [ TopMenuController :: 제품서비스_일반_버전_해결책유무_집계 ] " +
+                        "pdServiceId ==> {}, pdServiceVersionLinks ==> {}, resolution ==> {}"
+                , aggregationRequestDTO.getPdServiceLink()
+                , aggregationRequestDTO.getPdServiceVersionLinks().toString()
+                , resolution);
 
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+
+        검색결과_목록_메인 요구사항_연결이슈_일반_버전_해결책통계
+                = topMenuService.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, resolution);
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 요구사항_연결이슈_일반_버전_해결책통계);
+        return modelAndView;
+    }
 }
