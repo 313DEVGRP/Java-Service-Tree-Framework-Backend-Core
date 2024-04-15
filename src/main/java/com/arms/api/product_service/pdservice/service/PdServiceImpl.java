@@ -12,24 +12,22 @@
 package com.arms.api.product_service.pdservice.service;
 
 import com.arms.api.globaltreemap.dao.GlobalTreeMapRepository;
+import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
+import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraproject_pure.service.JiraProjectPure;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
-import com.arms.api.product_service.pdservice_pure.model.PdServicePureEntity;
-import com.arms.api.product_service.pdservice_pure.service.PdServicePure;
-import com.arms.api.util.dynamicdbmaker.service.DynamicDBMaker;
-import com.arms.api.util.filerepository.model.FileRepositoryEntity;
-import com.arms.api.util.filerepository.service.FileRepository;
 import com.arms.api.product_service.pdservice.model.PdServiceD3Chart;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.api.util.dynamicdbmaker.service.DynamicDBMaker;
+import com.arms.api.util.filerepository.model.FileRepositoryEntity;
+import com.arms.api.util.filerepository.service.FileRepository;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.*;
-import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
-import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
@@ -138,8 +136,11 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         baseVerNode.setRef(TreeConstant.First_Node_CID);
         baseVerNode.setC_title("BaseVersion");
         baseVerNode.setC_type(TreeConstant.Leaf_Node_TYPE);
-        baseVerNode.setC_pds_version_start_date("start");
-        baseVerNode.setC_pds_version_end_date("end");
+
+        // BaseVersion 기본 일자 오늘로 설정
+        Date date = new Date();
+        baseVerNode.setC_pds_version_start_date(DateUtils.format("yyyy/MM/dd HH:mm", DateUtils.getStartOfDate(date)));
+        baseVerNode.setC_pds_version_end_date(DateUtils.format("yyyy/MM/dd HH:mm", DateUtils.getEndOfDate(date)));
         baseVerNode.setC_pds_version_contents("contents");
         baseVerNode.setC_pds_version_etc("etc");
         PdServiceVersionEntity baseNode = pdServiceVersion.addNode(baseVerNode);

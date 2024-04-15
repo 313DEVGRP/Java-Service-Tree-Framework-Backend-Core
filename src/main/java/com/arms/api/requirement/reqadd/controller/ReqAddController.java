@@ -13,6 +13,7 @@ package com.arms.api.requirement.reqadd.controller;
 
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.api.requirement.reqadd.model.*;
@@ -26,10 +27,12 @@ import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
+import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -75,6 +78,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     @Qualifier("pdService")
     private PdService pdService;
+
+    @Autowired
+    @Qualifier("pdServiceVersion")
+    private PdServiceVersion pdServiceVersion;
 
     @Autowired
     @Qualifier("reqPriority")
@@ -311,10 +318,17 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        // 요구사항 생성일 및 시작일 업데이트 추가
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
-        reqAddEntity.setC_req_start_date(date);
+
+        // 요구사항 시작일, 종료일 버전 기간을 확인 후 설정
+        List<Long> versionList = List.of(버전유틸.convertToLongArray(reqAddEntity.getC_req_pdservice_versionset_link()));
+        Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+        String 시작일 = 시작일과_종료일.get("earliestDate");
+        String 종료일 = 시작일과_종료일.get("latestDate");
+
+        reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
+        reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
