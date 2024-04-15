@@ -1,6 +1,6 @@
 package com.arms.api.analysis.scope.dto;
 
-import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import lombok.*;
 
 @Getter
@@ -16,10 +16,10 @@ public class TreeBarDTO {
     private String color;
     private String type;
 
-    public TreeBarDTO(ReqStatusEntity reqStatusEntity) {
-        this.id = reqStatusEntity.getC_issue_key();
-        this.name = reqStatusEntity.getC_issue_key() + " - " +reqStatusEntity.getC_title();
-        this.parent = reqStatusEntity.getC_req_pdservice_versionset_link().toString();
+    public TreeBarDTO(LoadReqAddDTO loadReqAddDTO) {
+        this.id = "requirement-" + loadReqAddDTO.getC_id().toString();
+        this.name = loadReqAddDTO.getC_title();
+        this.parent = loadReqAddDTO.getC_req_pdservice_versionset_link().toString();
         this.value = 0;
         this.color = "";
         this.type = "requirement";
