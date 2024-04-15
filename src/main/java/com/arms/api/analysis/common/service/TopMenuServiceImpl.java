@@ -78,9 +78,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
                         Collectors.counting()
                 ));
 
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.get("folder")));
-
-
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.getOrDefault("folder", 0L)));
 
         SessionUtil.removeAttribute("getReqAddListByFilter");
         log.info("[TopMenuServiceImpl  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
