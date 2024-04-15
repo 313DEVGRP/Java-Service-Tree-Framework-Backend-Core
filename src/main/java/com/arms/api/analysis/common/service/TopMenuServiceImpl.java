@@ -54,10 +54,10 @@ public class TopMenuServiceImpl implements  TopMenuService{
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            ReqStateEntity reqStateEntity = entity.getReqStateEntity();
                             if (StringUtils.equals(entity.getC_type(),"folder") ) {
                                 return "folder";
                             } else {
+                                ReqStateEntity reqStateEntity = entity.getReqStateEntity();
                                 if (reqStateEntity == null) {
                                     return "null";
                                 }
@@ -180,7 +180,13 @@ public class TopMenuServiceImpl implements  TopMenuService{
             }
         }
 
-        //작업자_이슈_개수_맵.put("overall",요구사항_서브테스크_종합);
+        // 아예 없는 경우, 최솟값을 0으로
+        if(요구사항_서브테스크_종합.get("req_min") == 1000000L) {
+            요구사항_서브테스크_종합.put("req_min", 0L);
+        }
+        if(요구사항_서브테스크_종합.get("sub_min") == 1000000L) {
+            요구사항_서브테스크_종합.put("sub_min", 0L);
+        }
         return 요구사항_서브테스크_종합;
     }
 
