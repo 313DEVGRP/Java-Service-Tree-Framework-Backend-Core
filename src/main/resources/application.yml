@@ -41,6 +41,7 @@ springfox:
 
 server:
   port: 31313
+  address: 0.0.0.0
   servlet:
     session:
       timeout: 7200
