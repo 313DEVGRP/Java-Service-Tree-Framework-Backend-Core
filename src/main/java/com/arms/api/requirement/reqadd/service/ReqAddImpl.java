@@ -20,31 +20,28 @@ import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
+import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
-import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.TreeServiceUtils;
-import com.arms.api.util.communicate.external.response.jira.지라이슈_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈생성_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈우선순위_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈필드_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈해결책_데이터;
+import com.arms.api.util.communicate.external.response.jira.*;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -59,7 +56,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,10 +67,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
+	private 엔진통신기 엔진통신기;
 
 	@Autowired
-	private com.arms.api.util.communicate.internal.내부통신기 내부통신기;
+	private 내부통신기 내부통신기;
 
 	@Autowired
 	private GlobalTreeMapService globalTreeMapService;
@@ -147,7 +143,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		List<Long> 지라프로젝트_아이디_목록 = 지라프로젝트_버전아이디_맵.keySet().stream().collect(Collectors.toList());
 
 		// 각 지라프로젝트를 활용해서 요구사항 만들기.
-		for ( Long 지라프로젝트_아이디 : 지라프로젝트_아이디_목록 ) {
+		for (Long 지라프로젝트_아이디 : 지라프로젝트_아이디_목록) {
 			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
 			globalTreeMap.setJiraproject_link(지라프로젝트_아이디);
 			List<GlobalTreeMapEntity> 지라프로젝트에_연결된정보들 = globalTreeMapService.findAllBy(globalTreeMap);
@@ -171,14 +167,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
-					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
-
-			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
-
 			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
 				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
@@ -198,12 +186,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			if (요구사항_이슈_타입 == null) {
 				if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
 					요구사항_이슈_타입 = 검색된_지라서버.getJiraIssueTypeEntities().stream()
-							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
+							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement")
+												&& (이슈타입.getC_etc() == null || !StringUtils.equals(이슈타입.getC_etc(), "delete")))
 							.findFirst().orElse(null);
 				} else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
 					// 기본값은 아니지만 arms-requirement 가 있을경우, arms-requirement 를 이슈 유형으로 세팅
 					요구사항_이슈_타입 = 검색된_지라프로젝트.getJiraIssueTypeEntities().stream()
-							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement"))
+							.filter(이슈타입 -> StringUtils.equals(이슈타입.getC_issue_type_name(), "arms-requirement")
+												&& (이슈타입.getC_etc() == null || !StringUtils.equals(이슈타입.getC_etc(), "delete")))
 							.findFirst().orElse(null);
 				} else {
 					logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
@@ -277,6 +267,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 +
 					"&pdServiceVersion=" + 버전ID목록 + "\n" +
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
+					"시작 일자 : "+ DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_start_date()) +"\n" +
+					"종료 일자 : "+ DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_end_date() ) +"\n\n" +
 					"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
 			이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(savedReqAddEntity.getC_req_contents(), Whitelist.none())),"&nbsp;", " ");
@@ -293,7 +285,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						.summary(savedReqAddEntity.getC_title())
 						.description(이슈내용)
 						.build();
-			} else {
+			}
+			else {
 				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
 				지라이슈우선순위_데이터 우선순위 = new 지라이슈우선순위_데이터();
 				우선순위.setName(요구사항_이슈_우선순위.getC_issue_priority_name());
@@ -390,9 +383,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			reqStatusDTO.setC_issue_assignee(암스서버담당자.getName());
 
 			// 요구사항 생성 시 reqStatus start date도 함께 추가
-			Date date = new Date();
-			reqStatusDTO.setC_issue_create_date(date);
-			reqStatusDTO.setC_req_start_date(date);
+			reqStatusDTO.setC_issue_create_date(savedReqAddEntity.getC_req_create_date());
+			reqStatusDTO.setC_req_start_date(savedReqAddEntity.getC_req_start_date());
+			reqStatusDTO.setC_req_end_date(savedReqAddEntity.getC_req_end_date());
 
 			logger.info("ReqAddImpl = reqStatusDTO :: " + objectMapper.writeValueAsString(reqStatusDTO));
 
@@ -507,7 +500,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			return 1;
 
-		}else{
+		}
+		else{
 			String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
 
 			// 2. 수정 전 후 비교
@@ -1206,20 +1200,20 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 	private JiraIssueTypeEntity 요구사항이슈타입검색(Set<JiraIssueTypeEntity> issueTypes) throws Exception {
 		return issueTypes.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 	}
 
 	private JiraIssueStatusEntity 요구사항이슈상태검색(Set<JiraIssueStatusEntity> issueStatuses) throws Exception {
 		return issueStatuses.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 	}
 
 	private JiraIssuePriorityEntity 요구사항이슈우선순위검색(JiraServerEntity 지라서버) throws Exception {
 		Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 지라서버.getJiraIssuePriorityEntities();
 		JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 		return 요구사항_이슈_우선순위;
 	}
@@ -1227,7 +1221,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	private JiraIssueResolutionEntity 요구사항이슈해결책검색(JiraServerEntity 지라서버) throws Exception {
 		Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 지라서버.getJiraIssueResolutionEntities();
 		JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true"))
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 		return 요구사항_이슈_해결책;
 	}
