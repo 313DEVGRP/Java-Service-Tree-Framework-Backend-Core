@@ -255,6 +255,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
 
+			String 시작일 = savedReqAddEntity.getC_req_start_date() == null
+							? "시작일 데이터를 확인할 수 없습니다. 버전의 시작일, 종료일 확인이 필요합니다"
+								: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_start_date());
+			String 종료일 = savedReqAddEntity.getC_req_end_date() == null
+							? "종료일 데이터를 확인할 수 없습니다. 버전의 시작일, 종료일 확인이 필요합니다"
+								: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_end_date());
+
 			String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
 					"✔ 본 이슈는 자동으로 관리되므로,\n" +
 					"✔ 이슈를 강제로 삭제시 → 연결된 이슈 수집이 되지 않으므로\n" +
@@ -267,8 +274,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					"&reqAdd=" + 추가된_요구사항의_아이디 + "&jiraServer=" + 지라서버_아이디 + "&jiraProject=" + 지라프로젝트_아이디 +
 					"&pdServiceVersion=" + 버전ID목록 + "\n" +
 					"――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――\n\n" +
-					"시작 일자 : "+ DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_start_date()) +"\n" +
-					"종료 일자 : "+ DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_end_date() ) +"\n\n" +
+					"시작 일자 : "+ 시작일 +"\n" +
+					"종료 일자 : "+ 종료일 +"\n\n" +
 					"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
 			이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(savedReqAddEntity.getC_req_contents(), Whitelist.none())),"&nbsp;", " ");
