@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DateUtils extends org.apache.commons.lang.time.DateUtils{
-    
+
     public static DateFormat getDateFormat(String pattern) {
         DateFormat df = new SimpleDateFormat(pattern);
         return df;
@@ -254,7 +254,7 @@ public class DateUtils extends org.apache.commons.lang.time.DateUtils{
     	long result = (endDayTime - startDayTime) / 86400000;
     	return result;
     }
-    
+
     public static String getUnixToString(long unixTime) {
         SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String result = format2.format(unixTime * 1000);
@@ -264,5 +264,10 @@ public class DateUtils extends org.apache.commons.lang.time.DateUtils{
     public static Date getUnixToDate(long unixTime) {
         Date result = getDate(getUnixToString(unixTime), "yyyy-MM-dd HH:mm:ss");
         return result;
+    }
+
+    public static long convertDaysToManMonth(long days) {
+        double rawMonths = days / 22.0;
+        return Math.round(rawMonths);
     }
 }
