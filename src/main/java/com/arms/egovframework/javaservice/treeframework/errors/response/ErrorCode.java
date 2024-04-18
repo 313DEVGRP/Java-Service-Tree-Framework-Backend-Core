@@ -29,7 +29,8 @@ public enum ErrorCode {
     COMMON_ENTITY_NOT_FOUND("존재하지 않는 엔티티입니다."),
     COMMON_ILLEGAL_STATUS("잘못된 상태값입니다."),
     COMMON_ID_NOT_FOUND("존재 하지 않는 아이디 입니다."),
-    COMMON_DUPLICATE_FOUND("중복된 값이 존재 합니다.");
+    COMMON_DUPLICATE_FOUND("중복된 값이 존재 합니다."),
+    COMMON_TREE_DAO_ERROR("데이터 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
 
     private final String errorMsg;
 

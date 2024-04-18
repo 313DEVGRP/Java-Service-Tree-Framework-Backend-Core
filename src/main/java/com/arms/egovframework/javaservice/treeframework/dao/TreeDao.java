@@ -26,91 +26,89 @@ import java.util.Map;
 
 public interface TreeDao<T extends TreeSearchEntity, ID extends Serializable> {
 
-    public Class<T> getClazz();
+    Class<T> getClazz();
 
-    public void setClazz(Class<T> clazzToSet);
+    void setClazz(Class<T> clazzToSet);
 
-    public Session getCurrentSession();
+    Session getCurrentSession();
 
-    public DetachedCriteria createDetachedCriteria(Class<?> clazz);
+    DetachedCriteria createDetachedCriteria(Class<?> clazz);
 
-    public DetachedCriteria createDetachedCriteria();
+    DetachedCriteria createDetachedCriteria();
 
-    public T getUnique(Long id);
+    T getUnique(Long id);
 
-    public T getUnique(Criterion criterion);
+    T getUnique(Criterion criterion);
 
-    public T getUnique(T extractSearchDTO);
+    T getUnique(T extractSearchDTO);
 
-    public T getUnique(Criterion... criterions);
+    T getUnique(Criterion... criterions);
 
-    public T getUnique(List<Criterion> criterion);
+    T getUnique(List<Criterion> criterion);
 
-    public List<T> getList();
+    List<T> getList();
 
-    public List<T> getList(DetachedCriteria detachedCriteria, int limit, int offset);
+    List<T> getList(DetachedCriteria detachedCriteria, int limit, int offset);
 
-    public List<T> getList(T extractSearchDTO);
+    List<T> getList(T extractSearchDTO);
 
-    public List<T> getList(T extractSearchDTO, Criterion... criterion);
+    List<T> getList(T extractSearchDTO, Criterion... criterion);
 
-    public List<T> getList(Criterion... criterions);
+    List<T> getList(Criterion... criterions);
 
-    public List<T> getList(List<Criterion> criterions, List<Order> orders);
+    List<T> getList(List<Criterion> criterions, List<Order> orders);
 
-    public List<T> getGroupByList(T extractSearchDTO, String target);
+    List<T> getGroupByList(T extractSearchDTO, String target);
 
-    public Map<String, Long> getGroupByList(T extractSearchDTO, String groupProperty, String sumProperty);
+    Map<String, Long> getGroupByList(T extractSearchDTO, String groupProperty, String sumProperty);
 
-    public int getGroupByCount(T extractSearchDTO, String tagert);
+    int getGroupByCount(T extractSearchDTO, String tagert);
 
-    public List<T> getListWithoutPaging(Order order);
+    List<T> getListWithoutPaging(Order order);
 
-    public List<T> getListWithoutPaging(T extractSearchDTO);
+    List<T> getListWithoutPaging(T extractSearchDTO);
 
-    public List<T> getListWithoutPaging(Order order, Criterion... criterion);
+    List<T> getListWithoutPaging(Order order, Criterion... criterion);
 
-    public List<T> getListWithoutPaging(DetachedCriteria detachedCriteria);
+    List<T> getListWithoutPaging(DetachedCriteria detachedCriteria);
 
-    public int getCount(Criterion... criterions);
+    int getCount(Criterion... criterions);
 
-    public int getCount(T extractSearchDTO);
+    int getCount(T extractSearchDTO);
 
-    public int getCount(List<Criterion> criterions);
+    int getCount(List<Criterion> criterions);
 
-    public int getSum(List<Criterion> criterions, String propertyName);
+    int getSum(List<Criterion> criterions, String propertyName);
 
-    public int getSum(T extractSearchDTO, String propertyName);
+    int getSum(T extractSearchDTO, String propertyName);
 
-    public T find(ID id, LockMode lockMode);
+    T find(ID id, LockMode lockMode);
 
-    public T find(ID id, LockMode lockMode, boolean enableCache);
+    T find(ID id, LockMode lockMode, boolean enableCache);
 
-    public void refresh(Object entity);
+    void refresh(Object entity);
 
-    public ID store(T newInstance);
+    ID store(T newInstance);
 
-    public void storeOrUpdate(T newInstance);
+    void storeOrUpdate(T newInstance);
 
-    public void storeOrUpdateAdvanced(T newInstance);
+    void update(T transientObject);
 
-    public void update(T transientObject);
+    void merge(T transientObject);
 
-    public void merge(T transientObject);
+    int bulkUpdate(String queryString, Object... value);
 
-    public int bulkUpdate(String queryString, Object... value);
+    void delete(T persistentObject);
 
-    public void delete(T persistentObject);
+    void deleteAll(Collection<T> entities);
 
-    public void deleteAll(Collection<T> entities);
+    void bulkInsert(Collection<T> entities);
 
-    public void bulkInsert(Collection<T> entities);
+    T excute(HibernateCallback<T> callback);
 
-    public T excute(HibernateCallback<T> callback);
+    List<T> search(Map<String, Object> parameterMap);
 
-    public List<T> search(Map<String, Object> parameterMap);
+    ID insert(T entity);
 
-    public ID insert(T entity);
-
-    public void deleteById(ID id);
+    void deleteById(ID id);
 }
