@@ -330,6 +330,23 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
         reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
 
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+
+        long 총계획일수 = 0;
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            reqAddEntity.getC_req_plan_time();
+        }
+
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
+
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
         log.info("ReqAddController :: addReqNode");
@@ -344,14 +361,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     )
     public ResponseEntity<?> addReqFolderNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @Validated({AddNode.class}) ReqAddDTO reqAddDTO
-    ) throws Exception {
+            @Validated({AddNode.class}) ReqAddDTO reqAddDTO) throws Exception {
 
         log.info("ReqAddController :: addReqFolderNode");
 
         boolean 폴더타입여부 = Optional.ofNullable(reqAddDTO)
                 .map(ReqAddDTO::getC_type)
-                .filter(cType -> !cType.equals(TreeConstant.Branch_TYPE))
+                .filter(cType -> !StringUtils.equals(cType ,TreeConstant.Branch_TYPE))
                 .isPresent();
 
         if (폴더타입여부) {
@@ -428,6 +444,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: updateDate");
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
+
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
 
         SessionUtil.setAttribute("updateDate", changeReqTableName);
 
