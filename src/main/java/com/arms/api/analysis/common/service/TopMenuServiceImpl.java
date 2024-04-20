@@ -101,7 +101,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
         이슈_맵.put("req", null);
         이슈_맵.put("subtask", null);
 
-        검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
+        검색결과_목록_메인 집계결과목록 = 일반_버전필터_집계.getBody();
         if (집계결과목록 != null) {
             이슈_맵.put("total", 집계결과목록.get전체합계()); // 총 이슈
 

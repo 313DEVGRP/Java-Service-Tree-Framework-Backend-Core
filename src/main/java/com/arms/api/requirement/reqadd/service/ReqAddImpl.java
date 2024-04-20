@@ -498,6 +498,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
 
+		if(loadReqAddDTO == null){
+			logger.info("ReqAddImpl :: updateReqNode :: 요구사항 조회에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+			throw new Exception("요구사항 수정에 실패했습니다. 관리자에게 문의해 주세요.");
+		}
+
 		if(StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Branch_TYPE)){
 
 			// 3. ReqAdd 업데이트

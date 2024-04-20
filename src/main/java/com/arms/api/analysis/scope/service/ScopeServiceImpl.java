@@ -18,9 +18,9 @@ import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -45,8 +45,6 @@ public class ScopeServiceImpl implements ScopeService {
     private final 내부통신기 내부통신기;
 
     private final 통계엔진통신기 통계엔진통신기;
-
-    private final Gson gson;
 
     private List<TreeBarDTO> addProductVersions(
             PdServiceEntity product,
@@ -184,7 +182,7 @@ public class ScopeServiceImpl implements ScopeService {
         이슈_맵.put("req", null);
         이슈_맵.put("subtask", null);
 
-        검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
+        검색결과_목록_메인 집계결과목록 = 일반_버전필터_집계.getBody();
         if (집계결과목록 != null) {
             이슈_맵.put("total", 집계결과목록.get전체합계()); // 총 이슈
 
@@ -322,7 +320,7 @@ public class ScopeServiceImpl implements ScopeService {
 
         List<LoadReqAddDTO> loadReqAddDTOList = 요구사항목록조회.getBody();
 
-        if (loadReqAddDTOList.isEmpty()) {
+        if (CollectionUtils.isEmpty(loadReqAddDTOList)) {
             log.info("ScopeServiceImpl :: treebar :: loadReqAddDTOList is empty");
             return treeBarList;
         }
