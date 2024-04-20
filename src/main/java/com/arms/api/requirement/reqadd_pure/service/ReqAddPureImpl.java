@@ -11,29 +11,40 @@
  */
 package com.arms.api.requirement.reqadd_pure.service;
 
+import com.arms.api.analysis.common.AggregationMapper;
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
-
 import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.service.JiraServer;
-
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
-
 import com.arms.api.requirement.reqadd_pure.model.ReqAddPureEntity;
+import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
-
 import lombok.AllArgsConstructor;
-
+import org.apache.commons.lang.StringUtils;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service("reqAddPure")
@@ -42,10 +53,13 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
+	private 엔진통신기 엔진통신기;
 
 	@Autowired
-	private com.arms.api.util.communicate.internal.내부통신기 내부통신기;
+	private 통계엔진통신기 통계엔진통신기;
+
+	@Autowired
+	private 내부통신기 내부통신기;
 
 	@Autowired
 	private GlobalTreeMapService globalTreeMapService;
@@ -61,6 +75,8 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	@Autowired
 	@Qualifier("jiraServer")
 	private JiraServer jiraServer;
+
+	private final AggregationMapper aggregationMapper;
 
 	@Autowired
 	protected Chat chat;
@@ -78,4 +94,96 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 		return savedReqAddPureEntity;
 	}
 
+	@Override
+	public List<ReqAddPureEntity> reqProgress(ReqAddPureEntity reqAddPureEntity, String changeReqTableName,
+											  Long pdServiceId, List<Long> pdServiceVersionLinks, HttpServletRequest request) throws Exception {
+
+		SessionUtil.setAttribute("reqProgress", changeReqTableName);
+
+		// 전체 조회하여 리턴 - 선택된 버전과 폴더 타입만 조회하도록 변경
+		// List<ReqAddPureEntity> list2 = this.getChildNodeWithoutPaging(reqAddPureEntity);
+
+		if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+			Disjunction orCondition = Restrictions.disjunction();
+			for (Long 버전 : pdServiceVersionLinks) {
+				String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+				orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+			}
+			orCondition.add(Restrictions.eq("c_type", TreeConstant.Branch_TYPE));
+			reqAddPureEntity.getCriterions().add(orCondition);
+		}
+
+		List<ReqAddPureEntity> list = this.getChildNode(reqAddPureEntity);
+
+		SessionUtil.removeAttribute("reqProgress");
+
+		지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+				.메인그룹필드("cReqLink")
+				.컨텐츠보기여부(false)
+				.크기(1000)
+				.build();
+
+		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+
+		AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
+		aggregationRequestDTO.setPdServiceLink(pdServiceId);
+		aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
+		aggregationRequestDTO.set메인그룹필드("cReqLink");
+
+		EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+		ResponseEntity<검색결과_목록_메인> 완료상태 = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, "resolutiondate");
+
+		Map<Long, Map<String, Long>> 진행률계산맵 = new HashMap<>();
+
+		// 제품 아이디, 버전들의 적용된
+		검색결과_목록_메인 일반_버전필터_집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
+		집계결과처리(진행률계산맵, 일반_버전필터_집계결과목록, "전체");
+
+		검색결과_목록_메인 완료상태집계결과목록 = Optional.ofNullable(완료상태.getBody()).orElse(new 검색결과_목록_메인());
+		집계결과처리(진행률계산맵, 완료상태집계결과목록, "완료");
+
+		List<ReqAddPureEntity> result = list.stream().map(reqAddEntity -> {
+				// 폴더 타입 요구사항은 리턴, defalut 타입 요구사항에 대해서는 실적계산
+				if (reqAddEntity.getC_type() != null && StringUtils.equals(reqAddEntity.getC_type(), TreeConstant.Branch_TYPE)) {
+					return reqAddEntity;
+				}
+
+				Map<String, Long> 전체완료맵 = 진행률계산맵.get(reqAddEntity.getC_id());
+				if (전체완료맵 != null) {
+					Long 전체개수 = 전체완료맵.getOrDefault("전체", 0L);
+					Long 완료개수 = 전체완료맵.getOrDefault("완료", 0L);
+
+					Long 진행률 = 실적계산(전체개수, 완료개수);
+
+					reqAddEntity.setC_req_performance_progress(진행률);
+				}
+
+				return reqAddEntity;
+			})
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
+
+		return result;
+	}
+
+	private void 집계결과처리(Map<Long, Map<String, Long>> 진행률계산맵, 검색결과_목록_메인 집계결과목록, String 상태) {
+		Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
+		if (메인그룹_집계결과 != null) {
+			List<검색결과> 요구사항_아이디기준 = 메인그룹_집계결과.get("group_by_cReqLink");
+			if (요구사항_아이디기준 != null) {
+				for (검색결과 요구사항아이디 : 요구사항_아이디기준) {
+					String 필드명 = 요구사항아이디.get필드명();
+					Long 개수 = 요구사항아이디.get개수();
+
+					if (필드명 != null && 개수 != null) {
+						진행률계산맵.computeIfAbsent(Long.parseLong(필드명), k -> new HashMap<>()).put(상태, 개수);
+					}
+				}
+			}
+		}
+	}
+
+	private Long 실적계산(Long 전체개수, Long 완료개수) {
+		return 전체개수 > 0 ? (완료개수 * 100) / 전체개수 : 0L;
+	}
 }
