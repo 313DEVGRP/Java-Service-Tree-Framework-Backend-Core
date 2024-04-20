@@ -425,6 +425,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             reqAddEntity.setC_req_end_date(null);
         }
 
+        long 총계획일수 = reqAddEntity.getC_req_plan_time();
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
+
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
         return ResponseEntity.ok(CommonResponse.success(result));
