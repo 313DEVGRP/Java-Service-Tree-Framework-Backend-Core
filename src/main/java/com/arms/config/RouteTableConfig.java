@@ -1,4 +1,4 @@
-package com.arms.egovframework.javaservice.treeframework.interceptor;
+package com.arms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
