@@ -579,19 +579,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     }
 
 
-    @GetMapping(value = "/{changeReqTableName}/getNode.do/{c_id}")
+    @GetMapping(value = "/{changeReqTableName}/getNodeDetail.do")
     public ResponseEntity<LoadReqAddDTO> loadReqNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
+            @RequestParam(value = "c_id") Long c_id, HttpServletRequest request
     ) throws Exception {
 
-        log.info("ReqAddController :: getNode.do :: 단건 조회");
+        log.info("ReqAddController :: getNodeDetail.do :: changeReqTableName {} :: c_id {}", changeReqTableName, c_id);
 
-        log.info("ReqAddController :: getNode.do :: changeReqTableName :: " + changeReqTableName);
-
-        log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
-
-        SessionUtil.setAttribute("getNode", changeReqTableName);
+        SessionUtil.setAttribute("getNodeDetail", changeReqTableName);
 
         ReqAddEntity reqAddEntity = new ReqAddEntity();
 
@@ -599,13 +595,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity response = reqAdd.getNode(reqAddEntity);
 
-        log.info("ReqAddController :: getNode.do :: response :: " + response);
+        log.info("ReqAddController :: getNodeDetail.do :: response :: " + response);
 
         LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
 
-        log.info("ReqAddController :: getNode.do :: reqAddDto :: " + reqAddDto);
+        log.info("ReqAddController :: getNodeDetail.do :: reqAddDto :: " + reqAddDto);
 
-        SessionUtil.removeAttribute("getNode");
+        SessionUtil.removeAttribute("getNodeDetail");
 
         return ResponseEntity.ok(reqAddDto);
     }
