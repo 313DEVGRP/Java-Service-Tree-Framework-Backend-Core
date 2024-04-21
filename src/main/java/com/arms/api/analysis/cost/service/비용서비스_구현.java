@@ -23,7 +23,6 @@ import com.arms.api.analysis.salary.service.SalaryLog;
 import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
-import com.arms.api.util.communicate.external.EngineUtils;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -333,7 +332,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
         List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        List<검색결과> engineResponse = EngineUtils.flat(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "cReqLink");
+        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "cReqLink");
 
         List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
@@ -764,8 +763,21 @@ public class 비용서비스_구현 implements 비용서비스 {
         engineAggregationRequestDTO.setIsReqType(IsReqType.ALL);
         engineAggregationRequestDTO.setPdServiceLink(pdServiceLink);
         engineAggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-        List<검색결과> result = EngineUtils.flat(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
+        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
         return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
+
+    private List<검색결과> engineResponseNullFilter(검색결과_목록_메인 nullableBody, String mainAggregationGroupField) {
+        if (nullableBody == null) {
+            return Collections.emptyList();
+        }
+        Map<String, List<검색결과>> nullableMap = nullableBody.get검색결과();
+        List<검색결과> nullableList = nullableMap.get("group_by_" + mainAggregationGroupField);
+        if (nullableList == null) {
+            return Collections.emptyList();
+        }
+        return nullableList;
+    }
+
 }
 
