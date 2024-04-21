@@ -18,6 +18,8 @@ import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd_pure.model.ReqAddPureEntity;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
@@ -76,6 +78,10 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	@Qualifier("jiraServer")
 	private JiraServer jiraServer;
 
+	@Autowired
+	@Qualifier("reqState")
+	private ReqState reqState;
+
 	private final AggregationMapper aggregationMapper;
 
 	@Autowired
@@ -113,7 +119,7 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 			reqAddPureEntity.getCriterions().add(orCondition);
 		}
 
-		List<ReqAddPureEntity> list = this.getChildNode(reqAddPureEntity);
+		List<ReqAddPureEntity> 전체요구사항_목록 = this.getChildNode(reqAddPureEntity);
 
 		SessionUtil.removeAttribute("reqProgress");
 
@@ -142,45 +148,57 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 		검색결과_목록_메인 완료상태집계결과목록 = Optional.ofNullable(완료상태.getBody()).orElse(new 검색결과_목록_메인());
 		집계결과처리(진행률계산맵, 완료상태집계결과목록, "완료");
 
-		List<ReqAddPureEntity> result = list.stream().map(reqAddEntity -> {
+		ReqStateEntity reqStateEntity = new ReqStateEntity();
+		Map<Long, ReqStateEntity> 완료상태맵 = reqState.완료상태조회(reqStateEntity);
+
+		List<ReqAddPureEntity> 실적계산_결과목록 = 전체요구사항_목록.stream().map(요구사항_엔티티 -> {
 				// 폴더 타입 요구사항은 리턴, defalut 타입 요구사항에 대해서는 실적계산
-				if (reqAddEntity.getC_type() != null && StringUtils.equals(reqAddEntity.getC_type(), TreeConstant.Branch_TYPE)) {
-					return reqAddEntity;
+				if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
+					return 요구사항_엔티티;
 				}
 
-				Map<String, Long> 전체완료맵 = 진행률계산맵.get(reqAddEntity.getC_id());
-				if (전체완료맵 != null) {
-					Long 전체개수 = 전체완료맵.getOrDefault("전체", 0L);
-					Long 완료개수 = 전체완료맵.getOrDefault("완료", 0L);
+				// 요구사항 req state가 완료상태일 경우 실적 100% 처리
+				if (요구사항_엔티티.getC_req_state_link() != null && 완료상태맵.get(요구사항_엔티티.getC_req_state_link()) != null) {
+					요구사항_엔티티.setC_req_performance_progress(100L);
+				}
+				else {
+					Map<String, Long> 전체완료맵 = 진행률계산맵.get(요구사항_엔티티.getC_id());
+					if (전체완료맵 != null) {
+						Long 전체개수 = 전체완료맵.getOrDefault("전체", 0L);
+						Long 완료개수 = 전체완료맵.getOrDefault("완료", 0L);
 
-					Long 진행률 = 실적계산(전체개수, 완료개수);
+						Long 진행률 = 실적계산(전체개수, 완료개수);
 
-					reqAddEntity.setC_req_performance_progress(진행률);
+						요구사항_엔티티.setC_req_performance_progress(진행률);
+					}
 				}
 
-				return reqAddEntity;
+				return 요구사항_엔티티;
 			})
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
 
-		return result;
+		return 실적계산_결과목록;
 	}
 
 	private void 집계결과처리(Map<Long, Map<String, Long>> 진행률계산맵, 검색결과_목록_메인 집계결과목록, String 상태) {
 		Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
-		if (메인그룹_집계결과 != null) {
-			List<검색결과> 요구사항_아이디기준 = 메인그룹_집계결과.get("group_by_cReqLink");
-			if (요구사항_아이디기준 != null) {
-				for (검색결과 요구사항아이디 : 요구사항_아이디기준) {
-					String 필드명 = 요구사항아이디.get필드명();
-					Long 개수 = 요구사항아이디.get개수();
-
-					if (필드명 != null && 개수 != null) {
-						진행률계산맵.computeIfAbsent(Long.parseLong(필드명), k -> new HashMap<>()).put(상태, 개수);
-					}
-				}
-			}
-		}
+		Optional.ofNullable(메인그룹_집계결과)
+			.map(결과 -> 결과.get("group_by_cReqLink"))
+			.ifPresent(요구사항_아이디기준 -> 요구사항_아이디기준.stream()
+					.forEach(요구사항아이디 -> {
+						Optional.ofNullable(요구사항아이디.get필드명()).ifPresent(필드명 -> {
+							try {
+								Long 필드명Long = Long.parseLong(필드명);
+								Optional.ofNullable(요구사항아이디.get개수()).ifPresent(개수 ->
+										진행률계산맵.computeIfAbsent(필드명Long, k -> new HashMap<>()).put(상태, 개수)
+								);
+							} catch (NumberFormatException e) {
+								logger.error("필드명을 Long으로 파싱하는데 실패: " + 필드명, e);
+							}
+						});
+					})
+			);
 	}
 
 	private Long 실적계산(Long 전체개수, Long 완료개수) {

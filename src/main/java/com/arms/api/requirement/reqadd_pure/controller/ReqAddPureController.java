@@ -325,19 +325,12 @@ public class ReqAddPureController extends TreeAbstractController<ReqAddPure, Req
             @RequestParam(required = false) List<Long> pdServiceVersionLinks,
             ReqAddPureDTO reqAddPureDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
-        long 시작시간 = System.currentTimeMillis();
-
         log.info("ReqAddPureController :: reqProgress");
         ReqAddPureEntity reqAddPureEntity = modelMapper.map(reqAddPureDTO, ReqAddPureEntity.class);
         List<ReqAddPureEntity> list = reqAddPure.reqProgress(reqAddPureEntity, changeReqTableName, pdServiceId, pdServiceVersionLinks, request);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
-
-        long 종료시간 = System.currentTimeMillis();
-
-        long 걸린시간 = 종료시간 - 시작시간;
-        log.info("API 호출이 걸린 시간: " + 걸린시간 + "밀리초");
 
         return modelAndView;
     }
