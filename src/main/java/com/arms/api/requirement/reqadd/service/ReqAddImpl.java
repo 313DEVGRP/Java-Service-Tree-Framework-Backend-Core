@@ -514,7 +514,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			return 1;
 
 		}
-		else if (reqAddEntity.getC_req_etc().equals("칸반")) {
+		else if (reqAddEntity.getC_req_etc() != null && StringUtils.equals(reqAddEntity.getC_req_etc(), "칸반")) {
 
 			// ReqAdd 업데이트
 			SessionUtil.setAttribute("updateNode", changeReqTableName);
