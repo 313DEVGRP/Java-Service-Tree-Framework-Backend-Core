@@ -346,7 +346,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         long 총계획일수 = 0;
         if (reqAddEntity.getC_req_plan_time() != null) {
-            reqAddEntity.getC_req_plan_time();
+            총계획일수 = reqAddEntity.getC_req_plan_time();
         }
 
         long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
@@ -434,9 +434,11 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             reqAddEntity.setC_req_end_date(null);
         }
 
-        long 총계획일수 = reqAddEntity.getC_req_plan_time();
-        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
-        reqAddEntity.setC_req_plan_resource(총계획MM);
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            long 총계획일수 = reqAddEntity.getC_req_plan_time();
+            long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+            reqAddEntity.setC_req_plan_resource(총계획MM);
+        }
 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
