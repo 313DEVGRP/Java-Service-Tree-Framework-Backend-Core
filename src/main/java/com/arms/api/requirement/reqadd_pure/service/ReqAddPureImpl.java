@@ -27,14 +27,17 @@ import com.arms.api.util.communicate.external.response.aggregation.검색결과_
 import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,24 +105,32 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 	@Override
 	public List<ReqAddPureEntity> reqProgress(ReqAddPureEntity reqAddPureEntity, String changeReqTableName,
-											  Long pdServiceId, List<Long> pdServiceVersionLinks, HttpServletRequest request) throws Exception {
+											  Long pdServiceId, String c_req_pdservice_versionset_link, HttpServletRequest request) throws Exception {
+
+		String[] versionStrArr = StringUtils.split(c_req_pdservice_versionset_link, ",");
 
 		SessionUtil.setAttribute("reqProgress", changeReqTableName);
 
 		// 전체 조회하여 리턴 - 선택된 버전과 폴더 타입만 조회하도록 변경
 		// List<ReqAddPureEntity> list2 = this.getChildNodeWithoutPaging(reqAddPureEntity);
 
-		if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+		List<ReqAddPureEntity> 전체요구사항_목록;
+		if (versionStrArr == null || versionStrArr.length == 0) {
+			reqAddPureEntity.setOrder(Order.asc("c_position"));
+			전체요구사항_목록 = this.getChildNodeWithoutPaging(reqAddPureEntity);
+		}
+		else {
 			Disjunction orCondition = Restrictions.disjunction();
-			for (Long 버전 : pdServiceVersionLinks) {
-				String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
-				orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+			for (String versionStr : versionStrArr) {
+				versionStr = "\\\"" + versionStr + "\\\"";
+				orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
 			}
 			orCondition.add(Restrictions.eq("c_type", TreeConstant.Branch_TYPE));
 			reqAddPureEntity.getCriterions().add(orCondition);
-		}
+			reqAddPureEntity.setOrder(Order.asc("c_position"));
 
-		List<ReqAddPureEntity> 전체요구사항_목록 = this.getChildNode(reqAddPureEntity);
+			전체요구사항_목록 = this.getChildNode(reqAddPureEntity);
+		}
 
 		SessionUtil.removeAttribute("reqProgress");
 
@@ -128,6 +139,11 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 				.컨텐츠보기여부(false)
 				.크기(1000)
 				.build();
+
+		List<Long> pdServiceVersionLinks = Optional.ofNullable(c_req_pdservice_versionset_link)
+				.map(버전유틸::convertToLongArray)
+				.map(Arrays::asList)
+				.orElse(Collections.emptyList());
 
 		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
@@ -155,6 +171,15 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 				// 폴더 타입 요구사항은 리턴, defalut 타입 요구사항에 대해서는 실적계산
 				if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
 					return 요구사항_엔티티;
+				}
+
+				if (요구사항_엔티티.getC_req_start_date() != null && 요구사항_엔티티.getC_req_end_date() != null) {
+					Date 시작일 = DateUtils.getStartOfDate(요구사항_엔티티.getC_req_start_date());
+					Date 종료일 = DateUtils.getStartOfDate(요구사항_엔티티.getC_req_end_date());
+					Date 오늘 = DateUtils.getStartOfDate(new Date());
+
+					long 진행율 = 계획진행률_계산(시작일, 종료일, 오늘);
+					요구사항_엔티티.setC_req_plan_progress(진행율);
 				}
 
 				// 요구사항 req state가 완료상태일 경우 실적 100% 처리
@@ -203,5 +228,20 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 	private Long 실적계산(Long 전체개수, Long 완료개수) {
 		return 전체개수 > 0 ? (완료개수 * 100) / 전체개수 : 0L;
+	}
+
+	private long 계획진행률_계산(Date 시작일, Date 종료일, Date 오늘) {
+		long 진행율 = 0L;
+
+		if (오늘.after(시작일)) {
+			long 전체일수 = DateUtils.getDiffDay(시작일, 종료일);
+			long 진행일수 = DateUtils.getDiffDay(시작일, 오늘);
+
+			if (전체일수 > 0) {
+				진행율 = (진행일수 * 100) / 전체일수;
+			}
+		}
+
+		return Math.min(진행율, 100L);
 	}
 }

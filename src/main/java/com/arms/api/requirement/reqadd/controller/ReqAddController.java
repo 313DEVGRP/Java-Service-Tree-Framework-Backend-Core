@@ -330,14 +330,19 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
 
-        // 요구사항 시작일, 종료일 버전 기간을 확인 후 설정
-        List<Long> versionList = List.of(버전유틸.convertToLongArray(reqAddEntity.getC_req_pdservice_versionset_link()));
-        Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
-        String 시작일 = 시작일과_종료일.get("earliestDate");
-        String 종료일 = 시작일과_종료일.get("latestDate");
+        List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
+                .map(버전유틸::convertToLongArray)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
 
-        reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
-        reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
+        if (!versionList.isEmpty()) {
+            Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+            String 시작일 = 시작일과_종료일.get("earliestDate");
+            String 종료일 = 시작일과_종료일.get("latestDate");
+
+            reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
+            reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
+        }
 
         long 총기간일수 = 0;
         if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
@@ -415,24 +420,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
 
-        ReqStateEntity 상태_검색결과 = TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class);
-
-        reqAddEntity.setReqStateEntity(상태_검색결과);
-
-        Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
-
-        if (reqAddDTO.getC_req_start_date() != null) {
-            reqAddEntity.setC_req_start_date(reqAddDTO.getC_req_start_date());
-        }
-
-        boolean isCompleted = 완료_키워드_셋.contains(상태_검색결과.getC_title());
-
-        if (isCompleted) {
-            Date endDate = Optional.ofNullable(reqAddDTO.getC_req_end_date()).orElse(new Date());
-            reqAddEntity.setC_req_end_date(endDate);
-        } else {
-            reqAddEntity.setC_req_end_date(null);
-        }
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
         if (reqAddEntity.getC_req_plan_time() != null) {
             long 총계획일수 = reqAddEntity.getC_req_plan_time();

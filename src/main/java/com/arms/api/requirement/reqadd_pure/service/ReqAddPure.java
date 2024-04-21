@@ -21,5 +21,5 @@ public interface ReqAddPure extends TreeService {
 
     public ReqAddPureEntity moveReqNode(ReqAddPureEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception;
 
-    public List<ReqAddPureEntity> reqProgress(ReqAddPureEntity reqAddEntity, String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks, HttpServletRequest request) throws Exception;
+    public List<ReqAddPureEntity> reqProgress(ReqAddPureEntity reqAddEntity, String changeReqTableName, Long pdServiceId, String c_req_pdservice_versionset_link, HttpServletRequest request) throws Exception;
 }
