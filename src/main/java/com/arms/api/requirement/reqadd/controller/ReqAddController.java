@@ -285,9 +285,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
                 versionStr = "\\\"" + versionStr + "\\\"";
                 orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
             }
-            orCondition.add(Restrictions.eq("c_type","folder"));
 
-            reqAddEntity.getCriterions().add(orCondition);
+            if (reqAddEntity.getC_type() != null) {
+                reqAddEntity.getCriterions().add(orCondition);
+                reqAddEntity.getCriterions().add(Restrictions.eq("c_type", reqAddEntity.getC_type()));
+            } else {
+                orCondition.add(Restrictions.eq("c_type","folder"));
+                reqAddEntity.getCriterions().add(orCondition);
+            }
+
             reqAddEntity.setOrder(Order.asc("c_position"));
 
             savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);

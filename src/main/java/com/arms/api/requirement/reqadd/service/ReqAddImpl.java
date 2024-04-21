@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -512,6 +513,20 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			return 1;
 
+		}
+		else if (reqAddEntity.getC_req_etc().equals("칸반")) {
+
+			// ReqAdd 업데이트
+			SessionUtil.setAttribute("updateNode", changeReqTableName);
+
+			ModelMapper modelMapper = new ModelMapper();
+			ReqAddEntity loadReqAddEntity = modelMapper.map(loadReqAddDTO, ReqAddEntity.class);
+			loadReqAddEntity.setReqStateEntity(reqAddEntity.getReqStateEntity());
+
+			this.updateNode(loadReqAddEntity);
+			SessionUtil.removeAttribute("updateNode");
+
+			return 1;
 		}
 		else{
 			String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", ""); // ex) 22
