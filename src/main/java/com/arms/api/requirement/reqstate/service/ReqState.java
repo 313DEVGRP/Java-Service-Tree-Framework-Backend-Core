@@ -11,10 +11,12 @@
  */
 package com.arms.api.requirement.reqstate.service;
 
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
+
+import java.util.Map;
 
 public interface ReqState extends TreeService {
 
-
-
+    Map<Long, ReqStateEntity> 완료상태조회(ReqStateEntity reqStateEntity) throws Exception;
 }
