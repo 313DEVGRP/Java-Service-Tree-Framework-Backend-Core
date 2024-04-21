@@ -326,8 +326,10 @@ public class ReqAddPureController extends TreeAbstractController<ReqAddPure, Req
             ReqAddPureDTO reqAddPureDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddPureController :: reqProgress");
+        Long 제품서비스_아이디 = Long.parseLong(StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", ""));
+
         ReqAddPureEntity reqAddPureEntity = modelMapper.map(reqAddPureDTO, ReqAddPureEntity.class);
-        List<ReqAddPureEntity> list = reqAddPure.reqProgress(reqAddPureEntity, changeReqTableName, pdServiceId, pdServiceVersionLinks, request);
+        List<ReqAddPureEntity> list = reqAddPure.reqProgress(reqAddPureEntity, changeReqTableName, 제품서비스_아이디, reqAddPureEntity.getC_req_pdservice_versionset_link(), request);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
