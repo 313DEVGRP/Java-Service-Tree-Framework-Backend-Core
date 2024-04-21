@@ -273,25 +273,28 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         String[] versionStrArr = StringUtils.split(reqAddEntity.getC_req_pdservice_versionset_link(), ",");
 
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        List<ReqAddEntity> savedList = new ArrayList<>();
         if (versionStrArr == null || versionStrArr.length == 0) {
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", "result is empty");
-            return modelAndView;
+            reqAddEntity.setOrder(Order.asc("c_position"));
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+            SessionUtil.removeAttribute("getReqAddListByFilter");
         } else {
             Disjunction orCondition = Restrictions.disjunction();
             for (String versionStr : versionStrArr) {
                 versionStr = "\\\"" + versionStr + "\\\"";
                 orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
             }
+            orCondition.add(Restrictions.eq("c_type","folder"));
+
             reqAddEntity.getCriterions().add(orCondition);
+            reqAddEntity.setOrder(Order.asc("c_position"));
 
-            List<ReqAddEntity> savedList = reqAdd.getChildNode(reqAddEntity);
-
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
             SessionUtil.removeAttribute("getReqAddListByFilter");
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", savedList);
-            return modelAndView;
         }
+        modelAndView.addObject("result", savedList);
+        return modelAndView;
 
     }
 
