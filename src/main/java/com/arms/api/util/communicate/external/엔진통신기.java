@@ -114,7 +114,7 @@ public interface 엔진통신기 {
 
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
-                                                @RequestBody EngineAggregationRequestDTO engineAggregationRequestDTO);
+                                                @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO);
 
     @PostMapping("/engine/jira/field/update/c_req_link")
     ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);

@@ -74,6 +74,9 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     @Autowired
     private 통계엔진통신기 통계엔진통신기;
 
+    @Autowired
+    private 엔진통신기 엔진통신기;
+
     @PostConstruct
     public void initialize() {
         setTreeService(reqStatus);
@@ -145,6 +148,10 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         EngineAggregationRequestDTO 요청 = new EngineAggregationRequestDTO();
 
+        ParameterParser parser = new ParameterParser(request);
+        String versionsString = parser.get("version");
+        요청.setPdServiceVersionLinks(Arrays.stream(versionsString.split(",")).map(Long::parseLong).collect(Collectors.toList()));
+
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 엔진통신기.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
         return modelAndView;
@@ -189,8 +196,8 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         List<ReqStatusEntity> list = reqStatus.getNodesWithoutRoot(statusEntity);
 
-        List<Long> versionList = list.stream()
-                .map(ReqStatusEntity::getC_pds_version_link)
+        List<String> versionList = list.stream()
+                .map(ReqStatusEntity::getC_req_pdservice_versionset_link)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -228,9 +235,6 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return modelAndView;
     }
 
-    @Autowired
-    private 엔진통신기 엔진통신기;
-
     static final long dummy_jira_server = 0L;
     @ResponseBody
     @RequestMapping(
@@ -249,8 +253,6 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result",
-        /*        엔진통신기.제품서비스_버전별_상태값_통계(dummy_jira_server, pdService,
-                        List.of(pds_version).stream().toArray(Long[]::new)));*/
                         통계엔진통신기.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
         return modelAndView;
 
