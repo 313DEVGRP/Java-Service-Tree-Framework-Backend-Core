@@ -43,13 +43,13 @@ public class TimeServiceImpl implements TimeService{
 
     @Override
     public List<지라이슈> 제품서비스_버전목록으로_조회(Long dummy_jira_server, Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        List<지라이슈> result = 엔진통신기.제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> result = 통계엔진통신기.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return result;
     }
 
     @Override
     public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long dummy_jira_server, Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        히트맵데이터 result = 엔진통신기.히트맵_제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
+        히트맵데이터 result = 통계엔진통신기.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return result;
     }
 

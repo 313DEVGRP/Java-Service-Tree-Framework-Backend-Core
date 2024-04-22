@@ -12,6 +12,10 @@
 package com.arms.api.jira.jiraserver.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
+import com.arms.api.jira.jiraserver.model.계정정보_데이터;
+import com.arms.api.jira.jiraserver.model.enums.EntityType;
+import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
+import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -21,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -43,6 +48,9 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     @Autowired
     @Qualifier("jiraServer")
     private JiraServer jiraServer;
+
+    @Autowired
+    private 엔진통신기 엔진통신기;
 
     @PostConstruct
     public void initialize() {
@@ -90,13 +98,16 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             value={"{renewTarget}/renewNode.do"},
             method = {RequestMethod.PUT }
     )
-    public ResponseEntity<?> 지라_서버_항목별_갱신(
-            @PathVariable String renewTarget, JiraServerDTO jiraServerDTO) throws Exception{
+    public ResponseEntity<?> 지라_서버_항목별_갱신(@PathVariable String renewTarget,
+                                          String projectCId,
+                                          JiraServerDTO jiraServerDTO) throws Exception{
 
         log.info("JiraServerController :: 지라_서버_항목별_갱신 갱신종류=> {}", renewTarget);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(renewTarget, jiraServerEntity)));
+        EntityType 갱신항목 = EntityType.fromString(renewTarget);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_엔티티_항목별_갱신(갱신항목, projectCId, jiraServerEntity)));
     }
 
     @ResponseBody
@@ -178,9 +189,6 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     }
 
 
-
-
-
     @ResponseBody
     @RequestMapping(
             value = {"/{defaultTarget}/makeDefault.do"},
@@ -193,7 +201,9 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         log.info("JiraServerController :: 온프레미스_항목별_기본값_설정, 설정할_항목 : {}, 항목_c_id : {}", 설정할_항목, 항목_c_id);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(설정할_항목,항목_c_id,jiraServerEntity)));
+        EntityType 갱신항목 = EntityType.fromString(설정할_항목);
+
+        return ResponseEntity.ok(CommonResponse.success(jiraServer.서버_항목별_기본값_설정(갱신항목, 항목_c_id, jiraServerEntity)));
     }
 
     @ResponseBody
@@ -207,6 +217,25 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", jiraServer.암스_및_엔진_서버정보수정(treeSearchEntity));
         return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/verifyAccount.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> 계정정보_검증하기(지라서버정보_데이터 지라서버정보_데이터) throws Exception {
+
+        log.info("JiraServerController :: 계정정보_검증하기");
+
+        try{
+            계정정보_데이터 검증결과 = 엔진통신기.계정정보_검증하기(지라서버정보_데이터).getBody();
+            return ResponseEntity.ok(CommonResponse.success( 검증결과));
+        }catch (Exception e){
+            log.error("온프라미스 계정 정보 조회시 오류가 발생하였습니다." + e.getMessage());
+            CommonResponse.ApiResult<?> errorResult = CommonResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
+        }
     }
 
 }

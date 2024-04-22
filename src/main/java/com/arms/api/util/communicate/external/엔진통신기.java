@@ -1,19 +1,12 @@
 package com.arms.api.util.communicate.external;
 
-import com.arms.api.analysis.time.model.히트맵데이터;
+import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
-import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.external.response.jira.지라이슈_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈생성_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈우선순위_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈해결책_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라프로젝트_데이터;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라서버정보_엔티티;
+import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -96,10 +89,6 @@ public interface 엔진통신기 {
             @RequestParam("cReqLink") Long cReqLink
     );
 
-    @GetMapping("/engine/jira/{connectId}/issue/getProgress/{pdService}/{pdServiceVersion}")
-    public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("connectId") Long 지라서버_아이디,
-                                              @PathVariable("pdService") Long 제품서비스_아이디,
-                                              @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디);
 
     /*
      * 요구사항 상세 페이지
@@ -115,12 +104,6 @@ public interface 엔진통신기 {
                                              @PathVariable("issueKey") String 이슈키,
                                              @RequestParam("assigneeEmail") String 담당자_이메일);
 
-
-    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions")
-    List<지라이슈> 제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                               @RequestParam Long pdServiceLink,
-                               @RequestParam List<Long> pdServiceVersionLinks);
-
     /*
      * 이슈 가져오기.
      */
@@ -129,17 +112,15 @@ public interface 엔진통신기 {
                    @PathVariable("reqProjectKey") String 지라프로젝트_키,
                    @PathVariable("reqIssueKey") String 지라이슈_키);
 
-    @GetMapping("/engine/jira/{connectId}/issue/pdService/pdServiceVersions/heatmap")
-    히트맵데이터 히트맵_제품서비스_버전목록으로_조회(@PathVariable("connectId") Long 지라서버_아이디,
-                               @RequestParam Long pdServiceLink,
-                               @RequestParam List<Long> pdServiceVersionLinks);
-
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
                                                 @RequestBody EngineAggregationRequestDTO engineAggregationRequestDTO);
 
     @PostMapping("/engine/jira/field/update/c_req_link")
     ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
+
+    @GetMapping("/alm/account/verify")
+    ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
 
 
 }

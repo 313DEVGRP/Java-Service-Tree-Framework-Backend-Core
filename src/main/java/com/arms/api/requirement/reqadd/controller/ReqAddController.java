@@ -11,15 +11,13 @@
  */
 package com.arms.api.requirement.reqadd.controller;
 
-import static java.util.Comparator.*;
-import static java.util.stream.Collectors.*;
-
+import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
-import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
-import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddDateDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
+import com.arms.api.requirement.reqadd.model.*;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqdifficulty.service.ReqDifficulty;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
@@ -29,22 +27,18 @@ import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
-import com.arms.api.product_service.pdservice.model.PdServiceEntity;
-import com.arms.api.product_service.pdservice.service.PdService;
-import com.arms.api.requirement.reqadd.model.ReqAddDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
 import com.arms.egovframework.javaservice.treeframework.validation.group.MoveNode;
 import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
-
 import org.hibernate.criterion.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -60,21 +54,17 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.*;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Controller
@@ -88,6 +78,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     @Qualifier("pdService")
     private PdService pdService;
+
+    @Autowired
+    @Qualifier("pdServiceVersion")
+    private PdServiceVersion pdServiceVersion;
 
     @Autowired
     @Qualifier("reqPriority")
@@ -113,7 +107,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     private ReqAddControllerMapper reqAddControllerMapper;
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @ResponseBody
     @RequestMapping(
@@ -121,13 +115,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getMonitor(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             ReqAddDTO reqAddDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getMonitor");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getMonitor",changeReqTableName);
+        SessionUtil.setAttribute("getMonitor", changeReqTableName);
 
         reqAddEntity.setOrder(Order.asc("c_position"));
         List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
@@ -145,17 +139,17 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getNodesWithoutRoot(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             ReqAddDTO reqAddDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getNodesWithoutRoot");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getNodesWithoutRoot",changeReqTableName);
+        SessionUtil.setAttribute("getNodesWithoutRoot", changeReqTableName);
 
         Criterion criterion = Restrictions.not(
                 // replace "id" below with property name, depending on what you're filtering against
-                Restrictions.in("c_id", new Object[] {TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
+                Restrictions.in("c_id", new Object[]{TreeConstant.ROOT_CID, TreeConstant.First_Node_CID})
         );
         reqAddEntity.getCriterions().add(criterion);
         reqAddEntity.setOrder(Order.asc("c_position"));
@@ -173,7 +167,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             value = {"/{changeReqTableName}/getChildNode.do"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView getSwitchDBChildNode(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+    public ModelAndView getSwitchDBChildNode(@PathVariable(value = "changeReqTableName") String changeReqTableName,
                                              ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBChildNode");
@@ -184,7 +178,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getChildNode",changeReqTableName);
+            SessionUtil.setAttribute("getChildNode", changeReqTableName);
 
             reqAddEntity.setWhere("c_parentid", new Long(parser.get("c_id")));
             reqAddEntity.setOrder(Order.asc("c_position"));
@@ -203,8 +197,8 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             value = {"/{changeReqTableName}/getChildNodeWithParent.do"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView getSwitchDBChildNodeWithParent(@PathVariable(value ="changeReqTableName") String changeReqTableName,
-                                               ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+    public ModelAndView getSwitchDBChildNodeWithParent(@PathVariable(value = "changeReqTableName") String changeReqTableName,
+                                                       ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBChildNodeWithParent");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
@@ -214,7 +208,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getChildNodeWithParent",changeReqTableName);
+            SessionUtil.setAttribute("getChildNodeWithParent", changeReqTableName);
 
             Long targetId = new Long(parser.get("c_id"));
             Criterion criterion1 = Restrictions.eq("c_parentid", targetId);
@@ -239,8 +233,8 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getSwitchDBNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName
-            ,ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+            @PathVariable(value = "changeReqTableName") String changeReqTableName
+            , ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("ReqAddController :: getSwitchDBNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
@@ -251,7 +245,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             throw new RuntimeException();
         } else {
 
-            SessionUtil.setAttribute("getNode",changeReqTableName);
+            SessionUtil.setAttribute("getNode", changeReqTableName);
 
             ReqAddEntity returnVO = reqAdd.getNode(reqAddEntity);
 
@@ -269,35 +263,44 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.GET}
     )
     public ModelAndView getReqAddListByFilter(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName
-            ,ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
+            @PathVariable(value = "changeReqTableName") String changeReqTableName
+            , ReqAddDTO reqAddDTO, HttpServletRequest request) throws Exception {
 
         log.info("[ ReqAddController :: getSwitchDBNode ]");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+        SessionUtil.setAttribute("getReqAddListByFilter", changeReqTableName);
 
         String[] versionStrArr = StringUtils.split(reqAddEntity.getC_req_pdservice_versionset_link(), ",");
 
-        if ( versionStrArr == null || versionStrArr.length == 0){
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", "result is empty");
-            return modelAndView;
-        }else{
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        List<ReqAddEntity> savedList = new ArrayList<>();
+        if (versionStrArr == null || versionStrArr.length == 0) {
+            reqAddEntity.setOrder(Order.asc("c_position"));
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+            SessionUtil.removeAttribute("getReqAddListByFilter");
+        } else {
             Disjunction orCondition = Restrictions.disjunction();
-            for ( String versionStr : versionStrArr ){
+            for (String versionStr : versionStrArr) {
                 versionStr = "\\\"" + versionStr + "\\\"";
                 orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
             }
-            reqAddEntity.getCriterions().add(orCondition);
 
-            List<ReqAddEntity> savedList = reqAdd.getChildNode(reqAddEntity);
+            if (reqAddEntity.getC_type() != null) {
+                reqAddEntity.getCriterions().add(orCondition);
+                reqAddEntity.getCriterions().add(Restrictions.eq("c_type", reqAddEntity.getC_type()));
+            } else {
+                orCondition.add(Restrictions.eq("c_type","folder"));
+                reqAddEntity.getCriterions().add(orCondition);
+            }
 
+            reqAddEntity.setOrder(Order.asc("c_position"));
+
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
             SessionUtil.removeAttribute("getReqAddListByFilter");
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", savedList);
-            return modelAndView;
         }
+        modelAndView.addObject("result", savedList);
+        return modelAndView;
 
     }
 
@@ -307,7 +310,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> addReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({AddNode.class}) ReqAddDTO reqAddDTO,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -324,10 +327,39 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        // 요구사항 생성일 및 시작일 업데이트 추가
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
-        reqAddEntity.setC_req_start_date(date);
+
+        List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
+                .map(버전유틸::convertToLongArray)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+
+        if (!versionList.isEmpty()) {
+            Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+            String 시작일 = 시작일과_종료일.get("earliestDate");
+            String 종료일 = 시작일과_종료일.get("latestDate");
+
+            reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
+            reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
+        }
+
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+
+        long 총계획일수 = 0;
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            총계획일수 = reqAddEntity.getC_req_plan_time();
+        }
+
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
@@ -338,11 +370,44 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/addFolderNode.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> addReqFolderNode(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @Validated({AddNode.class}) ReqAddDTO reqAddDTO) throws Exception {
+
+        log.info("ReqAddController :: addReqFolderNode");
+
+        boolean 폴더타입여부 = Optional.ofNullable(reqAddDTO)
+                .map(ReqAddDTO::getC_type)
+                .filter(cType -> !StringUtils.equals(cType ,TreeConstant.Branch_TYPE))
+                .isPresent();
+
+        if (폴더타입여부) {
+            throw new IllegalArgumentException("요구사항 폴더 타입이 아닙니다.");
+        }
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        // 요구사항 폴더 생성일 추가
+        Date date = new Date();
+        reqAddEntity.setC_req_create_date(date);
+
+        ReqAddEntity savedNode = reqAdd.addReqFolderNode(reqAddEntity, changeReqTableName);
+
+        log.info("ReqAddController :: addReqFolderNode");
+
+        return ResponseEntity.ok(CommonResponse.success(savedNode));
+    }
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/updateNode.do"},
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> updateReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -355,23 +420,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
 
-        ReqStateEntity 상태_검색결과 = TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class);
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        reqAddEntity.setReqStateEntity(상태_검색결과);
-
-        Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
-
-        if (reqAddDTO.getC_req_start_date() != null) {
-            reqAddEntity.setC_req_start_date(reqAddDTO.getC_req_start_date());
-        }
-
-        boolean isCompleted = 완료_키워드_셋.contains(상태_검색결과.getC_title());
-
-        if (isCompleted) {
-            Date endDate = Optional.ofNullable(reqAddDTO.getC_req_end_date()).orElse(new Date());
-            reqAddEntity.setC_req_end_date(endDate);
-        } else {
-            reqAddEntity.setC_req_end_date(null);
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            long 총계획일수 = reqAddEntity.getC_req_plan_time();
+            long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+            reqAddEntity.setC_req_plan_resource(총계획MM);
         }
 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
@@ -385,7 +439,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> updateReqDate(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDateDTO reqAddDateDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
@@ -394,7 +448,16 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("updateDate",changeReqTableName);
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
+
+        SessionUtil.setAttribute("updateDate", changeReqTableName);
 
         int result = reqAdd.updateNode(reqAddEntity);
 
@@ -409,14 +472,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> removeReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: removeNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("removeNode",changeReqTableName);
+        SessionUtil.setAttribute("removeNode", changeReqTableName);
 
         int removedReqAddEntity = reqAdd.removeNode(reqAddEntity);
 
@@ -433,14 +496,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             method = {RequestMethod.POST}
     )
     public ResponseEntity<?> moveReqNode(
-            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({MoveNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model) throws Exception {
 
         log.info("ReqAddController :: moveReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("moveNode",changeReqTableName);
+        SessionUtil.setAttribute("moveNode", changeReqTableName);
 
         ReqAddEntity savedReqAddEntity = reqAdd.moveNode(reqAddEntity, request);
 
@@ -452,7 +515,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     }
 
     @ResponseBody
-    @RequestMapping(value="/uploadFileToNode.do", method = RequestMethod.POST)
+    @RequestMapping(value = "/uploadFileToNode.do", method = RequestMethod.POST)
     public ModelAndView uploadFileToNode(final MultipartHttpServletRequest multiRequest,
                                          HttpServletRequest request, Model model) throws Exception {
 
@@ -486,37 +549,33 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     public ResponseEntity excelUpload(@RequestPart("excelFile") MultipartFile excelFile, HttpServletRequest request) throws Exception {
         //확인후에 저장을 하기 위한 샘플입니다.
         return ResponseEntity.ok(CommonResponse.success(
-            new ExcelGantUpload(excelFile.getInputStream())
-                .getGetWebScheduleList()
-                .stream()
-                .sorted(comparing(WbsSchedule::getDepth).reversed())
-                .collect(toList())
-            )
+                        new ExcelGantUpload(excelFile.getInputStream())
+                                .getGetWebScheduleList()
+                                .stream()
+                                .sorted(comparing(WbsSchedule::getDepth).reversed())
+                                .collect(toList())
+                )
         );
     }
 
     @ResponseBody
     @GetMapping(value = "/{changeReqTableName}/getDetail.do")
-    public ResponseEntity<ReqAddDetailDTO> followReqLink(FollowReqLinkDTO followReqLinkDTO,@PathVariable(value ="changeReqTableName") String changeReqTableName
-        ) throws Exception {
+    public ResponseEntity<ReqAddDetailDTO> followReqLink(FollowReqLinkDTO followReqLinkDTO, @PathVariable(value = "changeReqTableName") String changeReqTableName
+    ) throws Exception {
 
-        return  ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO,changeReqTableName));
+        return ResponseEntity.ok(reqAdd.getDetail(followReqLinkDTO, changeReqTableName));
     }
 
 
-    @GetMapping(value = "/{changeReqTableName}/getNode.do/{c_id}")
+    @GetMapping(value = "/{changeReqTableName}/getNodeDetail.do")
     public ResponseEntity<LoadReqAddDTO> loadReqNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
+            @RequestParam(value = "c_id") Long c_id, HttpServletRequest request
     ) throws Exception {
 
-        log.info("ReqAddController :: getNode.do :: 단건 조회");
+        log.info("ReqAddController :: getNodeDetail.do :: changeReqTableName {} :: c_id {}", changeReqTableName, c_id);
 
-        log.info("ReqAddController :: getNode.do :: changeReqTableName :: " + changeReqTableName);
-
-        log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
-
-        SessionUtil.setAttribute("getNode",changeReqTableName);
+        SessionUtil.setAttribute("getNodeDetail", changeReqTableName);
 
         ReqAddEntity reqAddEntity = new ReqAddEntity();
 
@@ -524,15 +583,43 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity response = reqAdd.getNode(reqAddEntity);
 
-        log.info("ReqAddController :: getNode.do :: response :: " + response);
+        log.info("ReqAddController :: getNodeDetail.do :: response :: " + response);
 
         LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
 
-        log.info("ReqAddController :: getNode.do :: reqAddDto :: " + reqAddDto);
+        log.info("ReqAddController :: getNodeDetail.do :: reqAddDto :: " + reqAddDto);
 
-        SessionUtil.removeAttribute("getNode");
+        SessionUtil.removeAttribute("getNodeDetail");
 
         return ResponseEntity.ok(reqAddDto);
+    }
+
+
+    @GetMapping(value = "/{changeReqTableName}/getNodesWhereInIds.do")
+    public ResponseEntity<List<LoadReqAddDTO>> getNodesWhereInIds(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @RequestParam List<Long> ids, HttpServletRequest request
+    ) throws Exception {
+
+        log.info("ReqAddController :: getNodesWhereInIds :: changeReqTableName :: {} :: ids {} ", changeReqTableName, ids);
+
+        SessionUtil.setAttribute("getNodesWhereInIds", changeReqTableName);
+
+        ReqAddEntity reqAddEntity = new ReqAddEntity();
+
+        Criterion criterion = Restrictions.in("c_id", ids);
+
+        reqAddEntity.getCriterions().add(criterion);
+
+        reqAddEntity.setOrder(Order.asc("c_position"));
+
+        List<ReqAddEntity> list = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+
+        SessionUtil.removeAttribute("getNodesWhereInIds");
+
+        List<LoadReqAddDTO> loadReqAddDTOList = list.stream().map(reqAddControllerMapper::toLoadReqAddDto).collect(toList());
+
+        return ResponseEntity.ok(loadReqAddDTOList);
     }
 
     @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)

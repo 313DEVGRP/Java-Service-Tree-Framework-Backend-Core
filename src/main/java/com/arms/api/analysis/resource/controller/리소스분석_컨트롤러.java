@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -105,6 +102,75 @@ public class 리소스분석_컨트롤러 {
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
+    // fetchResourceData 에서만 사용.
+    @GetMapping("/workerStatus/pdServiceId/{pdServiceId}")
+    public ModelAndView 작업자별_업무_처리_현황(@PathVariable("pdServiceId") Long pdServiceId,
+                                   @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("[리소스분석_컨트롤러 :: 작업자별_업무_처리_현황] :: pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
+
+        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("assignee.assignee_emailAddress.keyword")
+                .하위그룹필드들(Arrays.asList("isReq,status.status_name.keyword".split(",")))
+                .컨텐츠보기여부(false)
+                .크기(1000)
+                .하위크기(1000)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
+    @GetMapping("/req-subtask-pie/pdServiceId/{pdServiceId}")
+    public ModelAndView 작업자_요구사항_연결이슈_파이차트(@PathVariable("pdServiceId") Long pdServiceId,
+                                                        @RequestParam List<Long> pdServiceVersionLinks,
+                                                        @RequestParam int size) throws Exception {
+
+        log.info("[리소스분석_컨트롤러 :: 작업자별_업무_처리_현황] :: pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
+
+        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("isReq")
+                .하위그룹필드들(Arrays.asList("assignee.assignee_emailAddress.keyword".split(",")))
+                .컨텐츠보기여부(false)
+                .크기(size)
+                .하위크기(1000)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
+    // getAssigneeInfo 에서만 사용.
+    @GetMapping("/assignee-infos/{pdServiceId}")
+    public ModelAndView 작업자_정보_통계(@PathVariable("pdServiceId") Long pdServiceId,
+                                   @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("리소스분석_컨트롤러 :: 작업자_정보_통계.제품서비스의 c_id ==> {}, 선택된버전의 c_id ==> {}", pdServiceId, pdServiceVersionLinks.toString());
+        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("assignee.assignee_emailAddress.keyword")
+                .컨텐츠보기여부(false)
+                .크기(1000)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
+                = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
+        modelAndView.addObject("result", 통신결과);
         return modelAndView;
     }
 

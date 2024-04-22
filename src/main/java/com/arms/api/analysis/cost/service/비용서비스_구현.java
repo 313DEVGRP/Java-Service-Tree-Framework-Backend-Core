@@ -1,12 +1,16 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.cost.dto.CandleStick;
+import com.arms.api.analysis.cost.dto.ProductCostResponse;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.dto.버전요구사항별_담당자데이터;
-import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
-import com.arms.api.salary.model.SalaryEntity;
+import com.arms.api.analysis.salary.model.SalaryLogJdbcDTO;
+import com.arms.api.analysis.salary.model.SalaryEntity;
 import com.arms.api.analysis.cost.dto.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
@@ -15,7 +19,8 @@ import com.arms.api.requirement.reqdifficulty.model.ReqDifficultyEntity;
 import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import com.arms.api.salary.service.SalaryService;
+import com.arms.api.analysis.salary.service.SalaryLog;
+import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -25,68 +30,59 @@ import com.arms.api.util.communicate.external.request.aggregation.지라이슈_�
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class 비용서비스_구현 implements 비용서비스 {
-
-    private final Logger 로그 = LoggerFactory.getLogger(this.getClass());
 
     @Value("${requirement.state.complete.keyword}")
     private String resolvedKeyword;
 
-    @Autowired
-    private 통계엔진통신기 통계엔진통신기;
+    private final 통계엔진통신기 engineCommunicator;
 
-    @Autowired
-    private PdService pdService;
+    private final PdServiceVersion pdServiceVersion;
 
-    @Autowired
-    private 내부통신기 internalCommunicator;
+    protected final Chat chat;
 
-    @Autowired
-    @Qualifier("reqAdd")
-    private ReqAdd reqAdd;
+    private final SalaryLog salaryLog;
 
-    @Autowired
-    @Qualifier("reqStatus")
-    private ReqStatus reqStatus;
+    private final 내부통신기 internalCommunicator;
 
-    @Autowired
-    private ReqState reqStateService;
+    private final ReqAdd reqAdd;
 
-    @Autowired
-    private SalaryService 연봉서비스;
+    private final ReqStatus reqStatus;
 
-    @Autowired
-    protected ModelMapper modelMapper;
+    private final ReqState reqStateService;
+
+    private final SalaryService 연봉서비스;
+
+    protected final ModelMapper modelMapper;
 
     public 버전요구사항별_담당자데이터 전체_담당자가져오기(Long 제품아이디, List<Long> 버전아이디_목록,
                                      지라이슈_일반_집계_요청 일반집계요청) {
 
         ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계_통신결과 =
-                통계엔진통신기.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
+                engineCommunicator.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
 
         검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(제품서비스_일반_버전_통계_통신결과.getBody()).orElse(new 검색결과_목록_메인());
 
@@ -112,8 +108,8 @@ public class 비용서비스_구현 implements 비용서비스 {
 //        ObjectMapper mapper = new ObjectMapper();
 //        try {
 //            String json = mapper.writeValueAsString(result);
-//            로그.info(" [ " + this.getClass().getName() + " :: 전체_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
-//            로그.info(json);
+//            log.info(" [ " + this.getClass().getName() + " :: 전체_담당자가져오기 ] :: 버전요구사항별_담당자데이터 -> ");
+//            log.info(json);
 //        } catch (JsonProcessingException e) {
 //            e.printStackTrace();
 //        }
@@ -124,10 +120,10 @@ public class 비용서비스_구현 implements 비용서비스 {
     public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(EngineAggregationRequestDTO engineAggregationRequestDTO) {
 
         engineAggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
-        ResponseEntity<List<검색결과>> 요구사항_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 요구사항_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
         engineAggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
-        ResponseEntity<List<검색결과>> 하위이슈_결과 = 통계엔진통신기.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 하위이슈_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
 
         List<검색결과> 전체결과 = new ArrayList<>();
 
@@ -142,7 +138,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         try {
             연봉정보_맵 = 연봉서비스.모든_연봉정보_맵();
         } catch (Exception e) {
-            로그.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 디비에서 연봉 정보를 조회하는 데 실패했습니다.");
+            log.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 디비에서 연봉 정보를 조회하는 데 실패했습니다.");
         }
         Map<String, SalaryEntity> 최종_연봉정보_맵 = 연봉정보_맵;
 
@@ -298,7 +294,7 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         String 조회대상_지라이슈상태_테이블 = "T_ARMS_REQSTATUS_" + 제품및서비스;
 
-        로그.info("조회 대상 테이블 searchTable :" + 조회대상_지라이슈상태_테이블);
+        log.info("조회 대상 테이블 searchTable :" + 조회대상_지라이슈상태_테이블);
 
         SessionUtil.setAttribute("req-linked-issue", 조회대상_지라이슈상태_테이블);
 
@@ -321,45 +317,295 @@ public class 비용서비스_구현 implements 비용서비스 {
         return 검색결과_요구사항;
     }
 
-
     @Override
-    public Map<String, Long> calculateInvestmentPerformance(EngineAggregationRequestDTO requestDTO) throws Exception {
+    public ProductCostResponse calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
         // 1. 해결 된 이슈를 찾기 위해 해결 상태값을 조회함. (ReqState)
         List<ReqStateEntity> reqStateEntities = getReqStateEntities();
-        List<Long> filteredReqStateId = filterResolvedStateIds(reqStateEntities);
+        List<Long> filteredReqStateId = filterResolvedStateIds(reqStateEntities, resolvedKeyword);
 
         // 2. ReqStatus(요구사항)을 조회함
-        List<ReqStatusEntity> reqStatusEntities = getReqStatusEntities(requestDTO);
+        List<ReqStatusEntity> reqStatusEntities = getReqStatusEntities(engineAggregationRequestDTO);
 
         // 3. 요구사항의 ReqStateLink 값을 가지고 필터링함. ReqState 값이 완료 키워드인 ReqStatus 만 가져옴
         List<ReqStatusEntity> filteredReqStatusEntities = filterResolvedReqStatusEntities(reqStatusEntities, filteredReqStateId);
 
-        // 4. 엔진 통신으로 담당자 데이터를 가져옴
-        검색결과_목록_메인 engineResponseBody = getAggregationData(requestDTO);
-        Map<String, List<검색결과>> searchResults = engineResponseBody.get검색결과();
-        List<검색결과> groupByParentReqKey = searchResults.get("group_by_" + requestDTO.get메인그룹필드());
+        // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
+        List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        // 5. 담당자 연봉 데이터 조회
-        Map<String, SalaryEntity> salaryData = getSalaryData();
+        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "cReqLink");
 
-        // 6. 2024년 월 별 비용에 대한 HashMap 변수 초기화. 당장은 2024년으로 고정
-        // TODO: 연봉 정보는 말 그대로 연(year)봉. 현재 연봉 데이터를 year 별로 입력받지 않고 있음. 연봉 데이터 관리에 대한 프로세스 정립이 필요.
-        Map<String, Long> monthlySalaries = initializeMonthlySalaries(2024);
+        List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
-        // 7. c_req_start_date, c_req_end_date, 연봉을 가지고 비용을 계산함. 연봉 / 365 * (c_req_end_date - c_req_start_date) * 10000
-        calculateSalary(filteredReqStatusEntities, groupByParentReqKey, salaryData, monthlySalaries);
+        // 5. 제품 버전을 기준으로 x 축에 해당하는 시작일, 종료일 구하기
+        List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity())
+                .stream().filter(pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())).collect(Collectors.toList());
 
-        // 8. 월 별 누적 비용 계산
-        Map<String, Long> accumulateMonthlySalaries = accumulateMonthlySalaries(monthlySalaries);
+        String startDateOrNull = pdServiceVersionEntities.stream()
+                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_start_date().equals("start"))
+                .map(PdServiceVersionEntity::getC_pds_version_start_date)
+                .min(String::compareTo).orElse(null);
 
-        return accumulateMonthlySalaries;
+        String endDateOrNull = pdServiceVersionEntities.stream()
+                .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_end_date().equals("end"))
+                .map(PdServiceVersionEntity::getC_pds_version_end_date)
+                .max(String::compareTo).orElse(null);
+
+        if (startDateOrNull == null || endDateOrNull == null) {
+            chat.sendMessageByEngine("제품 버전의 시작일과 종료일이 없습니다.");
+            return new ProductCostResponse(new TreeMap<>(), new TreeMap<>(), new TreeMap<>());
+        }
+
+        String formattedStartDate = convertDateTimeFormat(startDateOrNull);
+        String formattedEndDate = convertDateTimeFormat(endDateOrNull);
+
+        LocalDate versionStartDate = LocalDate.parse(formattedStartDate);
+        LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
+
+        // 6. 작업자 별 최초 연봉 데이터 추가 시 쌓인 "create" log 조회
+        Set<String> getAssignees = this.getAssignees(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
+        Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create", endDateOrNull);
+        Map<String, SalaryLogJdbcDTO> filteredSalaryCreateLogs = salaryCreateLogs.entrySet().stream()
+                .filter(entry -> getAssignees.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        if (filteredSalaryCreateLogs.isEmpty()) {
+            chat.sendMessageByEngine("버전의 기간 이후 연봉을 등록한 경우, 해당 버전은 비용 산정이 되지 않습니다.");
+            TreeMap<String, Integer> dailyCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
+            return new ProductCostResponse(dailyCost, dailyCost, generateDailyCostsCandleStick(versionStartDate, versionEndDate));
+        }
+
+        // 7. 작업자 별 최초 연봉 수정 시 쌓인 "update" log 조회
+        List<SalaryLogJdbcDTO> salaryUpdateLogs = salaryLog.findAllLogs("update", formattedStartDate, formattedEndDate);
+
+        // 8. 같은 날 연봉 데이터를 여러번 수정한 경우, 가장 마지막에 등록한 연봉 데이터 1개만 꺼내온다.
+        List<SalaryLogJdbcDTO> filteredLogs = getLatestSalaryUpdates(salaryUpdateLogs, getAssignees);
+
+        filteredLogs.sort(Comparator.comparing(SalaryLogJdbcDTO::getFormatted_date));
+
+        // 9. 담당자 별 연봉 캘린더 생성
+        Map<String, TreeMap<String, Integer>> allAssigneeSalaries = assigneeCostCalendar(filteredSalaryCreateLogs, filteredLogs, versionStartDate, versionEndDate);
+
+        // 10. 완료 된 요구사항에 대한 비용 캘린더 생성. 기본값으로 0을 세팅
+        TreeMap<String, Integer> barCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
+
+        // 10-1. 완료 된 요구사항으로 루프를 돌면서, 각 요구사항의 시작일과 종료일에 맞는 담당자의 연봉 데이터를 기반으로 성과 비용을 책정한다.
+        calculateBarCost(filteredReqStatusEntities, versionEndDate, groupByCReqLink, allAssigneeSalaries, barCost);
+
+        // TODO: 여러 요구사항에 관여 한 개발자의 경우, 각 요구사항의 일정이 겹치게 되면, 성과 기준선을 뛰어 넘을 수도 있음.
+        // 11. 성과 기준선을 책정하기 위한 변수 세팅
+        TreeMap<String, Integer> lineCost = getLineCost(allAssigneeSalaries);
+
+        // 12. 총 연봉 비용의 변동 추이를 보여주기 위한 캔들스틱 차트 데이터 세팅
+        // 12-1. 업데이트 로그를 담당자, 날짜 별로 그루핑
+        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = salaryUpdateLogs.stream()
+                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getC_key,
+                        Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date)));
+
+        // 12-2. 담당자 별 연봉 캘린더를 활용하여 캔들스틱 차트 데이터 생성. 연봉 캘린더의 금액으로 시가, 종가를 알 수 있다.
+        Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks = getAllAssigneeCandleSticks(allAssigneeSalaries, updatesGroupedByDateAndKey);
+
+        TreeMap<String, List<Integer>> candleStickCost = getCandleStickCost(allAssigneeCandleSticks);
+
+        return new ProductCostResponse(lineCost, barCost, candleStickCost);
     }
+
+    private static void calculateBarCost(
+            List<ReqStatusEntity> filteredReqStatusEntities,
+            LocalDate versionEndDate,
+            List<검색결과> groupByCReqLink,
+            Map<String, TreeMap<String, Integer>> allAssigneeSalaries,
+            TreeMap<String, Integer> barCost
+    ) {
+        // 10-1. 완료 된 요구사항으로 루프를 돌면서, 각 요구사항의 시작일과 종료일에 맞는 담당자의 연봉 데이터를 기반으로 성과 비용을 책정한다.
+        for (ReqStatusEntity filteredReqStatusEntity : filteredReqStatusEntities) {
+            LocalDate 요구사항시작일 = filteredReqStatusEntity.getC_req_start_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate 요구사항종료일 = filteredReqStatusEntity.getC_req_end_date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate adjustedEndDate = 요구사항종료일.isAfter(versionEndDate) ? versionEndDate : 요구사항종료일;
+
+            groupByCReqLink.stream()
+                    .filter(link -> Long.parseLong(link.get필드명()) == filteredReqStatusEntity.getC_req_link())
+                    .findFirst()
+                    .ifPresent(result -> {
+                        List<검색결과> assignees = result.get하위검색결과().get("group_by_assignee.assignee_accountId.keyword").stream().collect(Collectors.toList());
+                        assignees.forEach(assignee -> {
+                            Optional.ofNullable(allAssigneeSalaries.get(assignee.get필드명())).ifPresent(assigneeSalaries -> {
+                                assigneeSalaries.entrySet().stream().filter(entry -> {
+                                    LocalDate date = LocalDate.parse(entry.getKey());
+                                    return (date.isAfter(요구사항시작일) || date.isEqual(요구사항시작일)) && (date.isBefore(adjustedEndDate) || date.isEqual(adjustedEndDate));
+                                }).forEach(entry -> {
+                                    barCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
+                                });
+                            });
+                        });
+                    });
+        }
+
+        // 10-2. 요구사항의 연봉 캘린더는 만원 단위이기 때문에, 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
+        barCost.replaceAll((k, v) -> v * 10000 / 365);
+
+        // 10-3. 요구사항의 연봉 캘린더를 일 별 누적시킨다.
+        int barSum = 0;
+        for (Map.Entry<String, Integer> entry : barCost.entrySet()) {
+            barSum += entry.getValue();
+            barCost.put(entry.getKey(), barSum);
+        }
+    }
+
+    private TreeMap<String, List<Integer>> getCandleStickCost(Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks) {
+        TreeMap<String, List<Integer>> candleStickCost = new TreeMap<>();
+
+        // 12-5. 모든 담당자의 캔들스틱 데이터를 하나로 합친다. 최종 연봉 비용의 변동 추이를 보여주기 위함.
+        for (TreeMap<String, CandleStick> assigneeCandleSticks : allAssigneeCandleSticks.values()) {
+            for (Map.Entry<String, CandleStick> entry : assigneeCandleSticks.entrySet()) {
+                String date = entry.getKey();
+                CandleStick candleStick = entry.getValue();
+                List<Integer> sums = candleStickCost.getOrDefault(date, Arrays.asList(0, 0, 0, 0));
+
+                sums.set(0, sums.get(0) + (candleStick.get시가() * 10000));
+                sums.set(1, sums.get(1) + (candleStick.get종가() * 10000));
+                sums.set(2, sums.get(2) + (candleStick.get최저가() * 10000));
+                sums.set(3, sums.get(3) + (candleStick.get최고가() * 10000));
+
+                candleStickCost.put(date, sums);
+            }
+        }
+        return candleStickCost;
+    }
+
+    private Map<String, TreeMap<String, CandleStick>> getAllAssigneeCandleSticks(Map<String, TreeMap<String, Integer>> allAssigneeSalaries, Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey) {
+        Map<String, TreeMap<String, CandleStick>> allAssigneeCandleSticks = new HashMap<>();
+        for (Map.Entry<String, TreeMap<String, Integer>> assigneeEntry : allAssigneeSalaries.entrySet()) {
+            String assignee = assigneeEntry.getKey();
+            TreeMap<String, Integer> salaryMap = assigneeEntry.getValue();
+            Map<String, List<SalaryLogJdbcDTO>> updateLogsByAssignee = updatesGroupedByDateAndKey.get(assignee);
+            TreeMap<String, CandleStick> candleStickMap = new TreeMap<>();
+            String previousDate = null;
+            for (Map.Entry<String, Integer> salaryEntry : salaryMap.entrySet()) {
+                String date = salaryEntry.getKey();
+                Integer salary = salaryEntry.getValue();
+                int min = 0;
+                int max = 0;
+                int open = 0;
+                if (previousDate != null) {
+                    CandleStick previousCandleStick = candleStickMap.get(previousDate);
+                    open = previousCandleStick.get종가(); // 이전 날짜의 종가를 현재 날짜의 시가로 설정
+                }
+                // 12-3. 시가, 종가, 최저가, 최고가 기본 세팅
+                min = open > salary ? salary : open;
+                max = open > salary ? open : salary;
+
+                // 12-4. 업데이트 로그가 있는 날짜엔 해당 날짜의 최소값과 최대값을 찾아서 min, max 를 업데이트한다.
+                if (updateLogsByAssignee != null && updateLogsByAssignee.get(date) != null) {
+                    List<SalaryLogJdbcDTO> salaryLogJdbcDTOList = updateLogsByAssignee.get(date).stream().sorted(Comparator.comparing(SalaryLogJdbcDTO::getC_annual_income)).collect(Collectors.toList());
+                    if (!salaryLogJdbcDTOList.isEmpty()) {
+                        if (salaryLogJdbcDTOList.size() == 1) {
+                            Integer updateLogSalary = salaryLogJdbcDTOList.get(0).getC_annual_income();
+                            min = min > updateLogSalary ? updateLogSalary : min;
+                            max = max > updateLogSalary ? max : updateLogSalary;
+                        } else {
+                            // 해당 담당자의 해당 날짜의 모든 업데이트 로그를 정렬하여 최소값(인덱스 0)과 최대값(인덱스 size - 1)을 찾는다.
+                            Integer updateLogMinSalary = salaryLogJdbcDTOList.get(0).getC_annual_income();
+                            Integer updateLogMaxSalary = salaryLogJdbcDTOList.get(salaryLogJdbcDTOList.size() - 1).getC_annual_income();
+                            min = min > updateLogMinSalary ? updateLogMinSalary : min;
+                            max = max > updateLogMaxSalary ? max : updateLogMaxSalary;
+                        }
+                    }
+                }
+
+                CandleStick candleStick = new CandleStick(open, salary, min, max);
+                candleStickMap.put(date, candleStick);
+
+                previousDate = date;
+            }
+
+            allAssigneeCandleSticks.put(assignee, candleStickMap);
+        }
+        return allAssigneeCandleSticks;
+    }
+
+    private TreeMap<String, Integer> getLineCost(Map<String, TreeMap<String, Integer>> allAssigneeSalaries) {
+        TreeMap<String, Integer> lineCost = new TreeMap<>();
+
+        // 11-1. 담당자 별 연봉 캘린더를 활용하여 각 날짜에 해당하는 연봉 데이터를 가져와서 합산한다.
+        // 담당자를 별도로 구분하지 않고, 모든 성과를 각 날짜 별로 합치는 과정임에 주의한다.
+        for (TreeMap<String, Integer> assigneeSalaries : allAssigneeSalaries.values()) {
+            for (Map.Entry<String, Integer> entry : assigneeSalaries.entrySet()) {
+                lineCost.merge(entry.getKey(), entry.getValue(), Integer::sum);
+            }
+        }
+
+        // 11-2. 원 단위로 환산하고, 365로 나누어 일 단위로 변환.
+        lineCost.replaceAll((k, v) -> v * 10000 / 365);
+
+        // 11-3. 성과 기준선의 비용을 누적시킨다.
+        int lineSum = 0;
+        for (Map.Entry<String, Integer> entry : lineCost.entrySet()) {
+            lineSum += entry.getValue();
+            lineCost.put(entry.getKey(), lineSum);
+        }
+        return lineCost;
+    }
+
+    private Map<String, TreeMap<String, Integer>> assigneeCostCalendar(Map<String, SalaryLogJdbcDTO> salaryCreateLogs, List<SalaryLogJdbcDTO> filteredLogs, LocalDate versionStartDate, LocalDate versionEndDate) {
+        Map<String, TreeMap<String, Integer>> allAssigneeSalaries = new HashMap<>();
+        for (Map.Entry<String, SalaryLogJdbcDTO> salaryCreateLog : salaryCreateLogs.entrySet()) {
+            String assigneeKey = salaryCreateLog.getKey();
+            SalaryLogJdbcDTO salaryCreate = salaryCreateLog.getValue();
+            LocalDate salaryCreateDate = LocalDate.parse(salaryCreate.getFormatted_date());
+            int createdSalary = salaryCreate.getC_annual_income();
+            List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee = filteredLogs.stream().filter(sle -> sle.getC_key().equals(assigneeKey)).collect(Collectors.toList());
+            int updateLogSize = salaryUpdateLogsByAssignee.size();
+
+            // 1-1. 정상적인 케이스. 버전 먼저 등록하고, 이후에 연봉 데이터를 입력한 경우.
+            if (versionStartDate.isBefore(salaryCreateDate)) {
+                addSalaryForPeriod(versionStartDate, salaryCreateDate.minusDays(1), 0, assigneeKey, allAssigneeSalaries);
+
+                if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    updateSalaryForSection(salaryCreateDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
+                }
+                if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    addSalaryForPeriod(salaryCreateDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                }
+            }
+            // 1-2. 정상적인 케이스. 제품 버전 시작일과 연봉 데이터 입력일이 같은 경우.
+            if (versionStartDate.isEqual(salaryCreateDate)) {
+                if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    updateSalaryForSection(versionStartDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
+                }
+                if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    addSalaryForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                }
+            }
+            // 1-3. 비정상적인 케이스. 버전 생성 전 연봉 데이터를 먼저 넣은 경우.
+            if (versionStartDate.isAfter(salaryCreateDate)) {
+                if (hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    updateSalaryForSection(versionStartDate, versionEndDate, updateLogSize, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries, createdSalary);
+                }
+                if (!hasUpdateLog(salaryUpdateLogsByAssignee)) {
+                    addSalaryForPeriod(versionStartDate, versionEndDate, createdSalary, assigneeKey, allAssigneeSalaries);
+                }
+            }
+        }
+        return allAssigneeSalaries;
+    }
+
+    private void updateSalaryForSection(LocalDate startDate, LocalDate endDate, int updateLogSize, List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries, int createdSalary) {
+        for (int i = 0; i < updateLogSize; i++) {
+            if (i == 0) {
+                updateSalaryForFirstLog(i, salaryUpdateLogsByAssignee, startDate, assigneeKey, allAssigneeSalaries, createdSalary);
+            } else {
+                updateSalaryForMiddleLog(i, salaryUpdateLogsByAssignee, assigneeKey, allAssigneeSalaries);
+            }
+            updateSalaryForLastLog(i, updateLogSize, salaryUpdateLogsByAssignee, endDate, assigneeKey, allAssigneeSalaries);
+        }
+    }
+
 
     private List<ReqStateEntity> getReqStateEntities() throws Exception {
         return reqStateService.getNodesWithoutRoot(new ReqStateEntity());
     }
 
-    private List<Long> filterResolvedStateIds(List<ReqStateEntity> reqStateEntities) {
+    private List<Long> filterResolvedStateIds(List<ReqStateEntity> reqStateEntities, String resolvedKeyword) {
         return reqStateEntities.stream()
                 .filter(reqStateEntity -> resolvedKeyword.contains(reqStateEntity.getC_title()))
                 .map(ReqStateEntity::getC_id)
@@ -371,96 +617,167 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     private List<ReqStatusEntity> filterResolvedReqStatusEntities(List<ReqStatusEntity> reqStatusEntities, List<Long> filteredReqStateId) {
-        return reqStatusEntities.stream()
+        Map<Long, ReqStatusEntity> uniqueMap = reqStatusEntities.stream()
                 .filter(reqStatusEntity -> reqStatusEntity.getC_req_start_date() != null)
                 .filter(reqStatusEntity -> reqStatusEntity.getC_req_end_date() != null)
-                .filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
                 .filter(reqStatusEntity -> filteredReqStateId.contains(reqStatusEntity.getC_req_state_link()))
+                .collect(Collectors.toMap(ReqStatusEntity::getC_req_link, reqStatusEntity -> reqStatusEntity, (existing, replacement) -> existing));
+
+        return new ArrayList<>(uniqueMap.values());
+    }
+
+    private void addSalaryForPeriod(LocalDate startDate, LocalDate endDate, int salary, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries) {
+        TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            assigneeSalaries.put(date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), salary);
+        }
+        allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+    }
+
+    private void updateSalaryDataForPeriod(LocalDate startDate, LocalDate endDate, String assigneeKey, Map<String, TreeMap<String, Integer>> allAssigneeSalaries, int updatedSalary) {
+        TreeMap<String, Integer> assigneeSalaries = allAssigneeSalaries.getOrDefault(assigneeKey, new TreeMap<>());
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            String dateString = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            assigneeSalaries.put(dateString, updatedSalary);
+        }
+        allAssigneeSalaries.put(assigneeKey, assigneeSalaries);
+    }
+
+    public boolean hasUpdateLog(List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee) {
+        if (salaryUpdateLogsByAssignee.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+
+    private void updateSalaryForFirstLog(
+            int i,
+            List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee,
+            LocalDate startDate,
+            String assigneeKey,
+            Map<String, TreeMap<String, Integer>> allAssigneeSalaries, int createdSalary
+    ) {
+        LocalDate endDate = LocalDate.parse(salaryUpdateLogsByAssignee.get(i).getFormatted_date()).minusDays(1);
+        updateSalaryDataForPeriod(startDate, endDate, assigneeKey, allAssigneeSalaries, createdSalary);
+    }
+
+    private void updateSalaryForMiddleLog(
+            int i,
+            List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee,
+            String assigneeKey,
+            Map<String, TreeMap<String, Integer>> allAssigneeSalaries
+    ) {
+        LocalDate startDate = LocalDate.parse(salaryUpdateLogsByAssignee.get(i - 1).getFormatted_date());
+        LocalDate endDate = LocalDate.parse(salaryUpdateLogsByAssignee.get(i).getFormatted_date()).minusDays(1);
+        int updatedSalary = salaryUpdateLogsByAssignee.get(i - 1).getC_annual_income();
+        updateSalaryDataForPeriod(startDate, endDate, assigneeKey, allAssigneeSalaries, updatedSalary);
+    }
+
+
+    private void updateSalaryForLastLog(
+            int i,
+            int updateLogSize,
+            List<SalaryLogJdbcDTO> salaryUpdateLogsByAssignee,
+            LocalDate versionEndDate,
+            String assigneeKey,
+            Map<String, TreeMap<String, Integer>> allAssigneeSalaries
+    ) {
+        if (isLastLog(updateLogSize, i)) {
+            int currentSalary = salaryUpdateLogsByAssignee.get(i).getC_annual_income();
+            LocalDate currentStart = LocalDate.parse(salaryUpdateLogsByAssignee.get(i).getFormatted_date());
+            updateSalaryDataForPeriod(currentStart, versionEndDate, assigneeKey, allAssigneeSalaries, currentSalary);
+        }
+    }
+
+    private boolean isLastLog(int updateLogSize, int i) {
+        if (updateLogSize == i + 1) {
+            return true;
+        }
+        return false;
+    }
+
+    private List<SalaryLogJdbcDTO> getLatestSalaryUpdates(List<SalaryLogJdbcDTO> salaryUpdateLogs, Set<String> getAssignees) {
+
+        List<SalaryLogJdbcDTO> filteredUpdateLogs = salaryUpdateLogs.stream()
+                .filter(salaryLogJdbcDTO -> getAssignees.contains(salaryLogJdbcDTO.getC_key()))
+                .collect(Collectors.toList());
+
+        Map<String, Map<String, List<SalaryLogJdbcDTO>>> updatesGroupedByDateAndKey = filteredUpdateLogs.stream()
+                .collect(Collectors.groupingBy(SalaryLogJdbcDTO::getFormatted_date,
+                        Collectors.groupingBy(SalaryLogJdbcDTO::getC_key)));
+
+        return updatesGroupedByDateAndKey.values().stream()
+                .flatMap(dateGroup -> dateGroup.values().stream())
+                .map(this::getLatestLogFromGroup)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    private 검색결과_목록_메인 getAggregationData(EngineAggregationRequestDTO requestDTO) {
-        ResponseEntity<검색결과_목록_메인> response = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(requestDTO);
-        return response.getBody();
+    private SalaryLogJdbcDTO getLatestLogFromGroup(List<SalaryLogJdbcDTO> logs) {
+        return logs.stream()
+                .max(Comparator.comparing(SalaryLogJdbcDTO::getC_date))
+                .orElse(null);
     }
 
-    private Map<String, SalaryEntity> getSalaryData() throws Exception {
-        return 연봉서비스.모든_연봉정보_맵();
+    public String convertDateTimeFormat(String localDate) {
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDateTime parse = LocalDateTime.parse(localDate, inputFormatter);
+
+        return parse.format(outputFormatter);
     }
 
-    private void calculateSalary(List<ReqStatusEntity> filteredReqStatusEntities, List<검색결과> groupByParentReqKey, Map<String, SalaryEntity> salaryData, Map<String, Long> monthlySalaries) {
-        filteredReqStatusEntities.forEach(filteredReqStatusEntity -> {
-            String issueKey = filteredReqStatusEntity.getC_issue_key();
-            Date startDate = filteredReqStatusEntity.getC_req_start_date();
-            Date endDate = filteredReqStatusEntity.getC_req_end_date();
+    public TreeMap<String, Integer> generateDailyCostsMap(String startDateStr, String endDateStr, Integer dailyCost) {
 
-            Optional<검색결과> optionalMatchingIssueKey = groupByParentReqKey.stream()
-                    .filter(r -> r.get필드명().equals(issueKey))
-                    .findFirst();
+        TreeMap<String, Integer> dailySalaryCosts = new TreeMap<>();
 
-            optionalMatchingIssueKey.ifPresent(matchingIssueKey -> {
-                List<검색결과> assigneeList = matchingIssueKey.get하위검색결과().get("group_by_assignee.assignee_accountId.keyword");
-                assigneeList.forEach(assignee -> calculateAssigneeSalary(issueKey, startDate, endDate, salaryData, monthlySalaries, assignee));
-            });
-        });
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate startDate = LocalDate.parse(startDateStr, formatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, formatter);
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            dailySalaryCosts.put(date.format(formatter), dailyCost);
+        }
+
+        return dailySalaryCosts;
     }
 
-    private void calculateAssigneeSalary(String issueKey, Date startDate, Date endDate, Map<String, SalaryEntity> salaryData, Map<String, Long> monthlySalaries, 검색결과 assignee) {
-        String assigneeId = assignee.get필드명();
-        SalaryEntity salaryEntity = salaryData.get(assigneeId);
-        Long annualSalary = Long.parseLong(salaryEntity.getC_annual_income());
-        LocalDate startLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate endLocalDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        long diff = ChronoUnit.DAYS.between(startLocalDate, endLocalDate) + 1;
-        Long dailySalary = annualSalary / 365;
-        Long salaryForPeriod = dailySalary * diff * 10000;
-        String yearMonth = endLocalDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
-//        로그.info("Issue: " + issueKey + ", Start Date: " + startDate + ", End Date: " + endDate + ", diff: " + diff + ", Salary: " + salaryForPeriod + ", Year/Month: " + yearMonth);
-        monthlySalaries.merge(yearMonth, salaryForPeriod, Long::sum);
+    public TreeMap<String, List<Integer>> generateDailyCostsCandleStick(LocalDate versionStartDate, LocalDate versionEndDate) {
+        TreeMap<String, List<Integer>> candleStick = new TreeMap<>();
+        for (LocalDate date = versionStartDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
+            candleStick.put(date.toString(), Arrays.asList(0, 0, 0, 0));
+        }
+
+        return candleStick;
     }
 
     @Override
-    public Long 연봉총합(Long pdServiceLink, List<Long> pdServiceVersionLinks) throws Exception {
-        Map<String, SalaryEntity> 연봉데이터 = 연봉서비스.모든_연봉정보_맵();
-
-        if (연봉데이터.isEmpty()) {
-            return 0L;
-        }
-
+    public Set<String> getAssignees(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
         EngineAggregationRequestDTO engineAggregationRequestDTO = new EngineAggregationRequestDTO();
+        engineAggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
+        engineAggregationRequestDTO.setIsReqType(IsReqType.ALL);
         engineAggregationRequestDTO.setPdServiceLink(pdServiceLink);
         engineAggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-        engineAggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
-        engineAggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
-
-        검색결과_목록_메인 engineResponseBody = getAggregationData(engineAggregationRequestDTO);
-        List<검색결과> groupByAssignee = engineResponseBody.get검색결과().get("group_by_assignee.assignee_accountId.keyword");
-        List<String> assigneeList = groupByAssignee.stream().map(검색결과::get필드명).collect(Collectors.toList());
-
-        Long totalAnnualIncome = 연봉데이터.values().stream()
-                .filter(salaryEntity -> assigneeList.contains(salaryEntity.getC_key()))
-                .mapToLong(salaryEntity -> Long.parseLong(salaryEntity.getC_annual_income()))
-                .sum();
-
-        return totalAnnualIncome * 10000;
+        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
+        return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
 
-    public Map<String, Long> initializeMonthlySalaries(int year) {
-        Map<String, Long> monthlySalaries = new LinkedHashMap<>();
-        for (int month = 1; month <= 12; month++) {
-            String yearMonth = year + "/" + String.format("%02d", month);
-            monthlySalaries.put(yearMonth, 0L);
+    private List<검색결과> engineResponseNullFilter(검색결과_목록_메인 nullableBody, String mainAggregationGroupField) {
+        if (nullableBody == null) {
+            return Collections.emptyList();
         }
-        return monthlySalaries;
+        Map<String, List<검색결과>> nullableMap = nullableBody.get검색결과();
+        List<검색결과> nullableList = nullableMap.get("group_by_" + mainAggregationGroupField);
+        if (nullableList == null) {
+            return Collections.emptyList();
+        }
+        return nullableList;
     }
 
-    public Map<String, Long> accumulateMonthlySalaries(Map<String, Long> monthlySalaries) {
-        Map<String, Long> accumulatedMonthlySalaries = new LinkedHashMap<>();
-        Long accumulatedValue = 0L;
-        for (Map.Entry<String, Long> entry : monthlySalaries.entrySet()) {
-            accumulatedValue += entry.getValue();
-            accumulatedMonthlySalaries.put(entry.getKey(), accumulatedValue);
-        }
-        return accumulatedMonthlySalaries;
-    }
 }
+

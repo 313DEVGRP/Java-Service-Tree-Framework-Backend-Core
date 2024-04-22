@@ -100,7 +100,7 @@ ext {
 
     //version 정보
     majorVersion = 24
-    minorVersion = 03
+    minorVersion = 04
     //patchVersion = auto generation
 
     //mac 사용자 아래 114까지 주석처리!!
@@ -235,6 +235,8 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.unitils', name: 'unitils', version: '2.4'
     implementation group: 'net.sourceforge.collections', name: 'collections-generic', version: '4.01'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
+
 
     // spring
     implementation('org.springframework.boot:spring-boot-starter-web')
@@ -260,6 +262,9 @@ dependencies {
     testImplementation "org.mapstruct:mapstruct:1.5.5.Final"
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
+
+    // Slack Notification
+    implementation "com.slack.api:slack-api-client:1.25.1"
 
     // modelmapper
     implementation 'org.modelmapper:modelmapper:3.1.1'

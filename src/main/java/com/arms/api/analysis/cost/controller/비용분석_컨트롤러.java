@@ -4,6 +4,9 @@ import com.arms.api.analysis.common.AggregationMapper;
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.cost.dto.*;
 import com.arms.api.analysis.cost.service.비용서비스;
+import com.arms.api.analysis.salary.model.SalaryDTO;
+import com.arms.api.analysis.salary.model.SalaryEntity;
+import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
@@ -13,14 +16,18 @@ import com.arms.egovframework.javaservice.treeframework.controller.CommonRespons
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,7 +39,11 @@ public class 비용분석_컨트롤러 {
 
     private final 비용서비스 비용서비스;
 
+    private final SalaryService salaryService;
+
     private final 통계엔진통신기 통계엔진통신기;
+
+    private final CostControllerMapper costControllerMapper;
 
     @GetMapping("/all-assignees")
     public ResponseEntity<CommonResponse.ApiResult<버전요구사항별_담당자데이터>> 전체_담당자가져오기(AggregationRequestDTO aggregationRequestDTO) {
@@ -143,11 +154,40 @@ public class 비용분석_컨트롤러 {
     @GetMapping("/product-accumulate-cost-by-month")
     public ResponseEntity<CommonResponse.ApiResult<ProductCostResponse>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
-        Long 연봉총합 = 비용서비스.연봉총합(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
-        Map<String, Long> response = 비용서비스.calculateInvestmentPerformance(engineAggregationRequestDTO);
-        ProductCostResponse productCostResponse = new ProductCostResponse();
-        productCostResponse.setTotalAnnualIncome(연봉총합);
-        productCostResponse.setMonthlyCost(response);
+        ProductCostResponse productCostResponse = 비용서비스.calculateInvestmentPerformance(engineAggregationRequestDTO);
         return ResponseEntity.ok(CommonResponse.success(productCostResponse));
     }
+
+
+    /**
+     * 담당자 연봉 목록
+     */
+    @GetMapping
+    public ResponseEntity<CommonResponse.ApiResult<Map<String, SalaryDTO>>> assigneesWithSalary(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
+
+        Set<String> assignees = 비용서비스.getAssignees(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
+        Map<String, SalaryEntity> allSalaries = salaryService.모든_연봉정보_맵();
+
+        Map<String, SalaryDTO> filteredSalaries = new HashMap<>();
+        for (String assignee : assignees) {
+            if (allSalaries.containsKey(assignee)) {
+                SalaryEntity salaryEntity = allSalaries.get(assignee);
+                filteredSalaries.put(assignee, costControllerMapper.toSalaryDTO(salaryEntity));
+            } else {
+                SalaryDTO salaryDTO = SalaryDTO.builder()
+                        .c_key(assignee)
+                        .c_annual_income("0")
+                        .build();
+                filteredSalaries.put(assignee, salaryDTO);
+            }
+        }
+        return ResponseEntity.ok(CommonResponse.success(filteredSalaries));
+    }
+
+    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+    public interface CostControllerMapper {
+        SalaryDTO toSalaryDTO(SalaryEntity salaryEntity);
+    }
+
 }

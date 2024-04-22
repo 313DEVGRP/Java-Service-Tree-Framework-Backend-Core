@@ -315,4 +315,25 @@ public class ReqAddPureController extends TreeAbstractController<ReqAddPure, Req
         );
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/reqProgress.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView reqProgress(@PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @RequestParam(required = false) Long pdServiceId,
+            @RequestParam(required = false) List<Long> pdServiceVersionLinks,
+            ReqAddPureDTO reqAddPureDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqAddPureController :: reqProgress");
+        Long 제품서비스_아이디 = Long.parseLong(StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", ""));
+
+        ReqAddPureEntity reqAddPureEntity = modelMapper.map(reqAddPureDTO, ReqAddPureEntity.class);
+        List<ReqAddPureEntity> list = reqAddPure.reqProgress(reqAddPureEntity, changeReqTableName, 제품서비스_아이디, reqAddPureEntity.getC_req_pdservice_versionset_link(), request);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", list);
+
+        return modelAndView;
+    }
 }
