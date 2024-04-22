@@ -19,7 +19,7 @@ public class RouteTableConfig {
         map.put("getNodesWithoutRoot.do", "getNodesWithoutRoot");
         map.put("getChildNodeWithParent.do", "getChildNodeWithParent");
         map.put("addNode.do", "addNode");
-        map.put("addFolderNode.do", "addFolderNode");
+        map.put("addFolderNode.do", "addReqFolderNode");
         map.put("updateNode.do", "updateNode");
         map.put("updateDate.do", "updateDate");
         map.put("getNodesWhereInIds.do", "getNodesWhereInIds");
