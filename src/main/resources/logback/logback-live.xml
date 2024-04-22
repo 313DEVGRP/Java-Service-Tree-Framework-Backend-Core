@@ -9,9 +9,6 @@
               value="%highlightCustom([%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %(%-5level) %([%C.%M:%(%L)]) - %(%msg%n))"/>
 
     <include resource="logback/console-appender.xml"/>
-    <include resource="logback/file-error-appender.xml"/>
-    <include resource="logback/file-info-appender.xml"/>
-    <include resource="logback/file-warn-appender.xml"/>
 
     <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE" />
