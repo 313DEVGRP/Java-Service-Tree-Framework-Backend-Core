@@ -11,7 +11,6 @@ import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.util.communicate.external.통계엔진통신기;
@@ -74,9 +73,7 @@ public class ScopeController {
     }
 
     @GetMapping("/tree-bar-top10")
-    public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(
-            @Validated AggregationRequestDTO aggregationRequestDTO
-    ) throws Exception {
+    public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(aggregationRequestDTO)));
     }
 
