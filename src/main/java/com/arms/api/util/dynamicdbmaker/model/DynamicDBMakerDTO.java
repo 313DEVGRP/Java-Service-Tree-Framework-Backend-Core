@@ -6,7 +6,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DynamicDBMakerDTO extends TreeBaseDTO {

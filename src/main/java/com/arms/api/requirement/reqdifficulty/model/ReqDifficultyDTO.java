@@ -17,7 +17,7 @@ import com.arms.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReqDifficultyDTO extends TreeBaseDTO {

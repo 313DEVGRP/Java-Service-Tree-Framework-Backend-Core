@@ -11,9 +11,9 @@ import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(callSuper=true)
 @Getter
 @Setter
-@ToString
 public class LoadReqAddDTO extends TreeBaseDTO {
     private Long c_req_pdservice_link;
     private String c_req_pdservice_versionset_link;

@@ -8,7 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReqStatusDTO extends TreeBaseDTO {
