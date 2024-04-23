@@ -13,6 +13,7 @@ package com.arms.api.requirement.reqadd.controller;
 
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.excelupload.ExcelGantUpload;
 import com.arms.api.requirement.reqadd.excelupload.WbsSchedule;
 import com.arms.api.requirement.reqadd.model.*;
@@ -26,10 +27,12 @@ import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
+import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -75,6 +78,10 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     @Qualifier("pdService")
     private PdService pdService;
+
+    @Autowired
+    @Qualifier("pdServiceVersion")
+    private PdServiceVersion pdServiceVersion;
 
     @Autowired
     @Qualifier("reqPriority")
@@ -266,25 +273,34 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         String[] versionStrArr = StringUtils.split(reqAddEntity.getC_req_pdservice_versionset_link(), ",");
 
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        List<ReqAddEntity> savedList = new ArrayList<>();
         if (versionStrArr == null || versionStrArr.length == 0) {
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", "result is empty");
-            return modelAndView;
+            reqAddEntity.setOrder(Order.asc("c_position"));
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
+            SessionUtil.removeAttribute("getReqAddListByFilter");
         } else {
             Disjunction orCondition = Restrictions.disjunction();
             for (String versionStr : versionStrArr) {
                 versionStr = "\\\"" + versionStr + "\\\"";
                 orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", versionStr, MatchMode.ANYWHERE));
             }
-            reqAddEntity.getCriterions().add(orCondition);
 
-            List<ReqAddEntity> savedList = reqAdd.getChildNode(reqAddEntity);
+            if (reqAddEntity.getC_type() != null) {
+                reqAddEntity.getCriterions().add(orCondition);
+                reqAddEntity.getCriterions().add(Restrictions.eq("c_type", reqAddEntity.getC_type()));
+            } else {
+                orCondition.add(Restrictions.eq("c_type","folder"));
+                reqAddEntity.getCriterions().add(orCondition);
+            }
 
+            reqAddEntity.setOrder(Order.asc("c_position"));
+
+            savedList = reqAdd.getChildNodeWithoutPaging(reqAddEntity);
             SessionUtil.removeAttribute("getReqAddListByFilter");
-            ModelAndView modelAndView = new ModelAndView("jsonView");
-            modelAndView.addObject("result", savedList);
-            return modelAndView;
         }
+        modelAndView.addObject("result", savedList);
+        return modelAndView;
 
     }
 
@@ -311,10 +327,39 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        // 요구사항 생성일 및 시작일 업데이트 추가
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
-        reqAddEntity.setC_req_start_date(date);
+
+        List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
+                .map(버전유틸::convertToLongArray)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+
+        if (!versionList.isEmpty()) {
+            Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+            String 시작일 = 시작일과_종료일.get("earliestDate");
+            String 종료일 = 시작일과_종료일.get("latestDate");
+
+            reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
+            reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
+        }
+
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+
+        long 총계획일수 = 0;
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            총계획일수 = reqAddEntity.getC_req_plan_time();
+        }
+
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
 
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
@@ -330,14 +375,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     )
     public ResponseEntity<?> addReqFolderNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @Validated({AddNode.class}) ReqAddDTO reqAddDTO
-    ) throws Exception {
+            @Validated({AddNode.class}) ReqAddDTO reqAddDTO) throws Exception {
 
         log.info("ReqAddController :: addReqFolderNode");
 
         boolean 폴더타입여부 = Optional.ofNullable(reqAddDTO)
                 .map(ReqAddDTO::getC_type)
-                .filter(cType -> !cType.equals(TreeConstant.Branch_TYPE))
+                .filter(cType -> !StringUtils.equals(cType ,TreeConstant.Branch_TYPE))
                 .isPresent();
 
         if (폴더타입여부) {
@@ -376,23 +420,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
 
-        ReqStateEntity 상태_검색결과 = TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class);
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        reqAddEntity.setReqStateEntity(상태_검색결과);
-
-        Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
-
-        if (reqAddDTO.getC_req_start_date() != null) {
-            reqAddEntity.setC_req_start_date(reqAddDTO.getC_req_start_date());
-        }
-
-        boolean isCompleted = 완료_키워드_셋.contains(상태_검색결과.getC_title());
-
-        if (isCompleted) {
-            Date endDate = Optional.ofNullable(reqAddDTO.getC_req_end_date()).orElse(new Date());
-            reqAddEntity.setC_req_end_date(endDate);
-        } else {
-            reqAddEntity.setC_req_end_date(null);
+        if (reqAddEntity.getC_req_plan_time() != null) {
+            long 총계획일수 = reqAddEntity.getC_req_plan_time();
+            long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+            reqAddEntity.setC_req_plan_resource(총계획MM);
         }
 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
@@ -414,6 +447,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: updateDate");
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
+
+        long 총기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+
+        reqAddEntity.setC_req_total_time(총기간일수);
+        reqAddEntity.setC_req_total_resource(총작업MM);
 
         SessionUtil.setAttribute("updateDate", changeReqTableName);
 
@@ -525,19 +567,15 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     }
 
 
-    @GetMapping(value = "/{changeReqTableName}/getNode.do/{c_id}")
+    @GetMapping(value = "/{changeReqTableName}/getNodeDetail.do")
     public ResponseEntity<LoadReqAddDTO> loadReqNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
-            @PathVariable(value = "c_id") Long c_id, HttpServletRequest request
+            @RequestParam(value = "c_id") Long c_id, HttpServletRequest request
     ) throws Exception {
 
-        log.info("ReqAddController :: getNode.do :: 단건 조회");
+        log.info("ReqAddController :: getNodeDetail.do :: changeReqTableName {} :: c_id {}", changeReqTableName, c_id);
 
-        log.info("ReqAddController :: getNode.do :: changeReqTableName :: " + changeReqTableName);
-
-        log.info("ReqAddController :: getNode.do :: c_id :: " + c_id);
-
-        SessionUtil.setAttribute("getNode", changeReqTableName);
+        SessionUtil.setAttribute("getNodeDetail", changeReqTableName);
 
         ReqAddEntity reqAddEntity = new ReqAddEntity();
 
@@ -545,13 +583,13 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity response = reqAdd.getNode(reqAddEntity);
 
-        log.info("ReqAddController :: getNode.do :: response :: " + response);
+        log.info("ReqAddController :: getNodeDetail.do :: response :: " + response);
 
         LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
 
-        log.info("ReqAddController :: getNode.do :: reqAddDto :: " + reqAddDto);
+        log.info("ReqAddController :: getNodeDetail.do :: reqAddDto :: " + reqAddDto);
 
-        SessionUtil.removeAttribute("getNode");
+        SessionUtil.removeAttribute("getNodeDetail");
 
         return ResponseEntity.ok(reqAddDto);
     }

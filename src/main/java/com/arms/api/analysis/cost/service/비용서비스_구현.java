@@ -332,7 +332,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
         List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        List<검색결과> engineResponse = engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_cReqLink");
+        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "cReqLink");
 
         List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
@@ -350,7 +350,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                 .map(PdServiceVersionEntity::getC_pds_version_end_date)
                 .max(String::compareTo).orElse(null);
 
-        if (startDateOrNull == null || startDateOrNull == null) {
+        if (startDateOrNull == null || endDateOrNull == null) {
             chat.sendMessageByEngine("제품 버전의 시작일과 종료일이 없습니다.");
             return new ProductCostResponse(new TreeMap<>(), new TreeMap<>(), new TreeMap<>());
         }
@@ -371,7 +371,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         if (filteredSalaryCreateLogs.isEmpty()) {
             chat.sendMessageByEngine("버전의 기간 이후 연봉을 등록한 경우, 해당 버전은 비용 산정이 되지 않습니다.");
             TreeMap<String, Integer> dailyCost = generateDailyCostsMap(formattedStartDate, formattedEndDate, 0);
-            return new ProductCostResponse(dailyCost, dailyCost, generateDailyCostsCandleStick(versionStartDate, versionEndDate, 0));
+            return new ProductCostResponse(dailyCost, dailyCost, generateDailyCostsCandleStick(versionStartDate, versionEndDate));
         }
 
         // 7. 작업자 별 최초 연봉 수정 시 쌓인 "update" log 조회
@@ -747,7 +747,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         return dailySalaryCosts;
     }
 
-    public TreeMap<String, List<Integer>> generateDailyCostsCandleStick(LocalDate versionStartDate, LocalDate versionEndDate, Integer dailyCost) {
+    public TreeMap<String, List<Integer>> generateDailyCostsCandleStick(LocalDate versionStartDate, LocalDate versionEndDate) {
         TreeMap<String, List<Integer>> candleStick = new TreeMap<>();
         for (LocalDate date = versionStartDate; !date.isAfter(versionEndDate); date = date.plusDays(1)) {
             candleStick.put(date.toString(), Arrays.asList(0, 0, 0, 0));
@@ -763,8 +763,21 @@ public class 비용서비스_구현 implements 비용서비스 {
         engineAggregationRequestDTO.setIsReqType(IsReqType.ALL);
         engineAggregationRequestDTO.setPdServiceLink(pdServiceLink);
         engineAggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-        List<검색결과> result = engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody().get검색결과().get("group_by_assignee.assignee_accountId.keyword");
+        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
         return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
+
+    private List<검색결과> engineResponseNullFilter(검색결과_목록_메인 nullableBody, String mainAggregationGroupField) {
+        if (nullableBody == null) {
+            return Collections.emptyList();
+        }
+        Map<String, List<검색결과>> nullableMap = nullableBody.get검색결과();
+        List<검색결과> nullableList = nullableMap.get("group_by_" + mainAggregationGroupField);
+        if (nullableList == null) {
+            return Collections.emptyList();
+        }
+        return nullableList;
+    }
+
 }
 

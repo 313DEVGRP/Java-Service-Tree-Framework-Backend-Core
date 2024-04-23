@@ -54,10 +54,10 @@ public class TopMenuServiceImpl implements  TopMenuService{
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            ReqStateEntity reqStateEntity = entity.getReqStateEntity();
                             if (StringUtils.equals(entity.getC_type(),"folder") ) {
                                 return "folder";
                             } else {
+                                ReqStateEntity reqStateEntity = entity.getReqStateEntity();
                                 if (reqStateEntity == null) {
                                     return "null";
                                 }
@@ -78,9 +78,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
                         Collectors.counting()
                 ));
 
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.get("folder")));
-
-
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.getOrDefault("folder", 0L)));
 
         SessionUtil.removeAttribute("getReqAddListByFilter");
         log.info("[TopMenuServiceImpl  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
@@ -103,7 +101,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
         이슈_맵.put("req", null);
         이슈_맵.put("subtask", null);
 
-        검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
+        검색결과_목록_메인 집계결과목록 = 일반_버전필터_집계.getBody();
         if (집계결과목록 != null) {
             이슈_맵.put("total", 집계결과목록.get전체합계()); // 총 이슈
 
@@ -182,7 +180,13 @@ public class TopMenuServiceImpl implements  TopMenuService{
             }
         }
 
-        //작업자_이슈_개수_맵.put("overall",요구사항_서브테스크_종합);
+        // 아예 없는 경우, 최솟값을 0으로
+        if(요구사항_서브테스크_종합.get("req_min") == 1000000L) {
+            요구사항_서브테스크_종합.put("req_min", 0L);
+        }
+        if(요구사항_서브테스크_종합.get("sub_min") == 1000000L) {
+            요구사항_서브테스크_종합.put("sub_min", 0L);
+        }
         return 요구사항_서브테스크_종합;
     }
 

@@ -1,16 +1,29 @@
 package com.arms.config;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
+
 @Configuration
+@Slf4j
 public class WebConfig implements WebMvcConfigurer {
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        String[] origins = allowedOrigins.split(",");
+        for (String origin : origins) {
+            log.info("CORS Allowed Origin: {}", origin);
+        }
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost","http://127.0.0.1","http://localhost:9999","http://127.0.0.1:9999","http://313.co.kr","http://www.313.co.kr","https://313.co.kr","https://www.313.co.kr","http://313.co.kr:9999","http://www.313.co.kr:9999","http://a-rms.net","http://www.a-rms.net","https://a-rms.net","https://www.a-rms.net","http://www.a-rms.net:9999","http://a-rms.net:9999","http://mad-dev.megazone.com","http://192.168.4.141")
+                .allowedOrigins(origins)
                 .allowedMethods(
                         HttpMethod.GET.name(),
                         HttpMethod.HEAD.name(),
