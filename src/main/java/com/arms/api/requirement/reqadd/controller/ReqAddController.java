@@ -329,6 +329,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
+        reqAddEntity.setC_req_update_date(date);
 
         List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
                 .map(버전유틸::convertToLongArray)
