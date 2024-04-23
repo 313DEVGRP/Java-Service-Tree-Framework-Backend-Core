@@ -1,6 +1,7 @@
 package com.arms.api.analysis.scope.service;
 
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
@@ -9,7 +10,6 @@ import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.util.TreeServiceUtils;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
@@ -268,9 +268,9 @@ public class ScopeServiceImpl implements ScopeService {
     }
 
     @Override
-    public List<TreeBarDTO> treeBar(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+    public List<TreeBarDTO> treeBar(AggregationRequestDTO aggregationRequestDTO) throws Exception {
 
-        Long pdServiceLink = engineAggregationRequestDTO.getPdServiceLink();
+        Long pdServiceLink = aggregationRequestDTO.getPdServiceLink();
 
         List<TreeBarDTO> treeBarList = new ArrayList<>();
 
@@ -287,7 +287,7 @@ public class ScopeServiceImpl implements ScopeService {
 
         // 3. 제품 버전 조회
         List<PdServiceVersionEntity> productVersions = product.getPdServiceVersionEntities().stream().filter(
-                pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
+                pdServiceVersionEntity -> aggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())
         ).sorted(Comparator.comparing(PdServiceVersionEntity::getC_id)).collect(Collectors.toList());
 
         if (productVersions.isEmpty()) {
@@ -296,7 +296,7 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         // 4. 엔진 통신
-        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO);
+        ResponseEntity<검색결과_목록_메인> 외부API응답 = 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록메인 = 외부API응답.getBody();
 

@@ -11,7 +11,6 @@
  */
 package com.arms.api.requirement.reqadd_pure.service;
 
-import com.arms.api.analysis.common.AggregationMapper;
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraproject.service.JiraProject;
@@ -20,7 +19,6 @@ import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd_pure.model.ReqAddPureEntity;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -83,8 +81,6 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	@Autowired
 	@Qualifier("reqState")
 	private ReqState reqState;
-
-	private final AggregationMapper aggregationMapper;
 
 	@Autowired
 	protected Chat chat;
@@ -153,8 +149,7 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 		aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
 		aggregationRequestDTO.set메인그룹필드("cReqLink");
 
-		EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
-		ResponseEntity<검색결과_목록_메인> 완료상태 = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, "resolutiondate");
+		ResponseEntity<검색결과_목록_메인> 완료상태 = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
 
 		Map<Long, Map<String, Long>> 진행률계산맵 = new HashMap<>();
 

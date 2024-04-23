@@ -1,8 +1,8 @@
 package com.arms.api.util.communicate.external;
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.migration.UpdateReqLinkDTO;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -114,7 +114,7 @@ public interface 엔진통신기 {
 
     @PostMapping("/engine/jira/dashboard/requirement-linkedissue/{pdServiceId}")
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
-                                                @SpringQueryMap EngineAggregationRequestDTO engineAggregationRequestDTO);
+                                                @SpringQueryMap AggregationRequestDTO aggregationRequestDTO);
 
     @PostMapping("/engine/jira/field/update/c_req_link")
     ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);

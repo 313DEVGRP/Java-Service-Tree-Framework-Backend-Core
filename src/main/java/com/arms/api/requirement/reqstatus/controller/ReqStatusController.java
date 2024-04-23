@@ -11,12 +11,12 @@
  */
 package com.arms.api.requirement.reqstatus.controller;
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.jira.jiraissuepriority.service.JiraIssuePriority;
 import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
@@ -146,7 +146,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
         Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
 
-        EngineAggregationRequestDTO 요청 = new EngineAggregationRequestDTO();
+        AggregationRequestDTO 요청 = new AggregationRequestDTO();
 
         ParameterParser parser = new ParameterParser(request);
         String versionsString = parser.get("version");
