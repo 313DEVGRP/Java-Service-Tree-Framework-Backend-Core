@@ -1,10 +1,10 @@
 package com.arms.api.analysis.common.service;
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -191,9 +191,9 @@ public class TopMenuServiceImpl implements  TopMenuService{
     }
 
     @Override
-    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(EngineAggregationRequestDTO engineAggregationRequestDTO, String resolution) {
+    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(AggregationRequestDTO aggregationRequestDTO, String resolution) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계  =
-                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(engineAggregationRequestDTO, resolution);
+                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
 
         검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
 

@@ -1,5 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.cost.dto.CandleStick;
 import com.arms.api.analysis.cost.dto.ProductCostResponse;
 import com.arms.api.analysis.cost.dto.버전별_요구사항별_연결된_지라이슈데이터;
@@ -23,7 +24,6 @@ import com.arms.api.analysis.salary.service.SalaryLog;
 import com.arms.api.analysis.salary.service.SalaryService;
 import com.arms.api.util.API호출변수;
 import com.arms.api.analysis.common.IsReqType;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
@@ -117,13 +117,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         return 버전요구사항별_담당자데이터;
     }
 
-    public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(EngineAggregationRequestDTO engineAggregationRequestDTO) {
+    public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(AggregationRequestDTO aggregationRequestDTO) {
 
-        engineAggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
-        ResponseEntity<List<검색결과>> 요구사항_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        aggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
+        ResponseEntity<List<검색결과>> 요구사항_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
 
-        engineAggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
-        ResponseEntity<List<검색결과>> 하위이슈_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(engineAggregationRequestDTO);
+        aggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
+        ResponseEntity<List<검색결과>> 하위이슈_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
 
         List<검색결과> 전체결과 = new ArrayList<>();
 
@@ -262,11 +262,11 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     @Override
-    public 버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+    public 버전별_요구사항별_연결된_지라이슈데이터 버전별_요구사항_연결된_지라이슈키(AggregationRequestDTO aggregationRequestDTO) throws Exception {
 
-        Long 제품및서비스 = engineAggregationRequestDTO.getPdServiceLink();
+        Long 제품및서비스 = aggregationRequestDTO.getPdServiceLink();
 
-        List<Long> 버전 = engineAggregationRequestDTO.getPdServiceVersionLinks();
+        List<Long> 버전 = aggregationRequestDTO.getPdServiceVersionLinks();
 
         List<ReqStatusEntity> 상태_테이블_조회결과 = 지라이슈상태_테이블_조회(제품및서비스, 버전);
 
@@ -318,13 +318,13 @@ public class 비용서비스_구현 implements 비용서비스 {
     }
 
     @Override
-    public ProductCostResponse calculateInvestmentPerformance(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
+    public ProductCostResponse calculateInvestmentPerformance(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         // 1. 해결 된 이슈를 찾기 위해 해결 상태값을 조회함. (ReqState)
         List<ReqStateEntity> reqStateEntities = getReqStateEntities();
         List<Long> filteredReqStateId = filterResolvedStateIds(reqStateEntities, resolvedKeyword);
 
         // 2. ReqStatus(요구사항)을 조회함
-        List<ReqStatusEntity> reqStatusEntities = getReqStatusEntities(engineAggregationRequestDTO);
+        List<ReqStatusEntity> reqStatusEntities = getReqStatusEntities(aggregationRequestDTO);
 
         // 3. 요구사항의 ReqStateLink 값을 가지고 필터링함. ReqState 값이 완료 키워드인 ReqStatus 만 가져옴
         List<ReqStatusEntity> filteredReqStatusEntities = filterResolvedReqStatusEntities(reqStatusEntities, filteredReqStateId);
@@ -332,13 +332,13 @@ public class 비용서비스_구현 implements 비용서비스 {
         // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
         List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "cReqLink");
+        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "cReqLink");
 
         List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
         // 5. 제품 버전을 기준으로 x 축에 해당하는 시작일, 종료일 구하기
         List<PdServiceVersionEntity> pdServiceVersionEntities = pdServiceVersion.getNodesWithoutRoot(new PdServiceVersionEntity())
-                .stream().filter(pdServiceVersionEntity -> engineAggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())).collect(Collectors.toList());
+                .stream().filter(pdServiceVersionEntity -> aggregationRequestDTO.getPdServiceVersionLinks().contains(pdServiceVersionEntity.getC_id())).collect(Collectors.toList());
 
         String startDateOrNull = pdServiceVersionEntities.stream()
                 .filter(pdServiceVersionEntity -> !pdServiceVersionEntity.getC_pds_version_start_date().equals("start"))
@@ -362,7 +362,7 @@ public class 비용서비스_구현 implements 비용서비스 {
         LocalDate versionEndDate = LocalDate.parse(formattedEndDate);
 
         // 6. 작업자 별 최초 연봉 데이터 추가 시 쌓인 "create" log 조회
-        Set<String> getAssignees = this.getAssignees(engineAggregationRequestDTO.getPdServiceLink(), engineAggregationRequestDTO.getPdServiceVersionLinks());
+        Set<String> getAssignees = this.getAssignees(aggregationRequestDTO.getPdServiceLink(), aggregationRequestDTO.getPdServiceVersionLinks());
         Map<String, SalaryLogJdbcDTO> salaryCreateLogs = salaryLog.findAllLogsToMaps("create", endDateOrNull);
         Map<String, SalaryLogJdbcDTO> filteredSalaryCreateLogs = salaryCreateLogs.entrySet().stream()
                 .filter(entry -> getAssignees.contains(entry.getKey()))
@@ -612,7 +612,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                 .collect(Collectors.toList());
     }
 
-    private List<ReqStatusEntity> getReqStatusEntities(EngineAggregationRequestDTO requestDTO) {
+    private List<ReqStatusEntity> getReqStatusEntities(AggregationRequestDTO requestDTO) {
         return internalCommunicator.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + requestDTO.getPdServiceLink(), new ReqStatusDTO());
     }
 
@@ -758,12 +758,12 @@ public class 비용서비스_구현 implements 비용서비스 {
 
     @Override
     public Set<String> getAssignees(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        EngineAggregationRequestDTO engineAggregationRequestDTO = new EngineAggregationRequestDTO();
-        engineAggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
-        engineAggregationRequestDTO.setIsReqType(IsReqType.ALL);
-        engineAggregationRequestDTO.setPdServiceLink(pdServiceLink);
-        engineAggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
+        AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
+        aggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
+        aggregationRequestDTO.setIsReqType(IsReqType.ALL);
+        aggregationRequestDTO.setPdServiceLink(pdServiceLink);
+        aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
+        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
         return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
 

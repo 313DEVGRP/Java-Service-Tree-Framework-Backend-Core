@@ -1,5 +1,6 @@
 package com.arms.api.dashboard.service;
 
+import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.dashboard.model.SankeyData;
 import com.arms.api.dashboard.model.SankeyData.SankeyLink;
@@ -10,7 +11,6 @@ import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.트리맵_검색요청;
@@ -33,24 +33,24 @@ public class DashboardServiceImpl implements DashboardService {
     private final PdServiceVersion pdServiceVersion;
 
     @Override
-    public 검색결과_목록_메인 commonNestedAggregation(final EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        return 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(engineAggregationRequestDTO).getBody();
+    public 검색결과_목록_메인 commonNestedAggregation(final AggregationRequestDTO aggregationRequestDTO) {
+        return 통계엔진통신기.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
     }
 
     @Override
-    public 검색결과_목록_메인 commonFlatAggregation(final EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        return 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(engineAggregationRequestDTO).getBody();
+    public 검색결과_목록_메인 commonFlatAggregation(final AggregationRequestDTO aggregationRequestDTO) {
+        return 통계엔진통신기.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
     }
 
     @Override
-    public Map<String, RequirementJiraIssueAggregationResponse> requirementsJiraIssueStatuses(final EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        return 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(engineAggregationRequestDTO).getBody();
+    public Map<String, RequirementJiraIssueAggregationResponse> requirementsJiraIssueStatuses(final AggregationRequestDTO aggregationRequestDTO) {
+        return 통계엔진통신기.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(aggregationRequestDTO).getBody();
     }
 
     @Override
-    public SankeyData sankeyChartAPI(final EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
-        Long pdServiceLink = engineAggregationRequestDTO.getPdServiceLink();
-        List<Long> pdServiceVersionLinks = engineAggregationRequestDTO.getPdServiceVersionLinks();
+    public SankeyData sankeyChartAPI(final AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        Long pdServiceLink = aggregationRequestDTO.getPdServiceLink();
+        List<Long> pdServiceVersionLinks = aggregationRequestDTO.getPdServiceVersionLinks();
 
         if (pdServiceVersionLinks.isEmpty()) {
             return new SankeyData(Collections.emptyList(), Collections.emptyList());
@@ -78,7 +78,7 @@ public class DashboardServiceImpl implements DashboardService {
         }).collect(Collectors.toSet());
 
         // 3. Engine 에 담당자 데이터 요청
-        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(통계엔진통신기.제품_혹은_제품버전들의_담당자목록(engineAggregationRequestDTO).getBody());
+        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(통계엔진통신기.제품_혹은_제품버전들의_담당자목록(aggregationRequestDTO).getBody());
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
                 String versionId = result.get필드명();
@@ -118,8 +118,8 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<Worker> 작업자별_요구사항_관여도(EngineAggregationRequestDTO engineAggregationRequestDTO) throws Exception {
-        List<Long> pdServiceVersionLinks = engineAggregationRequestDTO.getPdServiceVersionLinks();
+    public List<Worker> 작업자별_요구사항_관여도(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        List<Long> pdServiceVersionLinks = aggregationRequestDTO.getPdServiceVersionLinks();
         List<제품버전목록> 제품버전목록데이터 = pdServiceVersion.getVersionListByCids(pdServiceVersionLinks).stream()
             .map(entity -> {
                 제품버전목록 model = new 제품버전목록();
@@ -129,15 +129,15 @@ public class DashboardServiceImpl implements DashboardService {
             })
             .collect(Collectors.toList());
 
-        List<Worker> workers = 통계엔진통신기.작업자별_요구사항_관여도(트리맵_검색요청.of(engineAggregationRequestDTO, 제품버전목록데이터)).getBody();
+        List<Worker> workers = 통계엔진통신기.작업자별_요구사항_관여도(트리맵_검색요청.of(aggregationRequestDTO, 제품버전목록데이터)).getBody();
 
         return workers;
     }
 
 
     @Override
-    public 검색결과_목록_메인 제품서비스_일반_통계(Long pdServiceId, EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, engineAggregationRequestDTO);
+    public 검색결과_목록_메인 제품서비스_일반_통계(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
         return 요구사항_연결이슈_일반_통계.getBody();
     }
 
@@ -147,14 +147,14 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> 제품서비스_요구사항제외_일반_통계(Long pdServiceId, EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, engineAggregationRequestDTO);
+    public Map<String, Object> 제품서비스_요구사항제외_일반_통계(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, aggregationRequestDTO);
         return 요구사항_연결이슈_일반_통계.getBody();
     }
 
     @Override
-    public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, engineAggregationRequestDTO);
+    public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, aggregationRequestDTO);
         Map<String, Object> 통신결과 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(Collections.emptyMap());
         Map<String, Object> 검색결과 = Optional.ofNullable((Map<String, Object>) 통신결과.get("검색결과")).orElse(Collections.emptyMap());
         List<Object> 작업자별결과 = (List<Object>) 검색결과.get("group_by_assignee.assignee_emailAddress.keyword");
@@ -162,8 +162,8 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, EngineAggregationRequestDTO engineAggregationRequestDTO) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, engineAggregationRequestDTO);
+    public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(new 검색결과_목록_메인());
 
