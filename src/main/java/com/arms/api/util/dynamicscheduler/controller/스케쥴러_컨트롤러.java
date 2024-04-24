@@ -18,8 +18,10 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import com.arms.api.util.dynamicscheduler.service.스케쥴러;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.dynamicscheduler.service.스케쥴러;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -43,17 +45,14 @@ import java.util.List;
 @RequestMapping(value = {"/arms/scheduler"})
 public class 스케쥴러_컨트롤러{
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
     private 스케쥴러 스케쥴러;
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Qualifier("pdService")
     private PdService pdService;
-
-    @Autowired
-    private com.arms.api.util.communicate.external.엔진통신기 엔진통신기;
 
     @Autowired
     @Qualifier("reqStatus")
@@ -64,7 +63,10 @@ public class 스케쥴러_컨트롤러{
     private JiraServer jiraServer;
 
     @Autowired
-    private com.arms.api.util.communicate.internal.내부통신기 내부통신기;
+    private 엔진통신기 엔진통신기;
+
+    @Autowired
+    private 내부통신기 내부통신기;
 
     @Autowired
     protected Chat chat;
@@ -110,6 +112,7 @@ public class 스케쥴러_컨트롤러{
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_link => {}", 요구사항_이슈_엔티티.getC_req_link());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_project_key => {}", 요구사항_이슈_엔티티.getC_jira_project_key());
                         String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
                         if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
                             Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
@@ -122,7 +125,8 @@ public class 스케쥴러_컨트롤러{
                                     요구사항_이슈_엔티티.getC_issue_key(),
                                     요구사항_이슈_엔티티.getC_pdservice_link(),
                                     버전_아이디_목록_배열,
-                                    요구사항_이슈_엔티티.getC_req_link()
+                                    요구사항_이슈_엔티티.getC_req_link(),
+                                    요구사항_이슈_엔티티.getC_jira_project_key()
                             );
 
                             if (저장결과 == 1) {
@@ -183,6 +187,8 @@ public class 스케쥴러_컨트롤러{
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_name => {}", 요구사항_이슈_엔티티.getC_req_name());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_issue_key => {}", 요구사항_이슈_엔티티.getC_issue_key());
                         log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_link => {}", 요구사항_이슈_엔티티.getC_req_link());
+                        log.info("[스케줄러_컨트롤러 :: 각_제품서비스_별_증분_요구사항이슈_조회_및_ES저장] :: 진행중인 ReqStatusEntity c_req_project_key => {}", 요구사항_이슈_엔티티.getC_jira_project_key());
+
                         String 버전_목록_문자열 = 요구사항_이슈_엔티티.getC_req_pdservice_versionset_link();
                         if(버전_목록_문자열 != null && !버전_목록_문자열.isEmpty()) {
                             Long[] 버전_아이디_목록_배열 = Arrays.stream(버전_목록_문자열.split("[\\[\\],\"]"))
@@ -195,7 +201,8 @@ public class 스케쥴러_컨트롤러{
                                     요구사항_이슈_엔티티.getC_issue_key(),
                                     요구사항_이슈_엔티티.getC_pdservice_link(),
                                     버전_아이디_목록_배열,
-                                    요구사항_이슈_엔티티.getC_req_link()
+                                    요구사항_이슈_엔티티.getC_req_link(),
+                                    요구사항_이슈_엔티티.getC_jira_project_key()
                             );
                             log.info("[" + 지라서버.getC_jira_server_name() + "] " + 요구사항_이슈_엔티티.getC_issue_key() + " :: ES 저장 결과개수 = " + 저장결과);
                         } else {

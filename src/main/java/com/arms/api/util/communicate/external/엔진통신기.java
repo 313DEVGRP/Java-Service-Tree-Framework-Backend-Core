@@ -77,7 +77,8 @@ public interface 엔진통신기 {
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
             @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열,
-            @RequestParam("cReqLink") Long cReqLink
+            @RequestParam("cReqLink") Long cReqLink,
+            @RequestParam("projectKey") String 프로젝트_키
     );
 
     @GetMapping("/engine/jira/{connectId}/issue/increment/loadToES/bulk/{issueKey}")
@@ -86,7 +87,8 @@ public interface 엔진통신기 {
             @PathVariable("issueKey") String 이슈_키,
             @RequestParam("pdServiceId") Long 제품서비스_아이디,
             @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열,
-            @RequestParam("cReqLink") Long cReqLink
+            @RequestParam("cReqLink") Long cReqLink,
+            @RequestParam("projectKeyOrId") String 프로젝트키_또는_아이디
     );
 
 
