@@ -11,7 +11,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class SalaryLogDTO extends TreeBaseDTO {

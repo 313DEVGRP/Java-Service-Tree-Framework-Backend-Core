@@ -40,9 +40,8 @@ import com.arms.egovframework.javaservice.treeframework.validation.group.MoveNod
 import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,8 +103,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         setTreeEntity(ReqAddEntity.class);
     }
 
-    @Autowired
-    private ReqAddControllerMapper reqAddControllerMapper;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -329,6 +326,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
+        reqAddEntity.setC_req_update_date(date);
 
         List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
                 .map(버전유틸::convertToLongArray)
@@ -585,7 +583,18 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         log.info("ReqAddController :: getNodeDetail.do :: response :: " + response);
 
-        LoadReqAddDTO reqAddDto = reqAddControllerMapper.toLoadReqAddDto(response);
+        ModelMapper customModelMapper = new ModelMapper();
+        customModelMapper.addMappings(new PropertyMap<ReqAddEntity, LoadReqAddDTO>() {
+            @Override
+            protected void configure() {
+                map().setC_req_pdservice_link(source.getPdServiceEntity().getC_id());
+                map().setC_req_priority_link(source.getReqPriorityEntity().getC_id());
+                map().setC_req_state_link(source.getReqStateEntity().getC_id());
+                map().setC_req_difficulty_link(source.getReqDifficultyEntity().getC_id());
+            }
+        });
+
+        LoadReqAddDTO reqAddDto = customModelMapper.map(response, LoadReqAddDTO.class);
 
         log.info("ReqAddController :: getNodeDetail.do :: reqAddDto :: " + reqAddDto);
 
@@ -617,18 +626,20 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         SessionUtil.removeAttribute("getNodesWhereInIds");
 
-        List<LoadReqAddDTO> loadReqAddDTOList = list.stream().map(reqAddControllerMapper::toLoadReqAddDto).collect(toList());
+        ModelMapper customModelMapper = new ModelMapper();
+        customModelMapper.addMappings(new PropertyMap<ReqAddEntity, LoadReqAddDTO>() {
+            @Override
+            protected void configure() {
+                map().setC_req_pdservice_link(source.getPdServiceEntity().getC_id());
+                map().setC_req_priority_link(source.getReqPriorityEntity().getC_id());
+                map().setC_req_state_link(source.getReqStateEntity().getC_id());
+                map().setC_req_difficulty_link(source.getReqDifficultyEntity().getC_id());
+            }
+        });
+
+        List<LoadReqAddDTO> loadReqAddDTOList = list.stream().map(entity -> customModelMapper.map(entity, LoadReqAddDTO.class)).collect(toList());
 
         return ResponseEntity.ok(loadReqAddDTOList);
-    }
-
-    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-    interface ReqAddControllerMapper {
-        @Mapping(source = "pdServiceEntity.c_id", target = "c_req_pdservice_link")
-        @Mapping(source = "reqPriorityEntity.c_id", target = "c_req_priority_link")
-        @Mapping(source = "reqStateEntity.c_id", target = "c_req_state_link")
-        @Mapping(source = "reqDifficultyEntity.c_id", target = "c_req_difficulty_link")
-        LoadReqAddDTO toLoadReqAddDto(ReqAddEntity reqAddEntity);
     }
 
 

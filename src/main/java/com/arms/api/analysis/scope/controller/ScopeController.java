@@ -4,8 +4,6 @@ import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자수;
 import com.arms.api.analysis.scope.service.ScopeService;
 import com.arms.api.analysis.common.AggregationRequestDTO;
-import com.arms.api.analysis.common.AggregationMapper;
-import com.arms.api.util.communicate.external.request.aggregation.EngineAggregationRequestDTO;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -13,7 +11,6 @@ import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.util.communicate.external.통계엔진통신기;
@@ -30,8 +27,6 @@ public class ScopeController {
     private final 통계엔진통신기 engineCommunicator;
 
     private final ScopeService scopeService;
-
-    private final AggregationMapper aggregationMapper;
 
     @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
@@ -78,11 +73,8 @@ public class ScopeController {
     }
 
     @GetMapping("/tree-bar-top10")
-    public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(
-            @Validated AggregationRequestDTO aggregationRequestDTO
-    ) throws Exception {
-        EngineAggregationRequestDTO engineAggregationRequestDTO = aggregationMapper.toEngineAggregationRequestDTO(aggregationRequestDTO);
-        return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(engineAggregationRequestDTO)));
+    public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(AggregationRequestDTO aggregationRequestDTO) throws Exception {
+        return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(aggregationRequestDTO)));
     }
 
 

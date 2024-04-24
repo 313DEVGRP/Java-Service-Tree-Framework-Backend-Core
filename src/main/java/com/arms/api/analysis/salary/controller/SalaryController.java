@@ -11,10 +11,6 @@ import com.arms.egovframework.javaservice.treeframework.excel.ExcelUtilsFactory;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +37,6 @@ import java.util.stream.Collectors;
 public class SalaryController extends TreeAbstractController<SalaryService, SalaryDTO, SalaryEntity> {
 
     private final SalaryService salaryService;
-    private final SalaryControllerMapper salaryControllerMapper;
 
     @PostConstruct
     public void initialize() {
@@ -94,24 +89,11 @@ public class SalaryController extends TreeAbstractController<SalaryService, Sala
     @PutMapping
     public ResponseEntity<CommonResponse.ApiResult<List<SalaryDTO>>> bulkUpdate(@RequestBody Map<String, SalaryDTO> salaryMaps) throws Exception {
         List<SalaryDTO> salaryDTOList = salaryMaps.values().stream().collect(Collectors.toList());
-        List<SalaryEntity> salaryEntityList = salaryControllerMapper.toSalaryEntityList(salaryDTOList);
+        List<SalaryEntity> salaryEntityList = salaryDTOList.stream().map(dto -> modelMapper.map(dto, SalaryEntity.class)).collect(Collectors.toList());
         salaryService.updateSalary(salaryEntityList);
         Map<String, SalaryEntity> fetchSalary = salaryService.모든_연봉정보_맵();
         List<SalaryDTO> response = fetchSalary.values().stream().map(entity -> modelMapper.map(entity, SalaryDTO.class)).collect(Collectors.toList());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
-    @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-    public interface SalaryControllerMapper {
-
-        @BeanMapping(ignoreByDefault = true)
-        @Mapping(target = "c_id", source = "c_id")
-        @Mapping(target = "c_name", source = "c_name")
-        @Mapping(target = "c_key", source = "c_key")
-        @Mapping(target = "c_annual_income", source = "c_annual_income")
-        @Mapping(target = "c_title", source = "c_title")
-        SalaryEntity toSalaryEntity(SalaryDTO salaryDTO);
-
-        List<SalaryEntity> toSalaryEntityList(List<SalaryDTO> salaryDTOList);
-    }
 }

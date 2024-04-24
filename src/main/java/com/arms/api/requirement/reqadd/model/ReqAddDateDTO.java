@@ -13,7 +13,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReqAddDateDTO extends TreeBaseDTO {
