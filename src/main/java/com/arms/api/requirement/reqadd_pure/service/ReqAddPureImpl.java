@@ -165,10 +165,7 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 		// 실적, 계획 진행퍼센트 처리
 		List<ReqAddPureEntity> 실적계산_결과목록 = 전체요구사항_목록.stream().map(요구사항_엔티티 -> {
-				// 폴더 타입 요구사항은 리턴, defalut 타입 요구사항에 대해서는 실적계산
-				if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
-					return 요구사항_엔티티;
-				}
+				
 
 				if (요구사항_엔티티.getC_req_start_date() != null && 요구사항_엔티티.getC_req_end_date() != null) {
 					Date 시작일 = DateUtils.getStartOfDate(요구사항_엔티티.getC_req_start_date());
@@ -177,6 +174,11 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 					long 진행율 = 계획진행률_계산(시작일, 종료일, 오늘);
 					요구사항_엔티티.setC_req_plan_progress(진행율);
+				}
+
+				// 폴더 타입 요구사항은 실적계산 전 리턴
+				if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
+					return 요구사항_엔티티;
 				}
 
 				// 요구사항 req state가 완료상태일 경우 실적 100% 처리
