@@ -235,6 +235,7 @@ public class ScopeServiceImpl implements ScopeService {
             }
             검색용도_객체.getCriterions().add(orCondition);
         }
+        검색용도_객체.getCriterions().add(Restrictions.eq("c_type", "default"));
 
         List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
 
