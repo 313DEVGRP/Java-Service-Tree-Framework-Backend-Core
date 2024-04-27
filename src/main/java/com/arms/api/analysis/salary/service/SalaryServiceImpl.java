@@ -28,9 +28,9 @@ public class SalaryServiceImpl extends TreeServiceImpl implements SalaryService 
         List<SampleDTO> 샘플데이터 = new ArrayList<>();
 
         AtomicInteger 번호 = new AtomicInteger(1);
-        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "이름", "지라에 설정된 사용자 이름 입니다.", "수정 X"));
-        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "고유 키", "지라에 설정된 고유한 사용자의 아이디 입니다.", "수정 X"));
-        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "연봉", "사용자의 연봉 정보입니다. (단위: 만원)", "수정 O"));
+        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "이름", "ALM(Jira, Redmine, GitLab) 에 설정된 사용자 이름 입니다.", "ex) moon", "최초 등록 후 수정 불가"));
+        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "고유 키", "ALM(Jira, Redmine, GitLab) 에 설정된 고유한 사용자의 아이디 입니다.", "ex) 6265535bfff19d0069259584", "최초 등록 후 수정 불가"));
+        샘플데이터.add(new SampleDTO(String.valueOf(번호.getAndIncrement()), "연봉", "사용자의 연봉 정보입니다. (단위: 만원)", "ex) 5000", "최초 등록 후 수정 가능"));
 
         return 샘플데이터;
     }
