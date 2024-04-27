@@ -2,8 +2,10 @@ package com.arms.api.analysis.scope.controller;
 
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자수;
+import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.analysis.scope.service.ScopeService;
 import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -58,6 +60,18 @@ public class ScopeController {
         return  ResponseEntity.ok(버전_요구사항_수);
     }
 
+    @GetMapping("/state-per-version/{changeReqTableName}/getReqAddListByFilter.do")
+    public ResponseEntity<List<요구사항_버전명추가_DTO>> 버전별_요구사항_상태정보(@PathVariable(value ="changeReqTableName") String changeReqTableName
+            , @RequestParam Long pdServiceId
+            , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
+        log.info("스코프분석_컨트롤러 :: 버전별_요구사항_상태정보.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
+                , pdServiceStr, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(scopeService.버전_요구사항_상태(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+    }
+
     @GetMapping("/{pdServiceId}/req-status-and-reqInvolved-unique-assignees-per-version")
     public ResponseEntity<List<버전별_요구사항_상태_작업자수>> 버전배열_요구사항_별_상태_및_관여_작업자_수(@PathVariable("pdServiceId") Long pdServiceId,
                                                                             @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
@@ -75,27 +89,5 @@ public class ScopeController {
     @GetMapping("/tree-bar-top10")
     public ResponseEntity<CommonResponse.ApiResult<List<TreeBarDTO>>> treeBar(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         return ResponseEntity.ok(CommonResponse.success(scopeService.treeBar(aggregationRequestDTO)));
-    }
-
-
-    // TopMenuApi용
-    @GetMapping("/top-menu/{changeReqTableName}/getReqAddListByFilter.do")
-    public ResponseEntity<Map<String, Long>> 분석_톱메뉴_요구사항_상태_합계(@PathVariable(value ="changeReqTableName") String changeReqTableName
-            , @RequestParam Long pdServiceId
-            , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
-
-        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
-        log.info("스코프분석_컨트롤러 :: 분석_톱메뉴_요구사항_상태_합계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
-                , pdServiceStr, pdServiceVersionLinks);
-
-        return  ResponseEntity.ok(scopeService.톱메뉴_버전별_요구사항_상태_합계(changeReqTableName, pdServiceId, pdServiceVersionLinks));
-    }
-
-    @GetMapping("/top-menu/issue/reqAndSubtask/{pdServiceId}")
-    public ResponseEntity<Map<String, Long>> 분석_톱메뉴_이슈_집계(@PathVariable("pdServiceId") Long pdServiceId
-                                          ,@RequestParam List<Long> pdServiceVersionLinks) throws Exception {
-        log.info("스코프분석_컨트롤러 :: 분석_톱메뉴_이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks);
-
-        return  ResponseEntity.ok(scopeService.톱메뉴_요구사항_하위이슈_집계(pdServiceId, pdServiceVersionLinks));
     }
 }
