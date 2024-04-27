@@ -41,7 +41,7 @@ public class SessionParamAdvice {
             StringWriter errors = new StringWriter();
             e.printStackTrace(new PrintWriter(errors));
             for (Object arg : args) {
-                log.error("※ERROR 발생\nmethodName : {}\nsession    : {}\nparameter   : {}\nerrorMsg    : {}",methodName,request.getSession().getId(),arg,errors);
+                log.error("※ERROR 발생\tmethodName : {}\tsession    : {}\tparameter   : {}\terrorMsg    : {}",methodName,request.getSession().getId(),arg,errors);
             }
             throw e;
         }
