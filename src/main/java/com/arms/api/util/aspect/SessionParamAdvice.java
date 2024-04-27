@@ -47,9 +47,14 @@ public class SessionParamAdvice {
             slackNotificationService.sendMessageToChannel(SlackProperty.Channel.backend, e);
             StringWriter errors = new StringWriter();
             e.printStackTrace(new PrintWriter(errors));
-            for (Object arg : args) {
-                log.error("{} Error 발생\tmethodName : {}\tsession    : {}\tparameter   : {}\terrorMsg    : {}",appName,methodName,request.getSession().getId(),arg,errors);
+            if(args.length>0){
+                for (Object arg : args) {
+                    log.error("{} Error 발생\tmethodName : {}\tsession    : {}\tparameter   : {}\terrorMsg    : {}",appName,methodName,request.getSession().getId(),arg,errors);
+                }
+            }else{
+                log.error("{} Error 발생\tmethodName : {}\tsession    : {}\terrorMsg    : {}",appName,methodName,request.getSession().getId(),errors);
             }
+
             throw e;
         }
 
