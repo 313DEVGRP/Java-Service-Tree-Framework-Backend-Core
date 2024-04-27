@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -21,10 +22,16 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 @Slf4j
-@AllArgsConstructor
 public class SessionParamAdvice {
 
     private final SlackNotificationService slackNotificationService;
+    private final String appName;
+
+    public SessionParamAdvice(SlackNotificationService slackNotificationService
+            , @Value("${spring.application.name}") String appName) {
+        this.slackNotificationService = slackNotificationService;
+        this.appName = appName;
+    }
 
     @Around("execution(* com.arms..controller.*.*(..))")
     public Object sessionParam(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -41,7 +48,7 @@ public class SessionParamAdvice {
             StringWriter errors = new StringWriter();
             e.printStackTrace(new PrintWriter(errors));
             for (Object arg : args) {
-                log.error("※ERROR 발생\tmethodName : {}\tsession    : {}\tparameter   : {}\terrorMsg    : {}",methodName,request.getSession().getId(),arg,errors);
+                log.error("{} Error 발생\tmethodName : {}\tsession    : {}\tparameter   : {}\terrorMsg    : {}",appName,methodName,request.getSession().getId(),arg,errors);
             }
             throw e;
         }
