@@ -552,6 +552,36 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/updateDataBase.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> updateDataBase(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
+            BindingResult bindingResult, ModelMap model
+    ) throws Exception {
+
+        log.info("ReqAddController :: updateDataBase");
+
+        SessionUtil.setAttribute("updateDataBase", changeReqTableName);
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
+
+        reqAddEntity.setReqStateEntity(reqAddEntity.getReqStateEntity());
+
+        int result = reqAdd.updateNode(reqAddEntity);
+
+        SessionUtil.removeAttribute("updateDataBase");
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/removeNode.do"},
             method = {RequestMethod.POST}
     )
