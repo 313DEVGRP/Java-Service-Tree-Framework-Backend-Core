@@ -1,9 +1,10 @@
 package com.arms.api.util.communicate.external.response.jira;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -40,6 +41,10 @@ public class 지라이슈필드_데이터 {
     private 지라이슈상태_데이터 status;
 
     private 지라이슈해결책_데이터 resolution;
+
+    private Date startDate;
+
+    private Date dueDate;
 
     @Getter
     @Setter

@@ -3,6 +3,7 @@ package com.arms.api.analysis.scope.service;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
+import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
@@ -15,7 +16,6 @@ import com.arms.api.util.communicate.external.response.aggregation.검색결과_
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
-import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
@@ -133,85 +133,7 @@ public class ScopeServiceImpl implements ScopeService {
         return 버전_요구사항_상태_작업자_맵;
     }
 
-    @Override
-    public Map<String, Long> 톱메뉴_버전별_요구사항_상태_합계(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
 
-        SessionUtil.setAttribute("getReqAddListByFilter", changeReqTableName);
-
-        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
-
-        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
-            Disjunction orCondition = Restrictions.disjunction();
-            for (Long 버전 : pdServiceVersionLinks) {
-                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
-                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
-            }
-            검색용도_객체.getCriterions().add(orCondition);
-        }
-
-        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
-
-        Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
-                .collect(Collectors.groupingBy(
-                        entity -> entity.getReqStateEntity().getC_id() == 10L ? "open" : "not-open",
-                        Collectors.counting()
-                ));
-
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size()));
-
-
-        SessionUtil.removeAttribute("getReqAddListByFilter");
-        log.info("[ScopeServiceImple  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
-                버전_요구사항_상태별_합계.get("total"), 버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
-
-        return 버전_요구사항_상태별_합계;
-    }
-
-    @Override
-    public Map<String, Long> 톱메뉴_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
-
-
-        지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("isReq")
-                .컨텐츠보기여부(false)
-                .크기(1000)
-                .build();
-        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
-        Map<String, Long> 이슈_맵 = new HashMap<>();
-        이슈_맵.put("total", null);
-        이슈_맵.put("req", null);
-        이슈_맵.put("subtask", null);
-
-        검색결과_목록_메인 집계결과목록 = 일반_버전필터_집계.getBody();
-        if (집계결과목록 != null) {
-            이슈_맵.put("total", 집계결과목록.get전체합계()); // 총 이슈
-
-            Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
-            if (메인그룹_집계결과 != null) {
-                List<검색결과> 요구사항_하위이슈_구분 = 메인그룹_집계결과.get("group_by_isReq");
-                if (요구사항_하위이슈_구분 != null) {
-                    for (검색결과 이슈 : 요구사항_하위이슈_구분) {
-                        String 필드명 = 이슈.get필드명();
-                        Long 이슈_개수 = 이슈.get개수();
-                        if (필드명 != null && 이슈_개수 != null) {
-                            이슈_맵.put(StringUtils.equals(필드명, "true") ? "req" : "subtask", 이슈_개수);
-                        }
-                    }
-                } else {
-                    log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 요구사항_하위이슈_구분 집계(group_by_isReq) => null");
-                }
-            } else {
-                log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 메인그룹_집계결과 => null");
-                // 검색결과가 null인 경우 처리
-            }
-        } else {
-            log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 집계결과목록 => null");
-        }
-        log.info("[ScopeServiceImple  :: 톱메뉴_요구사항_하위이슈_집계] :: 이슈_맵 :: 총합 = {}, 요구사항_이슈 = {}, 연결이슈_하위이슈 = {}",
-                이슈_맵.get("total"), 이슈_맵.get("req"), 이슈_맵.get("subtask"));
-
-        return 이슈_맵;
-    }
 
     @Override
     public Map<String, Long> 버전_요구사항_자료(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
@@ -235,6 +157,7 @@ public class ScopeServiceImpl implements ScopeService {
             }
             검색용도_객체.getCriterions().add(orCondition);
         }
+        검색용도_객체.getCriterions().add(Restrictions.eq("c_type", "default"));
 
         List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
 
@@ -265,6 +188,68 @@ public class ScopeServiceImpl implements ScopeService {
         log.info("[ScopeServiceImple  :: 버전_요구사항_자료] :: 버전_요구사항_맵 ==> {}", 버전_요구사항_맵.toString());
 
         return 버전_요구사항_맵;
+    }
+
+    @Override
+    public List<요구사항_버전명추가_DTO> 버전_요구사항_상태(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        SessionUtil.setAttribute("getReqAddListByFilter", changeReqTableName);
+
+        PdServiceEntity 검색용도_제품 = new PdServiceEntity();
+        검색용도_제품.setC_id(pdServiceId);
+        PdServiceEntity 제품_검색결과 = pdService.getNode(검색용도_제품);
+        Set<PdServiceVersionEntity> 제품_버전_세트 = 제품_검색결과.getPdServiceVersionEntities();
+        Map<Long, String> 버전_아이디_이름_맵 = 제품_버전_세트.stream()
+                .collect(Collectors.toMap(PdServiceVersionEntity::getC_id, PdServiceVersionEntity::getC_title));
+
+        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            Disjunction orCondition = Restrictions.disjunction();
+            for (Long 버전 : pdServiceVersionLinks) {
+                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+            }
+            검색용도_객체.getCriterions().add(orCondition);
+        }
+        검색용도_객체.getCriterions().add(Restrictions.eq("c_type", "default"));
+
+        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
+        List<요구사항_버전명추가_DTO> 결과_목록 = new ArrayList<>();
+        Map<String, String> 버전세트문자열_버전명_맵 = new HashMap<>();
+
+        for(ReqAddEntity 요구사항 : 검색_결과_목록) {
+            요구사항_버전명추가_DTO dto = new 요구사항_버전명추가_DTO();
+            dto.setReqAddEntity(요구사항);
+
+            String 버전세트_문자열 = 요구사항.getC_req_pdservice_versionset_link();
+            Long[] 버전_아이디_배열 = 버전유틸.convertToLongArray(버전세트_문자열);
+            StringBuilder keyBuilder = new StringBuilder();
+
+            if(버전세트문자열_버전명_맵.containsKey(버전세트_문자열)) {
+                dto.setVersion_name(버전세트문자열_버전명_맵.get(버전세트_문자열));
+                결과_목록.add(dto);
+            } else {
+                if (버전_아이디_배열.length != 0) {
+                    for (int i = 0; i < 버전_아이디_배열.length; i++) {
+                        if (i == 0) {
+                            keyBuilder.append(버전_아이디_이름_맵.get(버전_아이디_배열[i]));
+                        } else {
+                            keyBuilder.append(", ").append(버전_아이디_이름_맵.get(버전_아이디_배열[i]));
+                        }
+                    }
+                    String 버전_명_문자열 = keyBuilder.toString();
+                    log.info("[ScopeServiceImple  :: 버전_요구사항_상태] :: 만들어진 버전_명_문자열 ==> {}", 버전_명_문자열);
+                    // Map에 해당하는 값을 증가시킵니다.
+                    버전세트문자열_버전명_맵.putIfAbsent(버전세트_문자열,버전_명_문자열);
+                }
+                dto.setVersion_name(버전세트문자열_버전명_맵.get(버전세트_문자열));
+                결과_목록.add(dto);
+            }
+
+        }
+        SessionUtil.removeAttribute("getReqAddListByFilter");
+        return 결과_목록;
     }
 
     @Override

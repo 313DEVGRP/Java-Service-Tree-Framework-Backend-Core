@@ -333,32 +333,40 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
                 .map(Arrays::asList)
                 .orElse(Collections.emptyList());
 
+        Date 버전시작일 = null;
+        Date 버전종료일 = null;
         if (!versionList.isEmpty()) {
             Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
-            String 시작일 = 시작일과_종료일.get("earliestDate");
-            String 종료일 = 시작일과_종료일.get("latestDate");
 
-            reqAddEntity.setC_req_start_date(DateUtils.getDate(시작일, "yyyy/MM/dd HH:mm"));
-            reqAddEntity.setC_req_end_date(DateUtils.getDate(종료일, "yyyy/MM/dd HH:mm"));
+            버전시작일 = DateUtils.getDate(시작일과_종료일.get("earliestDate"), "yyyy/MM/dd HH:mm");
+            버전종료일 = DateUtils.getDate(시작일과_종료일.get("latestDate"), "yyyy/MM/dd HH:mm");
+
+            if (reqAddEntity.getC_req_start_date() == null) {
+                reqAddEntity.setC_req_start_date(버전시작일);
+            }
+
+            if (reqAddEntity.getC_req_end_date() == null) {
+                reqAddEntity.setC_req_end_date(버전종료일);
+            }
         }
+
+        long 총계획기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        reqAddEntity.setC_req_plan_time(총계획기간일수);
 
         long 총기간일수 = 0;
-        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
-            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        if (버전시작일 != null && 버전종료일 != null) {
+            총기간일수 = DateUtils.getDiffDay(버전시작일, 버전종료일);
         }
-
-        long 총계획일수 = 0;
-        if (reqAddEntity.getC_req_plan_time() != null) {
-            총계획일수 = reqAddEntity.getC_req_plan_time();
-        }
+        reqAddEntity.setC_req_total_time(총기간일수);
 
         long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
-        long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
 
-        reqAddEntity.setC_req_total_time(총기간일수);
         reqAddEntity.setC_req_total_resource(총작업MM);
         reqAddEntity.setC_req_plan_resource(총계획MM);
-
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
         log.info("ReqAddController :: addReqNode");
@@ -391,6 +399,47 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         // 요구사항 폴더 생성일 추가
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
+        reqAddEntity.setC_req_update_date(date);
+
+        List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
+                .map(버전유틸::convertToLongArray)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+
+        Date 버전시작일 = null;
+        Date 버전종료일 = null;
+        if (!versionList.isEmpty()) {
+            Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+
+            버전시작일 = DateUtils.getDate(시작일과_종료일.get("earliestDate"), "yyyy/MM/dd HH:mm");
+            버전종료일 = DateUtils.getDate(시작일과_종료일.get("latestDate"), "yyyy/MM/dd HH:mm");
+
+            if (reqAddEntity.getC_req_start_date() == null) {
+                reqAddEntity.setC_req_start_date(버전시작일);
+            }
+
+            if (reqAddEntity.getC_req_end_date() == null) {
+                reqAddEntity.setC_req_end_date(버전종료일);
+            }
+        }
+
+        long 총계획기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        reqAddEntity.setC_req_plan_time(총계획기간일수);
+
+        long 총기간일수 = 0;
+        if (버전시작일 != null && 버전종료일 != null) {
+            총기간일수 = DateUtils.getDiffDay(버전시작일, 버전종료일);
+        }
+        reqAddEntity.setC_req_total_time(총기간일수);
+
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
+
+        reqAddEntity.setC_req_total_resource(총작업MM);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
 
         ReqAddEntity savedNode = reqAdd.addReqFolderNode(reqAddEntity, changeReqTableName);
 
@@ -420,11 +469,48 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
-        if (reqAddEntity.getC_req_plan_time() != null) {
-            long 총계획일수 = reqAddEntity.getC_req_plan_time();
-            long 총계획MM = DateUtils.convertDaysToManMonth(총계획일수);
-            reqAddEntity.setC_req_plan_resource(총계획MM);
+        Date date = new Date();
+        reqAddEntity.setC_req_update_date(date);
+
+        List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
+                .map(버전유틸::convertToLongArray)
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
+
+        Date 버전시작일 = null;
+        Date 버전종료일 = null;
+        if (!versionList.isEmpty()) {
+            Map<String, String> 시작일과_종료일 = pdServiceVersion.versionPeriod(versionList);
+
+            버전시작일 = DateUtils.getDate(시작일과_종료일.get("earliestDate"), "yyyy/MM/dd HH:mm");
+            버전종료일 = DateUtils.getDate(시작일과_종료일.get("latestDate"), "yyyy/MM/dd HH:mm");
+
+            if (reqAddEntity.getC_req_start_date() == null) {
+                reqAddEntity.setC_req_start_date(버전시작일);
+            }
+
+            if (reqAddEntity.getC_req_end_date() == null) {
+                reqAddEntity.setC_req_end_date(버전종료일);
+            }
         }
+
+        long 총계획기간일수 = 0;
+        if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
+            총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+        }
+        reqAddEntity.setC_req_plan_time(총계획기간일수);
+
+        long 총기간일수 = 0;
+        if (버전시작일 != null && 버전종료일 != null) {
+            총기간일수 = DateUtils.getDiffDay(버전시작일, 버전종료일);
+        }
+        reqAddEntity.setC_req_total_time(총기간일수);
+
+        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
+
+        reqAddEntity.setC_req_total_resource(총작업MM);
+        reqAddEntity.setC_req_plan_resource(총계획MM);
 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
@@ -446,14 +532,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
 
-        long 총기간일수 = 0;
+        long 총계획기간일수 = 0;
         if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
-            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+            총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
         }
-        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        reqAddEntity.setC_req_plan_time(총계획기간일수);
 
-        reqAddEntity.setC_req_total_time(총기간일수);
-        reqAddEntity.setC_req_total_resource(총작업MM);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
+        reqAddEntity.setC_req_total_resource(총계획MM);
 
         SessionUtil.setAttribute("updateDate", changeReqTableName);
 
@@ -463,6 +549,36 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         return ResponseEntity.ok(CommonResponse.success(result));
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/updateDataBase.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> updateDataBase(
+            @PathVariable(value = "changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
+            BindingResult bindingResult, ModelMap model
+    ) throws Exception {
+
+        log.info("ReqAddController :: updateDataBase");
+
+        SessionUtil.setAttribute("updateDataBase", changeReqTableName);
+
+        ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+
+        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
+
+        reqAddEntity.setReqStateEntity(reqAddEntity.getReqStateEntity());
+
+        int result = reqAdd.updateNode(reqAddEntity);
+
+        SessionUtil.removeAttribute("updateDataBase");
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+
 
     @ResponseBody
     @RequestMapping(

@@ -17,6 +17,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtilsXlsx extends ExcelUtilsBase {
 
+    public static final String SHEET_연봉입력_예시 = "Sheet1";
+    public static final String SHEET_연봉입력 = "Sheet2";
+
     public ExcelUtilsXlsx(InputStream inputStream) {
         super(inputStream);
     }
@@ -31,7 +34,7 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
     }
 
     @Override
-    protected Workbook getWorkbook() throws  IOException {
+    protected Workbook getWorkbook() throws IOException {
         try (InputStream inputStream = this.inputStream) {
             return new XSSFWorkbook(inputStream);
         }
@@ -63,36 +66,36 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
         private final List<CellTemplate> templateList;
         private final Integer startRow;
 
-        public MergeHeaderBox(List<CellTemplate> templateList,int startRow) {
+        public MergeHeaderBox(List<CellTemplate> templateList, int startRow) {
             this.headerRanges = getHeaderRanges(templateList);
             this.templateList = templateList;
             this.startRow = startRow;
         }
 
-        public boolean hasNotHeader(Integer index){
+        public boolean hasNotHeader(Integer index) {
             return headerRanges.stream()
-                    .noneMatch(a->a.getEnd()>=index&&index>=a.getStart());
+                    .noneMatch(a -> a.getEnd() >= index && index >= a.getStart());
         }
 
-        public List<CellRangeAddress> cellRangeAddresses(){
-            return headerRanges.stream().map(a->new CellRangeAddress(startRow,startRow,a.getStart(),a.getEnd())).collect(
+        public List<CellRangeAddress> cellRangeAddresses() {
+            return headerRanges.stream().map(a -> new CellRangeAddress(startRow, startRow, a.getStart(), a.getEnd())).collect(
                     Collectors.toUnmodifiableList());
         }
 
-        public List<CellRangeAddress> cellRangeAddressesDetail(){
-            return templateList.stream().filter(a->hasNotHeader(a.getAnnotation_columnIndex()))
-                    .map(a->new CellRangeAddress(startRow,startRow+1,a.getAnnotation_columnIndex(),a.getAnnotation_columnIndex())).collect(
+        public List<CellRangeAddress> cellRangeAddressesDetail() {
+            return templateList.stream().filter(a -> hasNotHeader(a.getAnnotation_columnIndex()))
+                    .map(a -> new CellRangeAddress(startRow, startRow + 1, a.getAnnotation_columnIndex(), a.getAnnotation_columnIndex())).collect(
                             Collectors.toUnmodifiableList());
 
         }
 
-        public void setMergeRegions(XSSFSheet sheet){
+        public void setMergeRegions(XSSFSheet sheet) {
 
             cellRangeAddresses().forEach(
                     sheet::addMergedRegion
             );
 
-            if(headerRanges.size()>0){
+            if (headerRanges.size() > 0) {
                 cellRangeAddressesDetail().forEach(
                         sheet::addMergedRegion
                 );
@@ -111,19 +114,19 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
 
             List<HeaderRange> ranges = new ArrayList<>();
 
-            for(int i = 0; i < indexLists.size(); i++){
-                if(i == 0|| indexLists.get(i)- indexLists.get(i-1)!=1||
+            for (int i = 0; i < indexLists.size(); i++) {
+                if (i == 0 || indexLists.get(i) - indexLists.get(i - 1) != 1 ||
                         (
-                                indexLists.get(i)- indexLists.get(i-1)==1
-                                        &&(!templateList.get(indexLists.get(i)).getAnnotation_headerName().split("¶")[0].equals(
-                                        templateList.get(indexLists.get(i-1)).getAnnotation_headerName().split("¶")[0]
+                                indexLists.get(i) - indexLists.get(i - 1) == 1
+                                        && (!templateList.get(indexLists.get(i)).getAnnotation_headerName().split("¶")[0].equals(
+                                        templateList.get(indexLists.get(i - 1)).getAnnotation_headerName().split("¶")[0]
                                 )
                                 )
                         )
-                ){
+                ) {
 
-                    if(end != 0){
-                        ranges.add(new HeaderRange(start,end));
+                    if (end != 0) {
+                        ranges.add(new HeaderRange(start, end));
                     }
                     start = indexLists.get(i);
                 }
@@ -131,7 +134,7 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
             }
 
             if (end != 0) {
-                ranges.add(new HeaderRange(start,end));
+                ranges.add(new HeaderRange(start, end));
             }
 
             return ranges;
@@ -143,10 +146,10 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
         int headerTotalRowSize = this.getHeaderTotalRowSize(srcContent.get(0).getClass());
         int headerTitleRowSize = this.getHeaderTitleRowSize(srcContent.get(0).getClass());
 
-        MergeHeaderBox mergeHeaderBox = new MergeHeaderBox(templateList,headerTitleRowSize);
+        MergeHeaderBox mergeHeaderBox = new MergeHeaderBox(templateList, headerTitleRowSize);
 
         IntStream.range(headerTitleRowSize, headerTotalRowSize).forEach(
-                index->{
+                index -> {
                     XSSFRow mergeHeaderRow = sheet.createRow(index);
                     for (CellTemplate template : templateList) {
                         template.createHeaderCell(mergeHeaderRow);
@@ -159,14 +162,27 @@ public class ExcelUtilsXlsx extends ExcelUtilsBase {
     }
 
     private <T> void createTitleRow(List<CellTemplate> templateList, List<T> srcContent, XSSFSheet sheet) {
-
+        String sheetName = sheet.getSheetName();
         XSSFRow row = sheet.createRow(0);
-
         for (CellTemplate template : templateList) {
-            template.createTitleCell(row,this.getHeaderTitleName(srcContent.get(0).getClass()));
+            template.createTitleCell(row, this.getHeaderTitleName(srcContent.get(0).getClass()));
         }
 
-        sheet.addMergedRegion(new CellRangeAddress(0,0,0,templateList.size()-1));
+        if (sheetName.equals(SHEET_연봉입력_예시)) {
+            sheet.setColumnWidth(0, 3000); // 번호
+            sheet.setColumnWidth(1, 10000); // 항목
+            sheet.setColumnWidth(2, 17000); // 설명
+            sheet.setColumnWidth(3, 10000); // 예시
+            sheet.setColumnWidth(4, 10000); // 기타
+        }
+
+        if (sheetName.equals(SHEET_연봉입력)) {
+            sheet.setColumnWidth(0, 10000); // 이름
+            sheet.setColumnWidth(1, 10000); // 고유키
+            sheet.setColumnWidth(2, 10000); // 연봉
+        }
+
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, templateList.size() - 1));
 
     }
 
