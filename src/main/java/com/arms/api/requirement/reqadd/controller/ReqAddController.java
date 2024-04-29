@@ -532,14 +532,14 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDateDTO, ReqAddEntity.class);
 
-        long 총기간일수 = 0;
+        long 총계획기간일수 = 0;
         if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
-            총기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
+            총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
         }
-        long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
+        reqAddEntity.setC_req_plan_time(총계획기간일수);
 
-        reqAddEntity.setC_req_total_time(총기간일수);
-        reqAddEntity.setC_req_total_resource(총작업MM);
+        long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
+        reqAddEntity.setC_req_total_resource(총계획MM);
 
         SessionUtil.setAttribute("updateDate", changeReqTableName);
 
