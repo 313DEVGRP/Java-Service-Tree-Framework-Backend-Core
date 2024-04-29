@@ -28,6 +28,8 @@ public interface ReqAdd extends TreeService {
 
     public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
 
+    public Integer updateDataBase( ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
+
     public ReqAddDetailDTO getDetail(FollowReqLinkDTO followReqLinkDTO, String changeReqTableName) throws Exception;
 
 }

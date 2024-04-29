@@ -561,19 +561,20 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             BindingResult bindingResult, ModelMap model
     ) throws Exception {
 
-        log.info("ReqAddController :: updateDataBase");
-
-        SessionUtil.setAttribute("updateDataBase", changeReqTableName);
+        log.info("ReqAddController :: updateDataBase"); // 요구사항 상태 우선순위 난이도 시작일 종료일 데이터 베이스 값 변경
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
+        if(reqAddDTO.getC_req_state_link() != null){
+            reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class)); // 상태
+        }
+        if(reqAddDTO.getC_req_priority_link() != null){
+            reqAddEntity.setReqPriorityEntity(TreeServiceUtils.getNode(reqPriority, reqAddDTO.getC_req_priority_link(), ReqPriorityEntity.class)); // 우선순위
+        }
+        if(reqAddDTO.getC_req_difficulty_link() != null){
+            reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class)); // 난이도
+        }
 
-        reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
-
-        reqAddEntity.setReqStateEntity(reqAddEntity.getReqStateEntity());
-
-        int result = reqAdd.updateNode(reqAddEntity);
-
-        SessionUtil.removeAttribute("updateDataBase");
+        int result = reqAdd.updateDataBase(reqAddEntity,changeReqTableName);
 
         return ResponseEntity.ok(CommonResponse.success(result));
     }
