@@ -162,7 +162,7 @@ public class 리소스분석_컨트롤러 {
         지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
                 .메인그룹필드("assignee.assignee_emailAddress.keyword")
                 .컨텐츠보기여부(false)
-                .크기(1000)
+                .크기(5)
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
