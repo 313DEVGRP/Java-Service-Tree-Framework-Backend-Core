@@ -45,6 +45,7 @@ public class RouteTableConfig {
         map.put("updateStatusNode.do", "updateStatusNode");
         map.put("removeStatusNode.do", "removeStatusNode");
         map.put("updateDate.do", "updateDate");
+        map.put("updateDataBase.do", "updateDataBase"); // 추가
         map.put("removeNode.do", "removeNode");
         map.put("moveStatusNode.do", "moveStatusNode");
         map.put("getStatusHistory.do", "getStatusHistory");
