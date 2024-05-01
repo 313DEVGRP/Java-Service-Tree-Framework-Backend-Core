@@ -1320,14 +1320,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		// reqAdd 업데이트 (상태, 우선순위, 난이도, 시작일, 종료일)
 		int 요구사항_디비_업데이트_결과 = 요구사항_디비_업데이트(reqAddEntity, changeReqTableName);
 
-		/*
-		// reqStatus 업데이트 (상태, 우선순위, 난이도)
-		int 요구사항_상태_디비_업데이트_결과 = 0;
-		if (요구사항_상태 != null || 요구사항_우선순위 != null || 요구사항_난이도 != null) {
-			요구사항_상태_디비_업데이트_결과 = 요구사항_상태_디비_업데이트(reqAddEntity, changeReqTableName);
-		}
-		int 요구사항_업데이트_결과 = 요구사항_디비_업데이트_결과 * 요구사항_상태_디비_업데이트_결과;
-		*/
 		return 요구사항_디비_업데이트_결과;
 	}
 
@@ -1365,40 +1357,5 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 	}
 
-/*	private Integer 요구사항_상태_디비_업데이트(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception{
-		try {
-			String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
-			String 요구사항_상태_테이블 = "T_ARMS_REQSTATUS_"+pdServiceId;
-			int 요구사항_상태_업데이트_결과 = 1;
 
-			SessionUtil.setAttribute("updateDataBase", 요구사항_상태_테이블);
-
-			ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
-			reqStatusEntity.setC_req_link(reqAddEntity.getC_id());
-			List<ReqStatusEntity> reqStatusEntityList = this.getNodesWithoutRoot(reqStatusEntity);
-
-			for(ReqStatusEntity req : reqStatusEntityList){
-				if(reqAddEntity.getReqStateEntity() != null){
-					req.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
-					req.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
-				}
-				if(reqAddEntity.getReqPriorityEntity() != null){
-					req.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
-					req.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
-				}
-				if(reqAddEntity.getReqDifficultyEntity()  != null){
-					req.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
-					req.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
-				}
-				int 업데이트_결과 = this.updateNode(req);
-				요구사항_상태_업데이트_결과 *= 업데이트_결과;
-			}
-
-			SessionUtil.removeAttribute("updateDataBase");
-			return 요구사항_상태_업데이트_결과;
-		}catch (Exception e){
-			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 수정에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
-			throw new Exception("요구사항 수정에 실패했습니다. 관리자에게 문의해 주세요.");
-		}
-	}*/
 }

@@ -22,7 +22,7 @@ public class RouteTableConfig {
         map.put("addFolderNode.do", "addReqFolderNode");
         map.put("updateNode.do", "updateNode");
         map.put("updateDate.do", "updateDate");
-        map.put("updateDataBase.do", "updateDataBase"); // 추가
+        map.put("updateDataBase.do", "updateDataBase");
         map.put("getNodesWhereInIds.do", "getNodesWhereInIds");
         map.put("removeNode.do", "removeNode");
         map.put("moveNode.do", "moveNode");
@@ -45,7 +45,7 @@ public class RouteTableConfig {
         map.put("updateStatusNode.do", "updateStatusNode");
         map.put("removeStatusNode.do", "removeStatusNode");
         map.put("updateDate.do", "updateDate");
-        map.put("updateDataBase.do", "updateDataBase"); // 추가
+        map.put("updateDataBase.do", "updateDataBase");
         map.put("removeNode.do", "removeNode");
         map.put("moveStatusNode.do", "moveStatusNode");
         map.put("getStatusHistory.do", "getStatusHistory");
