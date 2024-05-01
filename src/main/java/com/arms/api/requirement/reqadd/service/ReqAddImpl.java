@@ -1351,6 +1351,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			if(reqAddEntity.getC_req_end_date() != null){ // 종료일
 				reqAddEntity.setC_req_end_date(reqAddEntity.getC_req_end_date());
 			}
+			reqAddEntity.setC_req_update_date(reqAddEntity.getC_req_update_date());
 
 			int 요구사항_업데이트_결과 = this.updateNode(reqAddEntity);
 
