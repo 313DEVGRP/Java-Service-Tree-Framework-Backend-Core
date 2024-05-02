@@ -46,6 +46,8 @@ import com.arms.egovframework.javaservice.treeframework.util.DateUtils;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.modelmapper.ModelMapper;
@@ -1314,48 +1316,72 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Transactional
 	public Integer updateDataBase( ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
 
-		ReqStateEntity 요구사항_상태 = reqAddEntity.getReqStateEntity();
-		ReqPriorityEntity 요구사항_우선순위 = reqAddEntity.getReqPriorityEntity();
-		ReqDifficultyEntity 요구사항_난이도 = reqAddEntity.getReqDifficultyEntity();
 		// reqAdd 업데이트 (상태, 우선순위, 난이도, 시작일, 종료일)
-		int 요구사항_디비_업데이트_결과 = 요구사항_디비_업데이트(reqAddEntity, changeReqTableName);
+		int 요구사항_디비_업데이트_결과;
+		요구사항_디비_업데이트_결과 = 요구사항_디비_업데이트(reqAddEntity,changeReqTableName);
 
-		return 요구사항_디비_업데이트_결과;
+		// reqStatus 업데이트 (상태, 우선순위, 난이도)
+		int 요구사항_상태_디비_업데이트_결과;
+		요구사항_상태_디비_업데이트_결과 = 요구사항_상태_디비_업데이트(reqAddEntity, changeReqTableName);
+
+		int 요구사항_업데이트_결과 = 요구사항_디비_업데이트_결과 * 요구사항_상태_디비_업데이트_결과;
+
+		return 요구사항_업데이트_결과;
 	}
 
 	private Integer 요구사항_디비_업데이트(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception{
 		// reqAdd 업데이트
-		try {
-			SessionUtil.setAttribute("updateDataBase", changeReqTableName);
+		SessionUtil.setAttribute("updateDataBase", changeReqTableName);
 
-			if(reqAddEntity.getReqStateEntity() != null){ // 상태
-				reqAddEntity.setReqStateEntity(reqAddEntity.getReqStateEntity());
-			}
-			if(reqAddEntity.getReqPriorityEntity() != null){ // 우선순위
-				reqAddEntity.setReqPriorityEntity(reqAddEntity.getReqPriorityEntity());
-			}
-			if(reqAddEntity.getReqDifficultyEntity() != null){ // 난이도
-				reqAddEntity.setReqDifficultyEntity(reqAddEntity.getReqDifficultyEntity());
-			}
-			if(reqAddEntity.getC_req_start_date() != null){ // 시작일
-				reqAddEntity.setC_req_start_date(reqAddEntity.getC_req_start_date());
-			}
-			if(reqAddEntity.getC_req_end_date() != null){ // 종료일
-				reqAddEntity.setC_req_end_date(reqAddEntity.getC_req_end_date());
-			}
-			reqAddEntity.setC_req_update_date(reqAddEntity.getC_req_update_date());
+		int 요구사항_업데이트_결과 = this.updateNode(reqAddEntity);
 
-			int 요구사항_업데이트_결과 = this.updateNode(reqAddEntity);
+		SessionUtil.removeAttribute("updateDataBase");
 
-			SessionUtil.removeAttribute("updateDataBase");
-
-			return 요구사항_업데이트_결과;
-		}catch (Exception e){
-			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 수정에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
-			throw new Exception("요구사항 수정에 실패했습니다. 관리자에게 문의해 주세요.");
+		if(요구사항_업데이트_결과 == 0){
+			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 업데이트에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+			throw new Exception("요구사항 업데이트에 실패했습니다. 관리자에게 문의해 주세요.");
 		}
 
+		return 요구사항_업데이트_결과;
 	}
+	private Integer 요구사항_상태_디비_업데이트(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception{
 
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
+		String 요구사항_상태_테이블 = "T_ARMS_REQSTATUS_"+pdServiceId;
+		int 업데이트_결과 = 0;
+
+		SessionUtil.setAttribute("updateDataBase", 요구사항_상태_테이블);
+		ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
+
+		Criterion criterion = Restrictions.eq("c_req_link", reqAddEntity.getC_id());
+		reqStatusEntity.getCriterions().add(criterion);
+		List<ReqStatusEntity> 검색결과_요구사항_목록 = reqStatus.getNodesWithoutRoot(reqStatusEntity);
+
+		for(ReqStatusEntity req : 검색결과_요구사항_목록){
+			if (reqAddEntity.getReqStateEntity() != null) {
+				req.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
+				req.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
+			}
+			if (reqAddEntity.getReqPriorityEntity() != null) {
+				req.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
+				req.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
+			}
+			if (reqAddEntity.getReqDifficultyEntity() != null) {
+				req.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
+				req.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
+			}
+			업데이트_결과 = reqStatus.updateNode(req);
+			업데이트_결과 *= 업데이트_결과;
+		}
+
+		SessionUtil.removeAttribute("updateDataBase");
+
+		if(업데이트_결과 == 0){
+			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 업데이트에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+			throw new Exception("요구사항 업데이트에 실패했습니다. 관리자에게 문의해 주세요.");
+		}
+
+		return 업데이트_결과;
+	}
 
 }
