@@ -82,9 +82,9 @@ public class DashboardServiceImpl implements DashboardService {
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
                 String versionId = result.get필드명();
-                result.get하위검색결과().get("assignees").forEach(assignee -> {
+                result.get하위검색결과().get("group_by_assignee.assignee_accountId.keyword").forEach(assignee -> {
                     String assigneeAccountId = assignee.get필드명();
-                    assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+                    assignee.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream().forEach(displayName -> {
                         String assigneeDisplayName = displayName.get필드명();
                         String workerNodeId = versionId + "-" + assigneeAccountId;
                         // 3-1. 담당자 노드 추가
