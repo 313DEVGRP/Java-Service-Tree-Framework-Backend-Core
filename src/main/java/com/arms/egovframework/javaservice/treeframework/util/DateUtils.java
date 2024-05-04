@@ -270,4 +270,15 @@ public class DateUtils extends org.apache.commons.lang.time.DateUtils{
         double rawMonths = days / 22.0;
         return Math.round(rawMonths);
     }
+
+    // 일자차이 계산 후 남는 시간이 있을 시 올림하여 1일 추가
+    public static long getRoundedDiffDays(Date startDay, Date endDay) {
+        long endDayTime = endDay.getTime();
+        long startDayTime = startDay.getTime();
+        long result = (endDayTime - startDayTime) / 86400000;
+        if ((endDayTime - startDayTime) % 86400000 > 0) {
+            result++;
+        }
+        return result;
+    }
 }
