@@ -11,6 +11,8 @@
  */
 package com.arms.api.util.filerepository.service;
 
+import com.arms.api.globaltreemap.model.GlobalContentsTreeMapEntity;
+import com.arms.api.globaltreemap.service.GlobalContentsTreeMapService;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
@@ -35,6 +37,9 @@ public class FileRepositoryImpl extends TreeServiceImpl implements FileRepositor
 
     @Autowired
     private GlobalTreeMapService globalTreeMapService;
+
+    @Autowired
+    private GlobalContentsTreeMapService globalContentsTreeMapService;
 
     @Override
     @Transactional
@@ -63,4 +68,29 @@ public class FileRepositoryImpl extends TreeServiceImpl implements FileRepositor
         return returnMap;
     }
 
+    @Override
+    public HashMap<String, Set<FileRepositoryEntity>> getFileSetByFileIdLinkWithGlobalContentsMap(ParameterParser parser) throws Exception {
+        GlobalContentsTreeMapEntity globalContentsTreeMapEntity = new GlobalContentsTreeMapEntity();
+        globalContentsTreeMapEntity.setPdservicedetail_link(parser.getLong("fileIdLink"));
+        List<GlobalContentsTreeMapEntity> treeMapListByFileIdLink = globalContentsTreeMapService.findAllBy(globalContentsTreeMapEntity);
+
+        Set<FileRepositoryEntity> returnFileSet = new TreeSet<>(Comparator.comparing(FileRepositoryEntity::getC_id).reversed());
+        HashMap<String, Set<FileRepositoryEntity>> returnMap = new HashMap();
+
+        for( GlobalContentsTreeMapEntity row : treeMapListByFileIdLink ){
+            if ( row.getFilerepository_link() != null ){
+                logger.info("row.getFilerepository_link() = " + row.getFilerepository_link());
+                FileRepositoryEntity entity = new FileRepositoryEntity();
+                entity.setC_id(row.getFilerepository_link());
+                FileRepositoryEntity returnEntity = this.getNode(entity);
+
+                if (returnEntity != null) {
+                    returnFileSet.add(returnEntity);
+                }
+
+            }
+        }
+        returnMap.put("files", returnFileSet);
+        return returnMap;
+    }
 }

@@ -20,6 +20,7 @@ import java.util.Set;
 
 public interface FileRepository extends TreeService {
 
-    public HashMap<String, Set<FileRepositoryEntity>> getFileSetByFileIdLink(ParameterParser parser) throws Exception;
+    HashMap<String, Set<FileRepositoryEntity>> getFileSetByFileIdLink(ParameterParser parser) throws Exception;
+    HashMap<String, Set<FileRepositoryEntity>> getFileSetByFileIdLinkWithGlobalContentsMap(ParameterParser parser) throws Exception;
 
 }
