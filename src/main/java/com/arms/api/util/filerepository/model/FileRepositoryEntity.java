@@ -12,6 +12,7 @@
 package com.arms.api.util.filerepository.model;
 
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice_detail.model.PdServiceDetailEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -60,6 +61,23 @@ public class FileRepositoryEntity extends TreeSearchEntity implements Serializab
     public PdServiceEntity getPdServiceEntity() {
         return pdServiceEntity;
     }
+
+    public void setPdServiceEntity(PdServiceEntity pdServiceEntity) { this.pdServiceEntity = pdServiceEntity;}
+
+
+    private PdServiceDetailEntity pdServiceDetailEntity;
+    @ManyToOne
+    @JsonBackReference
+    @JoinTable(
+            name = "GLOBAL_CONTENTS_TREE_MAP",
+            joinColumns = @JoinColumn(name = "filerepository_link"),
+            inverseJoinColumns = @JoinColumn(name = "pdservicedetail_link")
+    )
+    @WhereJoinTable( clause = "pdservicedetail_link is not null")
+    public PdServiceDetailEntity getPdServiceDetailEntity() {
+        return pdServiceDetailEntity;
+    }
+    public void setPdServiceDetailEntity(PdServiceDetailEntity pdServiceDetailEntity) { this.pdServiceDetailEntity = pdServiceDetailEntity;}
 
     //필드명과 컬럼명이 다를 경우는 하기와 같이 처리.
     private String fileName;
