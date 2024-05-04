@@ -106,9 +106,6 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 		SessionUtil.setAttribute("reqProgress", changeReqTableName);
 
-		// 전체 조회하여 리턴 - 선택된 버전과 폴더 타입만 조회하도록 변경
-		// List<ReqAddPureEntity> list2 = this.getChildNodeWithoutPaging(reqAddPureEntity);
-
 		List<ReqAddPureEntity> 전체요구사항_목록;
 		if (versionStrArr == null || versionStrArr.length == 0) {
 			reqAddPureEntity.setOrder(Order.asc("c_position"));
@@ -165,42 +162,62 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 
 		// 실적, 계획 진행퍼센트 처리
 		List<ReqAddPureEntity> 실적계산_결과목록 = 전체요구사항_목록.stream().map(요구사항_엔티티 -> {
-				
 
-				if (요구사항_엔티티.getC_req_start_date() != null && 요구사항_엔티티.getC_req_end_date() != null) {
-					Date 시작일 = DateUtils.getStartOfDate(요구사항_엔티티.getC_req_start_date());
-					Date 종료일 = DateUtils.getStartOfDate(요구사항_엔티티.getC_req_end_date());
-					Date 오늘 = DateUtils.getStartOfDate(new Date());
+					// 시작일, 종료일 데이터 있을 시 계획 진척율, 실적 진척율 계산
+					if (요구사항_엔티티.getC_req_start_date() != null && 요구사항_엔티티.getC_req_end_date() != null) {
+						Date 시작일 = 요구사항_엔티티.getC_req_start_date();
+						Date 종료일 = 요구사항_엔티티.getC_req_end_date();
+						Date 오늘 = new Date();
 
-					long 진행율 = 계획진행률_계산(시작일, 종료일, 오늘);
-					요구사항_엔티티.setC_req_plan_progress(진행율);
-				}
+						// 총 작업량 계산(종료일 - 시작일)
+						long 총작업량 = DateUtils.getRoundedDiffDays(시작일, 종료일);
 
-				// 폴더 타입 요구사항은 실적계산 전 리턴
-				if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
-					return 요구사항_엔티티;
-				}
+						// 계획 진행률 계산
+						long 진행율 = 계획진행률_계산(시작일, 종료일, 오늘);
+						long 계획작업량 = 0;
+						// 진행율에 따라서 작업량 계산(시작일과 종료일, 오늘 기준으로 계산)
+						if (진행율 > 0L && 진행율 < 100L) {
+							계획작업량 = DateUtils.getRoundedDiffDays(시작일, 오늘);
+						}
+						else if (진행율 == 100L) {
+							계획작업량 = 총작업량;
+						}
 
-				// 요구사항 req state가 완료상태일 경우 실적 100% 처리
-				if (요구사항_엔티티.getC_req_state_link() != null && 완료상태맵.get(요구사항_엔티티.getC_req_state_link()) != null) {
-					요구사항_엔티티.setC_req_performance_progress(100L);
-				}
-				else {
-					Map<String, Long> 전체완료맵 = 진행률계산맵.get(요구사항_엔티티.getC_id());
-					if (전체완료맵 != null) {
-						Long 전체개수 = 전체완료맵.getOrDefault("전체", 0L);
-						Long 완료개수 = 전체완료맵.getOrDefault("완료", 0L);
-
-						Long 진행률 = 실적계산(전체개수, 완료개수);
-
-						요구사항_엔티티.setC_req_performance_progress(진행률);
+						요구사항_엔티티.setC_req_total_resource(총작업량);
+						요구사항_엔티티.setC_req_plan_resource(계획작업량);
+						요구사항_엔티티.setC_req_plan_progress(진행율);
 					}
-				}
+					else {
+						요구사항_엔티티.setC_req_total_resource(0L);
+						요구사항_엔티티.setC_req_plan_resource(0L);
+						요구사항_엔티티.setC_req_plan_progress(0L);
+					}
 
-				return 요구사항_엔티티;
-			})
-			.filter(Objects::nonNull)
-			.collect(Collectors.toList());
+					// 폴더 타입 요구사항은 실적계산 전 리턴
+					if (요구사항_엔티티.getC_type() != null && StringUtils.equals(요구사항_엔티티.getC_type(), TreeConstant.Branch_TYPE)) {
+						return 요구사항_엔티티;
+					}
+
+					// 요구사항 req state가 완료상태일 경우 실적 100% 처리
+					if (요구사항_엔티티.getC_req_state_link() != null && 완료상태맵.get(요구사항_엔티티.getC_req_state_link()) != null) {
+						요구사항_엔티티.setC_req_performance_progress(100L);
+					}
+					else {
+						Map<String, Long> 전체완료맵 = 진행률계산맵.get(요구사항_엔티티.getC_id());
+						if (전체완료맵 != null) {
+							Long 전체개수 = 전체완료맵.getOrDefault("전체", 0L);
+							Long 완료개수 = 전체완료맵.getOrDefault("완료", 0L);
+
+							Long 진행률 = 실적계산(전체개수, 완료개수);
+
+							요구사항_엔티티.setC_req_performance_progress(진행률);
+						}
+					}
+
+					return 요구사항_엔티티;
+				})
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
 		return 실적계산_결과목록;
 	}
@@ -230,17 +247,27 @@ public class ReqAddPureImpl extends TreeServiceImpl implements ReqAddPure {
 	}
 
 	private long 계획진행률_계산(Date 시작일, Date 종료일, Date 오늘) {
-		long 진행율 = 0L;
-
-		if (오늘.after(시작일)) {
-			long 전체일수 = DateUtils.getDiffDay(시작일, 종료일);
-			long 진행일수 = DateUtils.getDiffDay(시작일, 오늘);
-
-			if (전체일수 > 0) {
-				진행율 = (진행일수 * 100) / 전체일수;
-			}
+		// 시작일이 종료일과 같거나 이후일 경우 진행율 0 처리
+		if (!시작일.before(종료일)) {
+			return 0L;
 		}
 
+		// 오늘이 시작일 이전인 경우, 진행율 0 처리
+		if (오늘.before(시작일)) {
+			return 0L;
+		}
+
+		// 오늘이 종료일 이후의 경우, 진행율 100 처리
+		if (오늘.after(종료일)) {
+			return 100L;
+		}
+
+		// 프로젝트가 진행 중인 상태
+		long 전체일수 = DateUtils.getRoundedDiffDays(시작일, 종료일);
+		long 진행일수 = DateUtils.getRoundedDiffDays(시작일, 오늘);
+		long 진행율 = 실적계산(전체일수, 진행일수);
+
+		// 진행율 100 최댓값 처리
 		return Math.min(진행율, 100L);
 	}
 }
