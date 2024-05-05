@@ -20,6 +20,8 @@ import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceD3Chart;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice_detail.model.PdServiceDetailEntity;
+import com.arms.api.product_service.pdservice_detail.service.PdServiceDetail;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.util.dynamicdbmaker.service.DynamicDBMaker;
@@ -60,6 +62,10 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     @Autowired
     @Qualifier("pdServiceVersion")
     private PdServiceVersion pdServiceVersion;
+
+    @Autowired
+    @Qualifier("pdServiceDetail")
+    private PdServiceDetail pdServiceDetail;
 
     @Autowired
     @Qualifier("dynamicDBMaker")
@@ -152,6 +158,14 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
         //제품(서비스) 데이터 등록
         PdServiceEntity addedNode = this.addNode(pdServiceEntity);
+
+        // 제품(서비스) 등록 시 BaseDetail 추가
+        PdServiceDetailEntity pdServiceDetailEntity = new PdServiceDetailEntity();
+        pdServiceDetailEntity.setC_title("BaseDetail");
+        pdServiceDetailEntity.setC_contents("<p>제품(서비스)의 기획서 및 Project Charter 의 내용을 기록합니다.</p>");
+        pdServiceDetailEntity.setRef(TreeConstant.First_Node_CID);
+        pdServiceDetailEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
+        pdServiceDetail.addNodeWithGlobalContentsTreeMap(addedNode.getC_id(), pdServiceDetailEntity);
 
         //제품(서비스) 생성시 - 요구사항 TABLE 생성
         //제품(서비스) 생성시 - 요구사항 STATUS TABLE 생성
