@@ -11,8 +11,9 @@
  */
 package com.arms.api.product_service.pdservice.service;
 
-import com.arms.api.globaltreemap.dao.GlobalTreeMapRepository;
+import com.arms.api.globaltreemap.model.GlobalContentsTreeMapEntity;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
+import com.arms.api.globaltreemap.service.GlobalContentsTreeMapService;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraproject_pure.model.JiraProjectPureEntity;
 import com.arms.api.jira.jiraproject_pure.service.JiraProjectPure;
@@ -20,6 +21,7 @@ import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceD3Chart;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice_detail.service.PdServiceDetail;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.util.dynamicdbmaker.service.DynamicDBMaker;
@@ -62,6 +64,10 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     private PdServiceVersion pdServiceVersion;
 
     @Autowired
+    @Qualifier("pdServiceDetail")
+    private PdServiceDetail pdServiceDetail;
+
+    @Autowired
     @Qualifier("dynamicDBMaker")
     private DynamicDBMaker dynamicDBMaker;
 
@@ -69,7 +75,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
     private GlobalTreeMapService globalTreeMapService;
 
     @Autowired
-    private GlobalTreeMapRepository globalTreeMapRepository;
+    private GlobalContentsTreeMapService globalContentsTreeMapService;
 
     @Autowired
     @Qualifier("jiraProjectPure")
@@ -427,5 +433,26 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                     .build();
         }
 
+    }
+
+    @Override
+    @Transactional
+    public int removeAll(Long pdServiceId) throws Exception {
+        // 1. 제품 및 버전 삭제
+        PdServiceEntity pdServiceEntity = new PdServiceEntity();
+        pdServiceEntity.setC_id(pdServiceId);
+        this.removeNode(pdServiceEntity);
+
+        List<Long> pdServiceDetailLinks = globalContentsTreeMapService.findAllByIds(List.of(pdServiceId), "pdservice_link").stream()
+                .filter(globalContentsTreeMapEntity -> globalContentsTreeMapEntity.getPdservicedetail_link() != null)
+                .map(GlobalContentsTreeMapEntity::getPdservicedetail_link)
+                .collect(Collectors.toList());
+
+        // 2. 제품 디테일 및 파일 삭제
+        for (Long pdServiceDetailLink : pdServiceDetailLinks) {
+            pdServiceDetail.deleteAll(pdServiceDetailLink);
+        }
+
+        return 1;
     }
 }

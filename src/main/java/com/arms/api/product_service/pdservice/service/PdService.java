@@ -42,4 +42,5 @@ public interface PdService extends TreeService {
     public PdServiceD3Chart getD3ChartData() throws Exception;
 
 
+    int removeAll(Long pdServiceId) throws Exception;
 }
