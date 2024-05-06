@@ -39,4 +39,16 @@ public class GlobalContentsTreeMapRepository {
     public GlobalContentsTreeMapEntity save(GlobalContentsTreeMapEntity globalTreeMapEntities) {
         return globalContentsTreeMapJpaRepository.save(globalTreeMapEntities);
     }
+
+    public void deleteByFileLink(Long value) {
+        globalContentsTreeMapJpaRepository.deleteByFileLink(value);
+    }
+
+    public void deleteByPdServiceLink(Long value) {
+        globalContentsTreeMapJpaRepository.deleteByPdServiceLink(value);
+    }
+
+    public void deleteByPdServiceDetailLink(Long value) {
+        globalContentsTreeMapJpaRepository.deleteByPdServiceDetailLink(value);
+    }
 }

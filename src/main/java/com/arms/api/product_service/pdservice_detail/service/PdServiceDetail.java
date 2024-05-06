@@ -28,4 +28,7 @@ public interface PdServiceDetail extends TreeService {
 
     Set<FileRepositoryEntity> uploadFileForPdServiceNode(Long pdServiceDetailId,  MultipartHttpServletRequest multiRequest) throws Exception;
 
+    int deleteFile(Long fileId) throws Exception;
+
+    int deleteAll(Long pdServiceDetailId) throws Exception;
 }
