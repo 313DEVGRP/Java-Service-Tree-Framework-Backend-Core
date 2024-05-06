@@ -11,6 +11,7 @@
  */
 package com.arms.api.requirement.reqadd.controller;
 
+import com.arms.api.product_service.pdservice.model.PdServiceDTO;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
@@ -759,5 +760,12 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         return ResponseEntity.ok(loadReqAddDTOList);
     }
 
+    @GetMapping(value = "/getRequirementAssignee.do")
+    public ResponseEntity<?> getRequirementAssignee(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
+        log.info("ReqAddController :: getRequirementAssignee");
 
+        PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
+
+        return ResponseEntity.ok(CommonResponse.success( reqAdd.getRequirementAssignee(pdServiceEntity)));
+    }
 }
