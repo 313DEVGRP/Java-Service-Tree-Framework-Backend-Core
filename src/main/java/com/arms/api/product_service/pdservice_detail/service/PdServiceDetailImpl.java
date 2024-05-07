@@ -151,7 +151,7 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
 
             fileRepositoryEntity.setUrl("/auth-user/api/arms/fileRepository" + "/downloadFileByNode/" + returnFileRepositoryEntity.getId());
             fileRepositoryEntity.setThumbnailUrl("/auth-user/api/arms/fileRepository" + "/thumbnailUrlFileToNode/" + returnFileRepositoryEntity.getId());
-            fileRepositoryEntity.setDelete_url("/auth-user/api/arms/fileRepository" + "/deleteFileByNode/" + returnFileRepositoryEntity.getId());
+            fileRepositoryEntity.setDelete_url("/auth-user/api/arms/pdServiceDetail" + "/deleteFileNode.do/" + returnFileRepositoryEntity.getId());
 
             fileRepository.updateNode(fileRepositoryEntity);
 
@@ -160,5 +160,45 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
         }
 
         return fileRepositoryEntities;
+    }
+
+    @Override
+    @Transactional
+    public int deleteFile(Long fileId) throws Exception {
+        // 1. FileRepositoryEntity 삭제
+        FileRepositoryEntity fileRepositoryEntity = new FileRepositoryEntity();
+        fileRepositoryEntity.setC_id(fileId);
+        fileRepository.removeNode(fileRepositoryEntity); // removeNode 로직을 보면 트리 개념으로 right, left로 삭제를 하니까 다 삭제하는듯
+
+        // 2. GlobalContentsTreeMapEntity 삭제
+        globalContentsTreeMapService.deleteByColumnValue("filerepository_link", fileId);
+
+        return 1;
+    }
+
+    @Override
+    @Transactional
+    public int deleteAll(Long pdServiceDetailId) throws Exception {
+        // 1. PdServiceBoardEntity 삭제
+        PdServiceDetailEntity pdServiceDetailEntity = new PdServiceDetailEntity();
+        pdServiceDetailEntity.setC_id(pdServiceDetailId);
+        this.removeNode(pdServiceDetailEntity);
+
+        // 2. FileRepository 조회 및 삭제
+        List<Long> fileLinks = globalContentsTreeMapService.findAllByIds(List.of(pdServiceDetailId), "pdservicedetail_link").stream()
+                .filter(globalContentsTreeMapEntity -> globalContentsTreeMapEntity.getFilerepository_link() != null)
+                .map(GlobalContentsTreeMapEntity::getFilerepository_link)
+                .collect(Collectors.toList());
+
+        for (Long fileLink : fileLinks) {
+            FileRepositoryEntity fileRepositoryEntity = new FileRepositoryEntity();
+            fileRepositoryEntity.setC_id(fileLink);
+            fileRepository.removeNode(fileRepositoryEntity);
+        }
+
+        // 3. GlobalContentsTreeMapEntity 삭제
+        globalContentsTreeMapService.deleteByColumnValue("pdservicedetail_link", pdServiceDetailId);
+
+        return 1;
     }
 }

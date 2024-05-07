@@ -70,4 +70,21 @@ public class GlobalContentsTreeMapServiceImpl implements GlobalContentsTreeMapSe
                 .collect(Collectors.toUnmodifiableList());
 
     }
+
+    @Override
+    public void deleteByColumnValue(String columnName, Long value) {
+        switch (columnName) {
+            case "filerepository_link":
+                globalContentsTreeMapRepository.deleteByFileLink(value);
+                break;
+            case "pdservice_link":
+                globalContentsTreeMapRepository.deleteByPdServiceLink(value);
+                break;
+            case "pdservicedetail_link":
+                globalContentsTreeMapRepository.deleteByPdServiceDetailLink(value);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid column name: " + columnName);
+        }
+    }
 }

@@ -11,12 +11,13 @@
  */
 package com.arms.api.requirement.reqadd.service;
 
-import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.requirement.reqadd.model.*;
+import com.arms.api.requirement.reqadd.model.요구사항별_담당자_목록.요구사항_담당자;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public interface ReqAdd extends TreeService {
 
@@ -31,5 +32,7 @@ public interface ReqAdd extends TreeService {
     public Integer updateDataBase( ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
 
     public ReqAddDetailDTO getDetail(FollowReqLinkDTO followReqLinkDTO, String changeReqTableName) throws Exception;
+
+    public List<요구사항_담당자> getRequirementAssignee(PdServiceEntity pdServiceEntity) throws Exception;
 
 }

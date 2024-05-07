@@ -208,4 +208,10 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return ResponseEntity.ok(CommonResponse.success(pdService.getD3ChartData()));
     }
 
+    @PostMapping("/removeAll.do/{pdServiceId}")
+    public ResponseEntity<?> removeAll(@PathVariable("pdServiceId") Long pdServiceId) throws Exception {
+        int result = pdService.removeAll(pdServiceId);
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
 }

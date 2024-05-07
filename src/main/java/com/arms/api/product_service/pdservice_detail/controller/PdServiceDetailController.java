@@ -99,4 +99,27 @@ public class PdServiceDetailController extends TreeAbstractController<PdServiceD
         return ResponseEntity.ok(CommonResponse.success(returnMap));
     }
 
+    /**
+     * 제품(서비스) 디테일 관련 전부 삭제 - (PdServiceDetail, FileRepository, GlobalContentsTreeMap)
+     */
+    @PostMapping("/deleteNode.do/{pdServiceDetailId}")
+    public ResponseEntity<CommonResponse.ApiResult<Integer>> deleteNode(@PathVariable(value = "pdServiceDetailId") Long pdServiceDetailId) throws Exception {
+
+        int result = pdServiceDetail.deleteAll(pdServiceDetailId);
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
+
+    /**
+     * 제품(서비스) 디테일의 파일 단 건 삭제 - (FileRepository, GlobalContentsTreeMap)
+     */
+    @PostMapping("/deleteFileNode.do/{fileId}")
+    public ResponseEntity<CommonResponse.ApiResult<Integer>> deleteFileNode(@PathVariable(value = "fileId") Long fileId) throws Exception {
+
+        int result = pdServiceDetail.deleteFile(fileId);
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+    }
+
 }

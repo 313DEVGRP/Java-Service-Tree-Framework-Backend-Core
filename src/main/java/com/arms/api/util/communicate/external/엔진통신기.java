@@ -4,6 +4,7 @@ import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -123,6 +124,14 @@ public interface 엔진통신기 {
 
     @GetMapping("/alm/account/verify")
     ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
+
+    /*
+    *  요구사항 별 담당자
+    * */
+    @GetMapping("/engine/jira/dashboard/req-assignees")
+    ResponseEntity<List<검색결과>> 제품_요구사항_담당자(
+            @SpringQueryMap AggregationRequestDTO aggregationRequestDTO
+    );
 
 
 }
