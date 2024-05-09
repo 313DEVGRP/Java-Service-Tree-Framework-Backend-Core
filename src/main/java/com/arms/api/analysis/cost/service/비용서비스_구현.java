@@ -170,7 +170,7 @@ public class 비용서비스_구현 implements 비용서비스 {
                                     .map(NumberUtils::toLong)
                                     .orElse(0L);
 
-                            assignee.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
+                            requirement.get하위검색결과().get("displayNames").stream().forEach(displayName -> {
                                 String assigneeDisplayName = displayName.get필드명();
 
                                 버전요구사항별_담당자데이터.담당자데이터 담당자데이터 = 버전요구사항별_담당자데이터.담당자데이터.builder()
