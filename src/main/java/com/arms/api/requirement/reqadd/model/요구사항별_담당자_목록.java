@@ -28,5 +28,6 @@ public class 요구사항별_담당자_목록 {
 
         private String 요구사항_아이디;
 
+        private Boolean 요구사항_여부;
     }
 }

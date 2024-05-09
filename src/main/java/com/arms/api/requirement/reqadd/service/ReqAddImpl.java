@@ -12,6 +12,7 @@
 package com.arms.api.requirement.reqadd.service;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
@@ -1384,26 +1385,35 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 업데이트_결과;
 	}
 
-	public List<요구사항_담당자>  getRequirementAssignee(PdServiceEntity pdServiceEntity) throws Exception{
-
+	public List<요구사항_담당자> getRequirementAssignee(PdServiceEntity pdServiceEntity) throws Exception {
 		List<요구사항_담당자> 요구사항_담당자_목록 = new ArrayList<>();
 
-		AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
-		aggregationRequestDTO.setPdServiceLink(pdServiceEntity.getC_id());
+		요구사항_담당자_목록.addAll(집계데이터_가져오기(pdServiceEntity, IsReqType.REQUIREMENT, true));
+		요구사항_담당자_목록.addAll(집계데이터_가져오기(pdServiceEntity, IsReqType.ISSUE, false));
 
-		Optional<List<검색결과>> optionalEsData = Optional.ofNullable(엔진통신기.제품_요구사항_담당자(aggregationRequestDTO).getBody());
-		optionalEsData.ifPresent(esData -> {
+		return 요구사항_담당자_목록;
+	}
+
+	private List<요구사항_담당자> 집계데이터_가져오기(PdServiceEntity pdServiceEntity, IsReqType isReqType, boolean isRequirement) {
+		List<요구사항_담당자> 결과_목록 = new ArrayList<>();
+
+		AggregationRequestDTO 집계요청 = new AggregationRequestDTO();
+		집계요청.setPdServiceLink(pdServiceEntity.getC_id());
+		집계요청.setIsReqType(isReqType);
+
+		Optional<List<검색결과>> 집계데이터 = Optional.ofNullable(엔진통신기.제품_요구사항_담당자(집계요청).getBody());
+		집계데이터.ifPresent(esData -> {
 			esData.forEach(result -> {
 				String 요구사항_키 = result.get필드명();
 				result.get하위검색결과().get("assignees").forEach(assignee -> {
 					String 담당자_아이디 = assignee.get필드명();
-					String 담당자_이름 = assignee.get하위검색결과().get("displayNames").stream().findFirst().map(displayName -> displayName.get필드명()).orElse(null);
-					String 요구사항_아이디 = assignee.get하위검색결과().get("cReqLink").stream().findFirst().map(cReqLink -> cReqLink.get필드명()).orElse(null);
-					요구사항_담당자_목록.add(new 요구사항_담당자(요구사항_키, 담당자_아이디, 담당자_이름, 요구사항_아이디));
+					String 담당자_이름 = assignee.get하위검색결과().get("displayNames").stream().findFirst().orElse(new 검색결과()).get필드명();
+					String 요구사항_아이디 = assignee.get하위검색결과().get("cReqLink").stream().findFirst().orElse(new 검색결과()).get필드명();
+					결과_목록.add(new 요구사항_담당자(요구사항_키, 담당자_아이디, 담당자_이름, 요구사항_아이디, isRequirement));
 				});
 			});
 		});
-		return 요구사항_담당자_목록;
-	}
 
+		return 결과_목록;
+	}
 }
