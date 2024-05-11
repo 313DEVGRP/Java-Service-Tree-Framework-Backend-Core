@@ -13,17 +13,19 @@ import java.time.Instant;
 @Getter
 @Setter
 @Builder
-@ToString(callSuper=true)
+@ToString(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PdServiceDetailDTO extends TreeBaseDTO {
 
     private String c_contents;
 
+    private String c_drawio_contents;
+
+    private String c_drawdb_contents;
+
     private Instant c_created_at;
 
     private Instant c_updated_at;
-
-    private Instant c_deleted_at;
 
 }
