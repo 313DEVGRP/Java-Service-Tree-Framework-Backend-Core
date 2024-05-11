@@ -140,8 +140,8 @@ public class 리소스분석_컨트롤러 {
                 .메인그룹필드("isReq")
                 .하위그룹필드들(Arrays.asList("assignee.assignee_emailAddress.keyword".split(",")))
                 .컨텐츠보기여부(false)
-                .크기(size)
-                .하위크기(1000)
+                .크기(10)
+                .하위크기(size)
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
