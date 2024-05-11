@@ -29,6 +29,8 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -177,7 +179,7 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public int deleteAll(Long pdServiceDetailId) throws Exception {
         // 1. PdServiceBoardEntity 삭제
         PdServiceDetailEntity pdServiceDetailEntity = new PdServiceDetailEntity();

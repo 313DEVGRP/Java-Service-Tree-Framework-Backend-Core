@@ -64,6 +64,14 @@ public class PdServiceDetailEntity extends TreeSearchEntity implements Serializa
     @Column(name = "c_contents")
     private String c_contents;
 
+    @Lob
+    @Column(name = "drawio_contents")
+    private String c_drawio_contents;
+
+    @Lob
+    @Column(name = "drawdb_contents")
+    private String c_drawdb_contents;
+
     @CreationTimestamp
     @Column(name = "c_created_at")
     private Instant c_created_at;
@@ -72,8 +80,6 @@ public class PdServiceDetailEntity extends TreeSearchEntity implements Serializa
     @Column(name = "c_updated_at")
     private Instant c_updated_at;
 
-    @Column(name = "c_deleted_at")
-    private Instant c_deleted_at;
 
     /*
      * Extend Bean Field
