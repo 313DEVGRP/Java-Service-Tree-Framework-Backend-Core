@@ -276,9 +276,10 @@ public class DateUtils extends org.apache.commons.lang.time.DateUtils{
         long endDayTime = endDay.getTime();
         long startDayTime = startDay.getTime();
         long result = (endDayTime - startDayTime) / 86400000;
+
         if ((endDayTime - startDayTime) % 86400000 > 0) {
             result++;
         }
-        return result;
+        return Math.max(result, 0);
     }
 }

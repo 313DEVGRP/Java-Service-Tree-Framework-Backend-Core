@@ -134,7 +134,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		/***
 		 * 요구사항 생성 전 Soft Delete된 프로젝트 확인 및 선택된 이슈 유형, 우선순위 검증 로직
 		 * 반목문 돌며 이슈 생성 중 오류가 발생 시 암스에는 없지만 ALM 서버에 요구사항 이슈는 생성되는 현상 방지
-		***/
+		 ***/
 		for (Long 지라프로젝트_아이디 : 지라프로젝트_아이디_목록) {
 			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
 			globalTreeMap.setJiraproject_link(지라프로젝트_아이디);
@@ -155,7 +155,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						+ 검색된_지라프로젝트.getC_jira_name() + "에 소프트 딜리트 처리된 상태입니다.");
 				소프트딜리트_프로젝트수++;
 				if (소프트딜리트_프로젝트수 == 지라프로젝트_아이디_목록.size()) {
-					throw new RuntimeException("삭제된 프로젝트에 이슈를 생성을 시도했습니다. 연결된 프로젝트 정보 확인이 필요합니다.");
+					throw new Exception("삭제된 프로젝트에 이슈를 생성을 시도했습니다. 연결된 프로젝트 정보 확인이 필요합니다.");
 				}
 				continue;
 			}
@@ -164,14 +164,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
 			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+				요구사항_이슈_타입= 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+				요구사항_이슈_타입 = 요구사항_이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 			}
 			else {
 				logger.info("지라 서버 타입에 알 수 없는 값이 들어있습니다. :: " + 검색된_지라서버.getC_jira_server_type());
-				throw new RuntimeException("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
+				throw new Exception("unknown jira server type :: " + 검색된_지라서버.getC_jira_server_type());
 			}
 
 			if (요구사항_이슈_타입 == null) {
@@ -179,18 +179,18 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 						+ 검색된_지라프로젝트.getC_jira_name() + "에 선택된 요구사항_이슈_타입이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
 				chat.sendMessageByEngine(검색된_지라서버.getC_jira_server_base_url() + " 서버의 프로젝트 :"
 						+ 검색된_지라프로젝트.getC_jira_name() + "에 선택된 요구사항_이슈_타입이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
-				throw new RuntimeException(검색된_지라서버.getC_jira_server_base_url() + " :: " + 검색된_지라프로젝트.getC_title() +
+				throw new Exception(검색된_지라서버.getC_jira_server_base_url() + " :: " + 검색된_지라프로젝트.getC_title() +
 						" 프로젝트에 선택된 이슈유형이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
 			}
 
 			// 이슈 우선순위 기본설정 확인
-			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항_이슈우선순위검색(검색된_지라서버);
 			if (serverType.equals(ServerType.REDMINE_ON_PREMISE) && 요구사항_이슈_우선순위 == null) {
 				logger.error(검색된_지라서버.getC_jira_server_base_url() +
 						" 서버에 선택된 요구사항_이슈_우선순위가 없습니다. 이슈 우선순위 기본 설정 확인이 필요합니다.");
 				chat.sendMessageByEngine(검색된_지라서버.getC_jira_server_base_url() +
 						" 서버에 선택된 요구사항_이슈_우선순위가 없습니다. 이슈 우선순위 기본 설정 확인이 필요합니다.");
-				throw new RuntimeException(검색된_지라서버.getC_jira_server_base_url() +
+				throw new Exception(검색된_지라서버.getC_jira_server_base_url() +
 						" 서버에 선택된 요구사항_이슈_우선순위가 없습니다. 이슈 우선순위 기본 설정 확인이 필요합니다.");
 			}
 
@@ -198,7 +198,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			 * 갱신하지 않은 상황에서 ALM 서버에서만 데이터가 삭제되었는데 이슈를 생성하는 경우
 			 * 이슈 생성 전 해당 버전과 연결된 프로젝트와 이슈 유형을 ALM 서버에 API 호출하여 ALM 서버에서 직접 확인 후 선 오류 처리하는 로직을 추가하는 것 고민
 			 * 검증 여부에 따라 요구사항 이슈 생성 or 오류 처리
-			***/
+			 ***/
 		}
 
 		// 각 지라프로젝트를 활용해서 요구사항 만들기.
@@ -228,10 +228,17 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+				요구사항_이슈_타입= 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+				요구사항_이슈_타입 = 요구사항_이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
+
+			if (요구사항_이슈_타입 == null) {
+				logger.error(검색된_지라서버.getC_jira_server_base_url() + " 서버의 프로젝트 :"
+						+ 검색된_지라프로젝트.getC_jira_name() + "에 선택된 요구사항_이슈_타입이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
+				throw new Exception(검색된_지라서버.getC_jira_server_base_url() + " :: " + 검색된_지라프로젝트.getC_title() +
+						" 프로젝트에 선택된 이슈유형이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
 			}
 
 			// 준비된 파라미터
@@ -269,11 +276,11 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 			String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
 
 			String 시작일 = savedReqAddEntity.getC_req_start_date() == null
-							? "시작일 데이터를 확인할 수 없습니다. 버전의 시작일 확인이 필요합니다"
-								: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_start_date());
+					? "시작일 데이터를 확인할 수 없습니다. 버전의 시작일 확인이 필요합니다"
+					: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_start_date());
 			String 종료일 = savedReqAddEntity.getC_req_end_date() == null
-							? "종료일 데이터를 확인할 수 없습니다. 버전의 종료일 확인이 필요합니다"
-								: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_end_date());
+					? "종료일 데이터를 확인할 수 없습니다. 버전의 종료일 확인이 필요합니다"
+					: DateUtils.format("yyyy-MM-dd", savedReqAddEntity.getC_req_end_date());
 
 			String 이슈내용 = "☀ 주의 : 본 이슈는 a-RMS에서 제공하는 요구사항 이슈 입니다.\n\n" +
 					"✔ 본 이슈는 자동으로 관리되므로,\n" +
@@ -302,7 +309,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.startDate(savedReqAddEntity.getC_req_start_date())
 					.dueDate(savedReqAddEntity.getC_req_end_date());
 
-			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항_이슈우선순위검색(검색된_지라서버);
 			지라이슈우선순위_데이터 우선순위;
 			if (요구사항_이슈_우선순위 != null) {
 				logger.info("요구사항_이슈_우선순위 = " + 요구사항_이슈_우선순위.getC_issue_priority_name());
@@ -449,7 +456,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 	@Transactional
 	public ReqAddEntity moveReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception {
 
-		SessionUtil.setAttribute("moveNode",changeReqTableName);
+		SessionUtil.setAttribute("moveNode", changeReqTableName);
 
 		ReqAddEntity savedReqAddEntity = this.moveNode(reqAddEntity, request);
 
@@ -669,40 +676,44 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
-			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
-			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			// Soft Delete된 프로젝트의 경우 이슈수정을 하지 않도록 방어 코드 추가
+			if (검색된_지라프로젝트.getC_etc() != null && StringUtils.equals(검색된_지라프로젝트.getC_etc(), "delete")) {
+				continue;
+			}
+
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항_이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항_이슈해결책검색(검색된_지라서버);
 
 			ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
-					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
-
-			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
-
 			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
 			}
 
-			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			JiraIssueTypeEntity 요구사항_이슈타입 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+				요구사항_이슈타입= 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+				요구사항_이슈타입 = 요구사항_이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 			}
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
-			지라이슈유형_데이터 유형 = null;
-			if (요구사항_이슈_타입 != null) {
-				유형 = 지라이슈유형가져오기(요구사항_이슈_타입);
+			지라이슈유형_데이터 유형;
+			if (요구사항_이슈타입 != null) {
+				유형 = 지라이슈유형가져오기(요구사항_이슈타입);
+			}
+			else {
+				// 추가 생성되는 요구사항의 경우 이슈유형이 Null 일 경우 오류 처리
+				logger.error(검색된_지라서버.getC_jira_server_base_url() + " 서버의 프로젝트 :"
+						+ 검색된_지라프로젝트.getC_jira_name() + "에 선택된 요구사항_이슈_타입이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
+				throw new Exception(검색된_지라서버.getC_jira_server_base_url() + " :: " + 검색된_지라프로젝트.getC_title() +
+						" 프로젝트에 선택된 이슈유형이 없습니다. 이슈유형 기본 설정 확인이 필요합니다.");
 			}
 
 			지라이슈필드_데이터.보고자 암스서버보고자 = 암스서버보고자가져오기(검색된_지라서버);
@@ -855,34 +866,30 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
 
 			JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
+			// Soft Delete된 프로젝트의 경우 이슈수정을 하지 않도록 방어 코드 추가
 			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
-			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
-			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			if (검색된_지라프로젝트.getC_etc() != null && StringUtils.equals(검색된_지라프로젝트.getC_etc(), "delete")) {
+				continue;
+			}
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항_이슈우선순위검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항_이슈해결책검색(검색된_지라서버);
 
 			ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-			/*JiraIssueStatusEntity 요구사항_이슈_상태 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities())
-					: 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
-
-			JiraIssueTypeEntity 요구사항_이슈_타입 = jiraServerType.equals(JiraServerType.JIRA_CLOUD)
-					? 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities())
-					: 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());*/
-
 			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
 			}
 
 			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
 			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_타입= 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+				요구사항_이슈_타입= 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
 			}
 			else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-				요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+				요구사항_이슈_타입 = 요구사항_이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
 			}
 
 			지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
@@ -1012,27 +1019,30 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
             JiraServerEntity 검색된_지라서버 = 지라서버검색(지라서버_아이디);
 
-            JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			JiraProjectEntity 검색된_지라프로젝트 = 지라프로젝트검색(지라_프로젝트_아이디);
+			// Soft Delete된 프로젝트의 경우 이슈수정을 하지 않도록 방어 코드 추가
+			if (검색된_지라프로젝트.getC_etc() != null && StringUtils.equals(검색된_지라프로젝트.getC_etc(), "delete")) {
+				continue;
+			}
+			JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항_이슈우선순위검색(검색된_지라서버);
 
-            JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 요구사항이슈우선순위검색(검색된_지라서버);
-
-            JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항이슈해결책검색(검색된_지라서버);
+			JiraIssueResolutionEntity 요구사항_이슈_해결책 = 요구사항_이슈해결책검색(검색된_지라서버);
 
             ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
 
-            JiraIssueStatusEntity 요구사항_이슈_상태 = null;
-            if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-                요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
-            } else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-                요구사항_이슈_상태 = 요구사항이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
-            }
+			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities());
+			} else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
+				요구사항_이슈_상태 = 요구사항_이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities());
+			}
 
-            JiraIssueTypeEntity 요구사항_이슈_타입 = null;
-            if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-                요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
-            } else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
-                요구사항_이슈_타입 = 요구사항이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
-            }
+			JiraIssueTypeEntity 요구사항_이슈_타입 = null;
+			if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
+			} else if (serverType.equals(ServerType.JIRA_ON_PREMISE)) {
+				요구사항_이슈_타입 = 요구사항_이슈타입검색(검색된_지라서버.getJiraIssueTypeEntities());
+			}
 
             지라이슈필드_데이터.프로젝트 프로젝트 = 지라프로젝트빌더(검색된_지라프로젝트);
 
@@ -1242,7 +1252,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 이슈내용;
 	}
 
-	private JiraIssueTypeEntity 요구사항이슈타입검색(Set<JiraIssueTypeEntity> issueTypes) throws Exception {
+	private JiraIssueTypeEntity 요구사항_이슈타입검색(Set<JiraIssueTypeEntity> issueTypes) throws Exception {
 
 		// getC_check가 "true"인 엔티티를 우선적으로 검색
 		Optional<JiraIssueTypeEntity> checkTrueEntity = issueTypes.stream()
@@ -1262,13 +1272,13 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 				.orElse(null);
 	}
 
-	private JiraIssueStatusEntity 요구사항이슈상태검색(Set<JiraIssueStatusEntity> issueStatuses) throws Exception {
+	private JiraIssueStatusEntity 요구사항_이슈상태검색(Set<JiraIssueStatusEntity> issueStatuses) throws Exception {
 		return issueStatuses.stream()
 				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 	}
 
-	private JiraIssuePriorityEntity 요구사항이슈우선순위검색(JiraServerEntity 지라서버) throws Exception {
+	private JiraIssuePriorityEntity 요구사항_이슈우선순위검색(JiraServerEntity 지라서버) throws Exception {
 		Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 지라서버.getJiraIssuePriorityEntities();
 		JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
 				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
@@ -1276,7 +1286,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 		return 요구사항_이슈_우선순위;
 	}
 
-	private JiraIssueResolutionEntity 요구사항이슈해결책검색(JiraServerEntity 지라서버) throws Exception {
+	private JiraIssueResolutionEntity 요구사항_이슈해결책검색(JiraServerEntity 지라서버) throws Exception {
 		Set<JiraIssueResolutionEntity> 지라서버_이슈해결책_리스트 = 지라서버.getJiraIssueResolutionEntities();
 		JiraIssueResolutionEntity 요구사항_이슈_해결책 = 지라서버_이슈해결책_리스트.stream()
 				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))

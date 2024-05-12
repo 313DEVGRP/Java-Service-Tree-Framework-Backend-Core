@@ -19,14 +19,10 @@ import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
-import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.util.communicate.external.response.jira.지라이슈상태_데이터;
-import com.arms.api.util.communicate.external.response.jira.지라이슈유형_데이터;
 import com.arms.api.util.communicate.external.엔진통신기;
-import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +33,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -169,134 +168,5 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
 
         this.updateNode(검색된_프로젝트_엔티티);
         return 검색된_프로젝트_엔티티;
-    }
-
-    @Override
-    @Transactional
-    public JiraProjectEntity 프로젝트_항목별_갱신(EntityType 설정할_항목, Long 서버_c_id, JiraProjectEntity jiraProjectEntity) throws Exception {
-        JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
-        검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
-        JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-
-        JiraServerPureEntity 검색용_지라서버_엔티티 = new JiraServerPureEntity();
-        검색용_지라서버_엔티티.setC_id(서버_c_id);
-        String 연결_아이디 = jiraServerPure.getNode(검색용_지라서버_엔티티).getC_jira_server_etc();
-
-        if (EntityType.이슈유형 == 설정할_항목) {
-            Set<JiraIssueTypeEntity> 프로젝트_이슈유형_세트 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities();
-            List<지라이슈유형_데이터> 클라우드_프로젝트별_이슈_유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(연결_아이디, 검색된_프로젝트_엔티티.getC_desc());
-
-            for(지라이슈유형_데이터 가져온_이슈_유형 : 클라우드_프로젝트별_이슈_유형_목록) {
-                if (기등록_이슈_유형_갱신결과(프로젝트_이슈유형_세트, 가져온_이슈_유형) == 0) {
-                    프로젝트_이슈유형_세트.add(미등록_이슈_유형_저장_및_저장된_엔티티(가져온_이슈_유형));
-                }
-            }
-            this.updateNode(검색된_프로젝트_엔티티);
-        }
-
-        if (EntityType.이슈상태 == 설정할_항목) {
-            Set<JiraIssueStatusEntity> 프로젝트_이슈상태_세트 = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities();
-            List<지라이슈상태_데이터> 클라우드_프로젝트별_이슈_상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(연결_아이디, 검색된_프로젝트_엔티티.getC_desc());
-
-            for(지라이슈상태_데이터 가져온_이슈_상태 : 클라우드_프로젝트별_이슈_상태_목록) {
-                if (기등록_이슈_상태_갱신결과(프로젝트_이슈상태_세트, 가져온_이슈_상태) == 0) {
-                    프로젝트_이슈상태_세트.add(미등록_이슈_상태_저장_및_저장된_엔티티(가져온_이슈_상태));
-                }
-            }
-            this.updateNode(검색된_프로젝트_엔티티);
-        }
-
-        return 검색된_프로젝트_엔티티;
-    }
-
-    private int 기등록_이슈_상태_갱신결과(Set<JiraIssueStatusEntity> 기존_이슈_상태_목록, 지라이슈상태_데이터 가져온_이슈_상태) throws Exception {
-        int 갱신_횟수 = 0;
-        for(JiraIssueStatusEntity issueStatusEntity : 기존_이슈_상태_목록) {
-            if (issueStatusEntity.getC_issue_status_url().equals(가져온_이슈_상태.getSelf())) {
-                issueStatusEntity.setC_issue_status_name(가져온_이슈_상태.getName());
-                issueStatusEntity.setC_issue_status_desc(가져온_이슈_상태.getDescription());
-                갱신_횟수 += jiraIssueStatus.updateNode(issueStatusEntity);
-            }
-        }
-        return 갱신_횟수;
-    }
-
-    private JiraIssueStatusEntity 미등록_이슈_상태_저장_및_저장된_엔티티(지라이슈상태_데이터 이슈_상태) throws Exception {
-
-        JiraIssueStatusEntity 저장할_이슈_상태 = new JiraIssueStatusEntity();
-        //공통
-        저장할_이슈_상태.setC_issue_status_id(이슈_상태.getId());
-        저장할_이슈_상태.setC_issue_status_name(이슈_상태.getName());
-        저장할_이슈_상태.setC_issue_status_url(이슈_상태.getSelf());
-        저장할_이슈_상태.setC_issue_status_desc(이슈_상태.getDescription());
-        저장할_이슈_상태.setC_check("false");
-        저장할_이슈_상태.setRef(TreeConstant.First_Node_CID);
-        저장할_이슈_상태.setC_type(TreeConstant.Leaf_Node_TYPE);
-
-        JiraIssueStatusEntity 저장된_지라이슈상태 = jiraIssueStatus.addNode(저장할_이슈_상태);
-        return 저장된_지라이슈상태;
-    }
-
-    private int 기등록_이슈_유형_갱신결과(Set<JiraIssueTypeEntity> 기존_이슈_유형_목록, 지라이슈유형_데이터 가져온_이슈_유형) throws Exception {
-        int 갱신_횟수 = 0;
-        for (JiraIssueTypeEntity issueTypeEntity : 기존_이슈_유형_목록) {
-            if (issueTypeEntity.getC_issue_type_url().equals(가져온_이슈_유형.getSelf())) {
-                if (가져온_이슈_유형.getName() != null) {
-                    issueTypeEntity.setC_issue_type_name(가져온_이슈_유형.getName());
-                }
-                if (가져온_이슈_유형.getDescription() != null) {
-                    issueTypeEntity.setC_issue_type_desc(가져온_이슈_유형.getDescription());
-                }
-                if (가져온_이슈_유형.getSubtask() != null) {
-                    issueTypeEntity.setC_desc(가져온_이슈_유형.getSubtask().toString());
-                }
-                if (가져온_이슈_유형.getUntranslatedName() != null) {
-                    issueTypeEntity.setC_etc(가져온_이슈_유형.getUntranslatedName());
-                }
-                if (가져온_이슈_유형.getHierarchyLevel() != null) {
-                    issueTypeEntity.setC_contents(가져온_이슈_유형.getHierarchyLevel().toString());
-                }
-
-                갱신_횟수 += jiraIssueType.updateNode(issueTypeEntity);
-            }
-        }
-        return 갱신_횟수;
-    }
-
-    private JiraIssueTypeEntity 미등록_이슈_유형_저장_및_저장된_엔티티(지라이슈유형_데이터 이슈_유형) throws Exception {
-        JiraIssueTypeEntity 저장할_이슈_유형 = new JiraIssueTypeEntity();
-        // 공통
-        if (이슈_유형.getId() != null) {
-            저장할_이슈_유형.setC_issue_type_id(이슈_유형.getId());
-        }
-        if (이슈_유형.getName() != null) {
-            저장할_이슈_유형.setC_issue_type_name(이슈_유형.getName());
-        }
-        if (이슈_유형.getSelf() != null) {
-            저장할_이슈_유형.setC_issue_type_url(이슈_유형.getSelf());
-        }
-        if (이슈_유형.getDescription() != null) {
-            저장할_이슈_유형.setC_issue_type_desc(이슈_유형.getDescription());
-        }
-        if (이슈_유형.getSubtask() != null) {
-            저장할_이슈_유형.setC_desc(이슈_유형.getSubtask().toString()); //Boolean
-        }
-        if (이슈_유형.getName().equals("arms-requirement")) {
-            저장할_이슈_유형.setC_check("true"); //기본값 false 설정
-        } else {
-            저장할_이슈_유형.setC_check("false"); //기본값 false 설정
-        }
-        저장할_이슈_유형.setRef(TreeConstant.First_Node_CID);
-        저장할_이슈_유형.setC_type(TreeConstant.Leaf_Node_TYPE);
-        if (이슈_유형.getUntranslatedName() != null) {
-            저장할_이슈_유형.setC_etc(이슈_유형.getUntranslatedName());
-        }
-        if (이슈_유형.getHierarchyLevel() != null) {
-            저장할_이슈_유형.setC_contents(이슈_유형.getHierarchyLevel().toString()); //Integer
-        }
-
-        JiraIssueTypeEntity 저장된_이슈_유형 = jiraIssueType.addNode(저장할_이슈_유형);
-
-        return 저장된_이슈_유형;
     }
 }

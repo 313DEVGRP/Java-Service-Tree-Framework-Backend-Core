@@ -12,6 +12,8 @@
 package com.arms.api.jira.jiraproject.controller;
 
 import com.arms.api.jira.jiraproject.model.JiraProjectDTO;
+import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
@@ -28,10 +30,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-
-import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
-import com.arms.api.jira.jiraproject.service.JiraProject;
-
 import java.util.List;
 
 @Slf4j
@@ -109,24 +107,6 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
         EntityType 설정항목 = EntityType.fromString(설정할_항목);
 
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_기본값_설정(설정항목, 항목_c_id, jiraProjectEntity)));
-    }
-
-    @ResponseBody
-    @RequestMapping(
-            value={"{renewTarget}/renewNode.do"},
-            method = {RequestMethod.PUT }
-    )
-    public ResponseEntity<?> 클라우드서버_지라프로젝트_항목별_갱신(@PathVariable(name="renewTarget") String 설정할_항목,
-                                                  @RequestParam(name="serverId") Long 서버_c_id,
-                                                  JiraProjectDTO jiraProjectDTO) throws Exception {
-        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
-
-        logger.info("JiraProjectController :: 클라우드서버_지라프로젝트_항목별_갱신, 서버_c_id: {}, 프로젝트_c_id: {}, 설정할_항목: {}"
-                                                                                    , 서버_c_id, jiraProjectEntity.getC_id(),설정할_항목);
-
-        EntityType 설정항목 = EntityType.fromString(설정할_항목);
-
-        return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_갱신(설정항목, 서버_c_id, jiraProjectEntity)));
     }
 
 }

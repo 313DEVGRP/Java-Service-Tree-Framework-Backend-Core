@@ -30,5 +30,4 @@ public interface JiraProject extends TreeService {
 
     public JiraProjectEntity 프로젝트_항목별_기본값_설정(EntityType 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception;
 
-    public JiraProjectEntity 프로젝트_항목별_갱신(EntityType 설정할_항목, Long 서버_c_id, JiraProjectEntity jiraProjectEntity) throws Exception;
 }
