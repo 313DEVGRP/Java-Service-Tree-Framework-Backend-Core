@@ -77,6 +77,8 @@ public class DashboardServiceImpl implements DashboardService {
             return version.getC_id();
         }).collect(Collectors.toSet());
 
+        Map<String, SankeyNode> workerNodeMap = new HashMap<>();
+
         // 3. Engine 에 담당자 데이터 요청
         Optional<List<검색결과>> optionalEsData = Optional.ofNullable(통계엔진통신기.제품_혹은_제품버전들의_담당자목록(aggregationRequestDTO).getBody());
         optionalEsData.ifPresent(esData -> {
@@ -86,11 +88,17 @@ public class DashboardServiceImpl implements DashboardService {
                     String assigneeAccountId = assignee.get필드명();
                     assignee.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream().forEach(displayName -> {
                         String assigneeDisplayName = displayName.get필드명();
-                        String workerNodeId = versionId + "-" + assigneeAccountId;
-                        // 3-1. 담당자 노드 추가
-                        nodeList.add(new SankeyNode(workerNodeId, assigneeDisplayName + " (" + displayName.get개수() + ") ", "작업자", versionId));
+
+                        // 담당자 노드가 이미 추가되었는지 확인
+                        if (!workerNodeMap.containsKey(assigneeAccountId)) {
+                            // 3-1. 담당자 노드 추가
+                            SankeyNode workerNode = new SankeyNode(assigneeAccountId, assigneeDisplayName, "작업자", versionId);
+                            nodeList.add(workerNode);
+                            workerNodeMap.put(assigneeAccountId, workerNode);
+                        }
+
                         // 3-2. 제품 버전 노드와 작업자 노드를 연결하는 link 추가
-                        linkList.add(new SankeyLink(versionId + "-version", workerNodeId));
+                        linkList.add(new SankeyLink(versionId + "-version", assigneeAccountId));
                         versionIds.remove(Long.parseLong(versionId));
                     });
                 });
