@@ -17,14 +17,16 @@ import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
+import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
+import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
+import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
-import com.arms.api.util.communicate.external.통계엔진통신기;
-import com.arms.api.util.communicate.external.엔진통신기;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -37,18 +39,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
-import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
-import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import org.springframework.web.servlet.ModelAndView;
-
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -381,4 +380,28 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return modelAndView;
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/getReqStatusListByCReqLink.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<List<ReqStatusEntity>> getReqStatusListByCReqLink(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: getReqStatusListByCReqLink");
+        ReqStatusEntity reqStatusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+
+        SessionUtil.setAttribute("getReqStatusListByCReqLink", changeReqTableName);
+
+        Long cReqLink = reqStatusEntity.getC_req_link();
+        reqStatusEntity.getCriterions().add(Restrictions.eq("c_req_link", cReqLink));
+        reqStatusEntity.setOrder(Order.asc("c_id"));
+
+        List<ReqStatusEntity> list = reqStatus.getChildNode(reqStatusEntity);
+
+        SessionUtil.removeAttribute("getReqStatusListByCReqLink");
+
+        return ResponseEntity.ok(list);
+    }
 }

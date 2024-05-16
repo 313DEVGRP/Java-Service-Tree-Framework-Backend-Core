@@ -26,6 +26,10 @@ public interface 내부통신기 {
     ResponseEntity<?> 요구사항_이슈_수정하기(@PathVariable(value = "changeReqTableName") String changeReqTableName,
             @RequestBody ReqStatusDTO reqStatusDTO);
 
+    @GetMapping("/arms/reqStatus/{changeReqTableName}/getReqStatusListByCReqLink.do")
+    ResponseEntity<List<ReqStatusEntity>> REQADD_CID_요구사항_이슈_조회(@PathVariable(value = "changeReqTableName") String changeReqTableName,
+                                         @SpringQueryMap ReqStatusDTO reqStatusDTO);
+
     @GetMapping("/arms/reqAdd/{changeReqTableName}/getNodeDetail.do")
     ResponseEntity<LoadReqAddDTO> 요구사항조회(@PathVariable(value = "changeReqTableName") String changeReqTableName,
             @RequestParam(value = "c_id") Long c_id);

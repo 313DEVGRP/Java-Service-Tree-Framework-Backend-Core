@@ -50,6 +50,7 @@ public class RouteTableConfig {
         map.put("moveStatusNode.do", "moveStatusNode");
         map.put("getStatusHistory.do", "getStatusHistory");
         map.put("getPdRelatedReqStats.do", "getPdRelatedReqStats");
+        map.put("getReqStatusListByCReqLink.do", "getReqStatusListByCReqLink");
 
         return map;
     }
