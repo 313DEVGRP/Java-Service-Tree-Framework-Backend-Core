@@ -280,7 +280,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		//-- ARMS 요구사항 난이도
 		Optional.ofNullable(savedReqAddEntity.getReqDifficultyEntity()).ifPresent(reqDifficulty -> {
 			Optional.ofNullable(reqDifficulty.getC_id()).ifPresent(reqStatusDTO::setC_req_difficulty_link);
-			Optional.ofNullable(reqDifficulty.getC_title()).ifPresent(reqStatusDTO::setC_req_state_name);
+			Optional.ofNullable(reqDifficulty.getC_title()).ifPresent(reqStatusDTO::setC_req_difficulty_name);
 		});
 
 		//-- ARMS 요구사항 작업량 데이터
