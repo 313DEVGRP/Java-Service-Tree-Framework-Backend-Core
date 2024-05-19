@@ -1,7 +1,6 @@
 package com.arms.api.util.communicate.internal;
 
 import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import org.springframework.cloud.openfeign.FeignClient;
