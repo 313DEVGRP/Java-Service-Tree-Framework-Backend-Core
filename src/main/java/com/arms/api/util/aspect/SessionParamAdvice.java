@@ -41,7 +41,6 @@ public class SessionParamAdvice {
     public Object sessionParam(ProceedingJoinPoint joinPoint) throws Throwable {
 
         Object[] args = joinPoint.getArgs();
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
 
         String methodName
                 = Arrays.stream(joinPoint.getSignature().toLongString().split(" ")).skip(1).collect(Collectors.joining(" "));
