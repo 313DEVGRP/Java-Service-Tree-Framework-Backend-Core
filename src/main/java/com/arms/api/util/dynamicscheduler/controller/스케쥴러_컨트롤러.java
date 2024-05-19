@@ -157,6 +157,7 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/increment/loadToES"},
             method = {RequestMethod.GET}
     )
+    @Async
     public String 증분이슈_검색엔진_벌크_저장(ModelMap model, HttpServletRequest request) throws Exception {
 
         //제품을 조회해 온다.

@@ -84,7 +84,6 @@ public interface 엔진통신기 {
     );
 
     @GetMapping("/engine/jira/{connectId}/issue/increment/loadToES/bulk/{issueKey}")
-    @Async
     public int 증분이슈_검색엔진_벌크_저장(
             @PathVariable("connectId") Long 지라서버_아이디,
             @PathVariable("issueKey") String 이슈_키,
