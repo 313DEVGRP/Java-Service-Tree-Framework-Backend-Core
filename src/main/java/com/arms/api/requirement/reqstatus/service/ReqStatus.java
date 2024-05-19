@@ -21,7 +21,7 @@ import java.util.Set;
 
 public interface ReqStatus extends TreeService {
 
-    public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록, PdServiceEntity 요구사항_제품서비스) throws Exception;
+    public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록, PdServiceEntity 요구사항_제품서비스, List<ReqStatusEntity> reqStatusEntityList) throws Exception;
 
     public void 유지_또는_삭제된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, List<ReqStatusEntity> 삭제된지라프로젝트, PdServiceEntity 요구사항_제품서비스, String CRUD_타입) throws Exception;
 
