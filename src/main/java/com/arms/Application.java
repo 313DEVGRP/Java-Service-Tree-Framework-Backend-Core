@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableSwagger2
 @SpringBootApplication
@@ -25,6 +26,7 @@ import org.modelmapper.ModelMapper;
         "classpath:com/arms/egovframework/spring/context-hibernate.xml",
         "classpath:com/arms/egovframework/spring/context-jdbc.xml"
 })
+@EnableAsync
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

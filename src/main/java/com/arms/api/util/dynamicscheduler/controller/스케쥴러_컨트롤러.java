@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,6 +81,7 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/loadToES"},
             method = {RequestMethod.GET}
     )
+    @Async
     public String 각_제품서비스_별_요구사항이슈_조회_및_ES저장(ModelMap model, HttpServletRequest request) throws Exception {
 
         //제품을 조회해 온다.
@@ -227,6 +229,7 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/updateFromES"},
             method = {RequestMethod.GET}
     )
+    @Async
     public String 각_제품서비스_별_요구사항_Status_업데이트_From_ES(ModelMap model, HttpServletRequest request) throws Exception {
 
         // 제품(서비스) 를 로드합니다.

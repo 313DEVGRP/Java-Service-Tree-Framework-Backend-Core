@@ -9,6 +9,7 @@ import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -83,6 +84,7 @@ public interface 엔진통신기 {
     );
 
     @GetMapping("/engine/jira/{connectId}/issue/increment/loadToES/bulk/{issueKey}")
+    @Async
     public int 증분이슈_검색엔진_벌크_저장(
             @PathVariable("connectId") Long 지라서버_아이디,
             @PathVariable("issueKey") String 이슈_키,
