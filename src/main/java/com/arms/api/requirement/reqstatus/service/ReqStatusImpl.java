@@ -84,7 +84,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	protected ModelMapper modelMapper;
 
 	@Override
-	public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록, PdServiceEntity 요구사항_제품서비스) throws Exception {
+	public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록, PdServiceEntity 요구사항_제품서비스, List<ReqStatusEntity> reqStatusEntityList) throws Exception {
 		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
 
 		// 추가되는 프로젝트 목록을 순회하며 REQSTATUS 데이터 생성처리
