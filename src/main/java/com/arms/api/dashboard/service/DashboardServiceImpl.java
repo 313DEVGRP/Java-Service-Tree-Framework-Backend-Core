@@ -89,9 +89,13 @@ public class DashboardServiceImpl implements DashboardService {
                     assignee.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream().forEach(displayName -> {
                         String assigneeDisplayName = displayName.get필드명();
 
-                        // 담당자 노드가 이미 추가되었는지 확인
-                        if (!workerNodeMap.containsKey(assigneeAccountId)) {
-                            // 3-1. 담당자 노드 추가
+                        // 3-1. 담당자 노드가 이미 존재한다면, parent(버전의 c_id) 를 변경한다. ex) 3 -> 3,12
+                        if (workerNodeMap.containsKey(assigneeAccountId)) {
+                            SankeyNode workerNode = workerNodeMap.get(assigneeAccountId);
+                            String parent = workerNode.getParent();
+                            workerNode.setParent(parent + "," + versionId);
+                        } else {
+                            // 3-2. 담당자 노드가 존재하지 않는다면 추가
                             SankeyNode workerNode = new SankeyNode(assigneeAccountId, assigneeDisplayName, "작업자", versionId);
                             nodeList.add(workerNode);
                             workerNodeMap.put(assigneeAccountId, workerNode);
@@ -107,12 +111,12 @@ public class DashboardServiceImpl implements DashboardService {
 
         // 4. 담당자가 없는 제품 버전 찾기 (계층적인 표현에 있어 UI 상 문제가 있기 때문에 가짜 노드와 링크를 추가해주어야함)
         boolean isWorkerNodeExist = false;
-        List<SankeyNode> versionNode = nodeList.stream().filter(node -> node.getType().equals("버전")).collect(Collectors.toList());
-        for (SankeyNode node : versionNode) {
-            if (nodeList.stream().noneMatch(workerNode -> workerNode.getParent().equals(node.getId().split("-")[0]))) {
+        List<SankeyNode> versionNodes = nodeList.stream().filter(node -> node.getType().equals("버전")).collect(Collectors.toList());
+        for (SankeyNode versionNode : versionNodes) {
+            if (nodeList.stream().noneMatch(workerNode -> workerNode.getParent().contains(versionNode.getId().split("-")[0]))) {
                 isWorkerNodeExist = true;
                 // 4-1. 제품 버전 노드와 가짜 노드를 연결하는 link 추가
-                linkList.add(new SankeyLink(node.getId(), "No-Worker"));
+                linkList.add(new SankeyLink(versionNode.getId(), "No-Worker"));
             }
         }
 
