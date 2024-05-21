@@ -49,6 +49,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @AllArgsConstructor
@@ -93,11 +94,38 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			// REQSTATUS 데이터 세팅
 			ReqStatusDTO reqStatusDTO = this.REQSTATUS_데이터_설정(지라프로젝트_아이디, reqAddEntity, 요구사항_제품서비스, "create");
 
-			// REQSTATUS addNode API 호출
-			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+			// 연결이 해제되었다가 다시 연결된 프로젝트에는 이미 생성했던 요구사항 이슈가 있음, 수정 시 삭제된 로직을 가져와서 그에 맞추어 검색
+			Optional<ReqStatusEntity> 삭제된데이터검색 = Optional.ofNullable(reqStatusEntityList)
+					.map(List::stream)
+					.orElseGet(Stream::empty)
+					.filter(reqStatusEntity -> reqStatusEntity.getC_req_link().equals(reqAddEntity.getC_id()))
+					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() != null)
+					.filter(reqStatusEntity -> reqStatusEntity.getC_jira_project_link().equals(지라프로젝트_아이디))
+					.findFirst();
 
-			if(!결과.getStatusCode().is2xxSuccessful()) {
-				logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 생성 오류 :: " + reqStatusDTO.toString());
+			// 삭제된 데이터가 있을 경우 해당 데이터 Soft Delete 제거, updateNode API 호출
+			if (삭제된데이터검색.isPresent()) {
+				chat.sendMessageByEngine("삭제된데이터 발견되어 이슈 수정");
+				reqStatusDTO.setC_id(삭제된데이터검색.get().getC_id());
+				reqStatusDTO.setC_issue_delete_date(null);
+				reqStatusDTO.setC_etc("update");
+
+				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+
+				if (결과.getStatusCode().is2xxSuccessful()) {
+					chat.sendMessageByEngine("기존에 Soft Delete 처리 된 지라 이슈를 복구하였습니다. 지라 이슈는 통계에 수집됩니다.");
+				}
+				else {
+					logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 수정 오류 :: " + reqStatusDTO.toString());
+				}
+			}
+			else {
+				// 없을 경우 REQSTATUS addNode API 호출
+				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+
+				if (!결과.getStatusCode().is2xxSuccessful()) {
+					logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 생성 오류 :: " + reqStatusDTO.toString());
+				}
 			}
 		}
 	}
@@ -149,11 +177,11 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		// REQSTATUS c_etc 컬럼이 complete 일 경우 생성완료 상태 그 외 실패
 		if (생성결과.getC_etc() != null && StringUtils.equals("complete", 생성결과.getC_etc())) {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
-									+ CURD_타입 + ", ALM 서버를 확인해주세요.");
+					+ CURD_타입 + ", ALM 서버를 확인해주세요.");
 		}
 		else {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
-									+ CURD_타입 + " 실패 :: " + 생성결과.getC_desc());
+					+ CURD_타입 + " 실패 :: " + 생성결과.getC_desc());
 		}
 
 		ReqStatusDTO updateReqStatusDTO = modelMapper.map(생성결과, ReqStatusDTO.class);
@@ -542,9 +570,17 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		JiraProjectEntity jiraProjectEntity = null;
 		try {
 			jiraProjectEntity = TreeServiceUtils.getNode(jiraProject, 지라_프로젝트_아이디, JiraProjectEntity.class);
+			boolean isSoftDelete = Optional.ofNullable(jiraProjectEntity)
+					.map(JiraProjectEntity::getC_etc)
+					.map("delete"::equals)
+					.orElse(false);
+
+			if (isSoftDelete) {
+				jiraProjectEntity = null;
+			}
 		}
 		catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error("ALM프로젝트_검색 :: 프로젝트 아이디 :: " + 지라_프로젝트_아이디 + " :: " + e.getMessage());
 		}
 
 		return jiraProjectEntity;
@@ -556,8 +592,9 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			jiraServerEntity = TreeServiceUtils.getNode(jiraServer, 지라서버_아이디, JiraServerEntity.class);
 		}
 		catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error("ALM서버_검색 :: 서버 아이디 :: " + 지라서버_아이디 + " :: " + e.getMessage());
 		}
+
 		return jiraServerEntity;
 	}
 
