@@ -11,8 +11,8 @@
  */
 package com.arms.api.util.dynamicscheduler.controller;
 
-import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.jira.jiraserver.service.JiraServer;
+import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
+import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
@@ -60,8 +60,8 @@ public class 스케쥴러_컨트롤러{
     private ReqStatus reqStatus;
 
     @Autowired
-    @Qualifier("jiraServer")
-    private JiraServer jiraServer;
+    @Qualifier("jiraServerPure")
+    private JiraServerPure jiraServerPure;
 
     @Autowired
     private 엔진통신기 엔진통신기;
@@ -100,9 +100,9 @@ public class 스케쥴러_컨트롤러{
             }else {
 
                 for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
-                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
+                    JiraServerPureEntity 지라서버_검색 = new JiraServerPureEntity();
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
-                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
+                    JiraServerPureEntity 지라서버 = jiraServerPure.getNode(지라서버_검색);
 
                     if( 지라서버 == null ){
 
@@ -176,9 +176,9 @@ public class 스케쥴러_컨트롤러{
             }else {
 
                 for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
-                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
+                    JiraServerPureEntity 지라서버_검색 = new JiraServerPureEntity();
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
-                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
+                    JiraServerPureEntity 지라서버 = jiraServerPure.getNode(지라서버_검색);
 
                     if( 지라서버 == null ){
 
@@ -253,9 +253,9 @@ public class 스케쥴러_컨트롤러{
             } else {
 
                 for(ReqStatusEntity 요구사항_이슈_엔티티 : 결과){
-                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
+                    JiraServerPureEntity 지라서버_검색 = new JiraServerPureEntity();
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
-                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
+                    JiraServerPureEntity 지라서버 = jiraServerPure.getNode(지라서버_검색);
 
                     if( 지라서버 == null ){
 
