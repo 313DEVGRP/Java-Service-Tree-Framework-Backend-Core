@@ -283,6 +283,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 
 			logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
 
+			Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
 			Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
 			Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
 			Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
@@ -307,12 +308,16 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd{
 					= 내부통신기.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
 			List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
 
-			List<ReqStatusEntity> 유지된지라프로젝트 = reqStatusEntityList.stream()
+			List<ReqStatusEntity> 유지된지라프로젝트 = Optional.ofNullable(reqStatusEntityList)
+					.orElse(Collections.emptyList())
+					.stream()
 					.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
 					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
 					.collect(Collectors.toList());
 
-			List<ReqStatusEntity> 삭제된지라프로젝트 = reqStatusEntityList.stream()
+			List<ReqStatusEntity> 삭제된지라프로젝트 = Optional.ofNullable(reqStatusEntityList)
+					.orElse(Collections.emptyList())
+					.stream()
 					.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
 					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
 					.collect(Collectors.toList());
