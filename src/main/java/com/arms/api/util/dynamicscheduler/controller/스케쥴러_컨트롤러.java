@@ -355,7 +355,6 @@ public class 스케쥴러_컨트롤러{
             else {
                 결과.stream()
                     .filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals("complete", 요구사항_이슈.getC_etc()))
-                    .filter(요구사항_이슈 -> 요구사항_이슈.getC_issue_delete_date() == null)
                     .forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
             }
         }
