@@ -630,7 +630,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				"종료 일자 : "+ 종료일 +"\n\n" +
 				"※ 『 아래는 입력된 요구사항 내용입니다. 』\n\n\n";
 
-		이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(지라이슈본문, Whitelist.none())), "&nbsp;", " ");
+		이슈내용 = 이슈내용 + StringUtils.replaceText(StringUtils.removeHtmlTags(Jsoup.clean(지라이슈본문, Whitelist.basic())), "&nbsp;", " ");
 
 		return 이슈내용;
 	}
