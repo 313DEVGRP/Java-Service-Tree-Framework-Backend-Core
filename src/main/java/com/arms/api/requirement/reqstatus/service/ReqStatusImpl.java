@@ -483,7 +483,22 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 			}
 			else {
-				엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+				Map<String, Object> 수정결과 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+
+				if (!((boolean) 수정결과.get("success"))) {
+					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
+							검색된_지라서버.getC_jira_server_base_url(),
+							검색된_지라프로젝트.getC_jira_name(),
+							reqStatusEntity.getC_etc(),
+							수정결과.get("message")
+					);
+
+					logger.error(실패_이유);
+					chat.sendMessageByEngine(실패_이유);
+					reqStatusEntity.setC_desc(실패_이유);
+
+					return reqStatusEntity;
+				}
 			}
 		}
 		catch (Exception e) {
@@ -567,6 +582,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	}
 
 	private JiraProjectEntity ALM프로젝트_검색(Long 지라_프로젝트_아이디) {
+		if (지라_프로젝트_아이디 == null) {
+			return null;
+		}
+
 		JiraProjectEntity jiraProjectEntity = null;
 		try {
 			jiraProjectEntity = TreeServiceUtils.getNode(jiraProject, 지라_프로젝트_아이디, JiraProjectEntity.class);
@@ -587,6 +606,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	}
 
 	private JiraServerEntity ALM서버_검색(Long 지라서버_아이디) {
+		if (지라서버_아이디 == null) {
+			return null;
+		}
+
 		JiraServerEntity jiraServerEntity = null;
 		try {
 			jiraServerEntity = TreeServiceUtils.getNode(jiraServer, 지라서버_아이디, JiraServerEntity.class);
@@ -606,6 +629,14 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		String 추가된_요구사항의_아이디 = reqAddEntity.getC_id().toString();
 
 		String 버전아이디목록_파싱 = 버전아이디목록.replaceAll("\\[|\\]|\"", "").replaceAll(",", ",");
+
+		if (지라서버_아이디 == null) {
+			지라서버_아이디 = 0L;
+		}
+
+		if (지라_프로젝트_아이디 == null) {
+			지라_프로젝트_아이디 = 0L;
+		}
 
 		String 시작일 = reqAddEntity.getC_req_start_date() == null
 				? "시작일 데이터를 확인할 수 없습니다. 버전의 시작일 확인이 필요합니다"
