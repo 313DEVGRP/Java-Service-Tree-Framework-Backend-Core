@@ -12,8 +12,10 @@
 package com.arms.api.jira.jiraserver.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
-import com.arms.api.jira.jiraserver.model.계정정보_데이터;
+import com.arms.api.jira.jiraserver.model.JiraServerEntity;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
+import com.arms.api.jira.jiraserver.model.계정정보_데이터;
+import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -32,13 +34,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-
-import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.jira.jiraserver.service.JiraServer;
-import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @Controller
