@@ -47,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -94,9 +93,6 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Autowired
     @Qualifier("reqState")
     private ReqState reqState;
-
-    @Value("${requirement.state.complete.keyword}")
-    private String 완료_키워드;
 
     @PostConstruct
     public void initialize() {
@@ -586,28 +582,22 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         return ResponseEntity.ok(CommonResponse.success(result));
     }
 
-
-
     @ResponseBody
     @RequestMapping(
             value = {"/{changeReqTableName}/removeNode.do"},
-            method = {RequestMethod.POST}
+            method = {RequestMethod.DELETE}
     )
     public ResponseEntity<?> removeReqNode(
             @PathVariable(value = "changeReqTableName") String changeReqTableName,
             @Validated({UpdateNode.class}) ReqAddDTO reqAddDTO, HttpServletRequest request,
             BindingResult bindingResult, ModelMap model) throws Exception {
 
-        log.info("ReqAddController :: removeNode");
+        log.info("ReqAddController :: removeReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
-        SessionUtil.setAttribute("removeNode", changeReqTableName);
+        int removedReqAddEntity = reqAdd.removeReqNode(reqAddEntity, changeReqTableName, request);
 
-        int removedReqAddEntity = reqAdd.removeNode(reqAddEntity);
-
-        SessionUtil.removeAttribute("removeNode");
-
-        log.info("ReqAddController :: removeNode");
+        log.info("ReqAddController :: removeReqNode");
         return ResponseEntity.ok(CommonResponse.success(removedReqAddEntity));
 
     }
