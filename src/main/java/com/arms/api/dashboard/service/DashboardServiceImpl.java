@@ -11,6 +11,7 @@ import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.트리맵_검색요청;
@@ -159,21 +160,6 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> 제품서비스_요구사항제외_일반_통계(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, aggregationRequestDTO);
-        return 요구사항_연결이슈_일반_통계.getBody();
-    }
-
-    @Override
-    public List<Object> 제품서비스_요구사항제외_일반_통계_TOP_5(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
-        ResponseEntity<Map<String, Object>> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_요구사항제외_일반_통계(pdServiceId, aggregationRequestDTO);
-        Map<String, Object> 통신결과 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(Collections.emptyMap());
-        Map<String, Object> 검색결과 = Optional.ofNullable((Map<String, Object>) 통신결과.get("검색결과")).orElse(Collections.emptyMap());
-        List<Object> 작업자별결과 = (List<Object>) 검색결과.get("group_by_assignee.assignee_emailAddress.keyword");
-        return 작업자별결과;
-    }
-
-    @Override
     public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = 통계엔진통신기.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
 
@@ -193,5 +179,43 @@ public class DashboardServiceImpl implements DashboardService {
         }
         return personAndStatus;
     }
+
+    @Override
+    public Map<String, Long> 대시보드_상단_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+        // 작성필요.
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> 인력별_요구사항_top5(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        지라이슈_단순_집계_요청 집계요청 = 지라이슈_단순_집계_요청.builder()
+                .메인그룹필드("assignee.assignee_emailAddress.keyword")
+                .컨텐츠보기여부(false)
+                .크기(5)
+                .하위그룹필드들(List.of("cReqLink"))
+                .하위크기(1000)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 집계_결과 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
+        검색결과_목록_메인 검색결과목록 = Optional.ofNullable(집계_결과.getBody()).orElse(new 검색결과_목록_메인());
+
+        Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());
+
+        List<검색결과> 작업자별결과 = Optional.ofNullable(검색결과.get("group_by_assignee.assignee_emailAddress.keyword")).orElse(Collections.emptyList());
+
+        Map<String, Object> reqCountPerAssignee = new HashMap<>();
+        for (검색결과 obj : 작업자별결과) {
+            String 작업자메일 = obj.get필드명();
+            long 요구사항_수 = obj.get개수();
+            int 엣위치 = 작업자메일.indexOf("@");
+            String 작업자아이디 = 작업자메일.substring(0, 엣위치);
+            reqCountPerAssignee.put(작업자아이디, 요구사항_수);
+        }
+
+        return reqCountPerAssignee;
+
+    }
+
 }
 

@@ -36,7 +36,7 @@ public class DashboardController {
     }
 
     /**
-     * C3 Donut Chart API - Dashboard
+     * C3 Combination Chart API - Dashboard
      */
     @GetMapping("/requirements-jira-issue-statuses")
     public ResponseEntity<ApiResult<Map<String, RequirementJiraIssueAggregationResponse>>> requirementsJiraIssueStatuses(AggregationRequestDTO aggregationRequestDTO) {
@@ -75,12 +75,14 @@ public class DashboardController {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO)));
     }
 
-    /**
-     * Dashboard
-     */
-    @GetMapping("/exclusion-isreq-normal/req-and-linked-issue-top5/{pdServiceId}")
-    ResponseEntity<ApiResult<List<Object>>> getReqAndLinkedIssueTop5(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
-        return ResponseEntity.ok(CommonResponse.success(dashboardService.제품서비스_요구사항제외_일반_통계_TOP_5(pdServiceId, aggregationRequestDTO)));
+
+    @GetMapping("/reqIssueTop5/{pdServiceId}")
+    public ResponseEntity<ApiResult<Map<String, Object>>> 인력별_요구사항_이슈_집계_top5(@PathVariable("pdServiceId") Long pdServiceId
+            ,@RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("DashboardController :: 인력별_요구사항_이슈_집계_top5.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(CommonResponse.success(dashboardService.인력별_요구사항_top5(pdServiceId, pdServiceVersionLinks)));
     }
 
     /**
@@ -90,5 +92,18 @@ public class DashboardController {
     ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
         return ResponseEntity.ok(CommonResponse.success(dashboardService.getIssueResponsibleStatusTop5(pdServiceId, aggregationRequestDTO)));
     }
+
+    /*
+    * Dashboard -
+    * */
+    @GetMapping("/issue/reqAndSubtask/{pdServiceId}")
+    public ResponseEntity<Map<String, Long>> 대시보드_톱메뉴_이슈_집계(@PathVariable("pdServiceId") Long pdServiceId
+            ,@RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+        log.info("DashboardController :: 대시보드_톱메뉴_이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(dashboardService.대시보드_상단_요구사항_하위이슈_집계(pdServiceId, pdServiceVersionLinks));
+    }
+
+
 
 }
