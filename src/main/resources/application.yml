@@ -50,7 +50,7 @@ server:
 requirement:
   delete:
     type: force delete      # (두 가지 유형)
-                            # soft delete - 이슈 제목 및 본문 삭제 수정 처리
+                            # soft delete - 이슈 제목 및 본문 삭제 수정 처리(default)
                             # force delete - 삭제 API 호출 처리
   state:
     complete:

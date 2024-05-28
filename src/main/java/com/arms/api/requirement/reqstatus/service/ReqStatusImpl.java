@@ -164,8 +164,11 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "update")) {
 			CURD_타입 = "수정";
 		}
-		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "delete")) {
-			CURD_타입 = "Soft Delete 수정 처리";
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "soft delete")) {
+			CURD_타입 = "Soft Delete 수정";
+		}
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "force delete")) {
+			CURD_타입 = "ALM 요구사항 이슈 삭제";
 		}
 		else {
 			CURD_타입 = "";
@@ -233,27 +236,27 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 		}
 
-		reqStatusDTO.setC_title(savedReqAddEntity.getC_title());
+		List<Long> 버전아이디_내림차순_목록 = 버전아이디_세트.stream()
+				.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+		String 버전아이디_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(String::valueOf)
+				.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+		String 버전명_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(제품_버전아이디_버전명_맵::get)
+				.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+		String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
+		//-- ARMS 요구사항의 매핑버전목록
+		reqStatusDTO.setC_pds_version_name(버전명_내림차순_문자열);
+		reqStatusDTO.setC_req_pdservice_versionset_link(버전아이디_내림차순_문자열);
 
+		String 요구사항_제목 = savedReqAddEntity.getC_title();
 		String 이슈내용 = null;
 		if (StringUtils.equals(CRUD_타입, "create") || StringUtils.equals(CRUD_타입, "update")) {
-			List<Long> 버전아이디_내림차순_목록 = 버전아이디_세트.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-
-			String 버전아이디_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(String::valueOf)
-					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
-			String 버전명_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(제품_버전아이디_버전명_맵::get)
-					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
-			String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
-
 			이슈내용 = 등록_및_수정_이슈본문_가져오기(savedReqAddEntity, 제품서비스_아이디, 지라서버_아이디, 지라프로젝트_아이디, 버전ID목록);
-
-			//-- ARMS 요구사항의 매핑버전목록
-			reqStatusDTO.setC_pds_version_name(버전명_내림차순_문자열);
-			reqStatusDTO.setC_req_pdservice_versionset_link(버전아이디_내림차순_문자열);
 		}
-		else if (StringUtils.equals(CRUD_타입, "delete")) {
+		else if (StringUtils.equals(CRUD_타입, "soft delete") || StringUtils.equals(CRUD_타입, "force delete")) {
+			요구사항_제목 = "[삭제된 요구사항 이슈] :: " + 요구사항_제목;
 			이슈내용 = 삭제_이슈본문_가져오기();
 		}
+		reqStatusDTO.setC_title(요구사항_제목);
 		reqStatusDTO.setC_contents(이슈내용);
 
 		//-- 제품 서비스
@@ -318,21 +321,20 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		Optional.ofNullable(savedReqAddEntity.getC_req_plan_time()).ifPresent(reqStatusDTO::setC_req_plan_time);
 
 		Date date = new Date();
-		// 요구사항 ALM 서버 설정 상태로 c_etc 컬럼을 crud type 처리
+		reqStatusDTO.setC_issue_update_date(date);
+
+		// 요구사항 ALM 서버 설정 상태로 c_etc 컬럼을 crud type별 처리
 		if (StringUtils.equals(CRUD_타입, "create")) {
-			reqStatusDTO.setC_etc("create");
 			reqStatusDTO.setC_issue_create_date(date);
-			reqStatusDTO.setC_issue_update_date(date);
 		}
-		else if (StringUtils.equals(CRUD_타입, "update")) {
-			reqStatusDTO.setC_etc("update");
-			reqStatusDTO.setC_issue_update_date(date);
-		}
-		else if (StringUtils.equals(CRUD_타입, "delete")) {
-			reqStatusDTO.setC_etc("delete");
-			reqStatusDTO.setC_issue_update_date(date);
+		else if (StringUtils.equals(CRUD_타입, "soft delete")) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
+		else if (StringUtils.equals(CRUD_타입, "force delete")) {
+			reqStatusDTO.setC_issue_delete_date(date);
+		}
+
+		reqStatusDTO.setC_etc(CRUD_타입);
 
 		logger.info("ReqStatusImpl = reqStatusDTO :: " + objectMapper.writeValueAsString(reqStatusDTO));
 
@@ -439,7 +441,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.dueDate(종료일);
 
 		// REQSTATUS c_etc 컬럼이 delete 일 경우 삭제 처리 대신 라벨  삭제 처리(ALM 지라 서버의 경우)
-		if (StringUtils.equals(reqStatusEntity.getC_etc(), "delete")) {
+		if (StringUtils.equals(reqStatusEntity.getC_etc(), "soft delete")) {
 			String 삭제라벨 = "삭제된_요구사항_이슈";
 			요구사항이슈_필드빌더.labels(List.of(삭제라벨));
 		}
@@ -481,6 +483,24 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		try {
 			if (StringUtils.equals(reqStatusEntity.getC_etc(), "create")) {
 				생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+			}
+			else if (StringUtils.equals(reqStatusEntity.getC_etc(), "force delete")) {
+				Map<String, Object> 삭제결과 = 엔진통신기.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
+
+				if (!((boolean) 삭제결과.get("success"))) {
+					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
+							검색된_지라서버.getC_jira_server_base_url(),
+							검색된_지라프로젝트.getC_jira_name(),
+							reqStatusEntity.getC_etc(),
+							삭제결과.get("message")
+					);
+
+					logger.error(실패_이유);
+					chat.sendMessageByEngine(실패_이유);
+					reqStatusEntity.setC_desc(실패_이유);
+
+					return reqStatusEntity;
+				}
 			}
 			else {
 				Map<String, Object> 수정결과 = 엔진통신기.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
@@ -576,7 +596,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	private JiraIssuePriorityEntity 요구사항_이슈우선순위검색(JiraServerEntity 지라서버) {
 		Set<JiraIssuePriorityEntity> 지라서버_이슈우선순위_리스트 = 지라서버.getJiraIssuePriorityEntities();
 		JiraIssuePriorityEntity 요구사항_이슈_우선순위 = 지라서버_이슈우선순위_리스트.stream()
-				.filter(entity -> StringUtils.equals(entity.getC_check(), "true") && (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
+				.filter(entity -> StringUtils.equals(entity.getC_check(), "true")
+									&& (entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete")))
 				.findFirst().orElse(null);
 		return 요구사항_이슈_우선순위;
 	}

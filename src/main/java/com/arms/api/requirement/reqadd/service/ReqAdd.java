@@ -27,6 +27,8 @@ public interface ReqAdd extends TreeService {
 
     public ReqAddEntity moveReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception;
 
+    public int removeReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception;
+
     public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;
 
     public Integer updateDataBase( ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception;

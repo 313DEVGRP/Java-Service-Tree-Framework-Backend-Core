@@ -9,7 +9,6 @@ import com.arms.api.util.communicate.external.response.jira.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +35,12 @@ public interface 엔진통신기 {
             @PathVariable("connectId") Long 연결_아이디,
             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
             @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
+    );
+
+    @DeleteMapping("/{connectId}/jira/issue/{issueKeyOrId}")
+    public Map<String,Object> 이슈_삭제하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디
     );
 
     @GetMapping("/{connectId}/jira/project/list")
