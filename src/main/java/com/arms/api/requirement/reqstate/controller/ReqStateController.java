@@ -12,25 +12,23 @@
 package com.arms.api.requirement.reqstate.controller;
 
 
+import com.arms.api.requirement.reqstate.model.ReqStateDTO;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.api.requirement.reqstate.service.ReqState;
+import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import javax.annotation.PostConstruct;
-
-import com.arms.api.requirement.reqstate.model.ReqStateEntity;
-import com.arms.api.requirement.reqstate.model.ReqStateDTO;
-import com.arms.api.requirement.reqstate.service.ReqState;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,8 +50,8 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Value("${requirement.state.complete.keyword}")
-    private String 완료_키워드;
+    @Autowired
+    private ArmsDetailUrlConfig armsDetailUrlConfig;
 
     @ResponseBody
     @RequestMapping(
@@ -62,7 +60,11 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
     )
     public ModelAndView 요구사항_완료_키워드조회() throws Exception {
         logger.info(" [ " + this.getClass().getName() + " :: 요구사항_완료_키워드조회 ]");
-        Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
+        Set<String> 완료_키워드_셋 = new HashSet<>();
+        if (armsDetailUrlConfig != null && armsDetailUrlConfig.getCompleteKeyword() != null) {
+            String[] keywords = armsDetailUrlConfig.getCompleteKeyword().split(",");
+            완료_키워드_셋.addAll(Arrays.asList(keywords));
+        }
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 완료_키워드_셋);

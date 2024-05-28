@@ -11,8 +11,22 @@ public class ArmsDetailUrlConfig {
     @Value("${arms.detail.connect.url}")
     public String address;
 
+    @Value("${requirement.state.complete.keyword}")
+    private String completeKeyword;
+
+    @Value("${requirement.delete.type}")
+    public String deleteTYpe;
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
+
+    public String getDeleteTYpe() {
+        return this.deleteTYpe;
+    }
+
+    public String getCompleteKeyword() {
+        return this.completeKeyword;
+    }
+
 }

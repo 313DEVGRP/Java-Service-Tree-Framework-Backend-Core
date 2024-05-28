@@ -12,12 +12,13 @@
 package com.arms.api.requirement.reqstate.service;
 
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -31,23 +32,21 @@ public class ReqStateImpl extends TreeServiceImpl implements ReqState{
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	@Value("${requirement.state.complete.keyword}")
-	private String 완료_키워드;
+	@Autowired
+	private ArmsDetailUrlConfig armsDetailUrlConfig;
 
 	@Override
 	public Map<Long, ReqStateEntity> 완료상태조회(ReqStateEntity reqStateEntity) throws Exception {
 
 		// 요구사항의 완료에 대한 기준을 위한 정책 및 컬럼 있을 시 사용.
-//		Criterion criterion = Restrictions.eq("c_etc", "true");
-//		reqStateEntity.getCriterions().add(criterion);
-//		Function<ReqStateEntity, Long> key = ReqStateEntity::getC_id;
-//		Function<ReqStateEntity, ReqStateEntity> value = Function.identity();
-//		Map<Long, ReqStateEntity> result = this.getNodesWithoutRootMap(reqStateEntity, key, value);
-
 		List<ReqStateEntity> 전체상태목록 = this.getNodesWithoutRoot(reqStateEntity);
 
 		// 완료키워드와 일치하는 데이터만 필터링
-		Set<String> 완료_키워드_셋 = new HashSet<>(Arrays.asList(완료_키워드.split(",")));
+		Set<String> 완료_키워드_셋 = new HashSet<>();
+		if (armsDetailUrlConfig != null && armsDetailUrlConfig.getCompleteKeyword() != null) {
+			String[] keywords = armsDetailUrlConfig.getCompleteKeyword().split(",");
+			완료_키워드_셋.addAll(Arrays.asList(keywords));
+		}
 		Map<Long, ReqStateEntity> 완료상태맵 = this.완료상태_필터링(전체상태목록, 완료_키워드_셋);
 
 		return 완료상태맵;
