@@ -188,16 +188,17 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public Map<String, Object> 인력별_요구사항_top5(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
-
-        지라이슈_단순_집계_요청 집계요청 = 지라이슈_단순_집계_요청.builder()
+        // 지라이슈_기본_검색__집계_하위_요청
+        AggregationRequestDTO 집계요청 = AggregationRequestDTO.builder()
                 .메인그룹필드("assignee.assignee_emailAddress.keyword")
+                .isReq(true)
                 .컨텐츠보기여부(false)
                 .크기(5)
                 .하위그룹필드들(List.of("cReqLink"))
                 .하위크기(1000)
                 .build();
 
-        ResponseEntity<검색결과_목록_메인> 집계_결과 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
+        ResponseEntity<검색결과_목록_메인> 집계_결과 = 통계엔진통신기.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
         검색결과_목록_메인 검색결과목록 = Optional.ofNullable(집계_결과.getBody()).orElse(new 검색결과_목록_메인());
 
         Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());
