@@ -22,6 +22,8 @@ public class PdServiceDetailDTO extends TreeBaseDTO {
 
     private String c_drawio_contents;
 
+    private String c_drawio_image_raw;
+
     private String c_drawdb_contents;
 
     private Instant c_created_at;
