@@ -31,5 +31,6 @@ public interface DashboardService {
 
     Map<String, Object> 인력별_요구사항_top5(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception;
 
+    Map<String, Map<Long,Long>> 인력별_요구사항_상태_누적_Top5(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception;
 
 }

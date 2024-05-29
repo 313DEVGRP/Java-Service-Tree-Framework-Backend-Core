@@ -11,12 +11,19 @@ import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.트리맵_검색요청;
 import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
+import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +39,8 @@ public class DashboardServiceImpl implements DashboardService {
     private final PdService pdService;
 
     private final PdServiceVersion pdServiceVersion;
+
+    private final ReqAdd reqAdd;
 
     @Override
     public 검색결과_목록_메인 commonNestedAggregation(final AggregationRequestDTO aggregationRequestDTO) {
@@ -218,5 +227,100 @@ public class DashboardServiceImpl implements DashboardService {
 
     }
 
+    @Override
+    public  Map<String, Map<Long,Long>> 인력별_요구사항_상태_누적_Top5(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+        //String 테이블명 = "T_ARMS_REQADD_"+String.valueOf(pdServiceId);
+
+        Map<Long, Long> 요구사항_아이디_상태_아이디_맵 = 대시보드_요구사항별_상태(changeReqTableName, pdServiceId, pdServiceVersionLinks);
+        Map<String, List<Long>> 작업자아이디_요구사항_아이디_목록_맵 = top5_인력별_요구사항_아이디_목록(pdServiceId, pdServiceVersionLinks);
+
+        // 작업자 아이디, 요구사항_상태별_개수
+        Map<String, Map<Long,Long>> 작업자아이디_요구사항_상태_맵 = new HashMap<>();
+
+        for (Map.Entry<String, List<Long>> entry : 작업자아이디_요구사항_아이디_목록_맵.entrySet()) {
+            String 작업자_아이디 = entry.getKey();
+            List<Long> 요구사항_아이디_목록 = entry.getValue();
+
+            Map<Long, Long> 요구사항_상태별_개수_맵 = new HashMap<>();
+
+            for(Long 요구사항_아이디 : 요구사항_아이디_목록) {
+                if (요구사항_아이디_상태_아이디_맵.containsKey(요구사항_아이디)) {
+                    Long 상태_아이디 = 요구사항_아이디_상태_아이디_맵.get(요구사항_아이디);
+                    요구사항_상태별_개수_맵.put(상태_아이디, 요구사항_상태별_개수_맵.getOrDefault(상태_아이디,0L)+1);
+                }
+            }
+
+            작업자아이디_요구사항_상태_맵.put(작업자_아이디, 요구사항_상태별_개수_맵);
+        }
+
+        return 작업자아이디_요구사항_상태_맵;
+    }
+
+
+    private Map<Long, Long> 대시보드_요구사항별_상태(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+
+        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+
+        ReqAddEntity 검색용도_객체 = new ReqAddEntity();
+
+        if (pdServiceVersionLinks != null && !pdServiceVersionLinks.isEmpty()) {
+            Disjunction orCondition = Restrictions.disjunction();
+            for (Long 버전 : pdServiceVersionLinks) {
+                String 버전_문자열 = "\\\"" + String.valueOf(버전) + "\\\"";
+                orCondition.add(Restrictions.like("c_req_pdservice_versionset_link", 버전_문자열, MatchMode.ANYWHERE));
+            }
+            검색용도_객체.getCriterions().add(orCondition);
+        }
+
+        List<ReqAddEntity> 검색_결과_목록 = reqAdd.getChildNode(검색용도_객체);
+
+        Map<Long, Long> 요구사항_아이디_상태_맵 = new HashMap<>();
+        for(ReqAddEntity entity : 검색_결과_목록) {
+            if(StringUtils.equals(entity.getC_type(),"default")) {
+                Long reqAddId = entity.getC_id();
+                Long stateId = Optional.ofNullable(entity.getReqStateEntity().getC_id()).orElse(null);
+                요구사항_아이디_상태_맵.put(reqAddId,stateId);
+            }
+        }
+
+        SessionUtil.removeAttribute("getReqAddListByFilter");
+
+        return 요구사항_아이디_상태_맵;
+    }
+
+    private Map<String, List<Long>> top5_인력별_요구사항_아이디_목록(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
+        // 지라이슈_기본_검색__집계_하위_요청
+        AggregationRequestDTO 집계요청 = AggregationRequestDTO.builder()
+                .메인그룹필드("assignee.assignee_emailAddress.keyword")
+                .isReq(true)
+                .컨텐츠보기여부(false)
+                .크기(5)
+                .하위그룹필드들(List.of("cReqLink"))
+                .하위크기(1000)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 집계_결과 = 통계엔진통신기.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
+        검색결과_목록_메인 검색결과목록 = Optional.ofNullable(집계_결과.getBody()).orElse(new 검색결과_목록_메인());
+
+        Map<String, List<검색결과>> 집계_검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());
+
+        List<검색결과> 작업자별결과 = Optional.ofNullable(집계_검색결과.get("group_by_assignee.assignee_emailAddress.keyword")).orElse(Collections.emptyList());
+
+        Map<String, List<Long>> 작업자별_요구사항_C_ID_목록 = new HashMap<>();
+        Map<String, Long> 작업자별_요구사항_수 = new HashMap<>();
+        for (검색결과 obj : 작업자별결과) {
+            String 작업자메일 = obj.get필드명();
+            long 요구사항_수 = obj.get개수();
+            List<검색결과> 요구사항 = Optional.ofNullable(obj.get하위검색결과().get("group_by_cReqLink")).orElse(Collections.emptyList());
+            List<Long> 요구사항_아이디_목록 = 요구사항.stream().map(검색결과::get필드명)
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            int 엣위치 = 작업자메일.indexOf("@");
+            String 작업자아이디 = 작업자메일.substring(0, 엣위치);
+            작업자별_요구사항_수.put(작업자아이디, 요구사항_수);
+            작업자별_요구사항_C_ID_목록.put(작업자아이디,요구사항_아이디_목록);
+        }
+        return 작업자별_요구사항_C_ID_목록;
+    }
 }
 

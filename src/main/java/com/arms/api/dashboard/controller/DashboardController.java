@@ -85,8 +85,19 @@ public class DashboardController {
         return  ResponseEntity.ok(CommonResponse.success(dashboardService.인력별_요구사항_top5(pdServiceId, pdServiceVersionLinks)));
     }
 
+    @GetMapping("/reqStatePerAssigneeTop5/{changeReqTableName}/getReqAddListByFilter.do")
+    ResponseEntity<ApiResult<Map<String, Map<Long,Long>>>> 인력별_요구사항_상태_누적_Top5(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @RequestParam Long pdServiceId,
+            @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("DashboardController :: 인력별_요구사항_상태_Top5.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks);
+
+        return  ResponseEntity.ok(CommonResponse.success(dashboardService.인력별_요구사항_상태_누적_Top5(changeReqTableName, pdServiceId, pdServiceVersionLinks)));
+    }
+
     /**
-     * Dashboard
+     * Dashboard - (삭제예정)
      */
     @GetMapping("/normal/issue-responsible-status-top5/{pdServiceId}")
     ResponseEntity<ApiResult<Map<String, Object>>> getIssueResponsibleStatusTop5(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
