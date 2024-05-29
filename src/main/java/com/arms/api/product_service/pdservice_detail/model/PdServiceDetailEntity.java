@@ -69,6 +69,10 @@ public class PdServiceDetailEntity extends TreeSearchEntity implements Serializa
     private String c_drawio_contents;
 
     @Lob
+    @Column(name = "c_drawio_image_raw")
+    private String c_drawio_image_raw;
+
+    @Lob
     @Column(name = "c_drawdb_contents")
     private String c_drawdb_contents;
 
