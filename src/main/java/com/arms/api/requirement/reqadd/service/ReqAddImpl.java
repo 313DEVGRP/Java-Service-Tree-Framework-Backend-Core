@@ -25,6 +25,7 @@ import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntit
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.*;
 import com.arms.api.requirement.reqadd.model.요구사항별_담당자_목록.요구사항_담당자;
+import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
@@ -144,20 +145,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 			Optional.ofNullable(요구사항_이슈_생성목록)
 					.orElse(Collections.emptyList())
 					.stream()
-					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && StringUtils.equals("create", 요구사항_이슈.getC_etc()))
+					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && StringUtils.equals(CRUDType.생성.getType(), 요구사항_이슈.getC_etc()))
 					.forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
 		}
-
-		return savedReqAddEntity;
-	}
-
-	@Override
-	@Transactional
-	public ReqAddEntity addReqFolderNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
-
-		SessionUtil.setAttribute("addReqFolderNode",changeReqTableName);
-		ReqAddEntity savedReqAddEntity = this.addNode(reqAddEntity);
-		SessionUtil.removeAttribute("addReqFolderNode");
 
 		return savedReqAddEntity;
 	}
@@ -193,6 +183,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 		// 요구사항 default 타입일 경우 REQSTATUS와 ALM 서버의 데이터 삭제 로직
 		if (StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
+			// 삭제에 필요한 데이터 설정
 			reqAddEntity.setC_req_pdservice_versionset_link(loadReqAddDTO.getC_req_pdservice_versionset_link());
 			reqAddEntity.setC_title(loadReqAddDTO.getC_title());
 			reqAddEntity.setC_req_contents(loadReqAddDTO.getC_req_contents());
@@ -204,8 +195,9 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 			reqStatusDTO.setC_req_link(loadReqAddDTO.getC_id());
 
+			// 삭제타입 application.yml에 설정된 값에 따라 변경, default - soft delete
 			String 삭제_타입 = Optional.ofNullable(armsDetailUrlConfig.getDeleteTYpe())
-										.filter(type -> !type.isEmpty()).orElse("soft delete");
+										.filter(type -> !type.isEmpty()).orElse(CRUDType.소프트_삭제.getType());
 
 			// 기존 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 결과
@@ -223,7 +215,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 			Optional.ofNullable(요구사항_이슈_삭제목록)
 					.orElse(Collections.emptyList())
 					.stream()
-					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals("complete", 요구사항_이슈.getC_etc()))
+					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
 					.forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
 		}
 
@@ -369,12 +361,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 					.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
 					.collect(Collectors.toList());
 
-			String 삭제_타입 = Optional.ofNullable(armsDetailUrlConfig.getDeleteTYpe())
-					.filter(type -> !type.isEmpty()).orElse("soft delete");
-
 			reqStatus.추가된_프로젝트_REQSTATUS_처리(reqAddEntity, 추가된지라프로젝트아이디, 요구사항_제품서비스, reqStatusEntityList);
-			reqStatus.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 유지된지라프로젝트, 요구사항_제품서비스, "update");
-			reqStatus.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 삭제된지라프로젝트, 요구사항_제품서비스, 삭제_타입);
+			reqStatus.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 유지된지라프로젝트, 요구사항_제품서비스, CRUDType.수정.getType());
+			// 요구사항 수정 시 연결 해제된 프로젝트의 요구사항 이슈의 경우 soft delete 처리
+			reqStatus.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 삭제된지라프로젝트, 요구사항_제품서비스, CRUDType.소프트_삭제.getType());
 
 			// 생성된 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 조회_결과
@@ -385,7 +375,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 			Optional.ofNullable(요구사항_이슈_수정목록)
 					.orElse(Collections.emptyList())
 					.stream()
-					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals("complete", 요구사항_이슈.getC_etc()))
+					.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
 					.forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
 		}
 
@@ -439,7 +429,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 		SessionUtil.removeAttribute("updateDataBase");
 
-		if(요구사항_업데이트_결과 == 0){
+		if (요구사항_업데이트_결과 == 0) {
 			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 업데이트에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
 			throw new Exception("요구사항 업데이트에 실패했습니다. 관리자에게 문의해 주세요.");
 		}
@@ -479,7 +469,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 		SessionUtil.removeAttribute("updateDataBase");
 
-		if(업데이트_결과 == 0){
+		if (업데이트_결과 == 0) {
 			logger.info("ReqAddImpl :: updateDataBase :: 요구사항 업데이트에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
 			throw new Exception("요구사항 업데이트에 실패했습니다. 관리자에게 문의해 주세요.");
 		}
