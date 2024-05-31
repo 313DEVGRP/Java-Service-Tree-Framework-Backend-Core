@@ -23,6 +23,7 @@ import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.TreeServiceUtils;
@@ -92,7 +93,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		for (Long 지라프로젝트_아이디 : 추가된_프로젝트_아이디_목록) {
 
 			// REQSTATUS 데이터 세팅
-			ReqStatusDTO reqStatusDTO = this.REQSTATUS_데이터_설정(지라프로젝트_아이디, reqAddEntity, 요구사항_제품서비스, "create");
+			ReqStatusDTO reqStatusDTO = this.REQSTATUS_데이터_설정(지라프로젝트_아이디, reqAddEntity, 요구사항_제품서비스, CRUDType.생성.getType());
 
 			// 연결이 해제되었다가 다시 연결된 프로젝트에는 이미 생성했던 요구사항 이슈가 있음, 수정 시 삭제된 로직을 가져와서 그에 맞추어 검색
 			Optional<ReqStatusEntity> 삭제된데이터검색 = Optional.ofNullable(reqStatusEntityList)
@@ -105,10 +106,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 			// 삭제된 데이터가 있을 경우 해당 데이터 Soft Delete 제거, updateNode API 호출
 			if (삭제된데이터검색.isPresent()) {
-				chat.sendMessageByEngine("삭제된데이터 발견되어 이슈 수정");
+				chat.sendMessageByEngine("삭제된 데이터 발견되어 이슈 수정");
 				reqStatusDTO.setC_id(삭제된데이터검색.get().getC_id());
 				reqStatusDTO.setC_issue_delete_date(null);
-				reqStatusDTO.setC_etc("update");
+				reqStatusDTO.setC_etc(CRUDType.수정.getType());
 
 				ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
@@ -158,16 +159,16 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		// ALM 서버에 요구사항 생성 또는 수정할 REQSTATUS 데이터가 생성, 수정, 삭제인지 확인
 		String CURD_타입;
-		if (StringUtils.equals(reqStatusEntity.getC_etc(), "create")) {
+		if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
 			CURD_타입 = "생성";
 		}
-		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "update")) {
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.수정.getType())) {
 			CURD_타입 = "수정";
 		}
-		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "soft delete")) {
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.소프트_삭제.getType())) {
 			CURD_타입 = "Soft Delete 수정";
 		}
-		else if (StringUtils.equals(reqStatusEntity.getC_etc(), "force delete")) {
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.삭제.getType())) {
 			CURD_타입 = "ALM 요구사항 이슈 삭제";
 		}
 		else {
@@ -177,8 +178,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		// REQSTATUS 데이터 기반 ALM 서버에 요구사항 이슈 생성 또는 수정
 		ReqStatusEntity 생성결과 = this.ALM서버_요구사항_생성_또는_수정(reqStatusEntity);
 
-		// REQSTATUS c_etc 컬럼이 complete 일 경우 생성완료 상태 그 외 실패
-		if (생성결과.getC_etc() != null && StringUtils.equals("complete", 생성결과.getC_etc())) {
+		// REQSTATUS c_etc 컬럼이 완료(complete) 일 경우 생성완료 상태 그 외 실패
+		if (생성결과.getC_etc() != null && StringUtils.equals(CRUDType.완료.getType(), 생성결과.getC_etc())) {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
 					+ CURD_타입 + ", ALM 서버를 확인해주세요.");
 		}
@@ -231,7 +232,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 		//-- 추가된 프로젝트의 경우 설정
-		if (StringUtils.equals(CRUD_타입, "create")) {
+		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType())) {
 			reqStatusDTO.setRef(TreeConstant.First_Node_CID);
 			reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 		}
@@ -249,10 +250,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		String 요구사항_제목 = savedReqAddEntity.getC_title();
 		String 이슈내용 = null;
-		if (StringUtils.equals(CRUD_타입, "create") || StringUtils.equals(CRUD_타입, "update")) {
+		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType()) || StringUtils.equals(CRUD_타입, CRUDType.수정.getType())) {
 			이슈내용 = 등록_및_수정_이슈본문_가져오기(savedReqAddEntity, 제품서비스_아이디, 지라서버_아이디, 지라프로젝트_아이디, 버전ID목록);
 		}
-		else if (StringUtils.equals(CRUD_타입, "soft delete") || StringUtils.equals(CRUD_타입, "force delete")) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.삭제.getType())) {
 			요구사항_제목 = "[삭제된 요구사항 이슈] :: " + 요구사항_제목;
 			이슈내용 = 삭제_이슈본문_가져오기();
 		}
@@ -324,13 +325,13 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		reqStatusDTO.setC_issue_update_date(date);
 
 		// 요구사항 ALM 서버 설정 상태로 c_etc 컬럼을 crud type별 처리
-		if (StringUtils.equals(CRUD_타입, "create")) {
+		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType())) {
 			reqStatusDTO.setC_issue_create_date(date);
 		}
-		else if (StringUtils.equals(CRUD_타입, "soft delete")) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType())) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
-		else if (StringUtils.equals(CRUD_타입, "force delete")) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.삭제.getType())) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
 
@@ -441,7 +442,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.dueDate(종료일);
 
 		// REQSTATUS c_etc 컬럼이 delete 일 경우 삭제 처리 대신 라벨  삭제 처리(ALM 지라 서버의 경우)
-		if (StringUtils.equals(reqStatusEntity.getC_etc(), "soft delete")) {
+		if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.소프트_삭제.getType())) {
 			String 삭제라벨 = "삭제된_요구사항_이슈";
 			요구사항이슈_필드빌더.labels(List.of(삭제라벨));
 		}
@@ -481,10 +482,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		지라이슈_데이터 생성된_요구사항_이슈 = null;
 		try {
-			if (StringUtils.equals(reqStatusEntity.getC_etc(), "create")) {
+			if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
 				생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 			}
-			else if (StringUtils.equals(reqStatusEntity.getC_etc(), "force delete")) {
+			else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.삭제.getType())) {
 				Map<String, Object> 삭제결과 = 엔진통신기.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
 
 				if (!((boolean) 삭제결과.get("success"))) {
@@ -532,7 +533,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			return reqStatusEntity;
 		}
 
-		reqStatusEntity.setC_etc("complete");
+		reqStatusEntity.setC_etc(CRUDType.완료.getType());
 		this.REQSTATUS_ALM_데이터동기화(생성된_요구사항_이슈, reqStatusEntity);
 
 		return reqStatusEntity;

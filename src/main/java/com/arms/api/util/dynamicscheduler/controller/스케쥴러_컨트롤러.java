@@ -15,6 +15,7 @@ import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
@@ -354,7 +355,7 @@ public class 스케쥴러_컨트롤러{
             }
             else {
                 결과.stream()
-                    .filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals("complete", 요구사항_이슈.getC_etc()))
+                    .filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
                     .forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
             }
         }
