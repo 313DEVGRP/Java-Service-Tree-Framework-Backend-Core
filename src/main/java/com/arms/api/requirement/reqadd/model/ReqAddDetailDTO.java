@@ -36,6 +36,14 @@ public class ReqAddDetailDTO {
 
 	private String reqAdd_c_req_contents;//설명
 
+	private Long reqAdd_c_req_priority_link; // 우선순위
 
+	private Long reqAdd_c_req_state_link; // 상태
+
+	private Long reqAdd_c_req_difficulty_link; // 난이도
+
+	private Date reqAdd_c_req_start_date; // 시작일
+
+	private Date reqAdd_c_req_end_date; // 종료일
 
 }
