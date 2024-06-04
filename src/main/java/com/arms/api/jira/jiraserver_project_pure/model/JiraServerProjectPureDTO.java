@@ -1,5 +1,7 @@
 package com.arms.api.jira.jiraserver_project_pure.model;
 
+import com.arms.api.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject_issuetype_pure.model.JiraProjectIssueTypePureEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseDTO;
 import lombok.*;
@@ -32,4 +34,8 @@ public class JiraServerProjectPureDTO extends TreeBaseDTO {
     // private Set<JiraProjectPureEntity> jiraProjectPureEntities;
 
     private Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities;
+
+    private Set<JiraIssuePriorityEntity> jiraIssuePriorityEntities;
+
+    private Set<JiraIssueTypeEntity> jiraIssueTypeEntities;
 }
