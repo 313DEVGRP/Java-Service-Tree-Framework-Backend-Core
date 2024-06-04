@@ -11,6 +11,8 @@
  */
 package com.arms.api.jira.jiraserver_project_pure.model;
 
+import com.arms.api.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject_issuetype_pure.model.JiraProjectIssueTypePureEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
@@ -103,6 +105,59 @@ public class JiraServerProjectPureEntity extends TreeSearchEntity implements Ser
     public void setJiraProjectIssueTypePureEntities(Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities) {
         this.jiraProjectIssueTypePureEntities = jiraProjectIssueTypePureEntities;
     }
+
+    // -- 1:N table 연계 - 단방향
+    private Set<JiraIssuePriorityEntity> jiraIssuePriorityEntities;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraserver_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraissuepriority_link")
+    )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+            "pdservice_link IS NULL and " +
+            "pdserviceversion_link IS NULL and " +
+            "jiraproject_link IS NULL and " +
+            "jiraissueresolution_link IS NULL and " +
+            "jiraissuestatus_link IS NULL and " +
+            "jiraissuetype_link IS NULL")
+    public Set<JiraIssuePriorityEntity> getJiraIssuePriorityEntities() {
+        return jiraIssuePriorityEntities;
+    }
+
+    public void setJiraIssuePriorityEntities(Set<JiraIssuePriorityEntity> jiraIssuePriorityEntities) {
+        this.jiraIssuePriorityEntities = jiraIssuePriorityEntities;
+    }
+
+    // -- 1:N table 연계
+    private Set<JiraIssueTypeEntity> jiraIssueTypeEntities;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "GLOBAL_TREE_MAP",
+            joinColumns = @JoinColumn(name = "jiraserver_link"),
+            inverseJoinColumns = @JoinColumn(name = "jiraissuetype_link")
+    )
+    @WhereJoinTable( clause =   "filerepository_link IS NULL and " +
+            "pdservice_link IS NULL and " +
+            "pdserviceversion_link IS NULL and " +
+            "jiraproject_link IS NULL and " +
+            "jiraissuepriority_link IS NULL and " +
+            "jiraissueresolution_link IS NULL and " +
+            "jiraissuestatus_link IS NULL")
+    public Set<JiraIssueTypeEntity> getJiraIssueTypeEntities() {
+        return jiraIssueTypeEntities;
+    }
+
+    public void setJiraIssueTypeEntities(Set<JiraIssueTypeEntity> jiraIssueTypeEntities) {
+        this.jiraIssueTypeEntities = jiraIssueTypeEntities;
+    }
+
     /*
      * Extend Bean Field
      */
