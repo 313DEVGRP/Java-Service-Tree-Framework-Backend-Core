@@ -15,7 +15,6 @@ import com.arms.api.jira.jiraserver.model.JiraServerDTO;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureDTO;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
-import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -31,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -54,11 +54,11 @@ public class JiraServerPureController extends TreeAbstractController<JiraServerP
             value= { "/getJiraServerMonitor.do"},
             method= {RequestMethod.GET}
     )
-    public ResponseEntity<?> getJiraServerMonitor(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    public ResponseEntity<List<JiraServerPureEntity>> getJiraServerMonitor(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
         log.info("JiraServerController :: getJiraServerMonitor");
         JiraServerPureEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerPureEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServerPure.getNodesWithoutRoot(jiraServerEntity)));
+        return ResponseEntity.ok(jiraServerPure.getNodesWithoutRoot(jiraServerEntity));
     }
 }
