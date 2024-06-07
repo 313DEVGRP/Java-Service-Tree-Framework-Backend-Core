@@ -5,9 +5,7 @@ import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자�
 import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.analysis.scope.service.ScopeService;
 import com.arms.api.analysis.common.AggregationRequestDTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
-import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
@@ -17,14 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.util.communicate.external.통계엔진통신기;
-import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/arms/analysis/scope")
+@RequestMapping(value = "/admin/arms/analysis/scope")
 @RequiredArgsConstructor
 public class ScopeController {
 
@@ -42,24 +39,9 @@ public class ScopeController {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
-    }
-
-
-    @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
-    public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,
-                                                                        @RequestParam List<Long> pdServiceVersionLinks) {
-        log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항_연결이슈_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
-                , pdServiceId, pdServiceVersionLinks);
-        지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("pdServiceVersions")
-                .하위그룹필드들(List.of("isReq"))
-                .컨텐츠보기여부(false)
-                .build();
-
-        ResponseEntity<검색결과_목록_메인> 집계결과 = engineCommunicator.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
-        return ResponseEntity.ok(집계결과.getBody());
 
     }
+
 
     @GetMapping("/req-per-version/{changeReqTableName}/getReqAddListByFilter.do")
     public ResponseEntity<Map<String, Long>> 버전들_하위_요구사항(@PathVariable(value ="changeReqTableName") String changeReqTableName
@@ -73,6 +55,7 @@ public class ScopeController {
         Map<String, Long> 버전_요구사항_수 = scopeService.버전_요구사항_자료(changeReqTableName, pdServiceId, pdServiceVersionLinks);
 
         return  ResponseEntity.ok(버전_요구사항_수);
+
     }
 
     @GetMapping("/state-per-version/{changeReqTableName}/getReqAddListByFilter.do")
@@ -85,6 +68,7 @@ public class ScopeController {
                 , pdServiceStr, pdServiceVersionLinks);
 
         return  ResponseEntity.ok(scopeService.버전_요구사항_상태(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+
     }
 
     @GetMapping("/{pdServiceId}/req-status-and-reqInvolved-unique-assignees-per-version")
@@ -99,6 +83,7 @@ public class ScopeController {
             매핑결과.add(버전별_요구사항_상태_작업자수);
         }
         return ResponseEntity.ok(매핑결과);
+
     }
 
     @GetMapping("/tree-bar-top10")
