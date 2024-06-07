@@ -42,25 +42,9 @@ public class TimeServiceImpl implements TimeService{
     private 통계엔진통신기 통계엔진통신기;
 
     @Override
-    public List<지라이슈> 제품서비스_버전목록으로_조회(Long dummy_jira_server, Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        List<지라이슈> result = 통계엔진통신기.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
-        return result;
-    }
-
-    @Override
-    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long dummy_jira_server, Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+    public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
         히트맵데이터 result = 통계엔진통신기.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return result;
-    }
-
-    @Override
-    public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(AggregationRequestDTO aggregationRequestDTO, String resolution) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계  =
-                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
-
-        검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
-
-        return 통계결과;
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.버전유틸;
@@ -45,6 +46,12 @@ public class ScopeServiceImpl implements ScopeService {
     private final 내부통신기 내부통신기;
 
     private final 통계엔진통신기 통계엔진통신기;
+
+    @Override
+    public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
+        List<지라이슈> result = 통계엔진통신기.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        return result;
+    }
 
     private List<TreeBarDTO> addProductVersions(
             PdServiceEntity product,

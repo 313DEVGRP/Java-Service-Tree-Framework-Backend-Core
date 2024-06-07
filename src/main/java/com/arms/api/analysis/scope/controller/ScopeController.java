@@ -8,6 +8,7 @@ import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
+import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
 
@@ -29,6 +31,19 @@ public class ScopeController {
     private final 통계엔진통신기 engineCommunicator;
 
     private final ScopeService scopeService;
+
+    @GetMapping(value = "/pdService/pdServiceVersions")
+    public ModelAndView 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
+                                        @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info(" [ 일정분석_컨트롤러 :: 제품서비스_버전목록으로_조회 ] ");
+        List<지라이슈> result = scopeService.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", result);
+        return modelAndView;
+    }
+
 
     @GetMapping("/pdservice-id/{pdServiceId}/req-per-version")
     public ResponseEntity<검색결과_목록_메인> 버전들_하위_요구사항_연결이슈_집계(@PathVariable("pdServiceId") Long pdServiceId,

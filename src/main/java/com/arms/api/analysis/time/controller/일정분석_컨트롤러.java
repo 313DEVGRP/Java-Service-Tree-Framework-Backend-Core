@@ -18,56 +18,27 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/arms/analysis/time")
+@RequestMapping(value = "/admin/arms/analysis/time")
 @RequiredArgsConstructor
 public class 일정분석_컨트롤러 {
 
     private final TimeService timeService;
 
-    static final long dummy_jira_server = 0L;
-
-    @GetMapping(value = "/pdService/pdServiceVersions")
-    public ModelAndView 제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
-                                        @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
-
-        log.info(" [ 일정분석_컨트롤러 :: 제품서비스_버전목록으로_조회 ] ");
-        List<지라이슈> result = timeService.제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
-
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", result);
-        return modelAndView;
-    }
-
+    // 히트맵
     @GetMapping(value = "/heatmap")
     public ModelAndView 히트맵_제품서비스_버전목록으로_조회(@RequestParam Long pdServiceLink,
                                             @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
 
         log.info(" [ 일정분석_컨트롤러 :: 히트맵_제품서비스_버전목록으로_조회 ] ");
-        히트맵데이터 result = timeService.히트맵_제품서비스_버전목록으로_조회(dummy_jira_server, pdServiceLink, pdServiceVersionLinks);
+        히트맵데이터 result = timeService.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", result);
         return modelAndView;
     }
 
-    @GetMapping("/normal-version/resolution")
-    public ModelAndView 제품서비스_일반_버전_해결책유무_집계(AggregationRequestDTO aggregationRequestDTO,
-                                             @RequestParam(required = false) String resolution) {
 
-        log.info(" [ 일정분석_컨트롤러 :: 제품서비스_일반_버전_해결책유무_집계 ] " +
-                        "pdServiceId ==> {}, pdServiceVersionLinks ==> {}, resolution ==> {}"
-                , aggregationRequestDTO.getPdServiceLink()
-                , aggregationRequestDTO.getPdServiceVersionLinks().toString()
-                , resolution);
-
-        검색결과_목록_메인 요구사항_연결이슈_일반_버전_해결책통계
-                = timeService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
-
-        ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 요구사항_연결이슈_일반_버전_해결책통계);
-        return modelAndView;
-    }
-
+    // 스캐터차트, 멀티콤비네이션 차트
     @GetMapping("/standard-daily/jira-issue")
     public ModelAndView 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) throws Exception {
 

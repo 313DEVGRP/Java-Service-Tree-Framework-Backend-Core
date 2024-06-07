@@ -5,11 +5,14 @@ import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
+import com.arms.api.util.communicate.external.response.jira.지라이슈;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ScopeService {
+
+    List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks);
 
     List<TreeBarDTO> treeBar(AggregationRequestDTO aggregationRequestDTO) throws Exception;
 
