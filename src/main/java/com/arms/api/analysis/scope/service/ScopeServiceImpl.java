@@ -312,6 +312,8 @@ public class ScopeServiceImpl implements ScopeService {
 
         List<LoadReqAddDTO> loadReqAddDTOList = 요구사항목록조회.getBody();
 
+        Set<Long> reqAddCidSet = loadReqAddDTOList.stream().map(LoadReqAddDTO::getC_id).collect(Collectors.toSet());
+
         if (CollectionUtils.isEmpty(loadReqAddDTOList)) {
             log.info("ScopeServiceImpl :: treebar :: loadReqAddDTOList is empty");
             return treeBarList;
@@ -328,14 +330,15 @@ public class ScopeServiceImpl implements ScopeService {
         treeBarList.addAll(requirements);
 
         // 11. 담당자 등록
-        treeBarList.addAll(addAssignees(top10));
+        treeBarList.addAll(addAssignees(top10,reqAddCidSet));
         return treeBarList;
     }
 
-    private List<TreeBarDTO> addAssignees(List<검색결과> top10Requirements) {
+    private List<TreeBarDTO> addAssignees(List<검색결과> top10Requirements, Set<Long> reqAddCidSet) {
         Map<String, String> assigneeToColorMap = new HashMap<>();
 
         return top10Requirements.stream()
+                .filter(cReqLink -> reqAddCidSet.contains(Long.valueOf(cReqLink.get필드명())))
                 .flatMap(cReqLink -> {
                     String parent = "requirement-" + cReqLink.get필드명();
                     return cReqLink.get하위검색결과().get("group_by_assignee.assignee_displayName.keyword").stream()
