@@ -60,7 +60,7 @@ public class DashboardController {
     }
 
     /**
-     * ReqStatus, Dashboard
+     * ReqStatus, Dashboard - Deprecated
      */
     @GetMapping("/jira-issue-assignee")
     ResponseEntity<ApiResult<Map<String, Long>>> getJiraAssigneeList(@RequestParam Long pdServiceId) {
@@ -68,7 +68,7 @@ public class DashboardController {
     }
 
     /**
-     * Dashboard
+     * Dashboard - Deprecated
      */
     @GetMapping("/normal/{pdServiceId}")
     ResponseEntity<ApiResult<검색결과_목록_메인>> normalAggregation(@PathVariable("pdServiceId") Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
