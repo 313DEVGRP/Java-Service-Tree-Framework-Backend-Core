@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping("/arms/salaries")
+@RequestMapping("/admin/arms/salaries")
 @RequiredArgsConstructor
 public class SalaryController extends TreeAbstractController<SalaryService, SalaryDTO, SalaryEntity> {
 

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/arms/analysis/cost")
+@RequestMapping(value = "/admin/arms/analysis/cost")
 public class 비용분석_컨트롤러 {
 
     private final 비용서비스 비용서비스;
@@ -41,6 +41,7 @@ public class 비용분석_컨트롤러 {
 
     private final ModelMapper modelMapper;
 
+    // 삭제검토
     @GetMapping("/all-assignees")
     public ResponseEntity<CommonResponse.ApiResult<버전요구사항별_담당자데이터>> 전체_담당자가져오기(AggregationRequestDTO aggregationRequestDTO) {
 
@@ -92,7 +93,10 @@ public class 비용분석_컨트롤러 {
 
         long 걸린시간 = 종료시간 - 시작시간;
         log.info("API 호출이 걸린 시간: " + 걸린시간 + "밀리초");
+
+
         return ResponseEntity.ok(CommonResponse.success(결과));
+
     }
 
     @GetMapping("/{changeReqTableName}/req-difficulty-priority-list")
@@ -111,6 +115,7 @@ public class 비용분석_컨트롤러 {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 조회결과);
         return modelAndView;
+
     }
 
     /**
