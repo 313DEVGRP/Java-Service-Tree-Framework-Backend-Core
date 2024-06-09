@@ -14,6 +14,7 @@ package com.arms.api.requirement.reqstatus.service;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
+import com.arms.api.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraproject.service.JiraProject;
@@ -401,6 +402,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 
 		ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
+		// 이슈 유형
 		JiraIssueTypeEntity 요구사항_이슈_타입 = null;
 		if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
 			요구사항_이슈_타입= 요구사항_이슈타입검색(검색된_지라프로젝트.getJiraIssueTypeEntities());
@@ -419,6 +421,18 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 			return reqStatusEntity;
 		}
+		// 이슈 상태
+		String 매핑된_요구사항_이슈_상태 = null;
+		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
+		// 클라우드의 경우 프로젝트 별 이슈 상태가 상이, 레드마인과 지라 온프레미스는 동일
+		if (serverType.equals(ServerType.JIRA_CLOUD)) {
+			매핑된_요구사항_이슈_상태= 매핑된_요구사항_이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities(),변경할_ARMS_상태아이디);
+		}else if (serverType.equals(ServerType.JIRA_ON_PREMISE) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
+			매핑된_요구사항_이슈_상태 = 매핑된_요구사항_이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities(),변경할_ARMS_상태아이디);
+		}
+
+		지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
+		상태.setId(매핑된_요구사항_이슈_상태);
 
 		지라이슈필드_데이터.프로젝트 프로젝트 = 지라이슈필드_데이터.프로젝트.builder().id(String.valueOf(검색된_지라프로젝트.getC_desc()))
 				.key(검색된_지라프로젝트.getC_jira_key())
@@ -436,6 +450,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.builder()
 				.project(프로젝트)
 				.issuetype(유형)
+				.status(상태)
 				.summary(요구사항_제목)
 				.description(요구사항_내용)
 				.startDate(시작일)
@@ -603,6 +618,21 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		return 요구사항_이슈_우선순위;
 	}
 
+	private String 매핑된_요구사항_이슈상태검색(Set<JiraIssueStatusEntity> issueStatus, Long 변경할_ARMS_상태아이디) {
+
+		if (issueStatus == null || 변경할_ARMS_상태아이디 == null) {
+			return null;
+		}
+
+		String 변경할_ARMS_상태아이디_문자열 = Objects.toString(변경할_ARMS_상태아이디, null);
+
+		return issueStatus.stream()
+				.filter(entity -> !StringUtils.equals(entity.getC_etc(), "delete")) // 삭제되지 않은 상태 값
+				.filter(entity -> Objects.equals(entity.getC_desc(), 변경할_ARMS_상태아이디_문자열)) // ARMS 상태 값으로 ALM 상태값을 T_ARMS_JIRAISSUESTATUS 테이블에서 검색
+				.map(JiraIssueStatusEntity::getC_issue_status_id)
+				.findFirst()
+				.orElse(null);
+	}
 	private JiraProjectEntity ALM프로젝트_검색(Long 지라_프로젝트_아이디) {
 		if (지라_프로젝트_아이디 == null) {
 			return null;
