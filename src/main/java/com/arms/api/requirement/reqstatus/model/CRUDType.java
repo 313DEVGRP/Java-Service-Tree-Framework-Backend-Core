@@ -4,7 +4,7 @@ public enum CRUDType {
     생성("create"),
     수정("update"),
     소프트_삭제("soft delete"),
-    삭제("force delete"),
+    하드_삭제("hard delete"),
     완료("complete");
 
     private final String type;

@@ -145,6 +145,11 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 			// 업데이트할 c_id 설정
 			reqStatusDTO.setC_id(reqStatusEntity.getC_id());
+			// 요구사항 생성에서 에러난 상태의 요구사항의 경우 스케줄러가 다시 작동하기 전에
+			// 수정을 하면 update로 바뀌게 되는데 이 때 issue key가 만들어지지 않고 수정 API를 호출하면 오류 발생하므로 해당 방어코드 추가
+			if (reqStatusEntity.getC_issue_key() != null) {
+				reqStatusDTO.setC_etc(CRUD_타입);
+			}
 
 			// REQSTATUS 데이터 updateNode API 호출
 			ResponseEntity<?> 결과 = 내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id(), reqStatusDTO);
@@ -169,7 +174,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.소프트_삭제.getType())) {
 			CURD_타입 = "Soft Delete 수정";
 		}
-		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.삭제.getType())) {
+		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
 			CURD_타입 = "ALM 요구사항 이슈 삭제";
 		}
 		else {
@@ -254,7 +259,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType()) || StringUtils.equals(CRUD_타입, CRUDType.수정.getType())) {
 			이슈내용 = 등록_및_수정_이슈본문_가져오기(savedReqAddEntity, 제품서비스_아이디, 지라서버_아이디, 지라프로젝트_아이디, 버전ID목록);
 		}
-		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.삭제.getType())) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType())) {
 			요구사항_제목 = "[삭제된 요구사항 이슈] :: " + 요구사항_제목;
 			이슈내용 = 삭제_이슈본문_가져오기();
 		}
@@ -332,11 +337,13 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType())) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
-		else if (StringUtils.equals(CRUD_타입, CRUDType.삭제.getType())) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType())) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
 
-		reqStatusDTO.setC_etc(CRUD_타입);
+		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType())) {
+			reqStatusDTO.setC_etc(CRUD_타입);
+		}
 
 		logger.info("ReqStatusImpl = reqStatusDTO :: " + objectMapper.writeValueAsString(reqStatusDTO));
 
@@ -402,6 +409,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 
 		ServerType serverType = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
+
 		// 이슈 유형
 		JiraIssueTypeEntity 요구사항_이슈_타입 = null;
 		if (serverType.equals(ServerType.JIRA_CLOUD) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
@@ -421,18 +429,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 			return reqStatusEntity;
 		}
-		// 이슈 상태
-		String 매핑된_요구사항_이슈_상태 = null;
-		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
-		// 클라우드의 경우 프로젝트 별 이슈 상태가 상이, 레드마인과 지라 온프레미스는 동일
-		if (serverType.equals(ServerType.JIRA_CLOUD)) {
-			매핑된_요구사항_이슈_상태= 매핑된_요구사항_이슈상태검색(검색된_지라프로젝트.getJiraIssueStatusEntities(),변경할_ARMS_상태아이디);
-		}else if (serverType.equals(ServerType.JIRA_ON_PREMISE) || serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-			매핑된_요구사항_이슈_상태 = 매핑된_요구사항_이슈상태검색(검색된_지라서버.getJiraIssueStatusEntities(),변경할_ARMS_상태아이디);
-		}
-
-		지라이슈상태_데이터 상태 = new 지라이슈상태_데이터();
-		상태.setId(매핑된_요구사항_이슈_상태);
 
 		지라이슈필드_데이터.프로젝트 프로젝트 = 지라이슈필드_데이터.프로젝트.builder().id(String.valueOf(검색된_지라프로젝트.getC_desc()))
 				.key(검색된_지라프로젝트.getC_jira_key())
@@ -450,7 +446,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.builder()
 				.project(프로젝트)
 				.issuetype(유형)
-				.status(상태)
 				.summary(요구사항_제목)
 				.description(요구사항_내용)
 				.startDate(시작일)
@@ -487,6 +482,26 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			logger.info("요구사항_이슈_우선순위 기본값이 없습니다. 요구사항은 등록됩니다.");
 		}
 
+		// 이슈 상태
+		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
+		JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+		if (serverType.equals(ServerType.JIRA_CLOUD) ) {
+			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_지라프로젝트.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
+		}
+		else if (serverType.equals(ServerType.JIRA_ON_PREMISE)|| serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
+			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_지라서버.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
+		}
+
+		지라이슈상태_데이터 상태 = null;
+		if (요구사항_이슈_상태 != null) {
+			reqStatusEntity.setC_issue_status_link(Long.valueOf(요구사항_이슈_상태.getC_issue_status_id()));
+			reqStatusEntity.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+
+			상태.setId(요구사항_이슈_상태.getC_issue_status_id());
+
+			요구사항이슈_필드빌더.status(상태);
+		}
+
 		지라이슈필드_데이터 요구사항이슈_필드 = 요구사항이슈_필드빌더.build();
 		지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 				.builder()
@@ -500,7 +515,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
 				생성된_요구사항_이슈 = 엔진통신기.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 			}
-			else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.삭제.getType())) {
+			else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
 				Map<String, Object> 삭제결과 = 엔진통신기.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
 
 				if (!((boolean) 삭제결과.get("success"))) {
@@ -618,21 +633,19 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		return 요구사항_이슈_우선순위;
 	}
 
-	private String 매핑된_요구사항_이슈상태검색(Set<JiraIssueStatusEntity> issueStatus, Long 변경할_ARMS_상태아이디) {
-
-		if (issueStatus == null || 변경할_ARMS_상태아이디 == null) {
+	private JiraIssueStatusEntity 매핑된_요구사항_이슈상태_검색(Set<JiraIssueStatusEntity> issueStatusEntities, Long 변경할_ARMS_상태아이디) {
+		if (issueStatusEntities == null || 변경할_ARMS_상태아이디 == null) {
 			return null;
 		}
 
-		String 변경할_ARMS_상태아이디_문자열 = Objects.toString(변경할_ARMS_상태아이디, null);
-
-		return issueStatus.stream()
-				.filter(entity -> !StringUtils.equals(entity.getC_etc(), "delete")) // 삭제되지 않은 상태 값
-				.filter(entity -> Objects.equals(entity.getC_desc(), 변경할_ARMS_상태아이디_문자열)) // ARMS 상태 값으로 ALM 상태값을 T_ARMS_JIRAISSUESTATUS 테이블에서 검색
-				.map(JiraIssueStatusEntity::getC_issue_status_id)
+		// ARMS 요구사항의 상태와 연결된 ALM 이슈 상태 중 findFirst 로 첫번째 조회되 상태로 update
+		return issueStatusEntities.stream()
+				.filter(entity -> entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete"))
+				.filter(entity -> entity.getC_req_state_mapping_link() != null && entity.getC_req_state_mapping_link() == 변경할_ARMS_상태아이디)
 				.findFirst()
 				.orElse(null);
 	}
+
 	private JiraProjectEntity ALM프로젝트_검색(Long 지라_프로젝트_아이디) {
 		if (지라_프로젝트_아이디 == null) {
 			return null;
