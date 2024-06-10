@@ -90,6 +90,10 @@ public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializa
     @Column(name = "c_etc")
     private String c_etc;
 
+    // ARMS 요구사항 상태 mapping
+    @Column(name = "c_req_state_link")
+    private Long c_req_state_mapping_link;
+
     /*
      * Extend Bean Field
      */

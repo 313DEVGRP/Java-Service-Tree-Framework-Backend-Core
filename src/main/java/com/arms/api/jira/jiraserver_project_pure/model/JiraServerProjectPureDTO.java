@@ -31,6 +31,8 @@ public class JiraServerProjectPureDTO extends TreeBaseDTO {
 
     private String c_jira_server_etc;
 
+    private String c_server_contents_text_formatting_type;
+
     // private Set<JiraProjectPureEntity> jiraProjectPureEntities;
 
     private Set<JiraProjectIssueTypePureEntity> jiraProjectIssueTypePureEntities;

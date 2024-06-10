@@ -33,6 +33,8 @@ public class JiraServerDTO extends TreeBaseDTO {
 
     private String c_jira_server_etc;
 
+    private String c_server_contents_text_formatting_type;
+
     private Set<JiraProjectEntity> jiraProjectEntities;   // 추가됨
 
     private Set<JiraIssueTypeEntity> jiraIssueTypeEntities;
