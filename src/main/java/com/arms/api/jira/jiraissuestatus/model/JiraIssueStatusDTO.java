@@ -31,4 +31,7 @@ public class JiraIssueStatusDTO extends TreeBaseDTO {
 
     //비고
     private String c_etc;
+
+    // ARMS 요구사항 상태 mapping
+    private Long c_req_state_mapping_link;
 }

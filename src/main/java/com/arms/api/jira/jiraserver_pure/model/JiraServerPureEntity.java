@@ -74,6 +74,10 @@ public class JiraServerPureEntity extends TreeSearchEntity implements Serializab
     @Type(type="text")
     private String c_jira_server_etc;
 
+    @Column(name = "c_server_contents_text_formatting_type")
+    @Type(type="text")
+    private String c_server_contents_text_formatting_type;
+
     /*
      * Extend Bean Field
      */

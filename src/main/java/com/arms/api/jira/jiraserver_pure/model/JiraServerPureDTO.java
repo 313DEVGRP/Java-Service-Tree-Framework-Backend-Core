@@ -25,4 +25,7 @@ public class JiraServerPureDTO extends TreeBaseDTO {
     private String c_jira_server_contents;
 
     private String c_jira_server_etc;
+
+    private String c_server_contents_text_formatting_type;
+
 }

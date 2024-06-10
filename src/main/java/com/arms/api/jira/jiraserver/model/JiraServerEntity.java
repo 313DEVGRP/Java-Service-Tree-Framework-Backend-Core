@@ -82,6 +82,10 @@ public class JiraServerEntity extends TreeSearchEntity implements Serializable {
     @Type(type="text")
     private String c_jira_server_etc;
 
+    @Column(name = "c_server_contents_text_formatting_type")
+    @Type(type="text")
+    private String c_server_contents_text_formatting_type;
+
     // -- 1:N table 연계 - 단방향
     private Set<JiraIssuePriorityEntity> jiraIssuePriorityEntities;
 
