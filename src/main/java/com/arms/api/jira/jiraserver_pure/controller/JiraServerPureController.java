@@ -56,6 +56,19 @@ public class JiraServerPureController extends TreeAbstractController<JiraServerP
     )
     public ResponseEntity<List<JiraServerPureEntity>> getJiraServerMonitor(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
+        log.info("JiraServerPureController :: getJiraServerMonitor");
+        JiraServerPureEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerPureEntity.class);
+
+        return ResponseEntity.ok(jiraServerPure.getNodesWithoutRoot(jiraServerEntity));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value= { "/getJiraServerMonitor2.do"},
+            method= {RequestMethod.GET}
+    )
+    public ResponseEntity<List<JiraServerPureEntity>> getJiraServerMonitor2(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
         log.info("JiraServerController :: getJiraServerMonitor");
         JiraServerPureEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerPureEntity.class);
 
