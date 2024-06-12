@@ -733,12 +733,12 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	private String 이슈_본문_설정(TextFormattingType 본문형식, String CRUD_타입, ReqAddEntity reqAddEntity,
 							Long 제품서비스_아이디, Long ALM서버_아이디, Long ALM_프로젝트_아이디, String 버전아이디목록) {
 
-		String 이슈_본문_전체 = null;
-		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType()) || StringUtils.equals(CRUD_타입, CRUDType.수정.getType())) {
-			이슈_본문_전체 = 등록_및_수정_ARMS_안내문가져오기(reqAddEntity, 제품서비스_아이디, ALM서버_아이디, ALM_프로젝트_아이디, 버전아이디목록);
-		}
-		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType())) {
+		String 이슈_본문_전체;
+		if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType())) {
 			이슈_본문_전체 = this.삭제_이슈_ARMS_안내문가져오기();
+		}
+		else {
+			이슈_본문_전체 = 등록_및_수정_ARMS_안내문가져오기(reqAddEntity, 제품서비스_아이디, ALM서버_아이디, ALM_프로젝트_아이디, 버전아이디목록);
 		}
 
 		String ARMS_요구사항_설명 = Optional.ofNullable(reqAddEntity.getC_req_contents()).orElse("이슈 본문 내용 무");
