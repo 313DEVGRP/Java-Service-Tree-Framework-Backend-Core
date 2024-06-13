@@ -35,8 +35,8 @@ import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.Util_TitleChecker;
+import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -349,6 +349,18 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
         // 프로젝트 생성 //
         String randomConnectId = String.valueOf(RANDOM.nextLong() & Long.MAX_VALUE);
 
+        String serverUrl = StringUtils.removeTrailingSlash(jiraServerEntity.getC_jira_server_base_url());
+//        서버는 1개만 등록 시킬 지 여부
+//        if (serverUrl != null) {
+//            JiraServerEntity searchServerEntity = new JiraServerEntity();
+//            searchServerEntity.getCriterions().add(Restrictions.eq("c_jira_server_base_url", serverUrl));
+//            List<JiraServerEntity> jiraServerEntities = this.getChildNode(searchServerEntity);
+//            if (jiraServerEntities.size() > 0) {
+//                throw new Exception("이미 등록된 서버입니다.");
+//            }
+//        }
+
+        jiraServerEntity.setC_jira_server_base_url(serverUrl);
         jiraServerEntity.setC_title(Util_TitleChecker.StringReplace(jiraServerEntity.getC_title()));
         jiraServerEntity.setC_jira_server_etc(randomConnectId); // 엔진과 통신할 connectId
 
@@ -372,9 +384,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
             서버_엔티티_항목별_갱신(EntityType.이슈상태, null, addedNodeEntity);
             서버_엔티티_항목별_갱신(EntityType.이슈우선순위, null, addedNodeEntity);
             서버_엔티티_항목별_갱신(EntityType.이슈해결책, null, addedNodeEntity);
-        }
 
-        chat.sendMessageByEngine("서버 등록이 완료되었습니다.");
+            chat.sendMessageByEngine("서버 등록이 완료되었습니다.");
+        }
 
         return addedNodeEntity;
     }
@@ -556,7 +568,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                                                                               String 서버유형, String 엔진_연결_아이디, EntityType 갱신항목 ) {
 
         if (가져온_엔티티_목록 == null || 가져온_엔티티_목록.size() == 0) {
-            return Collections.emptySet();
+            return null;
         }
 
         for (T 엔진_엔티티 : 가져온_엔티티_목록) {

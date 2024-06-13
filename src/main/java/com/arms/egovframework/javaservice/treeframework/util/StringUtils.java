@@ -587,4 +587,11 @@ public class StringUtils extends org.apache.commons.lang.StringUtils {
         versionInfo = StringUtils.remove(versionInfo, "[");
         return StringUtils.split(versionInfo, ",");
     }
+
+    public static String removeTrailingSlash(String uri) {
+        if (uri == null) {
+            return null;
+        }
+        return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
+    }
 }

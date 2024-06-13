@@ -70,12 +70,6 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         log.info("JiraServerController :: addJiraServerNode");
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
-        if(!jiraServerDTO.getC_jira_server_type().equals("레드마인_온프레미스")){
-            chat.sendMessageByEngine("지라(서버)가 추가되었습니다.");
-        }else{
-            chat.sendMessageByEngine("레드마인(서버)가 추가되었습니다.");
-        }
-
         return ResponseEntity.ok(CommonResponse.success(jiraServer.addJiraServer(jiraServerEntity)));
     }
 
