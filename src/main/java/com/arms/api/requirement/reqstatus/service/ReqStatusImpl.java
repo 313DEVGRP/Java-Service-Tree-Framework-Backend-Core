@@ -148,8 +148,11 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			reqStatusDTO.setC_id(reqStatusEntity.getC_id());
 			// 요구사항 생성에서 에러난 상태의 요구사항의 경우 스케줄러가 다시 작동하기 전에
 			// 수정을 하면 update로 바뀌게 되는데 이 때 issue key가 만들어지지 않고 수정 API를 호출하면 오류 발생하므로 해당 방어코드 추가
-			if (reqStatusEntity.getC_issue_key() != null) {
+			if (!StringUtils.equals(CRUD_타입, CRUDType.생성.getType()) && reqStatusEntity.getC_issue_key() != null) {
 				reqStatusDTO.setC_etc(CRUD_타입);
+			}
+			else {
+				reqStatusDTO.setC_etc(CRUDType.생성.getType());
 			}
 
 			// REQSTATUS 데이터 updateNode API 호출
