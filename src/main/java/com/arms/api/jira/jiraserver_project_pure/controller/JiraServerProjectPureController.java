@@ -14,7 +14,6 @@ package com.arms.api.jira.jiraserver_project_pure.controller;
 import com.arms.api.jira.jiraserver_project_pure.model.JiraServerProjectPureDTO;
 import com.arms.api.jira.jiraserver_project_pure.model.JiraServerProjectPureEntity;
 import com.arms.api.jira.jiraserver_project_pure.service.JiraServerProjectPure;
-import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.util.ParameterParser;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,7 @@ public class JiraServerProjectPureController extends TreeAbstractController<Jira
         log.info("JiraServerProjectPureController :: getJiraServerMonitor");
         JiraServerProjectPureEntity jiraServerProjectPureEntity = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
 
-        return ResponseEntity.ok(CommonResponse.success(jiraServerProjectPure.getNodesWithoutRoot(jiraServerProjectPureEntity)));
+        return ResponseEntity.ok(jiraServerProjectPure.getNodesWithoutRoot(jiraServerProjectPureEntity));
     }
 
     @ResponseBody
@@ -70,7 +69,7 @@ public class JiraServerProjectPureController extends TreeAbstractController<Jira
     public ModelAndView getChildNodeWithoutSoftDelete(JiraServerProjectPureDTO jiraServerProjectPureDTO, HttpServletRequest request)
             throws Exception {
 
-        log.info("JiraServerProjectPureController :: getChildNode");
+        log.info("JiraServerProjectPureController :: getChildNodeWithoutSoftDelete");
         JiraServerProjectPureEntity jiraServerProjectPureEntity
                 = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
 
@@ -87,5 +86,25 @@ public class JiraServerProjectPureController extends TreeAbstractController<Jira
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", list);
         return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getNodeWithoutSoftDelete.do", method = RequestMethod.GET)
+    public ResponseEntity<?> getNodeWithoutSoftDelete(JiraServerProjectPureDTO jiraServerProjectPureDTO, HttpServletRequest request)
+            throws Exception {
+
+        log.info("JiraServerProjectPureController :: getNodeWithoutSoftDelete");
+        JiraServerProjectPureEntity jiraServerProjectPureEntity
+                = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
+
+        ParameterParser parser = new ParameterParser(request);
+
+        if (parser.getInt("c_id") <= 0) {
+            throw new RuntimeException("c_id is minus value");
+        }
+
+        JiraServerProjectPureEntity result = jiraServerProjectPure.getNodeWithoutSoftDelete(jiraServerProjectPureEntity);
+
+        return ResponseEntity.ok(result);
     }
 }

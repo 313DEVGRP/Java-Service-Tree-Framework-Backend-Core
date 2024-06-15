@@ -11,18 +11,17 @@ import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.util.TreeServiceUtils;
+import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.internal.내부통신기;
 import com.arms.api.util.버전유틸;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
@@ -310,8 +309,7 @@ public class ScopeServiceImpl implements ScopeService {
         // 7. cReqLinks 값을 이용하여 요구사항(REQADD) 10개 조회
         ResponseEntity<List<LoadReqAddDTO>> 요구사항목록조회 = 내부통신기.요구사항목록조회("T_ARMS_REQADD_" + pdServiceLink, cReqLinks);
 
-        List<LoadReqAddDTO> loadReqAddDTOList = 요구사항목록조회.getBody();
-
+        List<LoadReqAddDTO> loadReqAddDTOList = Optional.ofNullable(요구사항목록조회.getBody()).orElse(Collections.emptyList());
         Set<Long> reqAddCidSet = loadReqAddDTOList.stream().map(LoadReqAddDTO::getC_id).collect(Collectors.toSet());
 
         if (CollectionUtils.isEmpty(loadReqAddDTOList)) {

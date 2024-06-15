@@ -8,4 +8,6 @@ import java.util.List;
 public interface JiraServerProjectPure extends TreeService {
     public List<JiraServerProjectPureEntity> getChildNodeWithoutSoftDelete(JiraServerProjectPureEntity jiraServerProjectPureEntity) throws Exception;
 
+    public JiraServerProjectPureEntity getNodeWithoutSoftDelete(JiraServerProjectPureEntity jiraServerProjectPureEntity) throws Exception;
+
 }

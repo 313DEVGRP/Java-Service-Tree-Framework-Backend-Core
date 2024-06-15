@@ -644,7 +644,9 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		// ARMS 요구사항의 상태와 연결된 ALM 이슈 상태 중 findFirst 로 첫번째 조회되 상태로 update c_req_state_mapping_link 변경 필요
 		return issueStatusEntities.stream()
 				.filter(entity -> entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete"))
-				.filter(entity -> entity.getC_req_state_mapping_link() != null && entity.getC_req_state_mapping_link() == 변경할_ARMS_상태아이디)
+				.filter(entity -> entity.getC_req_state_mapping_link() != null
+										&& entity.getC_req_state_mapping_link().equals(변경할_ARMS_상태아이디))
+
 				.findFirst()
 				.orElse(null);
 	}
