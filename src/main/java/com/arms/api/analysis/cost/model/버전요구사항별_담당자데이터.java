@@ -1,4 +1,4 @@
-package com.arms.api.analysis.cost.dto;
+package com.arms.api.analysis.cost.model;
 
 import lombok.*;
 

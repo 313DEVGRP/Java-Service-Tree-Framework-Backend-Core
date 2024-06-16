@@ -12,21 +12,18 @@
 package com.arms.egovframework.javaservice.treeframework.errors.response;
 
 import static com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.error;
-import static com.arms.egovframework.javaservice.treeframework.util.UUIDTimeProvider.getCurrentTimeUUID;
 
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse.ApiResult;
 import com.arms.egovframework.javaservice.treeframework.errors.exception.BaseException;
 import com.arms.egovframework.javaservice.treeframework.errors.exception.InvalidParamException;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.arms.notification.slack.SlackNotificationService;
-import com.arms.notification.slack.SlackProperty;
+import com.arms.api.util.notification.slack.SlackNotificationService;
+import com.arms.api.util.notification.slack.SlackProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;

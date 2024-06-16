@@ -9,9 +9,9 @@
  *  Written by 313 developer group <313@313.co.kr>, December 2010
  * </pre>
  */
-package com.arms.api.analysis.salary.service;
+package com.arms.api.analysis.cost.service;
 
-import com.arms.api.analysis.salary.model.SalaryLogJdbcDTO;
+import com.arms.api.analysis.cost.model.SalaryLogJdbcDTO;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
 
 import java.util.List;

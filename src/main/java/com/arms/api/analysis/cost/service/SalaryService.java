@@ -1,10 +1,9 @@
-package com.arms.api.analysis.salary.service;
+package com.arms.api.analysis.cost.service;
 
-import com.arms.api.analysis.salary.model.SampleDTO;
-import com.arms.api.analysis.salary.model.SalaryDTO;
-import com.arms.api.analysis.salary.model.SalaryEntity;
+import com.arms.api.analysis.cost.model.SampleDTO;
+import com.arms.api.analysis.cost.model.SalaryDTO;
+import com.arms.api.analysis.cost.model.SalaryEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Map;

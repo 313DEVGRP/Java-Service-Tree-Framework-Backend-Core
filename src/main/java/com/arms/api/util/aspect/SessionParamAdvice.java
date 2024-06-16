@@ -1,8 +1,7 @@
 package com.arms.api.util.aspect;
 
-import com.arms.notification.slack.SlackNotificationService;
-import com.arms.notification.slack.SlackProperty;
-import lombok.AllArgsConstructor;
+import com.arms.api.util.notification.slack.SlackNotificationService;
+import com.arms.api.util.notification.slack.SlackProperty;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.catalina.connector.RequestFacade;
@@ -10,17 +9,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Aspect
