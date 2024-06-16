@@ -380,6 +380,7 @@ public class 스케쥴러_컨트롤러{
                                                                 .ifPresent(매핑_아이디 -> {
                                                                     log.info("매핑된 이슈 상태 = " + 매핑_아이디);
                                                                     요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_name(암스_이슈상태.get(String.valueOf(매핑_아이디)));
                                                                     try {
                                                                         요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
                                                                     } catch (Exception e) {
@@ -397,7 +398,7 @@ public class 스케쥴러_컨트롤러{
                                                                 .ifPresent(매핑_아이디 -> {
                                                                     log.info("매핑된 이슈 상태 = " + 매핑_아이디);
                                                                     요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
-                                                                    요구사항_이슈_엔티티.setC_req_state_name(암스_이슈상태.get(매핑_아이디));
+                                                                    요구사항_이슈_엔티티.setC_req_state_name(암스_이슈상태.get(String.valueOf(매핑_아이디)));
                                                                     try {
                                                                         요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
                                                                     } catch (Exception e) {
