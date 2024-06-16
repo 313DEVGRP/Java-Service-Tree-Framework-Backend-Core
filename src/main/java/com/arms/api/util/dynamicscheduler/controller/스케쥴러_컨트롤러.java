@@ -11,14 +11,25 @@
  */
 package com.arms.api.util.dynamicscheduler.controller;
 
+import com.arms.api.jira.jiraissuestatus.model.JiraIssueStatusEntity;
+import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
+import com.arms.api.jira.jiraserver.model.JiraServerEntity;
+import com.arms.api.jira.jiraserver.model.enums.ServerType;
+import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.requirement.reqadd.model.ReqAddDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
+import com.arms.api.requirement.reqadd.service.ReqAdd;
+import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.api.util.communicate.internal.내부통신기;
@@ -39,8 +50,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -61,8 +71,20 @@ public class 스케쥴러_컨트롤러{
     private ReqStatus reqStatus;
 
     @Autowired
+    @Qualifier("reqAdd")
+    private ReqAdd reqAdd;
+
+    @Autowired
+    @Qualifier("reqState")
+    private ReqState reqState;
+
+    @Autowired
     @Qualifier("jiraServerPure")
     private JiraServerPure jiraServerPure;
+
+    @Autowired
+    @Qualifier("jiraServer")
+    private JiraServer jiraServer;
 
     @Autowired
     private 엔진통신기 엔진통신기;
@@ -237,6 +259,12 @@ public class 스케쥴러_컨트롤러{
     @Async
     public String 각_제품서비스_별_요구사항_Status_업데이트_From_ES(ModelMap model, HttpServletRequest request) throws Exception {
 
+        Map<String, String> 암스_이슈상태 = new HashMap<>();
+        암스_이슈상태.put("10", "열림");
+        암스_이슈상태.put("11", "진행중");
+        암스_이슈상태.put("12", "해결됨");
+        암스_이슈상태.put("13", "닫힘");
+
         // 제품(서비스) 를 로드합니다.
         log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 제품서비스_조회");
         PdServiceEntity 제품서비스_조회 = new PdServiceEntity();
@@ -255,9 +283,9 @@ public class 스케쥴러_컨트롤러{
             }
             else {
                 for (ReqStatusEntity 요구사항_이슈_엔티티 : 결과) {
-                    JiraServerPureEntity 지라서버_검색 = new JiraServerPureEntity();
+                    JiraServerEntity 지라서버_검색 = new JiraServerEntity();
                     지라서버_검색.setC_id(요구사항_이슈_엔티티.getC_jira_server_link());
-                    JiraServerPureEntity 지라서버 = jiraServerPure.getNode(지라서버_검색);
+                    JiraServerEntity 지라서버 = jiraServer.getNode(지라서버_검색);
 
                     if (지라서버 == null) {
                         chat.sendMessageByEngine("지라서버가 조회되지 않습니다. 검색할려는 지라서버 아이디 = " + 요구사항_이슈_엔티티.getC_jira_server_link());
@@ -317,8 +345,63 @@ public class 스케쥴러_컨트롤러{
                                         요구사항_이슈_엔티티.setC_issue_status_name(ES_지라이슈.getStatus().getName());
                                     }
 
+                                    ReqAddEntity reqAddEntity = new ReqAddEntity();
+                                    reqAddEntity.setC_id(요구사항_이슈_엔티티.getC_req_link());
+                                    ReqAddEntity 요구사항_엔티티 = reqAdd.getNode(reqAddEntity);
+
+                                    // 클라우드는 프로젝트 목록 내에서 이슈상태 서치
+                                    // 온프레미스 및 레드마인은 전역 이슈상태이므로 이슈상태목록에서 서치
+                                    Set<JiraProjectEntity> 프로젝트_목록 = Optional.ofNullable(지라서버.getJiraProjectEntities()).orElse(new HashSet<>());
+                                    Set<JiraIssueStatusEntity> 이슈상태_목록 = Optional.ofNullable(지라서버.getJiraIssueStatusEntities()).orElse(new HashSet<>());
+
+                                    // TODO: 프로젝트 별 상태가 다르므로 추후 작업 필요
+                                    if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 지라서버.getC_jira_server_type())) {
+
+                                        프로젝트_목록.stream()
+                                                .flatMap(지라이슈상태_목록 ->
+                                                        Optional.ofNullable(지라이슈상태_목록.getJiraIssueStatusEntities())
+                                                                .orElse(new HashSet<>())
+                                                                .stream()
+                                                )
+                                                .forEach(이슈상태 -> {
+                                                    if (이슈상태 != null && StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
+                                                        Optional.ofNullable(이슈상태.getC_req_state_mapping_link())
+                                                                .ifPresent(매핑_아이디 -> {
+                                                                    log.info("매핑된 이슈 상태 = " + 매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
+                                                                    try {
+                                                                        요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
+                                                                    } catch (Exception e) {
+                                                                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 요구사항_엔티티 = 매핑 아이디를 찾을 수 없습니다." );
+                                                                    }
+                                                                });
+                                                    }
+                                                });
+                                    } else {
+
+                                        이슈상태_목록.stream()
+                                                .forEach(이슈상태 -> {
+                                                    if (이슈상태 != null && StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
+                                                        Optional.ofNullable(이슈상태.getC_req_state_mapping_link())
+                                                                .ifPresent(매핑_아이디 -> {
+                                                                    log.info("매핑된 이슈 상태 = " + 매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_name(암스_이슈상태.get(매핑_아이디));
+                                                                    try {
+                                                                        요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
+                                                                    } catch (Exception e) {
+                                                                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 요구사항_엔티티 = 매핑 아이디를 찾을 수 없습니다." );
+                                                                    }
+                                                                });
+                                                    }
+                                                });
+
+                                    }
+
                                     ReqStatusDTO statusDTO = modelMapper.map(요구사항_이슈_엔티티, ReqStatusDTO.class);
+                                    ReqAddDTO reqAddDTO = modelMapper.map(요구사항_엔티티, ReqAddDTO.class);
                                     내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
+                                    내부통신기.요구사항_수정하기("T_ARMS_REQADD_" + 제품서비스_아이디, reqAddDTO);
                                 }
                             }
                         }
@@ -355,8 +438,8 @@ public class 스케쥴러_컨트롤러{
             }
             else {
                 결과.stream()
-                    .filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
-                    .forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
+                        .filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
+                        .forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
             }
         }
 
