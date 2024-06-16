@@ -1,4 +1,4 @@
-package com.arms.api.util.notification.slack;
+package com.arms.api.util.slack;
 
 import lombok.Getter;
 import lombok.Setter;
