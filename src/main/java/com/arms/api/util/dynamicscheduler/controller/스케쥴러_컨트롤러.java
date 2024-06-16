@@ -20,6 +20,7 @@ import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
@@ -42,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -347,7 +349,16 @@ public class 스케쥴러_컨트롤러{
 
                                     ReqAddEntity reqAddEntity = new ReqAddEntity();
                                     reqAddEntity.setC_id(요구사항_이슈_엔티티.getC_req_link());
-                                    ReqAddEntity 요구사항_엔티티 = reqAdd.getNode(reqAddEntity);
+
+                                    ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회("T_ARMS_REQADD_" + 제품서비스.getC_id(), reqAddEntity.getC_id());
+                                    LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
+                                    if (loadReqAddDTO == null) {
+                                        logger.error("스케줄러 컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES :: 요구사항 데이터 조회에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+                                        continue;
+                                    }
+
+                                    ReqAddEntity 요구사항_엔티티 = new ReqAddEntity();
+                                    요구사항_엔티티.setC_id(loadReqAddDTO.getC_id());
 
                                     // 클라우드는 프로젝트 목록 내에서 이슈상태 서치
                                     // 온프레미스 및 레드마인은 전역 이슈상태이므로 이슈상태목록에서 서치
@@ -400,6 +411,10 @@ public class 스케쥴러_컨트롤러{
 
                                     ReqStatusDTO statusDTO = modelMapper.map(요구사항_이슈_엔티티, ReqStatusDTO.class);
                                     ReqAddDTO reqAddDTO = modelMapper.map(요구사항_엔티티, ReqAddDTO.class);
+                                    if (요구사항_엔티티.getReqStateEntity() != null && 요구사항_엔티티.getReqStateEntity().getC_id() != null) {
+                                        reqAddDTO.setC_req_state_link(요구사항_엔티티.getReqStateEntity().getC_id());
+                                    }
+
                                     내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
                                     내부통신기.요구사항_수정하기("T_ARMS_REQADD_" + 제품서비스_아이디, reqAddDTO);
                                 }
