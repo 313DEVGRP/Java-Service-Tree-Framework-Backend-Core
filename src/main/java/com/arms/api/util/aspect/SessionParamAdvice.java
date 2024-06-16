@@ -1,7 +1,7 @@
 package com.arms.api.util.aspect;
 
-import com.arms.api.util.notification.slack.SlackNotificationService;
-import com.arms.api.util.notification.slack.SlackProperty;
+import com.arms.api.util.slack.SlackNotificationService;
+import com.arms.api.util.slack.SlackProperty;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.catalina.connector.RequestFacade;
