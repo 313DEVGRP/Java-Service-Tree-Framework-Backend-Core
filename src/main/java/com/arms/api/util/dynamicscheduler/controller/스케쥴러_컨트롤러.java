@@ -259,6 +259,12 @@ public class 스케쥴러_컨트롤러{
     @Async
     public String 각_제품서비스_별_요구사항_Status_업데이트_From_ES(ModelMap model, HttpServletRequest request) throws Exception {
 
+        Map<String, String> 암스_이슈상태 = new HashMap<>();
+        암스_이슈상태.put("10", "열림");
+        암스_이슈상태.put("11", "진행중");
+        암스_이슈상태.put("12", "해결됨");
+        암스_이슈상태.put("13", "닫힘");
+
         // 제품(서비스) 를 로드합니다.
         log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 제품서비스_조회");
         PdServiceEntity 제품서비스_조회 = new PdServiceEntity();
@@ -345,38 +351,48 @@ public class 스케쥴러_컨트롤러{
 
                                     // 클라우드는 프로젝트 목록 내에서 이슈상태 서치
                                     // 온프레미스 및 레드마인은 전역 이슈상태이므로 이슈상태목록에서 서치
-                                    Set<JiraProjectEntity> 프로젝트_목록 = 지라서버.getJiraProjectEntities();
-                                    Set<JiraIssueStatusEntity> 이슈상태_목록 = 지라서버.getJiraIssueStatusEntities();
+                                    Set<JiraProjectEntity> 프로젝트_목록 = Optional.ofNullable(지라서버.getJiraProjectEntities()).orElse(new HashSet<>());
+                                    Set<JiraIssueStatusEntity> 이슈상태_목록 = Optional.ofNullable(지라서버.getJiraIssueStatusEntities()).orElse(new HashSet<>());
 
+                                    // TODO: 프로젝트 별 상태가 다르므로 추후 작업 필요
                                     if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 지라서버.getC_jira_server_type())) {
 
-                                        Optional.ofNullable(프로젝트_목록)
-                                                .orElse(new HashSet<>()) // null이면 빈 HashSet 반환
-                                                .stream()
-                                                .flatMap(지라이슈상태_목록 -> Optional.ofNullable(지라이슈상태_목록.getJiraIssueStatusEntities()).orElse(new HashSet<>()).stream())
+                                        프로젝트_목록.stream()
+                                                .flatMap(지라이슈상태_목록 ->
+                                                        Optional.ofNullable(지라이슈상태_목록.getJiraIssueStatusEntities())
+                                                                .orElse(new HashSet<>())
+                                                                .stream()
+                                                )
                                                 .forEach(이슈상태 -> {
-                                                    if (StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
-                                                        요구사항_이슈_엔티티.setC_req_state_link(이슈상태.getC_req_state_mapping_link());
-                                                        try {
-                                                            요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 이슈상태.getC_req_state_mapping_link(), ReqStateEntity.class));
-                                                        } catch (Exception e) {
-                                                            throw new RuntimeException(e);
-                                                        }
+                                                    if (이슈상태 != null && StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
+                                                        Optional.ofNullable(이슈상태.getC_req_state_mapping_link())
+                                                                .ifPresent(매핑_아이디 -> {
+                                                                    log.info("매핑된 이슈 상태 = " + 매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
+                                                                    try {
+                                                                        요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
+                                                                    } catch (Exception e) {
+                                                                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 요구사항_엔티티 = 매핑 아이디를 찾을 수 없습니다." );
+                                                                    }
+                                                                });
                                                     }
                                                 });
                                     } else {
 
-                                        Optional.ofNullable(이슈상태_목록)
-                                                .orElse(new HashSet<>())
-                                                .stream()
+                                        이슈상태_목록.stream()
                                                 .forEach(이슈상태 -> {
-                                                    if (StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
-                                                        요구사항_이슈_엔티티.setC_req_state_link(이슈상태.getC_req_state_mapping_link());
-                                                        try {
-                                                            요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 이슈상태.getC_req_state_mapping_link(), ReqStateEntity.class));
-                                                        } catch (Exception e) {
-                                                            throw new RuntimeException(e);
-                                                        }
+                                                    if (이슈상태 != null && StringUtils.equals(이슈상태.getC_issue_status_id(), ES_지라이슈.getStatus().getId())) {
+                                                        Optional.ofNullable(이슈상태.getC_req_state_mapping_link())
+                                                                .ifPresent(매핑_아이디 -> {
+                                                                    log.info("매핑된 이슈 상태 = " + 매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_link(매핑_아이디);
+                                                                    요구사항_이슈_엔티티.setC_req_state_name(암스_이슈상태.get(매핑_아이디));
+                                                                    try {
+                                                                        요구사항_엔티티.setReqStateEntity(TreeServiceUtils.getNode(reqState, 매핑_아이디, ReqStateEntity.class));
+                                                                    } catch (Exception e) {
+                                                                        log.info("[스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 요구사항_엔티티 = 매핑 아이디를 찾을 수 없습니다." );
+                                                                    }
+                                                                });
                                                     }
                                                 });
 
