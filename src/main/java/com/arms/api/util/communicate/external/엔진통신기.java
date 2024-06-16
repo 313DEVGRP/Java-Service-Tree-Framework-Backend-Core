@@ -138,6 +138,14 @@ public interface 엔진통신기 {
     ResponseEntity<List<검색결과>> 제품_요구사항_담당자(
             @SpringQueryMap AggregationRequestDTO aggregationRequestDTO
     );
-
+    /*
+    *  요구사항 상태 변경
+    * */
+    @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}/{statusId}")
+    public Map<String,Object> 이슈_상태_변경하기(
+            @PathVariable("connectId") Long 연결_아이디,
+            @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
+            @PathVariable("statusId") String 요구사항_이슈_타입
+    );
 
 }

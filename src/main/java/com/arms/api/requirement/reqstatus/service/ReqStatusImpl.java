@@ -164,7 +164,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 	}
 
-	@Override
 	public void ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(ReqStatusEntity reqStatusEntity, Long 제품서비스_아이디) {
 
 		// ALM 서버에 요구사항 생성 또는 수정할 REQSTATUS 데이터가 생성, 수정, 삭제인지 확인
@@ -636,7 +635,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		return 요구사항_이슈_우선순위;
 	}
 
-	private JiraIssueStatusEntity 매핑된_요구사항_이슈상태_검색(Set<JiraIssueStatusEntity> issueStatusEntities, Long 변경할_ARMS_상태아이디) {
+	@Override
+	public JiraIssueStatusEntity 매핑된_요구사항_이슈상태_검색(Set<JiraIssueStatusEntity> issueStatusEntities, Long 변경할_ARMS_상태아이디) {
 		if (issueStatusEntities == null || 변경할_ARMS_상태아이디 == null) {
 			return null;
 		}
@@ -650,8 +650,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.findFirst()
 				.orElse(null);
 	}
-
-	private JiraProjectEntity ALM프로젝트_검색(Long ALM_프로젝트_아이디) {
+	@Override
+	public JiraProjectEntity ALM프로젝트_검색(Long ALM_프로젝트_아이디) {
 		if (ALM_프로젝트_아이디 == null) {
 			return null;
 		}
@@ -674,8 +674,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		return jiraProjectEntity;
 	}
-
-	private JiraServerEntity ALM서버_검색(Long ALM서버_아이디) {
+	@Override
+	public JiraServerEntity ALM서버_검색(Long ALM서버_아이디) {
 		if (ALM서버_아이디 == null) {
 			return null;
 		}
