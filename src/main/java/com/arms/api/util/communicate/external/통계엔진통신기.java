@@ -1,7 +1,7 @@
 package com.arms.api.util.communicate.external;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
-import com.arms.api.analysis.cost.dto.요구사항_지라이슈키별_업데이트_목록_데이터;
+import com.arms.api.analysis.cost.model.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.dashboard.model.Worker;

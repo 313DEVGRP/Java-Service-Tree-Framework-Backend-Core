@@ -1,11 +1,15 @@
 package com.arms.api.analysis.cost.controller;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
-import com.arms.api.analysis.cost.dto.*;
+import com.arms.api.analysis.cost.model.ProductCostResponse;
+import com.arms.api.analysis.cost.model.버전별_요구사항별_연결된_지라이슈데이터;
+import com.arms.api.analysis.cost.model.버전요구사항별_담당자데이터;
+import com.arms.api.analysis.cost.model.요구사항_지라이슈키별_업데이트_목록_데이터;
+import com.arms.api.analysis.cost.model.요구사항목록_난이도_및_우선순위통계데이터;
 import com.arms.api.analysis.cost.service.비용서비스;
-import com.arms.api.analysis.salary.model.SalaryDTO;
-import com.arms.api.analysis.salary.model.SalaryEntity;
-import com.arms.api.analysis.salary.service.SalaryService;
+import com.arms.api.analysis.cost.model.SalaryDTO;
+import com.arms.api.analysis.cost.model.SalaryEntity;
+import com.arms.api.analysis.cost.service.SalaryService;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
 import com.arms.api.util.API호출변수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
