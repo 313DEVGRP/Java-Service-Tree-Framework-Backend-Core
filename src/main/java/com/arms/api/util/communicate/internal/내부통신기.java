@@ -40,7 +40,7 @@ public interface 내부통신기 {
             @RequestParam List<Long> ids
     );
 
-    @PutMapping("/arms/reqAdd/{changeReqTableName}/updateNode.do")
+    @PostMapping("/arms/reqAdd/{changeReqTableName}/updateReqAddOnly.do")
     ResponseEntity<?> 요구사항_수정하기(@PathVariable(value = "changeReqTableName") String changeReqTableName,
                                 @RequestBody ReqAddDTO reqAddDTO);
 

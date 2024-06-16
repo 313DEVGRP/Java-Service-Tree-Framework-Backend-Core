@@ -30,6 +30,7 @@ public class RouteTableConfig {
         map.put("getReqAddListByFilter.do", "getReqAddListByFilter");
         map.put("reqProgress.do", "reqProgress");
         map.put("req-difficulty-priority-list", "req-difficulty-priority-list");
+        map.put("updateReqAddOnly.do", "updateReqAddOnly");
         return map;
     }
 
