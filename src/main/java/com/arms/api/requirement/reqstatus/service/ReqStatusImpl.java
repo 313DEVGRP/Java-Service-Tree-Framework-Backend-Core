@@ -246,13 +246,29 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			reqStatusDTO.setC_type(TreeConstant.Leaf_Node_TYPE);
 		}
 
-		List<Long> 버전아이디_내림차순_목록 = 버전아이디_세트.stream()
-				.sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-		String 버전아이디_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(String::valueOf)
-				.collect(Collectors.joining("\",\"", "[\"", "\"]"));
-		String 버전명_내림차순_문자열 = 버전아이디_내림차순_목록.stream().map(제품_버전아이디_버전명_맵::get)
-				.collect(Collectors.joining("\",\"", "[\"", "\"]"));
-		String 버전ID목록 = 버전아이디_내림차순_목록.stream().map(String::valueOf).collect(Collectors.joining(","));
+		List<Long> 버전아이디_내림차순_목록 = null;
+		String 버전아이디_내림차순_문자열 = null;
+		String 버전명_내림차순_문자열 = null;
+		String 버전ID목록 = null;
+
+		if (버전아이디_세트 != null) {
+			버전아이디_내림차순_목록 = 버전아이디_세트.stream()
+					.sorted(Comparator.reverseOrder())
+					.collect(Collectors.toList());
+
+			버전아이디_내림차순_문자열 = 버전아이디_내림차순_목록.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			버전명_내림차순_문자열 = 버전아이디_내림차순_목록.stream()
+					.map(제품_버전아이디_버전명_맵::get)
+					.collect(Collectors.joining("\",\"", "[\"", "\"]"));
+
+			버전ID목록 = 버전아이디_내림차순_목록.stream()
+					.map(String::valueOf)
+					.collect(Collectors.joining(","));
+		}
+
 		//-- ARMS 요구사항의 매핑버전목록
 		reqStatusDTO.setC_pds_version_name(버전명_내림차순_문자열);
 		reqStatusDTO.setC_req_pdservice_versionset_link(버전아이디_내림차순_문자열);
@@ -650,6 +666,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.findFirst()
 				.orElse(null);
 	}
+
 	@Override
 	public JiraProjectEntity ALM프로젝트_검색(Long ALM_프로젝트_아이디) {
 		if (ALM_프로젝트_아이디 == null) {
