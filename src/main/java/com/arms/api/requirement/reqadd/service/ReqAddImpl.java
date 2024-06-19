@@ -15,17 +15,18 @@ import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.common.IsReqType;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
-import com.arms.api.jira.jiraissuestatus.model.JiraIssueStatusEntity;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
-import com.arms.api.requirement.reqadd.model.*;
+import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
+import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.model.요구사항별_담당자_목록.요구사항_담당자;
 import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
@@ -43,7 +44,8 @@ import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.hibernate.criterion.*;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -424,10 +426,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		요구사항_상태_디비_업데이트_결과 = 요구사항_상태_디비_업데이트(reqAddEntity, changeReqTableName);
 
 		int 요구사항_업데이트_결과 = 요구사항_디비_업데이트_결과 * 요구사항_상태_디비_업데이트_결과;
-		// ALM 요구사항 상태 변경 요청 (상태 값 변경이 있을 경우)
-		if(reqAddEntity.getReqStateEntity() != null){
-			요구사항_ALM상태_업데이트(reqAddEntity,changeReqTableName);
-		}
+
 		return 요구사항_업데이트_결과;
 	}
 
@@ -454,27 +453,34 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		int 업데이트_결과 = 0;
 
 		SessionUtil.setAttribute("updateDataBase", 요구사항_상태_테이블);
-		ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
+		ReqStatusEntity searchEntity = new ReqStatusEntity();
 
 		Criterion criterion = Restrictions.eq("c_req_link", reqAddEntity.getC_id());
-		reqStatusEntity.getCriterions().add(criterion);
-		List<ReqStatusEntity> 검색결과_요구사항_목록 = reqStatus.getNodesWithoutRoot(reqStatusEntity);
+		searchEntity.getCriterions().add(criterion);
+		List<ReqStatusEntity> reqStatusEntityList = reqStatus.getNodesWithoutRoot(searchEntity);
 
-		for(ReqStatusEntity req : 검색결과_요구사항_목록){
+		for(ReqStatusEntity reqStatusEntity : reqStatusEntityList){
 			if (reqAddEntity.getReqStateEntity() != null) {
-				req.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
-				req.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
+				reqStatusEntity.setC_req_state_name(reqAddEntity.getReqStateEntity().getC_title());
+				reqStatusEntity.setC_req_state_link(reqAddEntity.getReqStateEntity().getC_id());
 			}
+
 			if (reqAddEntity.getReqPriorityEntity() != null) {
-				req.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
-				req.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
+				reqStatusEntity.setC_req_priority_name(reqAddEntity.getReqPriorityEntity().getC_title());
+				reqStatusEntity.setC_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id());
 			}
+
 			if (reqAddEntity.getReqDifficultyEntity() != null) {
-				req.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
-				req.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
+				reqStatusEntity.setC_req_difficulty_name(reqAddEntity.getReqDifficultyEntity().getC_title());
+				reqStatusEntity.setC_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id());
 			}
-			업데이트_결과 = reqStatus.updateNode(req);
+
+			// ALM 요구사항 상태 변경 요청 (상태 값 변경이 있을 경우)
+			reqStatus.ALM_이슈상태_업데이트(reqStatusEntity);
+
+			업데이트_결과 = reqStatus.updateNode(reqStatusEntity);
 			업데이트_결과 *= 업데이트_결과;
+
 		}
 
 		SessionUtil.removeAttribute("updateDataBase");
@@ -485,67 +491,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		}
 
 		return 업데이트_결과;
-	}
-
-	private void  요구사항_ALM상태_업데이트(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception{
-
-		Long 제품서비스_아이디 = Long.valueOf(changeReqTableName.replace("T_ARMS_REQADD_", ""));
-		String 요구사항_상태_테이블 = "T_ARMS_REQSTATUS_"+제품서비스_아이디;
-
-		SessionUtil.setAttribute("updateDataBase", 요구사항_상태_테이블);
-		ReqStatusEntity reqStatusEntity = new ReqStatusEntity();
-
-		Criterion criterion = Restrictions.eq("c_req_link", reqAddEntity.getC_id());
-		reqStatusEntity.getCriterions().add(criterion);
-		List<ReqStatusEntity> 검색결과_요구사항_목록 = reqStatus.getNodesWithoutRoot(reqStatusEntity);
-		SessionUtil.removeAttribute("updateDataBase");
-
-		for(ReqStatusEntity req : 검색결과_요구사항_목록){
-			// 매핑된 상태 아이디 검색
-			String 변경할_요구사항_상태 = null;
-			Long 변경할_ARMS_상태아이디 = req.getC_req_state_link();
-			String 이슈_키_또는_아이디 = req.getC_issue_key();
-
-			JiraProjectEntity 검색된_지라프로젝트 = reqStatus.ALM프로젝트_검색(req.getC_jira_project_link());
-			JiraServerEntity 검색된_지라서버= reqStatus.ALM서버_검색(req.getC_jira_server_link());
-			ServerType 서버_유형 = ServerType.fromString(검색된_지라서버.getC_jira_server_type());
-
-			JiraIssueStatusEntity 요구사항_이슈_상태 = null;
-
-			if (서버_유형.equals(ServerType.JIRA_CLOUD) ) {
-				요구사항_이슈_상태 = reqStatus.매핑된_요구사항_이슈상태_검색(검색된_지라프로젝트.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
-			}
-			else if (서버_유형.equals(ServerType.JIRA_ON_PREMISE)|| 서버_유형.equals(ServerType.REDMINE_ON_PREMISE)) {
-				요구사항_이슈_상태 = reqStatus.매핑된_요구사항_이슈상태_검색(검색된_지라서버.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
-			}
-
-			if (요구사항_이슈_상태 != null) { // 메핑된 상태 값이 없으면 ALM까지 데이터 전파 필요 없음
-				변경할_요구사항_상태 = 요구사항_이슈_상태.getC_issue_status_id();
-				Map<String, Object> 수정_결과 = 엔진통신기.이슈_상태_변경하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc())
-																	,이슈_키_또는_아이디
-																	,변경할_요구사항_상태);
-
-				if (!((boolean) 수정_결과.get("success"))) {
-					String 실패_이유 = null;
-					if(서버_유형.equals(ServerType.REDMINE_ON_PREMISE)){
-						실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 수정 중 실패하였습니다. :: 해당 업무 흐름으로 변경이 불가능 합니다.",
-								검색된_지라서버.getC_jira_server_base_url(),
-								검색된_지라프로젝트.getC_jira_name());
-					}else{
-						실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 수정 중 실패하였습니다. :: %s",
-								검색된_지라서버.getC_jira_server_base_url(),
-								검색된_지라프로젝트.getC_jira_name(),
-								수정_결과.get("message"));
-					}
-
-					logger.error(실패_이유);
-					chat.sendMessageByEngine(실패_이유);
-				}else{
-					chat.sendMessageByEngine("요구사항 이슈 :: "+ req.getC_title() +" :: 수정, ALM 서버를 확인해주세요.");
-				}
-			}
-		}
-
 	}
 
 	public List<요구사항_담당자> getRequirementAssignee(PdServiceEntity pdServiceEntity)  {

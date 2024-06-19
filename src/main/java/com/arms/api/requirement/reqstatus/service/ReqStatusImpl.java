@@ -499,27 +499,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			logger.info("요구사항_이슈_우선순위 기본값이 없습니다. 요구사항은 등록됩니다.");
 		}
 
-		// 이슈 상태
-		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
-		JiraIssueStatusEntity 요구사항_이슈_상태 = null;
-		if (serverType.equals(ServerType.JIRA_CLOUD) ) {
-			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_지라프로젝트.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
-		}
-		else if (serverType.equals(ServerType.JIRA_ON_PREMISE)|| serverType.equals(ServerType.REDMINE_ON_PREMISE)) {
-			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_지라서버.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
-		}
-
-		지라이슈상태_데이터 상태;
-		if (요구사항_이슈_상태 != null) {
-			상태 = new 지라이슈상태_데이터();
-			reqStatusEntity.setC_issue_status_link(Long.valueOf(요구사항_이슈_상태.getC_issue_status_id()));
-			reqStatusEntity.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
-
-			상태.setId(요구사항_이슈_상태.getC_issue_status_id());
-
-			요구사항이슈_필드빌더.status(상태);
-		}
-
 		지라이슈필드_데이터 요구사항이슈_필드 = 요구사항이슈_필드빌더.build();
 		지라이슈생성_데이터 요구사항_이슈 = 지라이슈생성_데이터
 				.builder()
@@ -579,6 +558,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			reqStatusEntity.setC_desc(실패_이유);
 
 			return reqStatusEntity;
+		}
+
+		if (StringUtils.equals(CRUDType.수정.getType(), reqStatusEntity.getC_etc())) {
+			this.ALM_이슈상태_업데이트(reqStatusEntity);
 		}
 
 		reqStatusEntity.setC_etc(CRUDType.완료.getType());
@@ -651,7 +634,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		return 요구사항_이슈_우선순위;
 	}
 
-	@Override
 	public JiraIssueStatusEntity 매핑된_요구사항_이슈상태_검색(Set<JiraIssueStatusEntity> issueStatusEntities, Long 변경할_ARMS_상태아이디) {
 		if (issueStatusEntities == null || 변경할_ARMS_상태아이디 == null) {
 			return null;
@@ -661,13 +643,12 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		return issueStatusEntities.stream()
 				.filter(entity -> entity.getC_etc() == null || !StringUtils.equals(entity.getC_etc(), "delete"))
 				.filter(entity -> entity.getC_req_state_mapping_link() != null
-										&& entity.getC_req_state_mapping_link().equals(변경할_ARMS_상태아이디))
+						&& entity.getC_req_state_mapping_link().equals(변경할_ARMS_상태아이디))
 
 				.findFirst()
 				.orElse(null);
 	}
 
-	@Override
 	public JiraProjectEntity ALM프로젝트_검색(Long ALM_프로젝트_아이디) {
 		if (ALM_프로젝트_아이디 == null) {
 			return null;
@@ -691,7 +672,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		return jiraProjectEntity;
 	}
-	@Override
+
 	public JiraServerEntity ALM서버_검색(Long ALM서버_아이디) {
 		if (ALM서버_아이디 == null) {
 			return null;
@@ -773,5 +754,63 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 
 		return 이슈_본문_전체;
+	}
+
+	public void ALM_이슈상태_업데이트(ReqStatusEntity reqStatusEntity) {
+
+		if (reqStatusEntity == null || reqStatusEntity.getC_issue_key() == null || reqStatusEntity.getC_issue_delete_date() != null) {
+			return;
+		}
+
+		String 변경할_이슈상태_아이디;
+		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
+		String 이슈_키_또는_아이디 = reqStatusEntity.getC_issue_key();
+
+		JiraProjectEntity 검색된_ALM프로젝트 = this.ALM프로젝트_검색(reqStatusEntity.getC_jira_project_link());
+		JiraServerEntity 검색된_ALM서버 = this.ALM서버_검색(reqStatusEntity.getC_jira_server_link());
+
+		if (검색된_ALM서버 == null) {
+			return;
+		}
+		if (검색된_ALM프로젝트 == null);
+		ServerType 서버_유형 = ServerType.fromString(검색된_ALM서버.getC_jira_server_type());
+
+		JiraIssueStatusEntity 요구사항_이슈_상태 = null;
+
+		if (서버_유형.equals(ServerType.JIRA_CLOUD) ) {
+			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_ALM프로젝트.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
+		}
+		else if (서버_유형.equals(ServerType.JIRA_ON_PREMISE)|| 서버_유형.equals(ServerType.REDMINE_ON_PREMISE)) {
+			요구사항_이슈_상태 = this.매핑된_요구사항_이슈상태_검색(검색된_ALM서버.getJiraIssueStatusEntities(), 변경할_ARMS_상태아이디);
+		}
+
+		if (요구사항_이슈_상태 != null) { // 메핑된 상태 값이 없으면 ALM까지 데이터 전파 필요 없음
+			변경할_이슈상태_아이디 = 요구사항_이슈_상태.getC_issue_status_id();
+			Map<String, Object> 변경_결과 = 엔진통신기.이슈_상태_변경하기(Long.parseLong(검색된_ALM서버.getC_jira_server_etc()),
+																	이슈_키_또는_아이디,
+																	변경할_이슈상태_아이디);
+
+			if (!((boolean) 변경_결과.get("success"))) {
+				String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 수정 중 실패하였습니다. :: 해당 업무 흐름으로 변경이 불가능 합니다. :: %s",
+						검색된_ALM서버.getC_jira_server_base_url(),
+						검색된_ALM프로젝트.getC_jira_name(),
+						변경_결과.get("message"));
+
+				logger.error(실패_이유);
+				chat.sendMessageByEngine(실패_이유);
+			}
+			else {
+				reqStatusEntity.setC_issue_status_link(Long.valueOf(요구사항_이슈_상태.getC_issue_status_id()));
+				reqStatusEntity.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
+
+				String 성공_메세지 = String.format("%s 서버 :: %s 프로젝트 :: %s 요구사항 상태를 변경하였습니다. :: %s",
+						검색된_ALM서버.getC_jira_server_base_url(),
+						검색된_ALM프로젝트.getC_jira_name(),
+						reqStatusEntity.getC_title(),
+						요구사항_이슈_상태.getC_issue_status_name());
+
+				chat.sendMessageByEngine(성공_메세지);
+			}
+		}
 	}
 }
