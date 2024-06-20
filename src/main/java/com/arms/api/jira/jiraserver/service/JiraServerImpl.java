@@ -595,6 +595,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
             catch (Exception e) {
                 logger.error("서버_엔티티_동기화 오류 발생 :: 연결아이디 :: {} 서버유형 :: {} :: 갱신항목 ::  {} :: 엔티티 :: {}",
                                                                             엔진_연결_아이디, 서버유형, 갱신항목, 엔진_엔티티.toString());
+                logger.error(e.getMessage());
             }
 
             if (결과 != null && !엔티티존재여부) {
@@ -680,6 +681,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 }
                 catch (Exception e) {
                     logger.error("소프트 딜리트 처리 오류 발생 :: 엔티티 ::  {}", 엔티티.toString());
+                    logger.error(e.getMessage());
                 }
             });
         }
