@@ -762,17 +762,16 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			return;
 		}
 
-		String 변경할_이슈상태_아이디;
 		Long 변경할_ARMS_상태아이디 = reqStatusEntity.getC_req_state_link();
 		String 이슈_키_또는_아이디 = reqStatusEntity.getC_issue_key();
 
 		JiraProjectEntity 검색된_ALM프로젝트 = this.ALM프로젝트_검색(reqStatusEntity.getC_jira_project_link());
 		JiraServerEntity 검색된_ALM서버 = this.ALM서버_검색(reqStatusEntity.getC_jira_server_link());
 
-		if (검색된_ALM서버 == null) {
+		if (검색된_ALM서버 == null || 검색된_ALM프로젝트 == null) {
 			return;
 		}
-		if (검색된_ALM프로젝트 == null);
+
 		ServerType 서버_유형 = ServerType.fromString(검색된_ALM서버.getC_jira_server_type());
 
 		JiraIssueStatusEntity 요구사항_이슈_상태 = null;
@@ -785,16 +784,16 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 
 		if (요구사항_이슈_상태 != null) { // 메핑된 상태 값이 없으면 ALM까지 데이터 전파 필요 없음
-			변경할_이슈상태_아이디 = 요구사항_이슈_상태.getC_issue_status_id();
+			String 변경할_이슈상태_아이디 = 요구사항_이슈_상태.getC_issue_status_id();
 			Map<String, Object> 변경_결과 = 엔진통신기.이슈_상태_변경하기(Long.parseLong(검색된_ALM서버.getC_jira_server_etc()),
 																	이슈_키_또는_아이디,
 																	변경할_이슈상태_아이디);
 
 			if (!((boolean) 변경_결과.get("success"))) {
 				String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 수정 중 실패하였습니다. :: 해당 업무 흐름으로 변경이 불가능 합니다. :: %s",
-						검색된_ALM서버.getC_jira_server_base_url(),
-						검색된_ALM프로젝트.getC_jira_name(),
-						변경_결과.get("message"));
+												검색된_ALM서버.getC_jira_server_base_url(),
+												검색된_ALM프로젝트.getC_jira_name(),
+												변경_결과.get("message"));
 
 				logger.error(실패_이유);
 				chat.sendMessageByEngine(실패_이유);
@@ -804,10 +803,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				reqStatusEntity.setC_issue_status_name(요구사항_이슈_상태.getC_issue_status_name());
 
 				String 성공_메세지 = String.format("%s 서버 :: %s 프로젝트 :: %s 요구사항 상태를 변경하였습니다. :: %s",
-						검색된_ALM서버.getC_jira_server_base_url(),
-						검색된_ALM프로젝트.getC_jira_name(),
-						reqStatusEntity.getC_title(),
-						요구사항_이슈_상태.getC_issue_status_name());
+													검색된_ALM서버.getC_jira_server_base_url(),
+													검색된_ALM프로젝트.getC_jira_name(),
+													reqStatusEntity.getC_title(),
+													요구사항_이슈_상태.getC_issue_status_name());
 
 				chat.sendMessageByEngine(성공_메세지);
 			}
