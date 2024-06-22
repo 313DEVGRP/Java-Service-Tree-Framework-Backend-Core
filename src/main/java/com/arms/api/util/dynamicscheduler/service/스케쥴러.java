@@ -15,6 +15,12 @@ import com.arms.egovframework.javaservice.treeframework.service.TreeService;
 
 public interface 스케쥴러 extends TreeService {
 
+    public String 각_제품서비스_별_요구사항이슈_조회_및_ES저장() throws Exception;
 
+    public String 증분이슈_검색엔진_벌크_저장() throws Exception;
+
+    public String 각_제품서비스_별_요구사항_Status_업데이트_From_ES() throws Exception;
+
+    public String 각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성() throws Exception;
 
 }
