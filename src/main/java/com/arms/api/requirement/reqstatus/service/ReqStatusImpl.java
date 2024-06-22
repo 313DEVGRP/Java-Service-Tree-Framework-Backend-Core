@@ -575,7 +575,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		if (생성된_요구사항_이슈 == null) {
 			return;
 		}
-		logger.info("[ ReqAddImpl :: ALM서버_요구사항_생성 ] :: 생성된_요구사항 이슈 -> {}", 생성된_요구사항_이슈.toString());
+		logger.info("[ ReqStatusImpl :: ALM서버_요구사항_생성 ] :: 생성된_요구사항 이슈 -> {}", 생성된_요구사항_이슈.toString());
 		reqStatusEntity.setC_issue_key(생성된_요구사항_이슈.getKey());
 		reqStatusEntity.setC_issue_url(생성된_요구사항_이슈.getSelf());
 
