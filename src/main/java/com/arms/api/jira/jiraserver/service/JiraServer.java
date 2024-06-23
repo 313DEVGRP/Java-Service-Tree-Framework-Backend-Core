@@ -46,4 +46,6 @@ public interface JiraServer extends TreeService {
     public JiraServerEntity 서버_항목별_기본값_설정(EntityType 설정할_항목, Long 항목_c_id, JiraServerEntity jiraServerEntity) throws Exception;
 
     public int 암스_및_엔진_서버정보수정(JiraServerEntity jiraServerEntity) throws Exception;
+
+    public boolean ALM_서버_전체_항목_갱신(JiraServerEntity jiraServerEntity) throws Exception;
 }
