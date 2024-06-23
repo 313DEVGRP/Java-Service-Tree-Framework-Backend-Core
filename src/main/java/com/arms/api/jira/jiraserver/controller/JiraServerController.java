@@ -234,7 +234,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     @ResponseBody
     @RequestMapping(
             value = {"/renewServer.do"},
-            method={RequestMethod.GET}
+            method={RequestMethod.PUT}
     )
     public ResponseEntity<?> ALM_서버_전체_항목_갱신(JiraServerDTO jiraServerDTO) throws Exception {
 
