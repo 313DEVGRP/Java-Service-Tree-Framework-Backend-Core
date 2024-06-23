@@ -91,11 +91,11 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             value={"{renewTarget}/renewNode.do"},
             method = {RequestMethod.PUT }
     )
-    public ResponseEntity<?> 지라_서버_항목별_갱신(@PathVariable String renewTarget,
+    public ResponseEntity<?> ALM_서버_항목별_갱신(@PathVariable String renewTarget,
                                           String projectCId,
                                           JiraServerDTO jiraServerDTO) throws Exception{
 
-        log.info("JiraServerController :: 지라_서버_항목별_갱신 갱신종류=> {}", renewTarget);
+        log.info("JiraServerController :: ALM_서버_항목별_갱신 갱신종류=> {}", renewTarget);
         JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
 
         EntityType 갱신항목 = EntityType.fromString(renewTarget);
@@ -229,6 +229,19 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
             CommonResponse.ApiResult<?> errorResult = CommonResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST);
             return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/renewServer.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> ALM_서버_전체_항목_갱신(JiraServerDTO jiraServerDTO) throws Exception {
+
+        log.info("JiraServerController :: ALM_서버_전체_항목_갱신");
+        JiraServerEntity jiraServerEntity = modelMapper.map(jiraServerDTO, JiraServerEntity.class);
+
+        return ResponseEntity.ok(jiraServer.ALM_서버_전체_항목_갱신(jiraServerEntity));
     }
 
 }
