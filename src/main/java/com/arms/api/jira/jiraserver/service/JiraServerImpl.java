@@ -557,7 +557,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 프로젝트.setJiraIssueTypeEntities(이슈유형_동기화목록);
                 Set<JiraProjectEntity> jiraProjectEntities = 검색된_ALM_서버.getJiraProjectEntities();
 
-                if (jiraProjectEntities.removeIf(entity -> entity.getC_id() == 프로젝트.getC_id())) {
+                if (jiraProjectEntities.removeIf(entity -> Objects.equals(entity.getC_id(), 프로젝트.getC_id()))) {
                     jiraProjectEntities.add(프로젝트);
                 }
 
@@ -578,8 +578,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                     .orElse(new HashSet<>());
 
             Map<String, JiraIssueStatusEntity> 기존이슈상태_맵 = 해당_서버_이슈_상태_목록.stream()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toMap(이슈상태 -> 이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
+                                                                .filter(Objects::nonNull)
+                                                                .collect(Collectors.toMap(이슈상태 ->
+                                                                          이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
 
             List<지라이슈상태_데이터> 가져온_이슈상태_목록;
             try {
@@ -591,7 +592,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 return 오류_메세지;
             }
 
-            Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
+            Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록,
+                                                                             서버유형, 엔진_통신_아이디, 갱신할_항목);
+
             검색된_ALM_서버.setJiraIssueStatusEntities(이슈상태_동기화목록);
         }
         else if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 서버유형)) {
@@ -600,7 +603,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
             // 프로젝트 아이디가 있는 경우 - 해당 프로젝트만 이슈상태 갱신시키는 로직
             if (프로젝트_C아이디 == null || 프로젝트_C아이디.isEmpty()) {
                 Set<JiraProjectEntity> 동기화_프로젝트_목록 = new HashSet<>();
-                Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_ALM_서버.getJiraProjectEntities();
+                Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = Optional.ofNullable(검색된_ALM_서버.getJiraProjectEntities())
+                                                                    .orElse(new HashSet<>());
 
                 for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
                     if (프로젝트.getC_etc() != null && StringUtils.equals(프로젝트.getC_etc(), "delete")) {
@@ -624,7 +628,9 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         return 오류_메세지;
                     }
 
-                    Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
+                    Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록,
+                                                                                    서버유형, 엔진_통신_아이디, 갱신할_항목);
+
                     프로젝트.setJiraIssueStatusEntities(이슈상태_동기화목록);
                     동기화_프로젝트_목록.add(프로젝트);
                 }
@@ -657,7 +663,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 프로젝트.setJiraIssueStatusEntities(이슈상태_동기화목록);
                 Set<JiraProjectEntity> jiraProjectEntities = 검색된_ALM_서버.getJiraProjectEntities();
 
-                if (jiraProjectEntities.removeIf(entity -> entity.getC_id() == 프로젝트.getC_id())) {
+                if (jiraProjectEntities.removeIf(entity -> Objects.equals(entity.getC_id(), 프로젝트.getC_id()))) {
                     jiraProjectEntities.add(프로젝트);
                 }
 
