@@ -44,19 +44,19 @@ public interface 엔진통신기 {
     );
 
     @GetMapping("/{connectId}/jira/project/list")
-    public List<지라프로젝트_데이터> 지라_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
+    public List<지라프로젝트_데이터> ALM_프로젝트_목록_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuetype/list")
-    public List<지라이슈유형_데이터> 지라_이슈_유형_가져오기(@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈유형_데이터> ALM_이슈_유형_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuepriority/list")
-    public List<지라이슈우선순위_데이터> 지라_이슈_우선순위_가져오기(@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈우선순위_데이터> ALM_이슈_우선순위_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issueresolution/list")
-    public List<지라이슈해결책_데이터> 지라_이슈_해결책_가져오기(@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈해결책_데이터> ALM_이슈_해결책_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/{connectId}/jira/issuestatus/list")
-    public List<지라이슈상태_데이터> 지라_이슈_상태_가져오기(@PathVariable("connectId") String 연결_아이디);
+    public List<지라이슈상태_데이터> ALM_이슈_상태_가져오기(@PathVariable("connectId") String 연결_아이디);
 
     @GetMapping("/engine/jira/{connectId}/issue/search/{issueKey}/subAndLinks")
     public List<지라이슈> 지라_연결된이슈_서브테스크_가져오기(@PathVariable("connectId") Long 연결_아이디,
