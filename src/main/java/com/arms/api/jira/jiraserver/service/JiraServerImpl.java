@@ -403,53 +403,67 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
         logger.info("[ JiraServerImpl :: 서버_엔티티_항목별_갱신 ] :: 갱신할_항목 → {}, 서버유형 → {}", 갱신할_항목.getType(), 서버유형);
 
+        String 오류_메세지;
         switch (갱신할_항목) {
             case 프로젝트:
-                this.프로젝트_갱신(검색된_ALM_서버);
+                오류_메세지 = this.프로젝트_갱신(검색된_ALM_서버);
                 break;
             case 이슈유형:
-                this.이슈유형_갱신(검색된_ALM_서버, 프로젝트_C아이디);
+                오류_메세지 = this.이슈유형_갱신(검색된_ALM_서버, 프로젝트_C아이디);
                 break;
             case 이슈상태:
-                this.이슈상태_갱신(검색된_ALM_서버, 프로젝트_C아이디);
+                오류_메세지 = this.이슈상태_갱신(검색된_ALM_서버, 프로젝트_C아이디);
                 break;
             case 이슈우선순위:
-                this.이슈우선순위_갱신(검색된_ALM_서버);
+                오류_메세지 = this.이슈우선순위_갱신(검색된_ALM_서버);
                 break;
             case 이슈해결책:
-                this.이슈해결책_갱신(검색된_ALM_서버);
+                오류_메세지 = this.이슈해결책_갱신(검색된_ALM_서버);
                 break;
             default:
                 throw new IllegalArgumentException("알 수 없는 갱신 항목: " + 갱신할_항목);
         }
 
-        chat.sendMessageByEngine(검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신되었습니다.");
+        String 갱신_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신되었습니다.";
+        if (오류_메세지 != null) {
+            갱신_메세지 = 오류_메세지;
+        }
+        chat.sendMessageByEngine(갱신_메세지);
 
         this.updateNode(검색된_ALM_서버);
         return 검색된_ALM_서버;
     }
 
-    private void 프로젝트_갱신(JiraServerEntity 검색된_ALM_서버) {
+    private String 프로젝트_갱신(JiraServerEntity 검색된_ALM_서버) {
         EntityType 갱신할_항목 = EntityType.프로젝트;
         String 엔진_통신_아이디 = 검색된_ALM_서버.getC_jira_server_etc();
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
 
         Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = Optional.ofNullable(검색된_ALM_서버.getJiraProjectEntities())
-                .orElse(new HashSet<>());
+                                                        .orElse(new HashSet<>());
 
         Map<String, JiraProjectEntity> 기존프로젝트_맵 = 해당_서버_프로젝트_목록.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(프로젝트 -> 프로젝트.getC_jira_url(), 프로젝트 -> 프로젝트));
 
-        List<지라프로젝트_데이터> 가져온_프로젝트_목록 = 엔진통신기.지라_프로젝트_목록_가져오기(엔진_통신_아이디);
+        List<지라프로젝트_데이터> 가져온_프로젝트_목록;
+        try {
+            가져온_프로젝트_목록 = 엔진통신기.ALM_프로젝트_목록_가져오기(엔진_통신_아이디);
+        }
+        catch (Exception e) {
+            String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+            logger.error(오류_메세지);
+            return 오류_메세지;
+        }
 
         Set<JiraProjectEntity> 프로젝트_동기화목록 = 서버_엔티티_동기화(해당_서버_프로젝트_목록, 기존프로젝트_맵, 가져온_프로젝트_목록,
                                                                         서버유형, 엔진_통신_아이디, 갱신할_항목);
 
         검색된_ALM_서버.setJiraProjectEntities(프로젝트_동기화목록);
+        return null;
     }
 
-    private void 이슈유형_갱신(JiraServerEntity 검색된_ALM_서버, String 프로젝트_C아이디) throws Exception {
+    private String 이슈유형_갱신(JiraServerEntity 검색된_ALM_서버, String 프로젝트_C아이디) throws Exception {
         EntityType 갱신할_항목 = EntityType.이슈유형;
         String 엔진_통신_아이디 = 검색된_ALM_서버.getC_jira_server_etc();
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
@@ -462,7 +476,15 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                     .filter(Objects::nonNull)
                     .collect(Collectors.toMap(이슈유형 -> 이슈유형.getC_issue_type_url(), 이슈유형 -> 이슈유형));
 
-            List<지라이슈유형_데이터> 가져온_이슈유형_목록 = 엔진통신기.지라_이슈_유형_가져오기(엔진_통신_아이디);
+            List<지라이슈유형_데이터> 가져온_이슈유형_목록;
+            try {
+                가져온_이슈유형_목록 = 엔진통신기.ALM_이슈_유형_가져오기(엔진_통신_아이디);
+            }
+            catch (Exception e) {
+                String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                logger.error(오류_메세지);
+                return 오류_메세지;
+            }
 
             Set<JiraIssueTypeEntity> 이슈유형_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈유형_목록, 기존이슈유형_맵, 가져온_이슈유형_목록,
                                                                             서버유형, 엔진_통신_아이디, 갱신할_항목);
@@ -475,9 +497,13 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
             // 프로젝트 아이디가 있는 경우 - 해당 프로젝트만 이슈유형을 갱신시키는 로직
             if (프로젝트_C아이디 == null || 프로젝트_C아이디.isEmpty()) {
                 Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = Optional.ofNullable(검색된_ALM_서버.getJiraProjectEntities())
-                        .orElse(new HashSet<>());
+                                                                .orElse(new HashSet<>());
 
                 for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
+                    if (프로젝트.getC_etc() != null && StringUtils.equals(프로젝트.getC_etc(), "delete")) {
+                        continue;
+                    }
+
                     Set<JiraIssueTypeEntity> 프로젝트의_이슈유형_목록 = Optional.ofNullable(프로젝트.getJiraIssueTypeEntities())
                             .orElse(new HashSet<>());
 
@@ -485,7 +511,15 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                             .filter(Objects::nonNull)
                             .collect(Collectors.toMap(이슈유형 -> 이슈유형.getC_issue_type_url(), 이슈유형 -> 이슈유형));
 
-                    List<지라이슈유형_데이터> 가져온_이슈유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    List<지라이슈유형_데이터> 가져온_이슈유형_목록;
+                    try {
+                        가져온_이슈유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    }
+                    catch (Exception e) {
+                        String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                        logger.error(오류_메세지);
+                        return 오류_메세지;
+                    }
 
                     Set<JiraIssueTypeEntity> 이슈유형_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈유형_목록, 기존이슈유형_맵, 가져온_이슈유형_목록,
                                                                                         서버유형, 엔진_통신_아이디, 갱신할_항목);
@@ -507,17 +541,34 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         .filter(Objects::nonNull)
                         .collect(Collectors.toMap(이슈유형 -> 이슈유형.getC_issue_type_url(), 이슈유형 -> 이슈유형));
 
-                List<지라이슈유형_데이터>  가져온_이슈유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                List<지라이슈유형_데이터> 가져온_이슈유형_목록;
+                try {
+                    가져온_이슈유형_목록 = 엔진통신기.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                }
+                catch (Exception e) {
+                    String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                    logger.error(오류_메세지);
+                    return 오류_메세지;
+                }
 
                 Set<JiraIssueTypeEntity> 이슈유형_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈유형_목록, 기존이슈유형_맵, 가져온_이슈유형_목록,
                                                                                 서버유형, 엔진_통신_아이디, 갱신할_항목);
 
                 프로젝트.setJiraIssueTypeEntities(이슈유형_동기화목록);
+                Set<JiraProjectEntity> jiraProjectEntities = 검색된_ALM_서버.getJiraProjectEntities();
+
+                if (jiraProjectEntities.removeIf(entity -> entity.getC_id() == 프로젝트.getC_id())) {
+                    jiraProjectEntities.add(프로젝트);
+                }
+
+                검색된_ALM_서버.setJiraProjectEntities(jiraProjectEntities);
             }
         }
+
+        return null;
     }
 
-    private void 이슈상태_갱신(JiraServerEntity 검색된_ALM_서버, String 프로젝트_C아이디) throws Exception {
+    private String 이슈상태_갱신(JiraServerEntity 검색된_ALM_서버, String 프로젝트_C아이디) throws Exception {
         EntityType 갱신할_항목 = EntityType.이슈상태;
         String 엔진_통신_아이디 = 검색된_ALM_서버.getC_jira_server_etc();
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
@@ -530,11 +581,20 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                     .filter(Objects::nonNull)
                     .collect(Collectors.toMap(이슈상태 -> 이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
 
-            List<지라이슈상태_데이터> 가져온_이슈상태_목록 = 엔진통신기.지라_이슈_상태_가져오기(엔진_통신_아이디);
+            List<지라이슈상태_데이터> 가져온_이슈상태_목록;
+            try {
+                가져온_이슈상태_목록 = 엔진통신기.ALM_이슈_상태_가져오기(엔진_통신_아이디);
+            }
+            catch (Exception e) {
+                String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                logger.error(오류_메세지);
+                return 오류_메세지;
+            }
 
             Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
             검색된_ALM_서버.setJiraIssueStatusEntities(이슈상태_동기화목록);
-        } else if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 서버유형)) {
+        }
+        else if (StringUtils.equals(ServerType.JIRA_CLOUD.getType(), 서버유형)) {
 
             // 프로젝트_아이디가 null - 서버 등록. 전체 프로젝트에 대한 이슈상태 갱신로직
             // 프로젝트 아이디가 있는 경우 - 해당 프로젝트만 이슈상태 갱신시키는 로직
@@ -543,6 +603,10 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 Set<JiraProjectEntity> 해당_서버_프로젝트_목록 = 검색된_ALM_서버.getJiraProjectEntities();
 
                 for (JiraProjectEntity 프로젝트 : 해당_서버_프로젝트_목록) {
+                    if (프로젝트.getC_etc() != null && StringUtils.equals(프로젝트.getC_etc(), "delete")) {
+                        continue;
+                    }
+
                     Set<JiraIssueStatusEntity> 프로젝트의_이슈상태_목록 = Optional.ofNullable(프로젝트.getJiraIssueStatusEntities())
                             .orElse(new HashSet<>());
 
@@ -550,7 +614,15 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                             .filter(Objects::nonNull)
                             .collect(Collectors.toMap(이슈상태 -> 이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
 
-                    List<지라이슈상태_데이터> 가져온_이슈상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    List<지라이슈상태_데이터> 가져온_이슈상태_목록;
+                    try {
+                        가져온_이슈상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    }
+                    catch (Exception e) {
+                        String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                        logger.error(오류_메세지);
+                        return 오류_메세지;
+                    }
 
                     Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
                     프로젝트.setJiraIssueStatusEntities(이슈상태_동기화목록);
@@ -558,7 +630,8 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 }
 
                 검색된_ALM_서버.setJiraProjectEntities(동기화_프로젝트_목록);
-            } else {
+            }
+            else {
                 JiraProjectEntity 프로젝트_검색전용 = new JiraProjectEntity();
                 프로젝트_검색전용.setC_id(Long.parseLong(프로젝트_C아이디));
                 JiraProjectEntity 프로젝트 = jiraProject.getNode(프로젝트_검색전용);
@@ -570,15 +643,32 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                         .filter(Objects::nonNull)
                         .collect(Collectors.toMap(이슈상태 -> 이슈상태.getC_issue_status_url(), 이슈상태 -> 이슈상태));
 
-                List<지라이슈상태_데이터> 가져온_이슈상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
-
+                List<지라이슈상태_데이터> 가져온_이슈상태_목록;
+                try {
+                    가져온_이슈상태_목록 = 엔진통신기.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                }
+                catch (Exception e) {
+                    String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+                    logger.error(오류_메세지);
+                    return 오류_메세지;
+                }
                 Set<JiraIssueStatusEntity> 이슈상태_동기화목록 = 서버_엔티티_동기화(프로젝트의_이슈상태_목록, 기존이슈상태_맵, 가져온_이슈상태_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
+
                 프로젝트.setJiraIssueStatusEntities(이슈상태_동기화목록);
+                Set<JiraProjectEntity> jiraProjectEntities = 검색된_ALM_서버.getJiraProjectEntities();
+
+                if (jiraProjectEntities.removeIf(entity -> entity.getC_id() == 프로젝트.getC_id())) {
+                    jiraProjectEntities.add(프로젝트);
+                }
+
+                검색된_ALM_서버.setJiraProjectEntities(jiraProjectEntities);
             }
         }
+
+        return null;
     }
 
-    private void 이슈우선순위_갱신(JiraServerEntity 검색된_ALM_서버) {
+    private String 이슈우선순위_갱신(JiraServerEntity 검색된_ALM_서버) {
         EntityType 갱신할_항목 = EntityType.이슈우선순위;
         String 엔진_통신_아이디 = 검색된_ALM_서버.getC_jira_server_etc();
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
@@ -590,13 +680,24 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(우선순위 -> 우선순위.getC_issue_priority_url(), 우선순위 -> 우선순위));
 
-        List<지라이슈우선순위_데이터> 가져온_이슈우선순위_목록 = 엔진통신기.지라_이슈_우선순위_가져오기(엔진_통신_아이디);
+        List<지라이슈우선순위_데이터> 가져온_이슈우선순위_목록 = null;
+        try {
+            가져온_이슈우선순위_목록 = 엔진통신기.ALM_이슈_우선순위_가져오기(엔진_통신_아이디);
+        }
+        catch (Exception e) {
+            String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+            logger.error(오류_메세지);
+            return 오류_메세지;
+        }
 
-        Set<JiraIssuePriorityEntity> 우선순위_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_우선순위_목록, 기존이슈우선순위_맵, 가져온_이슈우선순위_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
+        Set<JiraIssuePriorityEntity> 우선순위_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_우선순위_목록, 기존이슈우선순위_맵, 가져온_이슈우선순위_목록,
+                                                                            서버유형, 엔진_통신_아이디, 갱신할_항목);
+
         검색된_ALM_서버.setJiraIssuePriorityEntities(우선순위_동기화목록);
+        return null;
     }
 
-    private void 이슈해결책_갱신(JiraServerEntity 검색된_ALM_서버) {
+    private String 이슈해결책_갱신(JiraServerEntity 검색된_ALM_서버) {
         EntityType 갱신할_항목 = EntityType.이슈해결책;
         String 엔진_통신_아이디 = 검색된_ALM_서버.getC_jira_server_etc();
         String 서버유형 = 검색된_ALM_서버.getC_jira_server_type();
@@ -608,10 +709,21 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(이슈해결책 -> 이슈해결책.getC_issue_resolution_url(), 이슈해결책 -> 이슈해결책));
 
-        List<지라이슈해결책_데이터> 가져온_이슈해결책_목록 = 엔진통신기.지라_이슈_해결책_가져오기(엔진_통신_아이디);
+        List<지라이슈해결책_데이터> 가져온_이슈해결책_목록;
+        try {
+            가져온_이슈해결책_목록 = 엔진통신기.ALM_이슈_해결책_가져오기(엔진_통신_아이디);
+        }
+        catch (Exception e) {
+            String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
+            logger.error(오류_메세지);
+            return 오류_메세지;
+        }
 
-        Set<JiraIssueResolutionEntity> 해결책_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_해결책_목록, 기존이슈해결책_맵, 가져온_이슈해결책_목록, 서버유형, 엔진_통신_아이디, 갱신할_항목);
+        Set<JiraIssueResolutionEntity> 해결책_동기화목록 = 서버_엔티티_동기화(해당_서버_이슈_해결책_목록, 기존이슈해결책_맵, 가져온_이슈해결책_목록,
+                                                                            서버유형, 엔진_통신_아이디, 갱신할_항목);
+
         검색된_ALM_서버.setJiraIssueResolutionEntities(해결책_동기화목록);
+        return null;
     }
 
     private <E extends TreeSearchEntity, T extends ALM_데이터> Set<E> 서버_엔티티_동기화(Set<E> 등록된_엔티티_목록, Map<String, E> 기존_맵, List<T> 가져온_엔티티_목록,
