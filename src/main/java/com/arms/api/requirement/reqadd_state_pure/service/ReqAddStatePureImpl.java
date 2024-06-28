@@ -76,8 +76,8 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 		SessionUtil.removeAttribute("reqProgress");
 
 		지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-				.메인그룹필드("cReqLink")
-				.컨텐츠보기여부(false)
+				.메인_그룹_필드("cReqLink")
+				.컨텐츠_보기_여부(false)
 				.크기(1000)
 				.build();
 
@@ -93,7 +93,7 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 		AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
 		aggregationRequestDTO.setPdServiceLink(pdServiceId);
 		aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-		aggregationRequestDTO.set메인그룹필드("cReqLink");
+		aggregationRequestDTO.set메인_그룹_필드("cReqLink");
 
 		ResponseEntity<검색결과_목록_메인> 완료상태 = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
 

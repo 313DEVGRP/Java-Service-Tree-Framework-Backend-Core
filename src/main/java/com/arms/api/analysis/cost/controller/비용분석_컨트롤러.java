@@ -64,12 +64,12 @@ public class 비용분석_컨트롤러 {
             return null;
         }
 
-        String 하위그룹필드 = API호출변수.담당자이름집계;
+        String 하위그룹필드 = API호출변수.담당자_이름_집계;
         지라이슈_일반_집계_요청 일반_집계_요청_세팅 = 지라이슈_일반_집계_요청.builder()
-                .메인그룹필드(API호출변수.담당자아이디집계)
-                .컨텐츠보기여부(true)
+                .메인_그룹_필드(API호출변수.담당자_아이디_집계)
+                .컨텐츠_보기_여부(true)
                 .크기(1000)
-                .하위그룹필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
+                .하위_그룹_필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
                 .build();
 
         버전요구사항별_담당자데이터 결과 = 비용서비스.전체_담당자가져오기(제품아이디, 버전아이디_목록, 일반_집계_요청_세팅);
