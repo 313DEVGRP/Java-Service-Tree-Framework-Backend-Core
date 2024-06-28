@@ -1,11 +1,13 @@
 package com.arms.api.util.communicate.external.request.aggregation;
 
 import com.arms.api.analysis.common.AggregationRequestDTO;
-import lombok.*;
+import com.arms.api.dashboard.model.제품버전목록;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
-
-import com.arms.api.dashboard.model.제품버전목록;
 
 
 @Getter
@@ -22,10 +24,10 @@ public class 트리맵_검색요청 extends AggregationRequestDTO {
 		트리맵_검색요청.setPdServiceVersionLinks(aggregationRequestDTO.getPdServiceVersionLinks());
 		트리맵_검색요청.setIsReqType(aggregationRequestDTO.getIsReqType());
 		트리맵_검색요청.set크기(aggregationRequestDTO.get크기());
-		트리맵_검색요청.set하위크기(aggregationRequestDTO.get하위크기());
-		트리맵_검색요청.set메인그룹필드(aggregationRequestDTO.get메인그룹필드());
-		트리맵_검색요청.set하위그룹필드들(aggregationRequestDTO.get하위그룹필드들());
-		트리맵_검색요청.set컨텐츠보기여부(aggregationRequestDTO.is컨텐츠보기여부());
+		트리맵_검색요청.set하위_크기(aggregationRequestDTO.get하위_크기());
+		트리맵_검색요청.set메인_그룹_필드(aggregationRequestDTO.get메인_그룹_필드());
+		트리맵_검색요청.set하위_그룹_필드들(aggregationRequestDTO.get하위_그룹_필드들());
+		트리맵_검색요청.set컨텐츠_보기_여부(aggregationRequestDTO.is컨텐츠_보기_여부());
 		return 트리맵_검색요청;
 	}
 

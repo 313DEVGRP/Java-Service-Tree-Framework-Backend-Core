@@ -20,10 +20,10 @@ public class AggregationRequestDTO {
     @NotEmpty private List<Long> pdServiceVersionLinks;
     @Builder.Default private IsReqType isReqType = IsReqType.ALL;
     private Boolean isReq;
-    private String 메인그룹필드;
-    private List<String> 하위그룹필드들;
-    private boolean 컨텐츠보기여부;
+    private String 메인_그룹_필드;
+    private List<String> 하위_그룹_필드들;
+    private boolean 컨텐츠_보기_여부;
     @Builder.Default private int 크기 = 1000;
-    @Builder.Default private int 하위크기 = 1000;
+    @Builder.Default private int 하위_크기 = 1000;
 
 }

@@ -3,9 +3,10 @@ package com.arms.api.analysis.resource.controller;
 import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.resource.service.ResourceService;
 import com.arms.api.dashboard.model.Worker;
-import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
+import com.arms.api.util.API호출변수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
+import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -71,11 +73,11 @@ public class 리소스분석_컨트롤러 {
         log.info("[리소스분석_컨트롤러 :: 작업자별_업무_처리_현황] :: pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
         지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("assignee.assignee_emailAddress.keyword")
-                .하위그룹필드들(Arrays.asList("isReq,status.status_name.keyword".split(",")))
-                .컨텐츠보기여부(false)
+                .메인_그룹_필드(API호출변수.담당자_이메일_집계)
+                .하위_그룹_필드들(Arrays.asList("isReq,status.status_name.keyword".split(",")))
+                .컨텐츠_보기_여부(false)
                 .크기(1000)
-                .하위크기(1000)
+                .하위_크기(1000)
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
@@ -96,11 +98,11 @@ public class 리소스분석_컨트롤러 {
         log.info("[리소스분석_컨트롤러 :: 작업자별_업무_처리_현황] :: pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
         지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("isReq")
-                .하위그룹필드들(Arrays.asList("assignee.assignee_emailAddress.keyword".split(",")))
-                .컨텐츠보기여부(false)
+                .메인_그룹_필드("isReq")
+                .하위_그룹_필드들(Arrays.asList(API호출변수.담당자_이메일_집계.split(",")))
+                .컨텐츠_보기_여부(false)
                 .크기(10)
-                .하위크기(size)
+                .하위_크기(size)
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
@@ -119,8 +121,8 @@ public class 리소스분석_컨트롤러 {
 
         log.info("리소스분석_컨트롤러 :: 작업자_정보_통계.제품서비스의 c_id ==> {}, 선택된버전의 c_id ==> {}", pdServiceId, pdServiceVersionLinks.toString());
         지라이슈_단순_집계_요청 검색요청_데이터 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("assignee.assignee_emailAddress.keyword")
-                .컨텐츠보기여부(false)
+                .메인_그룹_필드(API호출변수.담당자_이메일_집계)
+                .컨텐츠_보기_여부(false)
                 .크기(5)
                 .build();
 

@@ -5,6 +5,7 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
+import com.arms.api.util.API호출변수;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
@@ -91,8 +92,8 @@ public class TopMenuServiceImpl implements  TopMenuService{
     public Map<String, Long> 톱메뉴_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
 
         지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("isReq")
-                .컨텐츠보기여부(false)
+                .메인_그룹_필드("isReq")
+                .컨텐츠_보기_여부(false)
                 .크기(1000)
                 .build();
         ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
@@ -135,11 +136,11 @@ public class TopMenuServiceImpl implements  TopMenuService{
     @Override
     public Map<String, Long> 톱메뉴_작업자별_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
         지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
-                .메인그룹필드("assignee.assignee_emailAddress.keyword")
-                .하위그룹필드들(Arrays.asList("isReq"))
-                .컨텐츠보기여부(false)
+                .메인_그룹_필드(API호출변수.담당자_이메일_집계)
+                .하위_그룹_필드들(Arrays.asList("isReq"))
+                .컨텐츠_보기_여부(false)
                 .크기(1000)
-                .하위크기(100)
+                .하위_크기(100)
                 .build();
 
         Map<String, Long> 요구사항_서브테스크_종합 = new HashMap<>();
@@ -155,7 +156,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
         // 전체 작업자 수 => 필드
         검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
         Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
-        List<검색결과> 작업자_검색결과_목록 = 메인그룹_집계결과.get("group_by_assignee.assignee_emailAddress.keyword");
+        List<검색결과> 작업자_검색결과_목록 = 메인그룹_집계결과.get("group_by_" + API호출변수.담당자_이메일_집계);
         요구사항_서브테스크_종합.put("resource", Long.valueOf(작업자_검색결과_목록.size()));
 
         for (검색결과 작업자_검색결과 : 작업자_검색결과_목록) {

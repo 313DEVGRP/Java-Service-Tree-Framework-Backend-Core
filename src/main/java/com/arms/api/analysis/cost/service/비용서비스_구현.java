@@ -86,13 +86,13 @@ public class 비용서비스_구현 implements 비용서비스 {
 
         Map<String, List<검색결과>> 결과 = Optional.ofNullable(검색결과목록메인.get검색결과()).orElse(Collections.emptyMap());
 
-        List<검색결과> groupByAssigneeAccountId = Optional.ofNullable(결과.get("group_by_" + API호출변수.담당자아이디집계)).orElse(Collections.emptyList());
+        List<검색결과> groupByAssigneeAccountId = Optional.ofNullable(결과.get("group_by_" + API호출변수.담당자_아이디_집계)).orElse(Collections.emptyList());
 
         Map<String, 버전요구사항별_담당자데이터.담당자데이터> result = groupByAssigneeAccountId.stream().collect(Collectors.toMap(
                 검색결과::get필드명,
                 data -> {
                     버전요구사항별_담당자데이터.담당자데이터 담당자 = 버전요구사항별_담당자데이터.담당자데이터.builder()
-                            .이름(data.get하위검색결과().get("group_by_" + API호출변수.담당자이름집계).get(0).get필드명())
+                            .이름(data.get하위검색결과().get("group_by_" + API호출변수.담당자_이름_집계).get(0).get필드명())
                             .연봉(0L)
                             .build();
 
@@ -757,7 +757,7 @@ public class 비용서비스_구현 implements 비용서비스 {
     @Override
     public Set<String> getAssignees(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
         AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
-        aggregationRequestDTO.set메인그룹필드("assignee.assignee_accountId.keyword");
+        aggregationRequestDTO.set메인_그룹_필드(API호출변수.담당자_아이디_집계);
         aggregationRequestDTO.setIsReqType(IsReqType.ALL);
         aggregationRequestDTO.setPdServiceLink(pdServiceLink);
         aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
