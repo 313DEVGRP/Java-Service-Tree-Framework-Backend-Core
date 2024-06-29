@@ -71,10 +71,10 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     private JiraIssueStatus jiraIssueStatus;
 
     @Autowired
-    private AggregationService AggregationService;
+    private AggregationService aggregationService;
 
     @Autowired
-    private EngineService EngineService;
+    private EngineService engineService;
 
     @PostConstruct
     public void initialize() {
@@ -152,7 +152,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         요청.setPdServiceVersionLinks(Arrays.stream(versionsString.split(",")).map(Long::parseLong).collect(Collectors.toList()));
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", EngineService.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
+        modelAndView.addObject("result", engineService.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
         return modelAndView;
     }
 
@@ -252,7 +252,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result",
-                        AggregationService.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
+                        aggregationService.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
         return modelAndView;
 
     }
@@ -283,7 +283,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             String 엔진통신_아이디 = 검색결과.getC_jira_server_etc();
             String 이슈키 = request.getParameter("issueKey");
 
-            List<지라이슈> 링크드이슈_서브데스크 = EngineService.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
+            List<지라이슈> 링크드이슈_서브데스크 = engineService.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
 
             log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크);
 
@@ -333,7 +333,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         String 담당자_이메일 = request.getParameter("assigneeEmail");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", EngineService.제품서비스별_담당자_요구사항_통계(dummy_jira_server, 제품서비스_아이디, 담당자_이메일));
+        modelAndView.addObject("result", engineService.제품서비스별_담당자_요구사항_통계(dummy_jira_server, 제품서비스_아이디, 담당자_이메일));
 
         return modelAndView;
     }
@@ -375,7 +375,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         SessionUtil.removeAttribute("getPdRelatedReqStats");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", EngineService.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일));
+        modelAndView.addObject("result", engineService.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일));
 
         return modelAndView;
     }

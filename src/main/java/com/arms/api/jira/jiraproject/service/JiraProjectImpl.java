@@ -46,7 +46,7 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private EngineService EngineService;
+    private EngineService engineService;
 
     @Autowired
     private GlobalTreeMapService globalTreeMapService;

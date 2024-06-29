@@ -49,7 +49,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     private JiraServer jiraServer;
 
     @Autowired
-    private EngineService EngineService;
+    private EngineService engineService;
 
     @PostConstruct
     public void initialize() {
@@ -222,7 +222,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         log.info("JiraServerController :: 계정정보_검증하기");
 
         try{
-            계정정보_데이터 검증결과 = EngineService.계정정보_검증하기(지라서버정보_데이터).getBody();
+            계정정보_데이터 검증결과 = engineService.계정정보_검증하기(지라서버정보_데이터).getBody();
             return ResponseEntity.ok(CommonResponse.success( 검증결과));
         }catch (Exception e){
             log.error("온프라미스 계정 정보 조회시 오류가 발생하였습니다." + e.getMessage());
