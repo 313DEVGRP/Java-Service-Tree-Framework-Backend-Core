@@ -30,7 +30,7 @@ import com.arms.api.util.filerepository.service.FileRepository;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.*;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -49,41 +49,25 @@ import java.util.stream.Collectors;
 import static com.arms.egovframework.javaservice.treeframework.remote.Global.chat;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service("pdService")
 public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final FileRepository fileRepository;
 
-    @Autowired
-    @Qualifier("fileRepository")
-    private FileRepository fileRepository;
+    private final PdServiceVersion pdServiceVersion;
 
-    @Autowired
-    @Qualifier("pdServiceVersion")
-    private PdServiceVersion pdServiceVersion;
+    private final PdServiceDetail pdServiceDetail;
 
-    @Autowired
-    @Qualifier("pdServiceDetail")
-    private PdServiceDetail pdServiceDetail;
+    private final DynamicDBMaker dynamicDBMaker;
 
-    @Autowired
-    @Qualifier("dynamicDBMaker")
-    private DynamicDBMaker dynamicDBMaker;
+    private final GlobalTreeMapService globalTreeMapService;
 
-    @Autowired
-    private GlobalTreeMapService globalTreeMapService;
+    private final GlobalContentsTreeMapService globalContentsTreeMapService;
 
-    @Autowired
-    private GlobalContentsTreeMapService globalContentsTreeMapService;
+    private final JiraProjectPure jiraProjectPure;
 
-    @Autowired
-    @Qualifier("jiraProjectPure")
-    private JiraProjectPure jiraProjectPure;
-
-    @Autowired
-    @Qualifier("jiraServerPure")
-    private JiraServerPure jiraServerPure;
+    private final JiraServerPure jiraServerPure;
 
     @Override
     public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception {
@@ -110,26 +94,6 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         return pdServiceNode;
     }
 
-    @Override
-    public PdServiceEntity addNodeToEndPosition(PdServiceEntity pdServiceEntity) throws Exception {
-        //루트 노드를 기준으로 리스트를 검색
-        PdServiceEntity paramPdServiceEntity = new PdServiceEntity();
-        paramPdServiceEntity.setWhere("c_parentid", TreeConstant.First_Node_CID);
-        List<PdServiceEntity> list = this.getChildNode(paramPdServiceEntity);
-
-        //검색된 노드중 maxPosition을 찾는다.
-        PdServiceEntity maxPositionPdServiceEntity = list
-                .stream()
-                .max(Comparator.comparing(PdServiceEntity::getC_position))
-                .orElseThrow(NoSuchElementException::new);
-
-        //노드 값 셋팅
-        pdServiceEntity.setRef(TreeConstant.First_Node_CID);
-        pdServiceEntity.setC_position(maxPositionPdServiceEntity.getC_position() + 1);
-        pdServiceEntity.setC_type(TreeConstant.Leaf_Node_TYPE);
-
-        return this.addNode(pdServiceEntity);
-    }
 
     @Override
     @Transactional
@@ -196,7 +160,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                 PdServiceVersionEntity 추가된버전 = pdServiceVersion.addNode(요청버전);
                 디비_버전들.add(추가된버전);
             } else {
-                logger.info("이미 존재하는 버전 = " + 요청버전);
+                log.info("이미 존재하는 버전 = " + 요청버전);
             }
         }
 
@@ -248,7 +212,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                 GlobalTreeMapEntity savedMap = globalTreeMapService.saveOne(globalTreeMap);
                 fileCids.add(savedMap.getFilerepository_link());
             } else {
-                logger.info("already registe PdService = " + pdservice_link + " & FileRepo = " + globalTreeMap.getFilerepository_link());
+                log.info("already registe PdService = " + pdservice_link + " & FileRepo = " + globalTreeMap.getFilerepository_link());
                 fileCids.add(globalTreeMap.getFilerepository_link());
             }
 
@@ -325,7 +289,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         Set<PdServiceVersionEntity> versionSet = savedPdServiceNode.getPdServiceVersionEntities();
         PdServiceVersionEntity 지울_버전엔티티 = versionSet.stream().filter(entity -> entity.getC_id().equals(versionID)).findFirst().orElse(null);
         String 지울_버전_이름 = "";
-        if(지울_버전엔티티 != null) {
+        if (지울_버전엔티티 != null) {
             지울_버전_이름 = 지울_버전엔티티.getC_title();
             versionSet.remove(지울_버전엔티티);
         }
@@ -335,8 +299,8 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
         삭제대상버전.setC_id(versionID);
         pdServiceVersion.removeNode(삭제대상버전);
 
-        if(StringUtils.isNotEmpty(지울_버전_이름)) {
-            chat.sendMessageByEngine(savedPdServiceNode.getC_title()+"의 버전 " + 지울_버전_이름 + "이(가) 삭제되었습니다.");
+        if (StringUtils.isNotEmpty(지울_버전_이름)) {
+            chat.sendMessageByEngine(savedPdServiceNode.getC_title() + "의 버전 " + 지울_버전_이름 + "이(가) 삭제되었습니다.");
         }
         return pdService;
     }
@@ -364,7 +328,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                     .collect(Collectors.toList());
 
             JiraProjectPureEntity 프로젝트_퓨어_검색 = new JiraProjectPureEntity();
-            프로젝트_퓨어_검색.getCriterions().add(Restrictions.in("c_id",연관_지라프로젝트_아이디_목록));
+            프로젝트_퓨어_검색.getCriterions().add(Restrictions.in("c_id", 연관_지라프로젝트_아이디_목록));
             // 3. 솎아낸 아이디만 모아서, 지라프로젝트 엔티티 가져오기
             List<JiraProjectPureEntity> 지라프로젝트_목록 = jiraProjectPure.getChildNode(프로젝트_퓨어_검색);
             // 4. 지라프로젝트 맵 생성 (K-V) - (아이디-명)
@@ -372,11 +336,11 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                     .collect(Collectors.toMap(JiraProjectPureEntity::getC_id, JiraProjectPureEntity::getC_jira_name));
 
             List<GlobalTreeMapEntity> 유니크_지라프로젝트_서버_트리맵 = globalTreeMapService
-                    .findAllByIds(연관_지라프로젝트_아이디_목록,"jiraproject_link").stream()
-                    .filter(글로벌트리맵엔티티->글로벌트리맵엔티티.getJiraserver_link() != null) // 이 시점에 server와 project 만 있다.
+                    .findAllByIds(연관_지라프로젝트_아이디_목록, "jiraproject_link").stream()
+                    .filter(글로벌트리맵엔티티 -> 글로벌트리맵엔티티.getJiraserver_link() != null) // 이 시점에 server와 project 만 있다.
                     .collect(Collectors.collectingAndThen(
-                                Collectors.toCollection(()-> new TreeSet<>(
-                                    Comparator.comparing(entity -> entity.getJiraproject_link()+"|"+entity.getJiraserver_link()))),
+                            Collectors.toCollection(() -> new TreeSet<>(
+                                    Comparator.comparing(entity -> entity.getJiraproject_link() + "|" + entity.getJiraserver_link()))),
                             ArrayList::new));
 
             List<PdServiceD3Chart> 레벨2_서비스_리스트 =
@@ -392,32 +356,32 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
 
                                             List<PdServiceD3Chart> 레벨4_지라프로젝트_목록 = new ArrayList<>();
 
-                                            for(Long 프로젝트_아이디 : 해당버전_지라프로젝트_아이디_목록) {
+                                            for (Long 프로젝트_아이디 : 해당버전_지라프로젝트_아이디_목록) {
                                                 if (Objects.isNull(프로젝트_아이디)) {
-                                                  continue;
+                                                    continue;
                                                 }
 
                                                 String 지라프로젝트_명 = 지라프로젝트_맵.get(프로젝트_아이디);
                                                 Long 지라서버_아이디 = 유니크_지라프로젝트_서버_트리맵.stream()
-                                                        .filter(프로젝트_서버_트리맵 -> Objects.equals(프로젝트_서버_트리맵.getJiraproject_link(),프로젝트_아이디))
+                                                        .filter(프로젝트_서버_트리맵 -> Objects.equals(프로젝트_서버_트리맵.getJiraproject_link(), 프로젝트_아이디))
                                                         .map(GlobalTreeMapEntity::getJiraserver_link).findFirst().orElse(0L);
 
                                                 JiraServerPureEntity 지라서버검색 = new JiraServerPureEntity();
                                                 지라서버검색.setC_id(지라서버_아이디);
 
-                                                String 지라서버명="";
+                                                String 지라서버명 = "";
 
                                                 try {
                                                     JiraServerPureEntity 지라서버퓨어_엔티티 = jiraServerPure.getNode(지라서버검색);
-                                                    지라서버명 += "["+지라서버퓨어_엔티티.getC_jira_server_name()+"]";
+                                                    지라서버명 += "[" + 지라서버퓨어_엔티티.getC_jira_server_name() + "]";
                                                 } catch (Exception e) {
                                                     log.info("PdServiceImpl :: getD3ChartData :: error = " + e.getMessage());
                                                     continue;
                                                 }
-                                                if(!지라서버명.isBlank()) {
+                                                if (!지라서버명.isBlank()) {
                                                     레벨4_지라프로젝트_목록.add(PdServiceD3Chart.builder()
                                                             .type("Jira")
-                                                            .name(지라서버명 +" "+지라프로젝트_명)
+                                                            .name(지라서버명 + " " + 지라프로젝트_명)
                                                             .build());
                                                 }
                                             }
@@ -426,7 +390,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                                     .name(버전.getC_title())
                                                     .children(레벨4_지라프로젝트_목록).build();
 
-                                }).collect(Collectors.toList()); //레벨3
+                                        }).collect(Collectors.toList()); //레벨3
 
                                 return PdServiceD3Chart.builder()
                                         .type("PdService")

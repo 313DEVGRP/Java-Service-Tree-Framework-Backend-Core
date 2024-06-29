@@ -13,9 +13,8 @@ package com.arms.api.product_service.pdservicelog.controller;
 
 import com.arms.api.product_service.pdservicelog.model.PdServiceLogDTO;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -25,22 +24,20 @@ import javax.annotation.PostConstruct;
 
 import com.arms.api.product_service.pdservicelog.model.PdServiceLogEntity;
 import com.arms.api.product_service.pdservicelog.service.PdServiceLog;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Controller
+@RestController
+@RequiredArgsConstructor
 @RequestMapping(value = {"/arms/pdServiceLog"})
 public class PdServiceLogController extends TreeAbstractController<PdServiceLog, PdServiceLogDTO, PdServiceLogEntity> {
 
-    @Autowired
-    @Qualifier("pdServiceLog")
-    private PdServiceLog pdServiceLog;
+    private final PdServiceLog pdServiceLog;
 
     @PostConstruct
     public void initialize() {
         setTreeService(pdServiceLog);
         setTreeEntity(PdServiceLogEntity.class);
     }
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 }

@@ -12,17 +12,13 @@
 package com.arms.api.product_service.pdserviceversionlog.service;
 
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import lombok.AllArgsConstructor;
-
-
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service("pdServiceVersionLog")
-public class PdServiceVersionLogImpl extends TreeServiceImpl implements PdServiceVersionLog{
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+@Slf4j
+public class PdServiceVersionLogImpl extends TreeServiceImpl implements PdServiceVersionLog {
 
 }

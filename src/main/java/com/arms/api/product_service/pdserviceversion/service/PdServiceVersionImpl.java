@@ -13,29 +13,18 @@ package com.arms.api.product_service.pdserviceversion.service;
 
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service("pdServiceVersion")
-public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVersion{
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Override
-    public List<PdServiceVersionEntity> getVersionListByPdService(PdServiceVersionEntity pdServiceVersionEntity) throws Exception {
-
-        List<PdServiceVersionEntity> pdServiceVersionEntities = this.getChildNode(pdServiceVersionEntity);
-        logger.info("UserPdServiceVersionController ::  getVersion :: pdServiceVersionDTOS = " + pdServiceVersionEntities.size());
-
-        return pdServiceVersionEntities;
-    }
+public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVersion {
 
     @Override
     public List<PdServiceVersionEntity> getVersionListByCids(List<Long> cids) throws Exception {
@@ -46,43 +35,29 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         versionDTO.getCriterions().add(criterion);
 
         List<PdServiceVersionEntity> pdServiceVersionEntities = this.getChildNode(versionDTO);
-        logger.info("UserPdServiceVersionController ::  getVersions :: pdServiceVersionDTOS = " + pdServiceVersionEntities.size());
+        log.info("UserPdServiceVersionController ::  getVersions :: pdServiceVersionDTOS = " + pdServiceVersionEntities.size());
 
         return pdServiceVersionEntities;
     }
 
-    @Override
-    public Map<Long, String> getVersionStartDates(List<Long> pdServiceVersionList) throws Exception {
-
-        Map<Long, String> 버전_시작일 = new HashMap<>();
-        for (Long c_id : pdServiceVersionList) {
-            PdServiceVersionEntity pdServiceVersionEntity = new PdServiceVersionEntity();
-            pdServiceVersionEntity.setC_id(c_id);
-            PdServiceVersionEntity 버전정보 = this.getNode(pdServiceVersionEntity);
-            String 시작일 = 버전정보.getC_pds_version_start_date();
-            버전_시작일.put(c_id, 시작일);
-        }
-
-        return 버전_시작일;
-    }
 
     @Override
     public List<PdServiceVersionEntity> getVersionListByAjax(List<Long> pdServiceVersionList) throws Exception {
         PdServiceVersionEntity 버전_검색세팅 = new PdServiceVersionEntity();
-        버전_검색세팅.setWhereIn("c_id",pdServiceVersionList);
+        버전_검색세팅.setWhereIn("c_id", pdServiceVersionList);
         List<PdServiceVersionEntity> 검색결과 = this.getChildNode(버전_검색세팅);
 
-        logger.info("PdServiceVersionImpl ::  getVersionList.size = {}", 검색결과.size());
+        log.info("PdServiceVersionImpl ::  getVersionList.size = {}", 검색결과.size());
 
         return 검색결과;
     }
 
     @Override
-    public Map<String,String> versionPeriod(List<Long> c_ids) throws Exception {
+    public Map<String, String> versionPeriod(List<Long> c_ids) throws Exception {
         PdServiceVersionEntity 버전_검색세팅 = new PdServiceVersionEntity();
-        버전_검색세팅.setWhereIn("c_id",c_ids);
+        버전_검색세팅.setWhereIn("c_id", c_ids);
         List<PdServiceVersionEntity> 검색결과_목록 = this.getChildNode(버전_검색세팅);
-        logger.info("PdServiceVersionImpl ::  versionPeriod.size = {}", 검색결과_목록.size());
+        log.info("PdServiceVersionImpl ::  versionPeriod.size = {}", 검색결과_목록.size());
 
         Map<String, String> map = new HashMap<>();
         String earliestDate = null;
@@ -99,7 +74,7 @@ public class PdServiceVersionImpl extends TreeServiceImpl implements PdServiceVe
         }
         map.put("earliestDate", earliestDate);
         map.put("latestDate", latestDate);
-        logger.info("[PdServiceVersionImpl ::  versionPeriod] :: earliestDate -> {}, latestDate -> {}  = {}",
+        log.info("[PdServiceVersionImpl ::  versionPeriod] :: earliestDate -> {}, latestDate -> {}  = {}",
                 earliestDate, latestDate);
         return map;
     }

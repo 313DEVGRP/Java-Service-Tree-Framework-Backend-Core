@@ -13,34 +13,28 @@ package com.arms.api.product_service.pdserviceversionlog.controller;
 
 import com.arms.api.product_service.pdserviceversionlog.model.PdServiceVersionLogDTO;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.annotation.PostConstruct;
 
 import com.arms.api.product_service.pdserviceversionlog.model.PdServiceVersionLogEntity;
 import com.arms.api.product_service.pdserviceversionlog.service.PdServiceVersionLog;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Controller
+@RestController
 @RequestMapping(value = {"/arms/pdServiceVersionLog"})
+@RequiredArgsConstructor
 public class PdServiceVersionLogController extends TreeAbstractController<PdServiceVersionLog, PdServiceVersionLogDTO, PdServiceVersionLogEntity> {
 
-    @Autowired
-    @Qualifier("pdServiceVersionLog")
-    private PdServiceVersionLog pdServiceVersionLog;
+    private final PdServiceVersionLog pdServiceVersionLog;
 
     @PostConstruct
     public void initialize() {
         setTreeService(pdServiceVersionLog);
         setTreeEntity(PdServiceVersionLogEntity.class);
     }
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 }
