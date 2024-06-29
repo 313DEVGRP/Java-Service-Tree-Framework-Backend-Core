@@ -1,13 +1,13 @@
 package com.arms.api.requirement.reqadd_state_pure.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.requirement.reqadd_state_pure.model.ReqAddStatePureEntity;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
@@ -38,7 +38,7 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private 통계엔진통신기 통계엔진통신기;
+	private AggregationService AggregationService;
 
 	@Autowired
 	@Qualifier("reqState")
@@ -88,14 +88,14 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 					.collect(Collectors.toList());
 		}
 
-		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
 		AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
 		aggregationRequestDTO.setPdServiceLink(pdServiceId);
 		aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
 		aggregationRequestDTO.set메인_그룹_필드("cReqLink");
 
-		ResponseEntity<검색결과_목록_메인> 완료상태 = 통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
+		ResponseEntity<검색결과_목록_메인> 완료상태 = AggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
 
 		Map<Long, Map<String, Long>> 진행률계산맵 = new HashMap<>();
 

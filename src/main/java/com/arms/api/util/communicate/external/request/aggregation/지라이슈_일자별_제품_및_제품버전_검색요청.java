@@ -1,6 +1,6 @@
 package com.arms.api.util.communicate.external.request.aggregation;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import lombok.*;
 
 @Getter

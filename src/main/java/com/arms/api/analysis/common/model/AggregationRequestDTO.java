@@ -1,4 +1,4 @@
-package com.arms.api.analysis.common;
+package com.arms.api.analysis.common.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

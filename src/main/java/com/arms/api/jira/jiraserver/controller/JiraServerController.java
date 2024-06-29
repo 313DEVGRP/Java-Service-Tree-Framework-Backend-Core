@@ -16,8 +16,8 @@ import com.arms.api.jira.jiraserver.model.JiraServerEntity;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
 import com.arms.api.jira.jiraserver.service.JiraServer;
+import com.arms.api.util.communicate.external.EngineService;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
-import com.arms.api.util.communicate.external.엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
@@ -49,7 +49,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
     private JiraServer jiraServer;
 
     @Autowired
-    private 엔진통신기 엔진통신기;
+    private EngineService EngineService;
 
     @PostConstruct
     public void initialize() {
@@ -222,7 +222,7 @@ public class JiraServerController extends TreeAbstractController<JiraServer, Jir
         log.info("JiraServerController :: 계정정보_검증하기");
 
         try{
-            계정정보_데이터 검증결과 = 엔진통신기.계정정보_검증하기(지라서버정보_데이터).getBody();
+            계정정보_데이터 검증결과 = EngineService.계정정보_검증하기(지라서버정보_데이터).getBody();
             return ResponseEntity.ok(CommonResponse.success( 검증결과));
         }catch (Exception e){
             log.error("온프라미스 계정 정보 조회시 오류가 발생하였습니다." + e.getMessage());

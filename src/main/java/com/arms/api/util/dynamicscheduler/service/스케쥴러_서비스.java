@@ -29,9 +29,9 @@ import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.util.communicate.external.EngineService;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.external.엔진통신기;
-import com.arms.api.util.communicate.internal.내부통신기;
+import com.arms.api.util.communicate.internal.InternalService;
 import com.arms.egovframework.javaservice.treeframework.remote.Chat;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import com.arms.egovframework.javaservice.treeframework.util.StringUtils;
@@ -75,10 +75,10 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 	private JiraServer jiraServer;
 
 	@Autowired
-	private 엔진통신기 엔진통신기;
+	private EngineService EngineService;
 
 	@Autowired
-	private 내부통신기 내부통신기;
+	private InternalService InternalService;
 
 	@Autowired
 	protected Chat chat;
@@ -98,7 +98,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 			Long 제품서비스_아이디 = 제품서비스.getC_id();
 
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-			List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+			List<ReqStatusEntity> 결과 = InternalService.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 			if(결과 == null){
 				chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");
@@ -130,7 +130,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 										.map(Long::valueOf)
 										.toArray(Long[]::new);
 
-								int 저장결과 = 엔진통신기.이슈_검색엔진_벌크_저장(
+								int 저장결과 = EngineService.이슈_검색엔진_벌크_저장(
 										Long.parseLong(지라서버.getC_jira_server_etc()),
 										요구사항_이슈_엔티티.getC_issue_key(),
 										요구사항_이슈_엔티티.getC_pdservice_link(),
@@ -171,7 +171,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 			Long 제품서비스_아이디 = 제품서비스.getC_id();
 
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
-			List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+			List<ReqStatusEntity> 결과 = InternalService.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 			if (결과 == null) {
 				chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");
@@ -204,7 +204,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 										.map(Long::valueOf)
 										.toArray(Long[]::new);
 
-								int 저장결과 = 엔진통신기.증분이슈_검색엔진_벌크_저장(
+								int 저장결과 = EngineService.증분이슈_검색엔진_벌크_저장(
 										Long.parseLong(지라서버.getC_jira_server_etc()),
 										요구사항_이슈_엔티티.getC_issue_key(),
 										요구사항_이슈_엔티티.getC_pdservice_link(),
@@ -246,7 +246,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 			Long 제품서비스_아이디 = 제품서비스.getC_id();
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 			log.info("[스케쥴러_서비스 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 제품서비스_리스트를 내부통신기로 결과 조회 -> " + 제품서비스_아이디);
-			List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+			List<ReqStatusEntity> 결과 = InternalService.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 			if (결과 == null) {
 				chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");
@@ -274,7 +274,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 							log.info("[스케쥴러_서비스 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_jira_project_key());
 							log.info("[스케쥴러_서비스 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES] :: 엔진통신기 = " + 요구사항_이슈_엔티티.getC_issue_key());
 
-							지라이슈 ES_지라이슈 = 엔진통신기.요구사항이슈_조회(
+							지라이슈 ES_지라이슈 = EngineService.요구사항이슈_조회(
 									Long.parseLong(지라서버.getC_jira_server_etc()),
 									요구사항_이슈_엔티티.getC_jira_project_key(),
 									요구사항_이슈_엔티티.getC_issue_key()
@@ -322,7 +322,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 										ReqAddEntity reqAddEntity = new ReqAddEntity();
 										reqAddEntity.setC_id(요구사항_이슈_엔티티.getC_req_link());
 
-										ResponseEntity<LoadReqAddDTO> 요구사항조회 = 내부통신기.요구사항조회("T_ARMS_REQADD_" + 제품서비스.getC_id(), reqAddEntity.getC_id());
+										ResponseEntity<LoadReqAddDTO> 요구사항조회 = InternalService.요구사항조회("T_ARMS_REQADD_" + 제품서비스.getC_id(), reqAddEntity.getC_id());
 										LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
 										if (loadReqAddDTO == null) {
 											log.error("스케쥴러_서비스 :: 각_제품서비스_별_요구사항_Status_업데이트_From_ES :: 요구사항 데이터 조회에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
@@ -376,13 +376,13 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 												reqAddDTO.setC_req_state_link(매핑_아이디);
 
 												// 매핑된 상태가 있을 경우에만 REQADD 변경 처리
-												내부통신기.요구사항_수정하기("T_ARMS_REQADD_" + 제품서비스_아이디, reqAddDTO);
+												InternalService.요구사항_수정하기("T_ARMS_REQADD_" + 제품서비스_아이디, reqAddDTO);
 											}
 										}
 									}
 
 									ReqStatusDTO statusDTO = modelMapper.map(요구사항_이슈_엔티티, ReqStatusDTO.class);
-									내부통신기.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
+									InternalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, statusDTO);
 								}
 							}
 						}
@@ -407,7 +407,7 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 			Long 제품서비스_아이디 = 제품서비스.getC_id();
 			ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 			log.info("[스케쥴러_서비스 :: 각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성시도] :: 제품서비스_리스트를 내부통신기로 결과 조회 -> " + 제품서비스_아이디);
-			List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+			List<ReqStatusEntity> 결과 = InternalService.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 			if (결과 == null) {
 				chat.sendMessageByEngine(제품서비스.getC_title() + "제품의 요구사항이 존재하지 않아서, ES 적재할 데이터가 없습니다.");

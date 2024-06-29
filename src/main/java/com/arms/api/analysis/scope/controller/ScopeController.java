@@ -4,7 +4,8 @@ import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자수;
 import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.analysis.scope.service.ScopeService;
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
+import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.arms.api.util.communicate.external.통계엔진통신기;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.*;
@@ -25,7 +25,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ScopeController {
 
-    private final 통계엔진통신기 engineCommunicator;
+    private final AggregationService engineCommunicator;
 
     private final ScopeService scopeService;
 

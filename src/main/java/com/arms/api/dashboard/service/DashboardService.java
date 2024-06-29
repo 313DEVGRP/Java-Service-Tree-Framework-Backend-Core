@@ -1,6 +1,6 @@
 package com.arms.api.dashboard.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.dashboard.model.SankeyData;
 import com.arms.api.dashboard.model.Worker;

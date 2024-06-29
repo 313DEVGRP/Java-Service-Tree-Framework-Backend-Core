@@ -1,15 +1,14 @@
 package com.arms.api.analysis.common.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
-import com.arms.api.product_service.pdservice.service.PdService;
+import com.arms.api.analysis.common.model.AggregationConstant;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.service.ReqAdd;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
-import com.arms.api.util.API호출변수;
+import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +19,36 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TopMenuServiceImpl implements  TopMenuService{
+public class CommonServiceImpl implements CommonService {
+
+    private final AggregationService AggregationService;
 
     private final ReqAdd reqAdd;
 
-    private final PdService pdService;
+    @Override
+    public 검색결과_목록_메인 commonNestedAggregation(final AggregationRequestDTO aggregationRequestDTO) {
+        return AggregationService.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
+    }
 
-    private final 통계엔진통신기 통계엔진통신기;
+    @Override
+    public 검색결과_목록_메인 commonFlatAggregation(final AggregationRequestDTO aggregationRequestDTO) {
+        return AggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
+    }
 
     @Override
     public Map<String, Long> 톱메뉴_버전별_요구사항_상태_합계(String changeReqTableName, Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
 
-        SessionUtil.setAttribute("getReqAddListByFilter",changeReqTableName);
+        SessionUtil.setAttribute("getReqAddListByFilter", changeReqTableName);
 
         ReqAddEntity 검색용도_객체 = new ReqAddEntity();
 
@@ -55,7 +66,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            if (StringUtils.equals(entity.getC_type(),"folder") ) {
+                            if (StringUtils.equals(entity.getC_type(), "folder")) {
                                 return "folder";
                             } else {
                                 ReqStateEntity reqStateEntity = entity.getReqStateEntity();
@@ -83,7 +94,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
 
         SessionUtil.removeAttribute("getReqAddListByFilter");
         log.info("[TopMenuServiceImpl  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",
-                버전_요구사항_상태별_합계.get("total"),버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
+                버전_요구사항_상태별_합계.get("total"), 버전_요구사항_상태별_합계.get("open"), 버전_요구사항_상태별_합계.get("not-open"));
 
         return 버전_요구사항_상태별_합계;
     }
@@ -96,7 +107,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
                 .컨텐츠_보기_여부(false)
                 .크기(1000)
                 .build();
-        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
+        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
         Map<String, Long> 이슈_맵 = new HashMap<>();
         이슈_맵.put("total", null);
         이슈_맵.put("req", null);
@@ -118,17 +129,17 @@ public class TopMenuServiceImpl implements  TopMenuService{
                         }
                     }
                 } else {
-                    log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 요구사항_하위이슈_구분 집계(group_by_isReq) => null" );
+                    log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 요구사항_하위이슈_구분 집계(group_by_isReq) => null");
                 }
             } else {
-                log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 메인그룹_집계결과 => null" );
+                log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 메인그룹_집계결과 => null");
                 // 검색결과가 null인 경우 처리
             }
         } else {
-            log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 집계결과목록 => null" );
+            log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 집계결과목록 => null");
         }
         log.info("[TopMenuServiceImpl  :: 톱메뉴_요구사항_하위이슈_집계] :: 이슈_맵 :: 총합 = {}, 요구사항_이슈 = {}, 연결이슈_하위이슈 = {}",
-                이슈_맵.get("total"),이슈_맵.get("req"), 이슈_맵.get("subtask"));
+                이슈_맵.get("total"), 이슈_맵.get("req"), 이슈_맵.get("subtask"));
 
         return 이슈_맵;
     }
@@ -136,7 +147,7 @@ public class TopMenuServiceImpl implements  TopMenuService{
     @Override
     public Map<String, Long> 톱메뉴_작업자별_요구사항_하위이슈_집계(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
         지라이슈_단순_집계_요청 집계_요청 = 지라이슈_단순_집계_요청.builder()
-                .메인_그룹_필드(API호출변수.담당자_이메일_집계)
+                .메인_그룹_필드(AggregationConstant.담당자_이메일_집계)
                 .하위_그룹_필드들(Arrays.asList("isReq"))
                 .컨텐츠_보기_여부(false)
                 .크기(1000)
@@ -144,29 +155,29 @@ public class TopMenuServiceImpl implements  TopMenuService{
                 .build();
 
         Map<String, Long> 요구사항_서브테스크_종합 = new HashMap<>();
-        요구사항_서브테스크_종합.put("resource",0L);
-        요구사항_서브테스크_종합.put("req",0L);
-        요구사항_서브테스크_종합.put("subtask",0L);
+        요구사항_서브테스크_종합.put("resource", 0L);
+        요구사항_서브테스크_종합.put("req", 0L);
+        요구사항_서브테스크_종합.put("subtask", 0L);
         요구사항_서브테스크_종합.put("req_max", 0L);
         요구사항_서브테스크_종합.put("req_min", 1000000L);
         요구사항_서브테스크_종합.put("sub_max", 0L);
         요구사항_서브테스크_종합.put("sub_min", 1000000L);
 
-        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = 통계엔진통신기.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
+        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
         // 전체 작업자 수 => 필드
         검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
         Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
-        List<검색결과> 작업자_검색결과_목록 = 메인그룹_집계결과.get("group_by_" + API호출변수.담당자_이메일_집계);
+        List<검색결과> 작업자_검색결과_목록 = 메인그룹_집계결과.get("group_by_" + AggregationConstant.담당자_이메일_집계);
         요구사항_서브테스크_종합.put("resource", Long.valueOf(작업자_검색결과_목록.size()));
 
         for (검색결과 작업자_검색결과 : 작업자_검색결과_목록) {
             String 작업자_메일 = 작업자_검색결과.get필드명();
             List<검색결과> 이슈_검색결과_목록 = 작업자_검색결과.get하위검색결과().get("group_by_isReq");
 
-            for(검색결과 이슈 : 이슈_검색결과_목록) {
+            for (검색결과 이슈 : 이슈_검색결과_목록) {
                 String 필드명 = 이슈.get필드명();
                 Long count = 이슈.get개수();
-                if(필드명.equals("true")) {
+                if (필드명.equals("true")) {
                     // 종합 Max, Min 세팅
                     요구사항_서브테스크_종합.put("req_max", 요구사항_서브테스크_종합.get("req_max") < count ? count : 요구사항_서브테스크_종합.get("req_max"));
                     요구사항_서브테스크_종합.put("req_min", 요구사항_서브테스크_종합.get("req_min") > count ? count : 요구사항_서브테스크_종합.get("req_min"));
@@ -177,15 +188,15 @@ public class TopMenuServiceImpl implements  TopMenuService{
                 }
 
                 Long total_count = 요구사항_서브테스크_종합.get(필드명.equals("true") ? "req" : "subtask");
-                요구사항_서브테스크_종합.put(필드명.equals("true") ? "req" : "subtask", total_count+count);
+                요구사항_서브테스크_종합.put(필드명.equals("true") ? "req" : "subtask", total_count + count);
             }
         }
 
         // 아예 없는 경우, 최솟값을 0으로
-        if(요구사항_서브테스크_종합.get("req_min") == 1000000L) {
+        if (요구사항_서브테스크_종합.get("req_min") == 1000000L) {
             요구사항_서브테스크_종합.put("req_min", 0L);
         }
-        if(요구사항_서브테스크_종합.get("sub_min") == 1000000L) {
+        if (요구사항_서브테스크_종합.get("sub_min") == 1000000L) {
             요구사항_서브테스크_종합.put("sub_min", 0L);
         }
         return 요구사항_서브테스크_종합;
@@ -193,8 +204,8 @@ public class TopMenuServiceImpl implements  TopMenuService{
 
     @Override
     public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(AggregationRequestDTO aggregationRequestDTO, String resolution) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계  =
-                통계엔진통신기.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계 =
+                AggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
 
         검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
 

@@ -11,7 +11,7 @@
  */
 package com.arms.api.requirement.reqstatus.controller;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.jira.jiraissuepriority.service.JiraIssuePriority;
 import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
@@ -19,9 +19,9 @@ import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
+import com.arms.api.util.communicate.external.AggregationService;
+import com.arms.api.util.communicate.external.EngineService;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.external.엔진통신기;
-import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
@@ -71,10 +71,10 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
     private JiraIssueStatus jiraIssueStatus;
 
     @Autowired
-    private 통계엔진통신기 통계엔진통신기;
+    private AggregationService AggregationService;
 
     @Autowired
-    private 엔진통신기 엔진통신기;
+    private EngineService EngineService;
 
     @PostConstruct
     public void initialize() {
@@ -152,7 +152,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         요청.setPdServiceVersionLinks(Arrays.stream(versionsString.split(",")).map(Long::parseLong).collect(Collectors.toList()));
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 엔진통신기.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
+        modelAndView.addObject("result", EngineService.제품별_요구사항_연결이슈_조회(제품서비스_아이디, 요청));
         return modelAndView;
     }
 
@@ -252,7 +252,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result",
-                        통계엔진통신기.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
+                        AggregationService.제품서비스_버전별_상태값_통계(pdService, Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new)));
         return modelAndView;
 
     }
@@ -283,7 +283,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             String 엔진통신_아이디 = 검색결과.getC_jira_server_etc();
             String 이슈키 = request.getParameter("issueKey");
 
-            List<지라이슈> 링크드이슈_서브데스크 = 엔진통신기.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
+            List<지라이슈> 링크드이슈_서브데스크 = EngineService.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
 
             log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크);
 
@@ -333,7 +333,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         String 담당자_이메일 = request.getParameter("assigneeEmail");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 엔진통신기.제품서비스별_담당자_요구사항_통계(dummy_jira_server, 제품서비스_아이디, 담당자_이메일));
+        modelAndView.addObject("result", EngineService.제품서비스별_담당자_요구사항_통계(dummy_jira_server, 제품서비스_아이디, 담당자_이메일));
 
         return modelAndView;
     }
@@ -375,7 +375,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         SessionUtil.removeAttribute("getPdRelatedReqStats");
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        modelAndView.addObject("result", 엔진통신기.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일));
+        modelAndView.addObject("result", EngineService.제품서비스별_담당자_연관된_요구사항_통계(지라서버_아이디, 제품서비스_아이디, 이슈키, 담당자_이메일));
 
         return modelAndView;
     }

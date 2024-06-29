@@ -1,6 +1,6 @@
 package com.arms.api.util.communicate.external;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.analysis.cost.model.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(name = "engine-dashboard", url = "${arms.engine.url}")
-public interface 통계엔진통신기 {
+public interface AggregationService {
 
     @GetMapping("/engine/jira/dashboard/aggregation/nested")
     ResponseEntity<검색결과_목록_메인> 제품_혹은_제품버전들의_집계_nested(

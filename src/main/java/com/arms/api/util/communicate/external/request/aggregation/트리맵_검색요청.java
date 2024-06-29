@@ -1,6 +1,6 @@
 package com.arms.api.util.communicate.external.request.aggregation;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.dashboard.model.제품버전목록;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

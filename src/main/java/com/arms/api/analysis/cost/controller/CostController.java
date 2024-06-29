@@ -1,19 +1,19 @@
 package com.arms.api.analysis.cost.controller;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.analysis.cost.model.ProductCostResponse;
 import com.arms.api.analysis.cost.model.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.model.버전요구사항별_담당자데이터;
 import com.arms.api.analysis.cost.model.요구사항_지라이슈키별_업데이트_목록_데이터;
 import com.arms.api.analysis.cost.model.요구사항목록_난이도_및_우선순위통계데이터;
-import com.arms.api.analysis.cost.service.비용서비스;
+import com.arms.api.analysis.cost.service.CostService;
 import com.arms.api.analysis.cost.model.SalaryDTO;
 import com.arms.api.analysis.cost.model.SalaryEntity;
 import com.arms.api.analysis.cost.service.SalaryService;
 import com.arms.api.requirement.reqadd.model.ReqAddDTO;
-import com.arms.api.util.API호출변수;
+import com.arms.api.analysis.common.model.AggregationConstant;
+import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일반_집계_요청;
-import com.arms.api.util.communicate.external.통계엔진통신기;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +35,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/admin/arms/analysis/cost")
-public class 비용분석_컨트롤러 {
+public class CostController {
 
-    private final 비용서비스 비용서비스;
+    private final CostService CostService;
 
     private final SalaryService salaryService;
 
-    private final 통계엔진통신기 통계엔진통신기;
+    private final AggregationService AggregationService;
 
     private final ModelMapper modelMapper;
 
@@ -64,15 +64,15 @@ public class 비용분석_컨트롤러 {
             return null;
         }
 
-        String 하위그룹필드 = API호출변수.담당자_이름_집계;
+        String 하위그룹필드 = AggregationConstant.담당자_이름_집계;
         지라이슈_일반_집계_요청 일반_집계_요청_세팅 = 지라이슈_일반_집계_요청.builder()
-                .메인_그룹_필드(API호출변수.담당자_아이디_집계)
+                .메인_그룹_필드(AggregationConstant.담당자_아이디_집계)
                 .컨텐츠_보기_여부(true)
                 .크기(1000)
                 .하위_그룹_필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
                 .build();
 
-        버전요구사항별_담당자데이터 결과 = 비용서비스.전체_담당자가져오기(제품아이디, 버전아이디_목록, 일반_집계_요청_세팅);
+        버전요구사항별_담당자데이터 결과 = CostService.전체_담당자가져오기(제품아이디, 버전아이디_목록, 일반_집계_요청_세팅);
 
         long 종료시간 = System.currentTimeMillis();
 
@@ -91,7 +91,7 @@ public class 비용분석_컨트롤러 {
 
         log.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
         log.info(aggregationRequestDTO.toString());
-        버전요구사항별_담당자데이터 결과 = 비용서비스.버전별_요구사항별_담당자가져오기(aggregationRequestDTO);
+        버전요구사항별_담당자데이터 결과 = CostService.버전별_요구사항별_담당자가져오기(aggregationRequestDTO);
 
         long 종료시간 = System.currentTimeMillis();
 
@@ -112,7 +112,7 @@ public class 비용분석_컨트롤러 {
 
         SessionUtil.setAttribute("req-difficulty-priority-list", changeReqTableName);
 
-        요구사항목록_난이도_및_우선순위통계데이터 조회결과 = 비용서비스.요구사항목록_난이도_및_우선순위통계_가져오기(reqAddDTO);
+        요구사항목록_난이도_및_우선순위통계데이터 조회결과 = CostService.요구사항목록_난이도_및_우선순위통계_가져오기(reqAddDTO);
 
         SessionUtil.removeAttribute("req-difficulty-priority-list");
 
@@ -129,7 +129,7 @@ public class 비용분석_컨트롤러 {
     public ModelAndView 버전별_요구사항_연결된_지라이슈키(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         log.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항_연결된_지라이슈키 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
         log.info(aggregationRequestDTO.toString());
-        버전별_요구사항별_연결된_지라이슈데이터 검색결과 = 비용서비스.버전별_요구사항_연결된_지라이슈키(aggregationRequestDTO);
+        버전별_요구사항별_연결된_지라이슈데이터 검색결과 = CostService.버전별_요구사항_연결된_지라이슈키(aggregationRequestDTO);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);
         return modelAndView;
@@ -144,7 +144,7 @@ public class 비용분석_컨트롤러 {
         log.info(" [ " + this.getClass().getName() + " :: 요구사항_지라이슈키별_업데이트_목록 ] :: 요구사항_지라이슈키_목록 -> ");
         log.info(issueList.toString());
 
-        ResponseEntity<Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과 = 통계엔진통신기.요구사항_지라이슈키별_업데이트_목록(issueList);
+        ResponseEntity<Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과 = AggregationService.요구사항_지라이슈키별_업데이트_목록(issueList);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);
@@ -156,7 +156,7 @@ public class 비용분석_컨트롤러 {
      */
     @GetMapping("/product-accumulate-cost-by-month")
     public ResponseEntity<CommonResponse.ApiResult<ProductCostResponse>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
-        ProductCostResponse productCostResponse = 비용서비스.calculateInvestmentPerformance(aggregationRequestDTO);
+        ProductCostResponse productCostResponse = CostService.calculateInvestmentPerformance(aggregationRequestDTO);
         return ResponseEntity.ok(CommonResponse.success(productCostResponse));
     }
 
@@ -167,7 +167,7 @@ public class 비용분석_컨트롤러 {
     @GetMapping
     public ResponseEntity<CommonResponse.ApiResult<Map<String, SalaryDTO>>> assigneesWithSalary(AggregationRequestDTO aggregationRequestDTO) throws Exception {
 
-        Set<String> assignees = 비용서비스.getAssignees(aggregationRequestDTO.getPdServiceLink(), aggregationRequestDTO.getPdServiceVersionLinks());
+        Set<String> assignees = CostService.getAssignees(aggregationRequestDTO.getPdServiceLink(), aggregationRequestDTO.getPdServiceVersionLinks());
         Map<String, SalaryEntity> allSalaries = salaryService.모든_연봉정보_맵();
 
         Map<String, SalaryDTO> filteredSalaries = new HashMap<>();
