@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/admin/arms/analysis/cost")
 public class CostController {
 
-    private final CostService CostService;
+    private final CostService costService;
 
     private final SalaryService salaryService;
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
 
     private final ModelMapper modelMapper;
 
@@ -72,7 +72,7 @@ public class CostController {
                 .하위_그룹_필드들(Arrays.stream(하위그룹필드.split(",")).collect(Collectors.toList()))
                 .build();
 
-        버전요구사항별_담당자데이터 결과 = CostService.전체_담당자가져오기(제품아이디, 버전아이디_목록, 일반_집계_요청_세팅);
+        버전요구사항별_담당자데이터 결과 = costService.전체_담당자가져오기(제품아이디, 버전아이디_목록, 일반_집계_요청_세팅);
 
         long 종료시간 = System.currentTimeMillis();
 
@@ -91,7 +91,7 @@ public class CostController {
 
         log.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항별_담당자가져오기 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
         log.info(aggregationRequestDTO.toString());
-        버전요구사항별_담당자데이터 결과 = CostService.버전별_요구사항별_담당자가져오기(aggregationRequestDTO);
+        버전요구사항별_담당자데이터 결과 = costService.버전별_요구사항별_담당자가져오기(aggregationRequestDTO);
 
         long 종료시간 = System.currentTimeMillis();
 
@@ -112,7 +112,7 @@ public class CostController {
 
         SessionUtil.setAttribute("req-difficulty-priority-list", changeReqTableName);
 
-        요구사항목록_난이도_및_우선순위통계데이터 조회결과 = CostService.요구사항목록_난이도_및_우선순위통계_가져오기(reqAddDTO);
+        요구사항목록_난이도_및_우선순위통계데이터 조회결과 = costService.요구사항목록_난이도_및_우선순위통계_가져오기(reqAddDTO);
 
         SessionUtil.removeAttribute("req-difficulty-priority-list");
 
@@ -129,7 +129,7 @@ public class CostController {
     public ModelAndView 버전별_요구사항_연결된_지라이슈키(AggregationRequestDTO aggregationRequestDTO) throws Exception {
         log.info(" [ " + this.getClass().getName() + " :: 버전별_요구사항_연결된_지라이슈키 ] :: 지라이슈_제품_및_제품버전_검색요청 -> ");
         log.info(aggregationRequestDTO.toString());
-        버전별_요구사항별_연결된_지라이슈데이터 검색결과 = CostService.버전별_요구사항_연결된_지라이슈키(aggregationRequestDTO);
+        버전별_요구사항별_연결된_지라이슈데이터 검색결과 = costService.버전별_요구사항_연결된_지라이슈키(aggregationRequestDTO);
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);
         return modelAndView;
@@ -144,7 +144,7 @@ public class CostController {
         log.info(" [ " + this.getClass().getName() + " :: 요구사항_지라이슈키별_업데이트_목록 ] :: 요구사항_지라이슈키_목록 -> ");
         log.info(issueList.toString());
 
-        ResponseEntity<Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과 = AggregationService.요구사항_지라이슈키별_업데이트_목록(issueList);
+        ResponseEntity<Map<String, List<요구사항_지라이슈키별_업데이트_목록_데이터>>> 검색결과 = aggregationService.요구사항_지라이슈키별_업데이트_목록(issueList);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 검색결과);
@@ -156,7 +156,7 @@ public class CostController {
      */
     @GetMapping("/product-accumulate-cost-by-month")
     public ResponseEntity<CommonResponse.ApiResult<ProductCostResponse>> 제품에대한투자비용대비성과(AggregationRequestDTO aggregationRequestDTO) throws Exception {
-        ProductCostResponse productCostResponse = CostService.calculateInvestmentPerformance(aggregationRequestDTO);
+        ProductCostResponse productCostResponse = costService.calculateInvestmentPerformance(aggregationRequestDTO);
         return ResponseEntity.ok(CommonResponse.success(productCostResponse));
     }
 
@@ -167,7 +167,7 @@ public class CostController {
     @GetMapping
     public ResponseEntity<CommonResponse.ApiResult<Map<String, SalaryDTO>>> assigneesWithSalary(AggregationRequestDTO aggregationRequestDTO) throws Exception {
 
-        Set<String> assignees = CostService.getAssignees(aggregationRequestDTO.getPdServiceLink(), aggregationRequestDTO.getPdServiceVersionLinks());
+        Set<String> assignees = costService.getAssignees(aggregationRequestDTO.getPdServiceLink(), aggregationRequestDTO.getPdServiceVersionLinks());
         Map<String, SalaryEntity> allSalaries = salaryService.모든_연봉정보_맵();
 
         Map<String, SalaryDTO> filteredSalaries = new HashMap<>();

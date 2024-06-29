@@ -66,10 +66,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private EngineService EngineService;
+	private EngineService engineService;
 
 	@Autowired
-	private InternalService InternalService;
+	private InternalService internalService;
 
 	@Autowired
 	private GlobalTreeMapService globalTreeMapService;
@@ -142,7 +142,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 			// 생성된 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 조회_결과
-					= InternalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+					= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 			List<ReqStatusEntity> 요구사항_이슈_생성목록 = 조회_결과.getBody();
 
 			// 생성된 REQSTATUS 데이터 목록을 순회하며 ALM 서버로 요구사항 이슈 생성 후 REQSTATUS 업데이트(issue key, issue url)
@@ -173,7 +173,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 	@Transactional
 	public int removeReqNode(ReqAddEntity reqAddEntity, String changeReqTableName, HttpServletRequest request) throws Exception {
 
-		ResponseEntity<LoadReqAddDTO> 요구사항조회 = InternalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+		ResponseEntity<LoadReqAddDTO> 요구사항조회 = internalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
 		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
 
 		if (loadReqAddDTO == null) {
@@ -205,14 +205,14 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 			// 기존 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 결과
-					= InternalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+					= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
 			List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
 
 			reqStatus.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, reqStatusEntityList, 요구사항_제품서비스, 삭제_타입);
 
 			// 생성된 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 조회_결과
-					= InternalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+					= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 			List<ReqStatusEntity> 요구사항_이슈_삭제목록 = 조회_결과.getBody();
 
 			// 목록을 순회하며 ALM 서버로 요구사항 이슈 생성
@@ -285,7 +285,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 	@Transactional
 	public Integer updateReqNode(ReqAddEntity reqAddEntity, String changeReqTableName) throws Exception {
 		// 1. 수정 전 ReqAdd 조회
-		ResponseEntity<LoadReqAddDTO> 요구사항조회 = InternalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+		ResponseEntity<LoadReqAddDTO> 요구사항조회 = internalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
 		LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
 
 		if (loadReqAddDTO == null) {
@@ -353,7 +353,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 			// 기존 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 결과
-					= InternalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+					= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
 			List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
 
 			List<ReqStatusEntity> 유지된지라프로젝트 = Optional.ofNullable(reqStatusEntityList)
@@ -377,7 +377,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 			// 생성된 REQSTATUS 데이터 목록 조회
 			ResponseEntity<List<ReqStatusEntity>> 조회_결과
-					= InternalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+					= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 			List<ReqStatusEntity> 요구사항_이슈_수정목록 = 조회_결과.getBody();
 
 			// 목록을 순회하며 ALM 서버로 요구사항 이슈 생성
@@ -509,7 +509,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		집계요청.setPdServiceLink(pdServiceEntity.getC_id());
 		집계요청.setIsReqType(isReqType);
 
-		Optional<List<검색결과>> 집계데이터 = Optional.ofNullable(EngineService.제품_요구사항_담당자(집계요청).getBody());
+		Optional<List<검색결과>> 집계데이터 = Optional.ofNullable(engineService.제품_요구사항_담당자(집계요청).getBody());
 		집계데이터.ifPresent(esData -> {
 			esData.forEach(result -> {
 				String 요구사항_키 = result.get필드명();

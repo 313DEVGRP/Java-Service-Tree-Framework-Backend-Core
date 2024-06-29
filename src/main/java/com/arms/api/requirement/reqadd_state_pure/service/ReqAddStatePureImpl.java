@@ -38,7 +38,7 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private AggregationService AggregationService;
+	private AggregationService aggregationService;
 
 	@Autowired
 	@Qualifier("reqState")
@@ -88,14 +88,14 @@ public class ReqAddStatePureImpl extends TreeServiceImpl implements ReqAddStateP
 					.collect(Collectors.toList());
 		}
 
-		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+		ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
 		AggregationRequestDTO aggregationRequestDTO = new AggregationRequestDTO();
 		aggregationRequestDTO.setPdServiceLink(pdServiceId);
 		aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
 		aggregationRequestDTO.set메인_그룹_필드("cReqLink");
 
-		ResponseEntity<검색결과_목록_메인> 완료상태 = AggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
+		ResponseEntity<검색결과_목록_메인> 완료상태 = aggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, "resolutiondate");
 
 		Map<Long, Map<String, Long>> 진행률계산맵 = new HashMap<>();
 

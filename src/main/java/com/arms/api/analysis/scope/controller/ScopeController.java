@@ -5,7 +5,6 @@ import com.arms.api.analysis.scope.dto.버전별_요구사항_상태_작업자�
 import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
 import com.arms.api.analysis.scope.service.ScopeService;
 import com.arms.api.analysis.common.model.AggregationRequestDTO;
-import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
@@ -25,8 +24,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ScopeController {
 
-    private final AggregationService engineCommunicator;
-
     private final ScopeService scopeService;
 
     @GetMapping(value = "/pdService/pdServiceVersions")
@@ -44,9 +41,9 @@ public class ScopeController {
 
 
     @GetMapping("/req-per-version/{changeReqTableName}/getReqAddListByFilter.do")
-    public ResponseEntity<Map<String, Long>> 버전들_하위_요구사항(@PathVariable(value ="changeReqTableName") String changeReqTableName
-                                                                , @RequestParam Long pdServiceId
-                                                                , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+    public ResponseEntity<Map<String, Long>> 버전들_하위_요구사항(@PathVariable(value = "changeReqTableName") String changeReqTableName
+            , @RequestParam Long pdServiceId
+            , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
 
         String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQADD_", "");
         log.info("스코프분석_컨트롤러 :: 버전들_하위_요구사항.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
@@ -54,12 +51,12 @@ public class ScopeController {
 
         Map<String, Long> 버전_요구사항_수 = scopeService.버전_요구사항_자료(changeReqTableName, pdServiceId, pdServiceVersionLinks);
 
-        return  ResponseEntity.ok(버전_요구사항_수);
+        return ResponseEntity.ok(버전_요구사항_수);
 
     }
 
     @GetMapping("/state-per-version/{changeReqTableName}/getReqAddListByFilter.do")
-    public ResponseEntity<List<요구사항_버전명추가_DTO>> 버전별_요구사항_상태정보(@PathVariable(value ="changeReqTableName") String changeReqTableName
+    public ResponseEntity<List<요구사항_버전명추가_DTO>> 버전별_요구사항_상태정보(@PathVariable(value = "changeReqTableName") String changeReqTableName
             , @RequestParam Long pdServiceId
             , @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
 
@@ -67,7 +64,7 @@ public class ScopeController {
         log.info("스코프분석_컨트롤러 :: 버전별_요구사항_상태정보.pdServiceId ==> {}, pdServiceVersionLinks ==> {}"
                 , pdServiceStr, pdServiceVersionLinks);
 
-        return  ResponseEntity.ok(scopeService.버전_요구사항_상태(changeReqTableName, pdServiceId, pdServiceVersionLinks));
+        return ResponseEntity.ok(scopeService.버전_요구사항_상태(changeReqTableName, pdServiceId, pdServiceVersionLinks));
 
     }
 
@@ -78,8 +75,8 @@ public class ScopeController {
                 , pdServiceId, pdServiceVersionLinks);
         Map<String, List<요구사항_버전_이슈_키_상태_작업자수>> 버전묶음_요구사항_목록 = scopeService.버전이름_매핑하고_같은_버전_묶음끼리_배치(pdServiceId, pdServiceVersionLinks);
         List<버전별_요구사항_상태_작업자수> 매핑결과 = new ArrayList<>();
-        for(Map.Entry<String, List<요구사항_버전_이슈_키_상태_작업자수>> entry : 버전묶음_요구사항_목록.entrySet()) {
-            버전별_요구사항_상태_작업자수  버전별_요구사항_상태_작업자수 = new 버전별_요구사항_상태_작업자수(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, List<요구사항_버전_이슈_키_상태_작업자수>> entry : 버전묶음_요구사항_목록.entrySet()) {
+            버전별_요구사항_상태_작업자수 버전별_요구사항_상태_작업자수 = new 버전별_요구사항_상태_작업자수(entry.getKey(), entry.getValue());
             매핑결과.add(버전별_요구사항_상태_작업자수);
         }
         return ResponseEntity.ok(매핑결과);

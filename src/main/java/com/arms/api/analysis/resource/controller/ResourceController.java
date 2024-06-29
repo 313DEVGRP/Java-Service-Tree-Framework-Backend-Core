@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResourceController {
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
     private final ResourceService resourceService;
     private final CommonService commonService;
 
@@ -37,7 +37,7 @@ public class ResourceController {
         log.info("리소스분석_컨트롤러 :: 제품서비스_버전_집계.pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = AggregationService.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = aggregationService.제품서비스_일반_버전_통계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
@@ -56,7 +56,7 @@ public class ResourceController {
                 , pdServiceVersionLinks.toString(), mailAddressList.toString());
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = AggregationService.일반_버전_및_작업자_필터_검색(pdServiceId, pdServiceVersionLinks, mailAddressList, 검색요청_데이터);
+                = aggregationService.일반_버전_및_작업자_필터_검색(pdServiceId, pdServiceVersionLinks, mailAddressList, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
 
@@ -83,7 +83,7 @@ public class ResourceController {
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
@@ -108,7 +108,7 @@ public class ResourceController {
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
@@ -129,7 +129,7 @@ public class ResourceController {
                 .build();
 
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계
-                = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
+                = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 검색요청_데이터);
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();

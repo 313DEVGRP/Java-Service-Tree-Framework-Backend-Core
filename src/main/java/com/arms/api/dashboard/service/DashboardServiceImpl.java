@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
 
     private final PdService pdService;
 
@@ -44,17 +44,17 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public 검색결과_목록_메인 commonNestedAggregation(final AggregationRequestDTO aggregationRequestDTO) {
-        return AggregationService.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
+        return aggregationService.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
     }
 
     @Override
     public 검색결과_목록_메인 commonFlatAggregation(final AggregationRequestDTO aggregationRequestDTO) {
-        return AggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
+        return aggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
     }
 
     @Override
     public Map<String, RequirementJiraIssueAggregationResponse> requirementsJiraIssueStatuses(final AggregationRequestDTO aggregationRequestDTO) {
-        return AggregationService.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(aggregationRequestDTO).getBody();
+        return aggregationService.제품_혹은_제품버전들의_요구사항_지라이슈상태_월별_집계(aggregationRequestDTO).getBody();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class DashboardServiceImpl implements DashboardService {
         Map<String, SankeyNode> workerNodeMap = new HashMap<>();
 
         // 3. Engine 에 담당자 데이터 요청
-        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(AggregationService.제품_혹은_제품버전들의_담당자목록(aggregationRequestDTO).getBody());
+        Optional<List<검색결과>> optionalEsData = Optional.ofNullable(aggregationService.제품_혹은_제품버전들의_담당자목록(aggregationRequestDTO).getBody());
         optionalEsData.ifPresent(esData -> {
             esData.forEach(result -> {
                 String versionId = result.get필드명();
@@ -151,7 +151,7 @@ public class DashboardServiceImpl implements DashboardService {
             })
             .collect(Collectors.toList());
 
-        List<Worker> workers = AggregationService.작업자별_요구사항_관여도(트리맵_검색요청.of(aggregationRequestDTO, 제품버전목록데이터)).getBody();
+        List<Worker> workers = aggregationService.작업자별_요구사항_관여도(트리맵_검색요청.of(aggregationRequestDTO, 제품버전목록데이터)).getBody();
 
         return workers;
     }
@@ -159,18 +159,18 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public 검색결과_목록_메인 제품서비스_일반_통계(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = AggregationService.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = aggregationService.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
         return 요구사항_연결이슈_일반_통계.getBody();
     }
 
     @Override
     public Map<String, Long> 제품서비스별_담당자_이름_통계(Long pdServiceId) {
-        return AggregationService.제품서비스별_담당자_이름_통계(pdServiceId);
+        return aggregationService.제품서비스별_담당자_이름_통계(pdServiceId);
     }
 
     @Override
     public Map<String, Object> getIssueResponsibleStatusTop5(Long pdServiceId, AggregationRequestDTO aggregationRequestDTO) {
-        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = AggregationService.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
+        ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_통계 = aggregationService.제품서비스_일반_통계(pdServiceId, aggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록 = Optional.ofNullable(요구사항_연결이슈_일반_통계.getBody()).orElse(new 검색결과_목록_메인());
 
@@ -207,7 +207,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .하위_크기(1000)
                 .build();
 
-        ResponseEntity<검색결과_목록_메인> 집계_결과 = AggregationService.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
+        ResponseEntity<검색결과_목록_메인> 집계_결과 = aggregationService.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
         검색결과_목록_메인 검색결과목록 = Optional.ofNullable(집계_결과.getBody()).orElse(new 검색결과_목록_메인());
 
         Map<String, List<검색결과>> 검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());
@@ -299,7 +299,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .하위_크기(1000)
                 .build();
 
-        ResponseEntity<검색결과_목록_메인> 집계_결과 = AggregationService.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
+        ResponseEntity<검색결과_목록_메인> 집계_결과 = aggregationService.제품_버전_요구사항_관련_집계(pdServiceId, pdServiceVersionLinks, 집계요청);
         검색결과_목록_메인 검색결과목록 = Optional.ofNullable(집계_결과.getBody()).orElse(new 검색결과_목록_메인());
 
         Map<String, List<검색결과>> 집계_검색결과 = Optional.ofNullable(검색결과목록.get검색결과()).orElse(Collections.emptyMap());

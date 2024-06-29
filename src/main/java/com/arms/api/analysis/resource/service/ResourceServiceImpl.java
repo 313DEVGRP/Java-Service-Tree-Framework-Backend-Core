@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ResourceServiceImpl implements ResourceService {
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
 
     private final PdServiceVersion pdServiceVersion;
 
@@ -32,7 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
                 })
                 .collect(Collectors.toList());
 
-        List<Worker> workers = AggregationService.작업자별_요구사항_관여도(트리맵_검색요청.of(aggregationRequestDTO, 제품버전목록데이터)).getBody();
+        List<Worker> workers = aggregationService.작업자별_요구사항_관여도(트리맵_검색요청.of(aggregationRequestDTO, 제품버전목록데이터)).getBody();
 
         return workers;
     }

@@ -56,7 +56,7 @@ public class CostServiceImpl implements CostService {
     @Value("${requirement.state.complete.keyword}")
     private String resolvedKeyword;
 
-    private final AggregationService engineCommunicator;
+    private final AggregationService aggregationService;
 
     private final PdServiceVersion pdServiceVersion;
 
@@ -80,7 +80,7 @@ public class CostServiceImpl implements CostService {
                                      지라이슈_일반_집계_요청 일반집계요청) {
 
         ResponseEntity<검색결과_목록_메인> 제품서비스_일반_버전_통계_통신결과 =
-                engineCommunicator.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
+                aggregationService.제품서비스_일반_버전_통계(제품아이디, 버전아이디_목록, 일반집계요청);
 
         검색결과_목록_메인 검색결과목록메인 = Optional.ofNullable(제품서비스_일반_버전_통계_통신결과.getBody()).orElse(new 검색결과_목록_메인());
 
@@ -118,10 +118,10 @@ public class CostServiceImpl implements CostService {
     public 버전요구사항별_담당자데이터 버전별_요구사항별_담당자가져오기(AggregationRequestDTO aggregationRequestDTO) {
 
         aggregationRequestDTO.setIsReqType(IsReqType.REQUIREMENT);
-        ResponseEntity<List<검색결과>> 요구사항_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 요구사항_결과 = aggregationService.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
 
         aggregationRequestDTO.setIsReqType(IsReqType.ISSUE);
-        ResponseEntity<List<검색결과>> 하위이슈_결과 = engineCommunicator.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
+        ResponseEntity<List<검색결과>> 하위이슈_결과 = aggregationService.제품별_버전_및_요구사항별_작업자(aggregationRequestDTO);
 
         List<검색결과> 전체결과 = new ArrayList<>();
 
@@ -330,7 +330,7 @@ public class CostServiceImpl implements CostService {
         // 4. 엔진 통신 cReqLink 기준 집계 및 필터링
         List<Long> cReqLinks = filteredReqStatusEntities.stream().map(ReqStatusEntity::getC_req_link).distinct().collect(Collectors.toList());
 
-        List<검색결과> engineResponse = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "cReqLink");
+        List<검색결과> engineResponse = engineResponseNullFilter(aggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "cReqLink");
 
         List<검색결과> groupByCReqLink = engineResponse.stream().filter(link -> cReqLinks.contains(Long.parseLong(link.get필드명()))).collect(Collectors.toList());
 
@@ -761,7 +761,7 @@ public class CostServiceImpl implements CostService {
         aggregationRequestDTO.setIsReqType(IsReqType.ALL);
         aggregationRequestDTO.setPdServiceLink(pdServiceLink);
         aggregationRequestDTO.setPdServiceVersionLinks(pdServiceVersionLinks);
-        List<검색결과> result = engineResponseNullFilter(engineCommunicator.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
+        List<검색결과> result = engineResponseNullFilter(aggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody(), "assignee.assignee_accountId.keyword");
         return result.stream().map(검색결과::get필드명).collect(Collectors.toSet());
     }
 

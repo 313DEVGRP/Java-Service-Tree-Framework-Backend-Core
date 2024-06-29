@@ -42,13 +42,13 @@ public class ScopeServiceImpl implements ScopeService {
 
     private final PdService pdService;
 
-    private final InternalService InternalService;
+    private final InternalService internalService;
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
 
     @Override
     public List<지라이슈> 제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        List<지라이슈> result = AggregationService.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        List<지라이슈> result = aggregationService.제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return result;
     }
 
@@ -100,7 +100,7 @@ public class ScopeServiceImpl implements ScopeService {
 
     @Override
     public Map<String, List<요구사항_버전_이슈_키_상태_작업자수>> 버전이름_매핑하고_같은_버전_묶음끼리_배치(Long pdServiceId, List<Long> pdServiceVersionLinks) throws Exception {
-        List<요구사항_버전_이슈_키_상태_작업자수> 버전배열_요구사항_별_상태_및_관여_작업자_수 = AggregationService.버전배열_요구사항_별_상태_및_관여_작업자_수(pdServiceId, pdServiceVersionLinks).getBody();
+        List<요구사항_버전_이슈_키_상태_작업자수> 버전배열_요구사항_별_상태_및_관여_작업자_수 = aggregationService.버전배열_요구사항_별_상태_및_관여_작업자_수(pdServiceId, pdServiceVersionLinks).getBody();
 
 
         Map<String, List<요구사항_버전_이슈_키_상태_작업자수>> 버전_요구사항_상태_작업자_맵 = new HashMap<>();
@@ -287,7 +287,7 @@ public class ScopeServiceImpl implements ScopeService {
         }
 
         // 4. 엔진 통신
-        ResponseEntity<검색결과_목록_메인> 외부API응답 = AggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO);
+        ResponseEntity<검색결과_목록_메인> 외부API응답 = aggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO);
 
         검색결과_목록_메인 검색결과목록메인 = 외부API응답.getBody();
 
@@ -307,7 +307,7 @@ public class ScopeServiceImpl implements ScopeService {
         List<Long> cReqLinks = top10.stream().map(검색결과::get필드명).map(Long::parseLong).collect(Collectors.toList());
 
         // 7. cReqLinks 값을 이용하여 요구사항(REQADD) 10개 조회
-        ResponseEntity<List<LoadReqAddDTO>> 요구사항목록조회 = InternalService.요구사항목록조회("T_ARMS_REQADD_" + pdServiceLink, cReqLinks);
+        ResponseEntity<List<LoadReqAddDTO>> 요구사항목록조회 = internalService.요구사항목록조회("T_ARMS_REQADD_" + pdServiceLink, cReqLinks);
 
         List<LoadReqAddDTO> loadReqAddDTOList = Optional.ofNullable(요구사항목록조회.getBody()).orElse(Collections.emptyList());
         Set<Long> reqAddCidSet = loadReqAddDTOList.stream().map(LoadReqAddDTO::getC_id).collect(Collectors.toSet());

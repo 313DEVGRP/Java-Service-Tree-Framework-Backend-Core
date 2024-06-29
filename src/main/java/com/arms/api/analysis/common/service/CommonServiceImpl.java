@@ -31,18 +31,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommonServiceImpl implements CommonService {
 
-    private final AggregationService AggregationService;
+    private final AggregationService aggregationService;
 
     private final ReqAdd reqAdd;
 
     @Override
     public 검색결과_목록_메인 commonNestedAggregation(final AggregationRequestDTO aggregationRequestDTO) {
-        return AggregationService.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
+        return aggregationService.제품_혹은_제품버전들의_집계_nested(aggregationRequestDTO).getBody();
     }
 
     @Override
     public 검색결과_목록_메인 commonFlatAggregation(final AggregationRequestDTO aggregationRequestDTO) {
-        return AggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
+        return aggregationService.제품_혹은_제품버전들의_집계_flat(aggregationRequestDTO).getBody();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class CommonServiceImpl implements CommonService {
                 .컨텐츠_보기_여부(false)
                 .크기(1000)
                 .build();
-        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
+        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
         Map<String, Long> 이슈_맵 = new HashMap<>();
         이슈_맵.put("total", null);
         이슈_맵.put("req", null);
@@ -163,7 +163,7 @@ public class CommonServiceImpl implements CommonService {
         요구사항_서브테스크_종합.put("sub_max", 0L);
         요구사항_서브테스크_종합.put("sub_min", 1000000L);
 
-        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = AggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
+        ResponseEntity<검색결과_목록_메인> 일반_버전필터_집계 = aggregationService.일반_버전필터_집계(pdServiceId, pdServiceVersionLinks, 집계_요청);
         // 전체 작업자 수 => 필드
         검색결과_목록_메인 집계결과목록 = Optional.ofNullable(일반_버전필터_집계.getBody()).orElse(new 검색결과_목록_메인());
         Map<String, List<검색결과>> 메인그룹_집계결과 = 집계결과목록.get검색결과();
@@ -205,7 +205,7 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public 검색결과_목록_메인 제품서비스_일반_버전_해결책유무_통계(AggregationRequestDTO aggregationRequestDTO, String resolution) {
         ResponseEntity<검색결과_목록_메인> 요구사항_연결이슈_일반_버전_해결책통계 =
-                AggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
+                aggregationService.제품서비스_일반_버전_해결책유무_통계(aggregationRequestDTO, resolution);
 
         검색결과_목록_메인 통계결과 = 요구사항_연결이슈_일반_버전_해결책통계.getBody();
 

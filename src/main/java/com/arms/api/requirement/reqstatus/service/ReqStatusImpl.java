@@ -71,10 +71,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	protected Chat chat;
 
 	@Autowired
-	private EngineService EngineService;
+	private EngineService engineService;
 
 	@Autowired
-	private InternalService InternalService;
+	private InternalService internalService;
 
 	@Autowired
 	@Qualifier("jiraServer")
@@ -113,7 +113,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				reqStatusDTO.setC_issue_delete_date(null);
 				reqStatusDTO.setC_etc(CRUDType.수정.getType());
 
-				ResponseEntity<?> 결과 = InternalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+				ResponseEntity<?> 결과 = internalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 				if (결과.getStatusCode().is2xxSuccessful()) {
 					chat.sendMessageByEngine("기존에 Soft Delete 처리 된 지라 이슈를 복구하였습니다. 지라 이슈는 통계에 수집됩니다.");
@@ -124,7 +124,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			}
 			else {
 				// 없을 경우 REQSTATUS addNode API 호출
-				ResponseEntity<?> 결과 = InternalService.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+				ResponseEntity<?> 결과 = internalService.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 				if (!결과.getStatusCode().is2xxSuccessful()) {
 					logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 생성 오류 :: " + reqStatusDTO.toString());
@@ -156,7 +156,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			}
 
 			// REQSTATUS 데이터 updateNode API 호출
-			ResponseEntity<?> 결과 = InternalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id(), reqStatusDTO);
+			ResponseEntity<?> 결과 = internalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id(), reqStatusDTO);
 
 			if (!결과.getStatusCode().is2xxSuccessful()) {
 				logger.error("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id() + " :: 삭제 오류 :: " + reqStatusDTO.toString());
@@ -200,7 +200,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		ReqStatusDTO updateReqStatusDTO = modelMapper.map(생성결과, ReqStatusDTO.class);
 
 		// 생성 후 REQSTATUS 데이터 업데이트
-		ResponseEntity<?> 업데이트_결과 = InternalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, updateReqStatusDTO);
+		ResponseEntity<?> 업데이트_결과 = internalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, updateReqStatusDTO);
 
 		// 업데이트 실패 시 메시지 전송
 		if (!업데이트_결과.getStatusCode().is2xxSuccessful()) {
@@ -510,10 +510,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		지라이슈_데이터 생성된_요구사항_이슈 = null;
 		try {
 			if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
-				생성된_요구사항_이슈 = EngineService.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
+				생성된_요구사항_이슈 = engineService.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 			}
 			else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
-				Map<String, Object> 삭제결과 = EngineService.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
+				Map<String, Object> 삭제결과 = engineService.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
 
 				if (!((boolean) 삭제결과.get("success"))) {
 					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
@@ -531,7 +531,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				}
 			}
 			else {
-				Map<String, Object> 수정결과 = EngineService.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+				Map<String, Object> 수정결과 = engineService.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
 
 				if (!((boolean) 수정결과.get("success"))) {
 					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
@@ -785,7 +785,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		if (요구사항_이슈_상태 != null) { // 메핑된 상태 값이 없으면 ALM까지 데이터 전파 필요 없음
 			String 변경할_이슈상태_아이디 = 요구사항_이슈_상태.getC_issue_status_id();
-			Map<String, Object> 변경_결과 = EngineService.이슈_상태_변경하기(Long.parseLong(검색된_ALM서버.getC_jira_server_etc()),
+			Map<String, Object> 변경_결과 = engineService.이슈_상태_변경하기(Long.parseLong(검색된_ALM서버.getC_jira_server_etc()),
 																	이슈_키_또는_아이디,
 																	변경할_이슈상태_아이디);
 

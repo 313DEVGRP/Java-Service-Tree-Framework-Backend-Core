@@ -62,7 +62,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
     private static final SecureRandom RANDOM = new SecureRandom();
 
     @Autowired
-    private EngineService EngineService;
+    private EngineService engineService;
 
     @Autowired
     @Qualifier("jiraProject")
@@ -334,7 +334,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
         /**
          * 엔진 - 암스 오류발생 시 동기화 필요
          **/
-        지라서버정보_엔티티 수정결과 = EngineService.지라서버_등록(서버정보_데이터);
+        지라서버정보_엔티티 수정결과 = engineService.지라서버_등록(서버정보_데이터);
 
         if (수정결과 != null) {
             logger.info(" [ " + this.getClass().getName() + " :: 암스_및_엔진_서버정보수정 ] :: 수정결과 -> " + 수정결과.toString() );
@@ -372,7 +372,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
         서버정보_데이터.setUri(addedNodeEntity.getC_jira_server_base_url());
         서버정보_데이터.setUserId(addedNodeEntity.getC_jira_server_connect_id());
         서버정보_데이터.setPasswordOrToken(addedNodeEntity.getC_jira_server_connect_pw());
-        지라서버정보_엔티티 등록결과 = EngineService.지라서버_등록(서버정보_데이터);
+        지라서버정보_엔티티 등록결과 = engineService.지라서버_등록(서버정보_데이터);
 
         if (등록결과 != null) {
             logger.info(" [ 암스_및_엔진_서버정보등록 ] :: 등록결과 -> " + 등록결과.toString() );
@@ -448,7 +448,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
         List<지라프로젝트_데이터> 가져온_프로젝트_목록;
         try {
-            가져온_프로젝트_목록 = EngineService.ALM_프로젝트_목록_가져오기(엔진_통신_아이디);
+            가져온_프로젝트_목록 = engineService.ALM_프로젝트_목록_가져오기(엔진_통신_아이디);
         }
         catch (Exception e) {
             String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -478,7 +478,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
             List<지라이슈유형_데이터> 가져온_이슈유형_목록;
             try {
-                가져온_이슈유형_목록 = EngineService.ALM_이슈_유형_가져오기(엔진_통신_아이디);
+                가져온_이슈유형_목록 = engineService.ALM_이슈_유형_가져오기(엔진_통신_아이디);
             }
             catch (Exception e) {
                 String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -513,7 +513,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
                     List<지라이슈유형_데이터> 가져온_이슈유형_목록;
                     try {
-                        가져온_이슈유형_목록 = EngineService.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                        가져온_이슈유형_목록 = engineService.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
                     }
                     catch (Exception e) {
                         String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -543,7 +543,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
                 List<지라이슈유형_데이터> 가져온_이슈유형_목록;
                 try {
-                    가져온_이슈유형_목록 = EngineService.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    가져온_이슈유형_목록 = engineService.클라우드_프로젝트별_이슈_유형_목록(엔진_통신_아이디, 프로젝트.getC_desc());
                 }
                 catch (Exception e) {
                     String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -584,7 +584,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
             List<지라이슈상태_데이터> 가져온_이슈상태_목록;
             try {
-                가져온_이슈상태_목록 = EngineService.ALM_이슈_상태_가져오기(엔진_통신_아이디);
+                가져온_이슈상태_목록 = engineService.ALM_이슈_상태_가져오기(엔진_통신_아이디);
             }
             catch (Exception e) {
                 String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -620,7 +620,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
                     List<지라이슈상태_데이터> 가져온_이슈상태_목록;
                     try {
-                        가져온_이슈상태_목록 = EngineService.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                        가져온_이슈상태_목록 = engineService.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
                     }
                     catch (Exception e) {
                         String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -651,7 +651,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
                 List<지라이슈상태_데이터> 가져온_이슈상태_목록;
                 try {
-                    가져온_이슈상태_목록 = EngineService.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
+                    가져온_이슈상태_목록 = engineService.클라우드_프로젝트별_이슈_상태_목록(엔진_통신_아이디, 프로젝트.getC_desc());
                 }
                 catch (Exception e) {
                     String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -688,7 +688,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
         List<지라이슈우선순위_데이터> 가져온_이슈우선순위_목록 = null;
         try {
-            가져온_이슈우선순위_목록 = EngineService.ALM_이슈_우선순위_가져오기(엔진_통신_아이디);
+            가져온_이슈우선순위_목록 = engineService.ALM_이슈_우선순위_가져오기(엔진_통신_아이디);
         }
         catch (Exception e) {
             String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
@@ -717,7 +717,7 @@ public class JiraServerImpl extends TreeServiceImpl implements JiraServer{
 
         List<지라이슈해결책_데이터> 가져온_이슈해결책_목록;
         try {
-            가져온_이슈해결책_목록 = EngineService.ALM_이슈_해결책_가져오기(엔진_통신_아이디);
+            가져온_이슈해결책_목록 = engineService.ALM_이슈_해결책_가져오기(엔진_통신_아이디);
         }
         catch (Exception e) {
             String 오류_메세지 = 검색된_ALM_서버.getC_jira_server_name()+"의 "+ 갱신할_항목 + " 이(가) 갱신 실패하습니다." + e.getMessage();
