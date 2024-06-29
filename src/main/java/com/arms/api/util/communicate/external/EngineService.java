@@ -1,8 +1,7 @@
 package com.arms.api.util.communicate.external;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.jira.jiraserver.model.계정정보_데이터;
-import com.arms.api.migration.UpdateReqLinkDTO;
 import com.arms.api.util.communicate.external.request.지라서버정보_데이터;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.jira.*;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(name = "engine", url = "${arms.engine.url}")
-public interface 엔진통신기 {
+public interface EngineService {
 
     //@PostMapping("/jira/connect/info")
     @PostMapping("/engine/serverinfo")
@@ -31,14 +30,14 @@ public interface 엔진통신기 {
     );
 
     @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}")
-    public Map<String,Object> 이슈_수정하기(
+    public Map<String, Object> 이슈_수정하기(
             @PathVariable("connectId") Long 연결_아이디,
             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
             @RequestBody 지라이슈생성_데이터 지라이슈생성_데이터
     );
 
     @DeleteMapping("/{connectId}/jira/issue/{issueKeyOrId}")
-    public Map<String,Object> 이슈_삭제하기(
+    public Map<String, Object> 이슈_삭제하기(
             @PathVariable("connectId") Long 연결_아이디,
             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디
     );
@@ -125,24 +124,22 @@ public interface 엔진통신기 {
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
                                                 @SpringQueryMap AggregationRequestDTO aggregationRequestDTO);
 
-    @PostMapping("/engine/jira/field/update/c_req_link")
-    ResponseEntity<String> reqUpdate(@RequestBody UpdateReqLinkDTO updateReqLinkDTOS);
-
     @GetMapping("/alm/account/verify")
     ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
 
     /*
-    *  요구사항 별 담당자
-    * */
+     *  요구사항 별 담당자
+     * */
     @GetMapping("/engine/jira/dashboard/req-assignees")
     ResponseEntity<List<검색결과>> 제품_요구사항_담당자(
             @SpringQueryMap AggregationRequestDTO aggregationRequestDTO
     );
+
     /*
-    *  요구사항 상태 변경
-    * */
+     *  요구사항 상태 변경
+     * */
     @PutMapping("/{connectId}/jira/issue/{issueKeyOrId}/{statusId}")
-    public Map<String,Object> 이슈_상태_변경하기(
+    public Map<String, Object> 이슈_상태_변경하기(
             @PathVariable("connectId") Long 연결_아이디,
             @PathVariable("issueKeyOrId") String 이슈_키_또는_아이디,
             @PathVariable("statusId") String 요구사항_이슈_타입

@@ -1,6 +1,6 @@
 package com.arms.api.dashboard.controller;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.dashboard.model.RequirementJiraIssueAggregationResponse;
 import com.arms.api.dashboard.model.SankeyData;
 import com.arms.api.dashboard.model.Worker;
@@ -11,7 +11,6 @@ import com.arms.egovframework.javaservice.treeframework.controller.CommonRespons
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -22,7 +22,7 @@ import com.arms.api.jira.jiraserver.model.enums.EntityType;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.util.communicate.external.엔진통신기;
+import com.arms.api.util.communicate.external.EngineService;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +46,7 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private 엔진통신기 엔진통신기;
+    private EngineService EngineService;
 
     @Autowired
     private GlobalTreeMapService globalTreeMapService;

@@ -1,4 +1,4 @@
-package com.arms.api.analysis.common;
+package com.arms.api.analysis.common.model;
 
 public enum IsReqType {
     ALL,

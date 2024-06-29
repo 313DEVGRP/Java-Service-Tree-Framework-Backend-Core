@@ -1,9 +1,8 @@
 package com.arms.api.analysis.scope.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.analysis.scope.dto.TreeBarDTO;
 import com.arms.api.analysis.scope.dto.요구사항_버전명추가_DTO;
-import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.util.communicate.external.request.aggregation.요구사항_버전_이슈_키_상태_작업자수;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 

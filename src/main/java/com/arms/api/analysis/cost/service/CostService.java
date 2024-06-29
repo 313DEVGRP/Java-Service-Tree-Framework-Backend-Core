@@ -1,6 +1,6 @@
 package com.arms.api.analysis.cost.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.analysis.cost.model.ProductCostResponse;
 import com.arms.api.analysis.cost.model.버전별_요구사항별_연결된_지라이슈데이터;
 import com.arms.api.analysis.cost.model.버전요구사항별_담당자데이터;
@@ -11,7 +11,7 @@ import com.arms.api.util.communicate.external.request.aggregation.지라이슈_�
 import java.util.List;
 import java.util.Set;
 
-public interface 비용서비스 {
+public interface CostService {
 
     버전요구사항별_담당자데이터 전체_담당자가져오기(Long 제품아이디, List<Long> 버전아이디_목록, 지라이슈_일반_집계_요청 일반집계요청);
 

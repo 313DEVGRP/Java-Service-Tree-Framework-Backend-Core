@@ -1,19 +1,17 @@
 package com.arms.api.analysis.time.service;
 
-import com.arms.api.analysis.common.AggregationRequestDTO;
 import com.arms.api.analysis.time.model.등고선데이터;
 import com.arms.api.analysis.time.model.일자별_요구사항_연결된이슈_생성개수_및_상태데이터;
 import com.arms.api.analysis.time.model.히트맵데이터;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
-import com.arms.api.analysis.common.IsReqType;
+import com.arms.api.analysis.common.model.IsReqType;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_일자별_제품_및_제품버전_검색요청;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
-import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
-import com.arms.api.util.communicate.internal.내부통신기;
-import com.arms.api.util.communicate.external.엔진통신기;
-import com.arms.api.util.communicate.external.통계엔진통신기;
+import com.arms.api.util.communicate.internal.InternalService;
+import com.arms.api.util.communicate.external.EngineService;
+import com.arms.api.util.communicate.external.AggregationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,31 +31,31 @@ public class TimeServiceImpl implements TimeService{
     private ReqStatus reqStatus;
 
     @Autowired
-    private 내부통신기 내부통신기;
+    private InternalService InternalService;
 
     @Autowired
-    private 엔진통신기 엔진통신기;
+    private EngineService EngineService;
 
     @Autowired
-    private 통계엔진통신기 통계엔진통신기;
+    private AggregationService AggregationService;
 
     @Override
     public 히트맵데이터 히트맵_제품서비스_버전목록으로_조회(Long pdServiceLink, List<Long> pdServiceVersionLinks) {
-        히트맵데이터 result = 통계엔진통신기.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
+        히트맵데이터 result = AggregationService.히트맵_제품서비스_버전목록으로_조회(pdServiceLink, pdServiceVersionLinks);
         return result;
     }
 
     @Override
     public Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터> 기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) {
         ResponseEntity<Map<String, 일자별_요구사항_연결된이슈_생성개수_및_상태데이터>> result =
-                통계엔진통신기.기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청);
+                AggregationService.기준일자별_제품_및_제품버전목록_요구사항_및_연결된이슈_집계(지라이슈_일자별_제품_및_제품버전_검색요청);
 
         return result.getBody();
     }
 
     @Override
     public Map<Long, List<지라이슈>> 기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) {
-        ResponseEntity<List<지라이슈>> 검색일자_범위_데이터 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청);
+        ResponseEntity<List<지라이슈>> 검색일자_범위_데이터 = AggregationService.기준일자별_제품_및_제품버전목록_업데이트된_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청);
 
         Map<Long, List<지라이슈>> 버전별_그룹화_결과 = Optional.ofNullable(검색일자_범위_데이터.getBody())
                 .orElseGet(Collections::emptyList)
@@ -71,7 +69,7 @@ public class TimeServiceImpl implements TimeService{
 
     @Override
     public List<등고선데이터> 기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청 지라이슈_일자별_제품_및_제품버전_검색요청) {
-        ResponseEntity<Map<Long, Map<String, Map<String,List<지라이슈>>>>> 결과 = 통계엔진통신기.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청);
+        ResponseEntity<Map<Long, Map<String, Map<String,List<지라이슈>>>>> 결과 = AggregationService.기준일자별_제품_및_제품버전목록_업데이트된_누적_이슈조회(지라이슈_일자별_제품_및_제품버전_검색요청);
 
         Map<Long, Map<String, Map<String,List<지라이슈>>>> 검색일자_범위_데이터 = 결과.getBody();
         Long service_id = 지라이슈_일자별_제품_및_제품버전_검색요청.getPdServiceLink();
@@ -93,7 +91,7 @@ public class TimeServiceImpl implements TimeService{
 
         ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 
-        List<ReqStatusEntity> 결과 = 내부통신기.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + service_id, reqStatusDTO);
+        List<ReqStatusEntity> 결과 = InternalService.제품별_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + service_id, reqStatusDTO);
 
         Map<String, String> 요구사항맵 = 결과.stream()
                 .filter(Objects::nonNull)

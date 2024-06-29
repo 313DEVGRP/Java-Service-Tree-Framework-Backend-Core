@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(name = "loopback", url = "http://127.0.0.1:31313")
-public interface 내부통신기 {
+public interface InternalService {
 
     @PostMapping("/arms/reqStatus/{changeReqTableName}/addStatusNode.do")
     ResponseEntity<?> 요구사항_이슈_저장하기(@PathVariable(value = "changeReqTableName") String changeReqTableName,
