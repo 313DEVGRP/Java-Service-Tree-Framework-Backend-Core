@@ -23,24 +23,21 @@ import java.util.Set;
 
 public interface PdService extends TreeService {
 
-    public List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception;
+    List<PdServiceEntity> getNodesWithoutRoot(PdServiceEntity pdServiceEntity) throws Exception;
 
-    public PdServiceEntity getNodeWithVersionOrderByCidDesc(PdServiceEntity pdServiceEntity) throws Exception;
+    PdServiceEntity getNodeWithVersionOrderByCidDesc(PdServiceEntity pdServiceEntity) throws Exception;
 
-    public PdServiceEntity addNodeToEndPosition(PdServiceEntity pdServiceEntity) throws Exception;
+    PdServiceEntity addPdServiceAndVersion(PdServiceEntity pdServiceEntity) throws Exception;
 
-    public PdServiceEntity addPdServiceAndVersion(PdServiceEntity pdServiceEntity) throws Exception;
+    PdServiceEntity addPdServiceVersion(PdServiceEntity pdServiceEntity) throws Exception;
 
-    public PdServiceEntity addPdServiceVersion(PdServiceEntity pdServiceEntity) throws Exception;
+    PdServiceEntity updatePdServiceVersion(Long pdservice_link, PdServiceVersionEntity pdServiceVersionEntity) throws Exception;
 
-    public PdServiceEntity updatePdServiceVersion(Long pdservice_link, PdServiceVersionEntity pdServiceVersionEntity) throws Exception;
+    Set<FileRepositoryEntity> uploadFileForPdServiceNode(Long pdservice_link, MultipartHttpServletRequest multiRequest) throws Exception;
 
-    public Set<FileRepositoryEntity> uploadFileForPdServiceNode(Long pdservice_link, MultipartHttpServletRequest multiRequest) throws Exception;
+    PdServiceEntity removeVersionNode(Long pdServiceID, Long versionID) throws Exception;
 
-    public PdServiceEntity removeVersionNode(Long pdServiceID, Long versionID) throws Exception;
-
-    public PdServiceD3Chart getD3ChartData() throws Exception;
-
+    PdServiceD3Chart getD3ChartData() throws Exception;
 
     int removeAll(Long pdServiceId) throws Exception;
 }

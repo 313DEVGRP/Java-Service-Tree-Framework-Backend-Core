@@ -29,8 +29,6 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -64,16 +62,14 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
 
         pdServiceDetailEntity.setOrder(Order.asc("c_position"));
 
-        List<PdServiceDetailEntity> pdServiceBoardEntities = this.getChildNodeWithoutPaging(pdServiceDetailEntity);
-
-        return pdServiceBoardEntities;
+        return this.getChildNodeWithoutPaging(pdServiceDetailEntity);
     }
 
     @Override
     @Transactional
     public PdServiceDetailEntity addNodeWithGlobalContentsTreeMap(Long pdServiceId, PdServiceDetailEntity pdServiceDetailEntity) throws Exception {
 
-        // 1. PdServiceBoardEntity 등록
+        // 1. PdServiceDetailEntity 등록
         PdServiceDetailEntity result = this.addNode(pdServiceDetailEntity);
 
         // 2. GlobalContentsTreeMapEntity 등록
@@ -118,6 +114,7 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
 
         return returnSet;
     }
+
     public Set<FileRepositoryEntity> upload(MultipartHttpServletRequest multiRequest, FileRepository fileRepository) throws Exception {
 
         PropertiesReader propertiesReader = new PropertiesReader("com/arms/egovframework/property/globals.properties");
@@ -179,14 +176,9 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
+    @Transactional
     public int deleteAll(Long pdServiceDetailId) throws Exception {
-        // 1. PdServiceBoardEntity 삭제
-        PdServiceDetailEntity pdServiceDetailEntity = new PdServiceDetailEntity();
-        pdServiceDetailEntity.setC_id(pdServiceDetailId);
-        this.removeNode(pdServiceDetailEntity);
-
-        // 2. FileRepository 조회 및 삭제
+        // 1. FileRepository 조회 및 삭제
         List<Long> fileLinks = globalContentsTreeMapService.findAllByIds(List.of(pdServiceDetailId), "pdservicedetail_link").stream()
                 .filter(globalContentsTreeMapEntity -> globalContentsTreeMapEntity.getFilerepository_link() != null)
                 .map(GlobalContentsTreeMapEntity::getFilerepository_link)
@@ -197,6 +189,11 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
             fileRepositoryEntity.setC_id(fileLink);
             fileRepository.removeNode(fileRepositoryEntity);
         }
+
+        // 2. PdServiceDetailEntity 삭제
+        PdServiceDetailEntity pdServiceDetailEntity = new PdServiceDetailEntity();
+        pdServiceDetailEntity.setC_id(pdServiceDetailId);
+        this.removeNode(pdServiceDetailEntity);
 
         // 3. GlobalContentsTreeMapEntity 삭제
         globalContentsTreeMapService.deleteByColumnValue("pdservicedetail_link", pdServiceDetailId);

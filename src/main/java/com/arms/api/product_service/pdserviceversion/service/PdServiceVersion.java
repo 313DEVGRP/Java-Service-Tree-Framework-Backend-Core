@@ -19,13 +19,9 @@ import java.util.Map;
 
 public interface PdServiceVersion extends TreeService {
 
-    public List<PdServiceVersionEntity> getVersionListByPdService(PdServiceVersionEntity pdServiceVersionEntity) throws Exception;
+    List<PdServiceVersionEntity> getVersionListByCids(List<Long> pdServiceVersionDTO) throws Exception;
 
-    public List<PdServiceVersionEntity> getVersionListByCids(List<Long> pdServiceVersionDTO) throws Exception;
+    List<PdServiceVersionEntity> getVersionListByAjax(List<Long> pdServiceVersionList) throws Exception;
 
-    Map<Long, String> getVersionStartDates(List<Long> pdServiceVersionList) throws Exception;
-
-    public List<PdServiceVersionEntity> getVersionListByAjax(List<Long> pdServiceVersionList) throws Exception;
-
-    public Map<String,String> versionPeriod(List<Long> c_ids) throws Exception;
+    Map<String, String> versionPeriod(List<Long> c_ids) throws Exception;
 }

@@ -21,15 +21,10 @@ import com.arms.egovframework.javaservice.treeframework.controller.CommonRespons
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
 import com.arms.egovframework.javaservice.treeframework.util.*;
 import com.arms.egovframework.javaservice.treeframework.validation.group.AddNode;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -42,13 +37,11 @@ import java.util.*;
 @Slf4j
 @Controller
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(value = {"/arms/pdService"})
 public class PdServiceController extends TreeAbstractController<PdService, PdServiceDTO, PdServiceEntity> {
 
-    @Autowired
-    @Qualifier("pdService")
-    private PdService pdService;
+    private final PdService pdService;
 
     @PostConstruct
     public void initialize() {
@@ -56,12 +49,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         setTreeEntity(PdServiceEntity.class);
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/getNodeWithVersionOrderByCidDesc.do"},
-            method = {RequestMethod.GET}
-    )
-    public ModelAndView getNodeWithVersionOrderByCidDesc(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
+    @GetMapping("/getNodeWithVersionOrderByCidDesc.do")
+    public ModelAndView getNodeWithVersionOrderByCidDesc(PdServiceDTO pdServiceDTO) throws Exception {
 
         log.info("PdServiceController :: getNodeWithVersionOrderByCidDesc");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
@@ -72,13 +61,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return modelAndView;
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/addPdServiceNode.do"},
-            method = {RequestMethod.POST}
-    )
-    public ResponseEntity<?> addPdServiceNode(@Validated({AddNode.class}) PdServiceDTO pdServiceDTO,
-                                         BindingResult bindingResult, ModelMap model) throws Exception {
+    @PostMapping("/addPdServiceNode.do")
+    public ResponseEntity<?> addPdServiceNode(@Validated({AddNode.class}) PdServiceDTO pdServiceDTO) throws Exception {
 
         log.info("PdServiceController :: addPdServiceNode");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
@@ -88,12 +72,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return ResponseEntity.ok(CommonResponse.success(pdService.addPdServiceAndVersion(pdServiceEntity)));
     }
 
-    @RequestMapping(
-            value = {"/addVersionToNode.do"},
-            method = {RequestMethod.POST}
-    )
-    public ResponseEntity<?> addVersionToNode(@RequestBody PdServiceDTO pdServiceDTO,
-                                              BindingResult bindingResult, ModelMap model) throws Exception {
+    @PostMapping("/addVersionToNode.do")
+    public ResponseEntity<?> addVersionToNode(@RequestBody PdServiceDTO pdServiceDTO) throws Exception {
 
         log.info("PdServiceController :: addVersionToNode");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
@@ -103,9 +83,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return ResponseEntity.ok(CommonResponse.success(pdService.addPdServiceVersion(pdServiceEntity)));
     }
 
-    @RequestMapping(value="/updateVersionToNode.do", method= RequestMethod.PUT)
-    public ModelAndView updateVersionNode(@RequestBody PdServiceVersionDTO pdServiceVersionDTO,
-                                          BindingResult bindingResult, HttpServletRequest request) throws Exception {
+    @PutMapping("/updateVersionToNode.do")
+    public ModelAndView updateVersionNode(@RequestBody PdServiceVersionDTO pdServiceVersionDTO, HttpServletRequest request) throws Exception {
 
         log.info("PdServiceVersionController :: updateVersionNode");
         PdServiceVersionEntity pdServiceVersionEntity = modelMapper.map(pdServiceVersionDTO, PdServiceVersionEntity.class);
@@ -122,29 +101,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return modelAndView;
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/addEndNodeByRoot.do", method = RequestMethod.POST)
-    public ResponseEntity<?> addEndNodeByRoot(@RequestBody PdServiceDTO pdServiceDTO,
-                                         BindingResult bindingResult) throws Exception {
-
-        log.info("PdServiceController :: addEndNodeByRoot");
-        PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
-
-        return ResponseEntity.ok(CommonResponse.success(pdService.addNodeToEndPosition(pdServiceEntity)));
-    }
-
-    /**
-     * 이미지 Upload를 처리한다.
-     *
-     * @param multiRequest
-     * @param model
-     * @return
-     * @throws Exception
-     */
-    @ResponseBody
-    @RequestMapping(value="/uploadFileToNode.do", method = RequestMethod.POST)
-    public ModelAndView uploadFileToNode(final MultipartHttpServletRequest multiRequest,
-                                         HttpServletRequest request, Model model) throws Exception {
+    @PostMapping("/uploadFileToNode.do")
+    public ModelAndView uploadFileToNode(final MultipartHttpServletRequest multiRequest, HttpServletRequest request) throws Exception {
 
         ParameterParser parser = new ParameterParser(request);
         long pdservice_link = parser.getLong("pdservice_link");
@@ -157,12 +115,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return modelAndView;
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/getPdServiceMonitor.do"},
-            method = {RequestMethod.GET}
-    )
-    public ResponseEntity<?> getPdServiceMonitor(PdServiceDTO pdServiceDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    @GetMapping("/getPdServiceMonitor.do")
+    public ResponseEntity<?> getPdServiceMonitor(PdServiceDTO pdServiceDTO) throws Exception {
 
         log.info("PdServiceController :: getPdServiceMonitor");
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
@@ -171,12 +125,8 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
 
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/getVersionList.do"},
-            method = {RequestMethod.GET}
-    )
-    public ResponseEntity<?> getVersionList(PdServiceDTO pdServiceDTO, HttpServletRequest request) throws Exception {
+    @GetMapping("/getVersionList.do")
+    public ResponseEntity<?> getVersionList(PdServiceDTO pdServiceDTO) throws Exception {
         log.info("PdServiceController :: getVersionList");
 
         PdServiceEntity pdServiceEntity = modelMapper.map(pdServiceDTO, PdServiceEntity.class);
@@ -186,7 +136,7 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return ResponseEntity.ok(CommonResponse.success(pdServiceNode.getPdServiceVersionEntities()));
     }
 
-    @RequestMapping(value="/removeVersion.do", method= RequestMethod.DELETE)
+    @DeleteMapping("/removeVersion.do")
     public ModelAndView removeVersion(HttpServletRequest request) throws Exception {
 
         log.info("PdServiceController :: removeVersion");
@@ -202,8 +152,7 @@ public class PdServiceController extends TreeAbstractController<PdService, PdSer
         return modelAndView;
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/getD3ChartData.do", method = RequestMethod.GET)
+    @GetMapping("/getD3ChartData.do")
     public ResponseEntity<?> getD3ChartData() throws Exception {
         return ResponseEntity.ok(CommonResponse.success(pdService.getD3ChartData()));
     }

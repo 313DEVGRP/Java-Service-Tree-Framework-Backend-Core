@@ -16,28 +16,20 @@ import com.arms.api.product_service.pdservice_pure.model.PdServicePureEntity;
 import com.arms.api.product_service.pdservice_pure.service.PdServicePure;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
-@Controller
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(value = {"/arms/pdServicePure"})
 public class PdServicePureController extends TreeAbstractController<PdServicePure, PdServicePureDTO, PdServicePureEntity> {
 
-    @Autowired
-    @Qualifier("pdServicePure")
-    private PdServicePure pdServicePure;
+    private final PdServicePure pdServicePure;
 
     @PostConstruct
     public void initialize() {
@@ -45,12 +37,8 @@ public class PdServicePureController extends TreeAbstractController<PdServicePur
         setTreeEntity(PdServicePureEntity.class);
     }
 
-    @ResponseBody
-    @RequestMapping(
-            value = {"/getPdServiceMonitor.do"},
-            method = {RequestMethod.GET}
-    )
-    public ResponseEntity<?> getPdServiceMonitor(PdServicePureDTO pdServicePureDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    @GetMapping("getPdServiceMonitor.do")
+    public ResponseEntity<?> getPdServiceMonitor(PdServicePureDTO pdServicePureDTO) throws Exception {
 
         log.info("PdServiceController :: getPdServiceMonitor");
         PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServicePureDTO, PdServicePureEntity.class);
