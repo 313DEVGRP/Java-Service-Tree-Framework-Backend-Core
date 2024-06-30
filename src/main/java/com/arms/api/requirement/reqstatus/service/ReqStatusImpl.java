@@ -296,7 +296,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		}
 		reqStatusDTO.setC_title(요구사항_제목);
 
-		TextFormattingType 본문형식 = TextFormattingType.fromString(검색된_ALM서버.getC_server_contents_text_formatting_type());
+		TextFormattingType 본문형식 = Optional.ofNullable(검색된_ALM서버)
+												.map(JiraServerEntity::getC_server_contents_text_formatting_type)
+												.map(TextFormattingType::fromString)
+												.orElse(TextFormattingType.TEXT);
 		String 이슈본문 = 이슈_본문_설정(본문형식, CRUD_타입, savedReqAddEntity, 제품서비스_아이디, ALM서버_아이디, ALM프로젝트_아이디, 버전ID목록);
 		reqStatusDTO.setC_contents(이슈본문);
 

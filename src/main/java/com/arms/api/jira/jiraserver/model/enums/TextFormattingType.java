@@ -17,6 +17,10 @@ public enum TextFormattingType {
     }
 
     public static TextFormattingType fromString(String type) {
+        if (type == null) {
+            return TextFormattingType.TEXT;
+        }
+
         for (TextFormattingType textFormattingType : TextFormattingType.values()) {
             if (textFormattingType.getType().equals(type)) {
                 return textFormattingType;
