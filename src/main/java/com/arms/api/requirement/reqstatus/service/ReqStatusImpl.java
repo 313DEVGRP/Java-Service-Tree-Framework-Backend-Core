@@ -167,21 +167,21 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	public void ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(ReqStatusEntity reqStatusEntity, Long 제품서비스_아이디) {
 
 		// ALM 서버에 요구사항 생성 또는 수정할 REQSTATUS 데이터가 생성, 수정, 삭제인지 확인
-		String CURD_타입;
+		String CRUD_타입;
 		if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
-			CURD_타입 = "생성";
+			CRUD_타입 = "생성";
 		}
 		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.수정.getType())) {
-			CURD_타입 = "수정";
+			CRUD_타입 = "수정";
 		}
 		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.소프트_삭제.getType())) {
-			CURD_타입 = "Soft Delete 수정";
+			CRUD_타입 = "Soft Delete 수정";
 		}
 		else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
-			CURD_타입 = "ALM 요구사항 이슈 삭제";
+			CRUD_타입 = "ALM 요구사항 이슈 삭제";
 		}
 		else {
-			CURD_타입 = "";
+			CRUD_타입 = "";
 		}
 
 		// REQSTATUS 데이터 기반 ALM 서버에 요구사항 이슈 생성 또는 수정
@@ -190,11 +190,11 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		// REQSTATUS c_etc 컬럼이 완료(complete) 일 경우 생성완료 상태 그 외 실패
 		if (생성결과.getC_etc() != null && StringUtils.equals(CRUDType.완료.getType(), 생성결과.getC_etc())) {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
-					+ CURD_타입 + ", ALM 서버를 확인해주세요.");
+					+ CRUD_타입 + ", ALM 서버를 확인해주세요. :: " + reqStatusEntity.getC_desc());
 		}
 		else {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
-					+ CURD_타입 + " 실패 :: " + 생성결과.getC_desc());
+					+ CRUD_타입 + " 실패 :: " + 생성결과.getC_desc());
 		}
 
 		ReqStatusDTO updateReqStatusDTO = modelMapper.map(생성결과, ReqStatusDTO.class);
@@ -204,8 +204,8 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 		// 업데이트 실패 시 메시지 전송
 		if (!업데이트_결과.getStatusCode().is2xxSuccessful()) {
-			logger.error("요구사항 생성 후 현황을 수정하던 중 오류가 발생하였습니다.");
-			chat.sendMessageByEngine("요구사항 생성 후 현황을 수정하던 중 오류가 발생하였습니다.");
+			logger.error("요구사항 생성 후 현황을 수정하던 중 오류가 발생하였습니다. :: REQSTATUS c_id = " + updateReqStatusDTO.getC_id());
+			chat.sendMessageByEngine("요구사항 생성 후 현황을 수정하던 중 오류가 발생하였습니다. :: REQSTATUS c_id = " + updateReqStatusDTO.getC_id());
 		}
 	}
 
@@ -402,9 +402,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			String 실패_이유 = "ALM서버_요구사항_생성 작동 중 ALM 서버 조회 오류";
 
 			logger.error(실패_이유);
-			chat.sendMessageByEngine(실패_이유);
 			reqStatusEntity.setC_desc(실패_이유);
-
 			return reqStatusEntity;
 		}
 
@@ -413,9 +411,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			String 실패_이유 = "ALM서버_요구사항_생성 작동 중 ALM 서버 프로젝트 조회 오류";
 
 			logger.error(실패_이유);
-			chat.sendMessageByEngine(실패_이유);
 			reqStatusEntity.setC_desc(실패_이유);
-
 			return reqStatusEntity;
 		}
 
@@ -445,8 +441,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 			logger.error(실패_이유);
 			chat.sendMessageByEngine(실패_이유);
-			reqStatusEntity.setC_desc(실패_이유);
-
 			return reqStatusEntity;
 		}
 
@@ -495,7 +489,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			logger.error(실패_이유);
 			chat.sendMessageByEngine(실패_이유);
 			reqStatusEntity.setC_desc(실패_이유);
-
 			return reqStatusEntity;
 		}
 		else {
@@ -529,7 +522,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 					logger.error(실패_이유);
 					chat.sendMessageByEngine(실패_이유);
 					reqStatusEntity.setC_desc(실패_이유);
-
 					return reqStatusEntity;
 				}
 			}
@@ -547,7 +539,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 					logger.error(실패_이유);
 					chat.sendMessageByEngine(실패_이유);
 					reqStatusEntity.setC_desc(실패_이유);
-
 					return reqStatusEntity;
 				}
 			}
@@ -559,7 +550,6 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			logger.error(실패_이유);
 			chat.sendMessageByEngine(실패_이유);
 			reqStatusEntity.setC_desc(실패_이유);
-
 			return reqStatusEntity;
 		}
 

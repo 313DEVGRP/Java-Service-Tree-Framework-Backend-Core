@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,7 +36,6 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/loadToES"},
             method = {RequestMethod.GET}
     )
-    @Async
     public String 각_제품서비스_별_요구사항이슈_조회_및_ES저장() throws Exception {
 
         logger.info("[ 스케쥴러_컨트롤러 :: 각_제품서비스_별_요구사항이슈_조회_및_ES저장 ]");
@@ -49,7 +47,6 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/increment/loadToES"},
             method = {RequestMethod.GET}
     )
-    @Async
     public String 증분이슈_검색엔진_벌크_저장() throws Exception {
         logger.info("[ 스케쥴러_컨트롤러 :: 증분이슈_검색엔진_벌크_저장 ]");
         return 스케쥴러.증분이슈_검색엔진_벌크_저장();
@@ -60,7 +57,6 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/updateFromES"},
             method = {RequestMethod.GET}
     )
-    @Async
     public String 각_제품서비스_별_요구사항_Status_업데이트_From_ES() throws Exception {
         logger.info("[ 스케쥴러_컨트롤러 :: 증분이슈_검색엔진_벌크_저장 ]");
         return 스케쥴러.각_제품서비스_별_요구사항_Status_업데이트_From_ES();
@@ -71,7 +67,6 @@ public class 스케쥴러_컨트롤러{
             value = {"/pdservice/reqstatus/recreateFailedReqIssue"},
             method = {RequestMethod.GET}
     )
-    @Async
     public String 각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성() throws Exception {
         logger.info("[ 스케쥴러_컨트롤러 :: 각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성 ]");
         return 스케쥴러.각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성();
