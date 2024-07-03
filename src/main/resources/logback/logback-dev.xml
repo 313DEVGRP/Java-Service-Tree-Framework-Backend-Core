@@ -10,11 +10,21 @@
 
     <include resource="logback/console-appender.xml"/>
 
-    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+    <!-- Hibernate SQL 로그 비활성화 -->
+    <logger name="org.hibernate.SQL" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
     </logger>
 
-    <root level="DEBUG">
+    <!-- log4jdbc 로그 -->
+    <logger name="net.sf.log4jdbc" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <!-- JDBC 로그 (statement) -->
+    <logger name="jdbc" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 

@@ -46,7 +46,7 @@ public class RouteTableInterceptor extends EmptyInterceptor {
             String lastPathSegment = servletPath.substring(servletPath.lastIndexOf("/") + 1);
 
             log.info("RouteTableInterceptor :: servletPath -> {}", servletPath);
-            log.info("RouteTableInterceptor :: onPrepareStatement -> {}", lastPathSegment);
+            log.debug("RouteTableInterceptor :: onPrepareStatement -> {}", lastPathSegment);
 
             if (StringUtils.contains(servletPath, "T_ARMS_REQADD_")) {
                 String route = reqAddRoute.get(lastPathSegment);
@@ -75,7 +75,7 @@ public class RouteTableInterceptor extends EmptyInterceptor {
     }
 
     private String replaceStatement(String preparedStatement, String replaceTableName) {
-        log.info("RouteTableInterceptor :: preparedStatement - before =>" + preparedStatement);
+        log.debug("RouteTableInterceptor :: preparedStatement - before =>" + preparedStatement);
         log.info("RouteTableInterceptor :: replaceTableName =>" + replaceTableName);
         if (StringUtils.isNotEmpty(replaceTableName)) {
             if (StringUtils.contains(replaceTableName, "T_ARMS_REQADD")) {
@@ -85,7 +85,7 @@ public class RouteTableInterceptor extends EmptyInterceptor {
             } else {
                 log.info("RouteTableInterceptor :: replaceTableName - notFound =>" + replaceTableName);
             }
-            log.info("RouteTableInterceptor :: preparedStatement - after =>" + preparedStatement);
+            log.debug("RouteTableInterceptor :: preparedStatement - after =>" + preparedStatement);
         } else {
             log.info("RouteTableInterceptor :: replaceTableName - empty");
         }
