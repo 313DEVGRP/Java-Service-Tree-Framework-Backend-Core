@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <timestamp key="BY_DATE" datePattern="yyyy-MM-dd"/>
+
+    <conversionRule conversionWord="highlightCustom" converterClass="com.arms.api.util.HighlightingCompositeConverterCustom" />
+
+    <property name="LOG_PATTERN"
+              value="%highlightCustom([%d{yyyy-MM-dd HH:mm:ss}:%-4relative] %([%thread]) %(%-5level) %([%C.%M:%(%L)]) - %(%msg%n))"/>
+
+    <include resource="logback/console-appender.xml"/>
+
+    <!-- Hibernate SQL 로그 -->
+    <logger name="org.hibernate.SQL" level="OFF" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- log4jdbc 로그 -->
+    <logger name="net.sf.log4jdbc" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- JDBC 로그 (statement) -->
+    <logger name="jdbc" level="OFF" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+</configuration>

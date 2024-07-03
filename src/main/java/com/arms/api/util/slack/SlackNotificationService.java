@@ -19,7 +19,7 @@ public class SlackNotificationService {
 
 
     public void sendMessageToChannel(final SlackProperty.Channel channel, final Exception e) {
-        if (isLive()) {
+        if (isStage()) {
             String title = MessageFormat.format("[{0}] {1}", slackProperty.getProfile(), slackProperty.getServiceName());
             String text = messageInStackTrace(e);
 
@@ -40,7 +40,7 @@ public class SlackNotificationService {
     }
 
     public void sendMessageToChannel(final SlackProperty.Channel channel, final String message) {
-        if (isLive()) {
+        if (isStage()) {
             String title = MessageFormat.format("[{0}] {1}", slackProperty.getProfile(), slackProperty.getServiceName());
 
             SlackMessageDTO slackMessageDTO = SlackMessageDTO.builder()
@@ -70,7 +70,7 @@ public class SlackNotificationService {
         return e + (filteredStackTrace.isBlank() ? "" : filteredStackTrace);
     }
 
-    private boolean isLive() {
-        return Arrays.asList(environment.getActiveProfiles()).contains("live");
+    private boolean isStage() {
+        return Arrays.asList(environment.getActiveProfiles()).contains("stg");
     }
 }
