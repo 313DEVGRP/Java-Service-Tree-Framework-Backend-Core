@@ -329,6 +329,7 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
             List<JiraProjectPureEntity> 지라프로젝트_목록 = jiraProjectPure.getChildNode(프로젝트_퓨어_검색);
             // 4. 지라프로젝트 맵 생성 (K-V) - (아이디-명)
             Map<Long, String> 지라프로젝트_맵 = 지라프로젝트_목록.stream()
+                    .filter(프로젝트 -> 프로젝트.getC_etc() == null || !StringUtils.equals(프로젝트.getC_etc(), "delete"))
                     .collect(Collectors.toMap(JiraProjectPureEntity::getC_id, JiraProjectPureEntity::getC_jira_name));
 
             List<GlobalTreeMapEntity> 유니크_지라프로젝트_서버_트리맵 = globalTreeMapService
@@ -358,6 +359,10 @@ public class PdServiceImpl extends TreeServiceImpl implements PdService {
                                                 }
 
                                                 String 지라프로젝트_명 = 지라프로젝트_맵.get(프로젝트_아이디);
+                                                if (!StringUtils.isNullCheck(지라프로젝트_명)) {
+                                                    continue;
+                                                }
+
                                                 Long 지라서버_아이디 = 유니크_지라프로젝트_서버_트리맵.stream()
                                                         .filter(프로젝트_서버_트리맵 -> Objects.equals(프로젝트_서버_트리맵.getJiraproject_link(), 프로젝트_아이디))
                                                         .map(GlobalTreeMapEntity::getJiraserver_link).findFirst().orElse(0L);
