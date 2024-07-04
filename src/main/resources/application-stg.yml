@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: live
+    active: stg
   datasource:
     #Hibernate
     url: jdbc:mysql://mysql:3306/aRMS?characterEncoding=UTF-8&useLegacyDatetimeCode=false
