@@ -23,14 +23,16 @@ import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.jira.jiraserver.model.enums.TextFormattingType;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqstatus.model.CRUDType;
 import com.arms.api.requirement.reqstatus.model.ReqStatusDTO;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.util.TreeServiceUtils;
-import com.arms.api.util.communicate.external.response.jira.*;
 import com.arms.api.util.communicate.external.EngineService;
+import com.arms.api.util.communicate.external.response.jira.*;
 import com.arms.api.util.communicate.internal.InternalService;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -75,6 +78,10 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 
 	@Autowired
 	private InternalService internalService;
+
+	@Autowired
+	@Qualifier("pdService")
+	private PdService pdService;
 
 	@Autowired
 	@Qualifier("jiraServer")
@@ -311,7 +318,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		reqStatusDTO.setC_req_link(요구사항_아이디);
 		reqStatusDTO.setC_req_name(savedReqAddEntity.getC_title());
 
-		//-- ARMS 요구사항 오너를 제품 서비스으 오너로 설정
+		//-- ARMS 요구사항 오너를 제품 서비스 오너로 설정
 		String 요구사항_오너 = "admin";
 		if (요구사항_제품서비스.getC_pdservice_owner() != null) {
 			요구사항_오너 = 요구사항_제품서비스.getC_pdservice_owner();
@@ -354,10 +361,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		if (StringUtils.equals(CRUD_타입, CRUDType.생성.getType())) {
 			reqStatusDTO.setC_issue_create_date(date);
 		}
-		else if (StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType())) {
-			reqStatusDTO.setC_issue_delete_date(date);
-		}
-		else if (StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType())) {
+		else if (StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType())) {
 			reqStatusDTO.setC_issue_delete_date(date);
 		}
 
@@ -465,7 +469,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				.startDate(시작일)
 				.dueDate(종료일);
 
-		// REQSTATUS c_etc 컬럼이 delete 일 경우 삭제 처리 대신 라벨  삭제 처리(ALM 지라 서버의 경우)
+		// REQSTATUS c_etc 컬럼이 soft delete 일 경우 삭제 처리 대신 라벨 삭제 처리(ALM 지라 서버의 경우)
 		if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.소프트_삭제.getType())) {
 			String 삭제라벨 = "삭제된_요구사항_이슈";
 			요구사항이슈_필드빌더.labels(List.of(삭제라벨));
@@ -508,15 +512,14 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.생성.getType())) {
 				생성된_요구사항_이슈 = engineService.이슈_생성하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), 요구사항_이슈);
 			}
-			else if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
-				Map<String, Object> 삭제결과 = engineService.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
-
-				if (!((boolean) 삭제결과.get("success"))) {
+			else {
+				// ALM 요구사항 생성 전 삭제 및 수정 로직 실행 시 오류 발생 방어코드 추가
+				if (reqStatusEntity.getC_issue_key() == null) {
 					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
 							검색된_지라서버.getC_jira_server_base_url(),
 							검색된_지라프로젝트.getC_jira_name(),
 							reqStatusEntity.getC_etc(),
-							삭제결과.get("message")
+							"생성 전 요구사항 이슈"
 					);
 
 					logger.error(실패_이유);
@@ -524,16 +527,21 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 					reqStatusEntity.setC_desc(실패_이유);
 					return reqStatusEntity;
 				}
-			}
-			else {
-				Map<String, Object> 수정결과 = engineService.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
 
-				if (!((boolean) 수정결과.get("success"))) {
+				Map<String, Object> 결과 = new HashMap<>();
+				if (StringUtils.equals(reqStatusEntity.getC_etc(), CRUDType.하드_삭제.getType())) {
+					결과 = engineService.이슈_삭제하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key());
+				}
+				else {
+					결과 = engineService.이슈_수정하기(Long.parseLong(검색된_지라서버.getC_jira_server_etc()), reqStatusEntity.getC_issue_key(), 요구사항_이슈);
+				}
+
+				if (!((boolean) 결과.get("success"))) {
 					String 실패_이유 = String.format("%s 서버 :: %s 프로젝트 :: 요구사항 %s 중 실패하였습니다. :: %s",
 							검색된_지라서버.getC_jira_server_base_url(),
 							검색된_지라프로젝트.getC_jira_name(),
 							reqStatusEntity.getC_etc(),
-							수정결과.get("message")
+							결과.get("message")
 					);
 
 					logger.error(실패_이유);
@@ -804,5 +812,208 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 				chat.sendMessageByEngine(성공_메세지);
 			}
 		}
+	}
+
+	@Async
+	@Override
+	public void addReqStatusByReqAdd(ReqAddEntity savedReqAddEntity) throws Exception {
+
+		Long 요구사항_아이디 = savedReqAddEntity.getC_id();
+		PdServiceEntity 요구사항_제품서비스 = savedReqAddEntity.getPdServiceEntity();
+		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String 요구사항_제품서비스_버전목록_JSON = savedReqAddEntity.getC_req_pdservice_versionset_link();
+		List<String> 요구사항_제품서비스_버전목록 = Arrays.asList(objectMapper.readValue(요구사항_제품서비스_버전목록_JSON, String[].class));
+
+		Set<Long> 지라프로젝트_아이디_셋 = new HashSet<>();
+		for (String 디비에저장된_제품서비스하위_버전 : 요구사항_제품서비스_버전목록) {
+			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();
+			globalTreeMap.setPdserviceversion_link(Long.parseLong(디비에저장된_제품서비스하위_버전));
+			List<GlobalTreeMapEntity> 버전_지라프로젝트_목록 = globalTreeMapService.findAllBy(globalTreeMap).stream()
+					.filter(엔티티 -> 엔티티.getJiraproject_link() != null)
+					.collect(Collectors.toList());
+
+			for (GlobalTreeMapEntity 엔티티 : 버전_지라프로젝트_목록) {
+				Long 지라프로젝트_아이디 = 엔티티.getJiraproject_link();
+				지라프로젝트_아이디_셋.add(지라프로젝트_아이디);
+			}
+		}
+
+		// 연결된 버전의 프로젝트 목록으로 REQSTATUS 데이터 추가
+		this.추가된_프로젝트_REQSTATUS_처리(savedReqAddEntity, 지라프로젝트_아이디_셋, 요구사항_제품서비스, null);
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		reqStatusDTO.setC_req_link(요구사항_아이디);
+
+		// 생성된 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 조회_결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+		List<ReqStatusEntity> 요구사항_이슈_생성목록 = 조회_결과.getBody();
+
+		// 생성된 REQSTATUS 데이터 목록을 순회하며 ALM 서버로 요구사항 이슈 생성 후 REQSTATUS 업데이트(issue key, issue url)
+		List<ReqStatusEntity> filteredIssues = Optional.ofNullable(요구사항_이슈_생성목록)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && StringUtils.equals(CRUDType.생성.getType(), 요구사항_이슈.getC_etc()))
+				.collect(Collectors.toList());
+
+		filteredIssues.forEach(요구사항_이슈 -> this.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
+	}
+
+	@Async
+	@Override
+	public void removeReqStatusByReqAdd(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception {
+		// 삭제에 필요한 데이터 설정
+		reqAddEntity.setC_req_pdservice_versionset_link(loadReqAddDTO.getC_req_pdservice_versionset_link());
+		reqAddEntity.setC_title(loadReqAddDTO.getC_title());
+		reqAddEntity.setC_req_contents(loadReqAddDTO.getC_req_contents());
+
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
+		PdServiceEntity 요구사항_제품서비스 = 제품데이터조회(pdServiceId);
+		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		reqStatusDTO.setC_req_link(loadReqAddDTO.getC_id());
+
+		// 삭제타입 application.yml에 설정된 값에 따라 변경, default - soft delete
+		String 삭제_타입 = Optional.ofNullable(armsDetailUrlConfig.getDeleteTYpe())
+				.filter(type -> !type.isEmpty()).orElse(CRUDType.소프트_삭제.getType());
+
+		// 기존 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+		List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
+
+		this.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, reqStatusEntityList, 요구사항_제품서비스, 삭제_타입);
+
+		// 생성된 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 조회_결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+		List<ReqStatusEntity> 요구사항_이슈_삭제목록 = 조회_결과.getBody();
+
+		// 목록을 순회하며 ALM 서버로 요구사항 이슈 생성
+		List<ReqStatusEntity> filteredIssues = Optional.ofNullable(요구사항_이슈_삭제목록)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
+				.collect(Collectors.toList());
+
+		filteredIssues.forEach(요구사항_이슈 -> this.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
+	}
+
+	@Async
+	@Override
+	public void updateReqStatusByReqAdd(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception {
+
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
+
+		// 3. 수정 전 후 비교
+		ObjectMapper objectMapper = new ObjectMapper();
+		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		루프용버전셋.addAll(현재버전셋);
+
+		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2
+		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 2,3
+		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2,3
+
+		logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
+		logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
+		logger.info("루프용버전셋리스트 : {}", 루프용버전셋리스트);
+
+		List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
+				.stream()
+				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
+				.collect(Collectors.toList());
+
+		Set<Long> 수정전버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 수정전버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("수정전버전에연결된지라프로젝트아이디 : {}", 수정전버전에연결된지라프로젝트아이디);
+
+		Set<Long> 현재버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 현재버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
+
+		Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+
+		logger.info("유지된지라프로젝트아이디 : {}", 유지된지라프로젝트아이디);
+		logger.info("추가된지라프로젝트아이디 : {}", 추가된지라프로젝트아이디);
+		logger.info("삭제된지라프로젝트아이디 : {}", 삭제된지라프로젝트아이디);
+
+		PdServiceEntity 요구사항_제품서비스 = 제품데이터조회(pdServiceId);
+		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		reqStatusDTO.setC_req_link(reqAddEntity.getC_id());
+
+		// 기존 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+		List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
+
+		List<ReqStatusEntity> 유지된지라프로젝트 = Optional.ofNullable(reqStatusEntityList)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+		List<ReqStatusEntity> 삭제된지라프로젝트 = Optional.ofNullable(reqStatusEntityList)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+		this.추가된_프로젝트_REQSTATUS_처리(reqAddEntity, 추가된지라프로젝트아이디, 요구사항_제품서비스, reqStatusEntityList);
+		this.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 유지된지라프로젝트, 요구사항_제품서비스, CRUDType.수정.getType());
+		// 요구사항 수정 시 연결 해제된 프로젝트의 요구사항 이슈의 경우 soft delete 처리
+		this.유지_또는_삭제된_프로젝트_REQSTATUS_처리(reqAddEntity, 삭제된지라프로젝트, 요구사항_제품서비스, CRUDType.소프트_삭제.getType());
+
+		// 생성된 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 조회_결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+		List<ReqStatusEntity> 요구사항_이슈_수정목록 = 조회_결과.getBody();
+
+		// 목록을 순회하며 ALM 서버로 요구사항 이슈 생성
+		List<ReqStatusEntity> filteredIssues = Optional.ofNullable(요구사항_이슈_수정목록)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
+				.collect(Collectors.toList());
+
+		filteredIssues.forEach(요구사항_이슈 -> this.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
+	}
+
+	private PdServiceEntity 제품데이터조회(String pdServiceId) throws Exception {
+		return TreeServiceUtils.getNode(pdService, Long.valueOf(pdServiceId), PdServiceEntity.class);
+	}
+
+	private Set<Long> 유지된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 유지된버전 = new HashSet<>(현재버전);
+		유지된버전.retainAll(수정할버전);
+		return 유지된버전;
+	}
+
+	private Set<Long> 추가된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 추가된버전 = new HashSet<>(수정할버전);
+		추가된버전.removeAll(현재버전);
+		return 추가된버전;
+	}
+
+	private Set<Long> 삭제된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 삭제된버전 = new HashSet<>(현재버전);
+		삭제된버전.removeAll(수정할버전);
+		return 삭제된버전;
 	}
 }

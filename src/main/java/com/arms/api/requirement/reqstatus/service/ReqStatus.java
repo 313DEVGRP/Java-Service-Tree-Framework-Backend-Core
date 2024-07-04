@@ -12,6 +12,7 @@
 package com.arms.api.requirement.reqstatus.service;
 
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.egovframework.javaservice.treeframework.service.TreeService;
@@ -28,4 +29,11 @@ public interface ReqStatus extends TreeService {
     public void ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(ReqStatusEntity reqStatusEntity, Long 제품서비스_아이디);
 
     public void ALM_이슈상태_업데이트(ReqStatusEntity reqStatusEntity);
+
+    public void addReqStatusByReqAdd(ReqAddEntity reqAddEntity) throws Exception;
+
+    public void removeReqStatusByReqAdd(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception;
+
+    public void updateReqStatusByReqAdd(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception;
+
 }

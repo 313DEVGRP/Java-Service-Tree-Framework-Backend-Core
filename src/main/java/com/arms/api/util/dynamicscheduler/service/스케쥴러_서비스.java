@@ -33,7 +33,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -99,9 +102,13 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 			}
 
 			if (스케쥴러_타입.equals("생성_실패_요구사항_스케줄러")) {
-				결과.stream()
+				List<ReqStatusEntity> filteredIssues = Optional.ofNullable(결과)
+						.orElse(Collections.emptyList())
+						.stream()
 						.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
-						.forEach(요구사항_이슈_업데이트 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈_업데이트, 제품서비스_아이디));
+						.collect(Collectors.toList());
+
+				filteredIssues.forEach(요구사항_이슈 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
 			}
 			else {
 				for (ReqStatusEntity 요구사항_이슈_엔티티 : 결과) {
