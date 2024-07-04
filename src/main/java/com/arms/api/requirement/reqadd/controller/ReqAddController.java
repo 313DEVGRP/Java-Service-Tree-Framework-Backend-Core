@@ -321,23 +321,30 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
+        //제품(서비스) 셋팅
         reqAddEntity.setPdServiceEntity(TreeServiceUtils.getNode(pdService, reqAddDTO.getC_req_pdservice_link(), PdServiceEntity.class));
 
+        //요구사항 우선순위 셋팅
         reqAddEntity.setReqPriorityEntity(TreeServiceUtils.getNode(reqPriority, reqAddDTO.getC_req_priority_link(), ReqPriorityEntity.class));
 
+        //요구사항 난이도 셋팅
         reqAddEntity.setReqDifficultyEntity(TreeServiceUtils.getNode(reqDifficulty, reqAddDTO.getC_req_difficulty_link(), ReqDifficultyEntity.class));
 
+        //요구사항 상태 셋팅
         reqAddEntity.setReqStateEntity(TreeServiceUtils.getNode(reqState, reqAddDTO.getC_req_state_link(), ReqStateEntity.class));
 
+        //요구사항 생성일, 수정일 셋팅
         Date date = new Date();
         reqAddEntity.setC_req_create_date(date);
         reqAddEntity.setC_req_update_date(date);
 
+        //버전 정보 리스트 = 글로벌 트리맵 조회
         List<Long> versionList = Optional.ofNullable(reqAddEntity.getC_req_pdservice_versionset_link())
                 .map(버전유틸::convertToLongArray)
                 .map(Arrays::asList)
                 .orElse(Collections.emptyList());
 
+        //버전 시작일과 종료일을 요구사항 시작일과 종료일로 셋팅
         Date 버전시작일 = null;
         Date 버전종료일 = null;
         if (!versionList.isEmpty()) {
@@ -355,18 +362,21 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
             }
         }
 
+        //총 계획 기간일 수 셋팅
         long 총계획기간일수 = 0;
         if (reqAddEntity.getC_req_start_date() != null && reqAddEntity.getC_req_end_date() != null) {
             총계획기간일수 = DateUtils.getDiffDay(reqAddEntity.getC_req_start_date(), reqAddEntity.getC_req_end_date());
         }
         reqAddEntity.setC_req_plan_time(총계획기간일수);
 
+        //총 기간일 수 셋팅
         long 총기간일수 = 0;
         if (버전시작일 != null && 버전종료일 != null) {
             총기간일수 = DateUtils.getDiffDay(버전시작일, 버전종료일);
         }
         reqAddEntity.setC_req_total_time(총기간일수);
 
+        //총 작업 및 계획에 대한 일정 셋팅
         long 총작업MM = DateUtils.convertDaysToManMonth(총기간일수);
         long 총계획MM = DateUtils.convertDaysToManMonth(총계획기간일수);
 
@@ -376,6 +386,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         // 요구사항 default 타입일 경우에만 REQSTATUS 생성 후 ALM 서버로 요구사항 이슈 생성 로직 처리
         if (StringUtils.equals(savedNode.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
+            //async 처리 됨.
             reqStatus.addReqStatusByReqAdd(savedNode);
         }
 

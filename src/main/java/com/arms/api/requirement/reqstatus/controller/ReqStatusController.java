@@ -89,7 +89,7 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
             value = {"/{changeReqTableName}/addStatusNode.do"},
             method = {RequestMethod.POST}
     )
-    public ResponseEntity<?> 요구사항_이슈_저장하기(
+    public ResponseEntity<?> 요구사항_상태_정보_저장하기(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             @RequestBody ReqStatusDTO reqStatusDTO) throws Exception {
 

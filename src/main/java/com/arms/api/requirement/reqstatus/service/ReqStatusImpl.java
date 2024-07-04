@@ -95,7 +95,9 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	protected ModelMapper modelMapper;
 
 	@Override
-	public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록, PdServiceEntity 요구사항_제품서비스, List<ReqStatusEntity> reqStatusEntityList) throws Exception {
+	public void 추가된_프로젝트_REQSTATUS_처리(ReqAddEntity reqAddEntity, Set<Long> 추가된_프로젝트_아이디_목록,
+									  		PdServiceEntity 요구사항_제품서비스, List<ReqStatusEntity> reqStatusEntityList) throws Exception {
+
 		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
 
 		// 추가되는 프로젝트 목록을 순회하며 REQSTATUS 데이터 생성처리
@@ -131,7 +133,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 			}
 			else {
 				// 없을 경우 REQSTATUS addNode API 호출
-				ResponseEntity<?> 결과 = internalService.요구사항_이슈_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+				ResponseEntity<?> 결과 = internalService.요구사항_상태_정보_저장하기("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 
 				if (!결과.getStatusCode().is2xxSuccessful()) {
 					logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 생성 오류 :: " + reqStatusDTO.toString());
@@ -197,7 +199,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		// REQSTATUS c_etc 컬럼이 완료(complete) 일 경우 생성완료 상태 그 외 실패
 		if (생성결과.getC_etc() != null && StringUtils.equals(CRUDType.완료.getType(), 생성결과.getC_etc())) {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
-					+ CRUD_타입 + ", ALM 서버를 확인해주세요. :: " + reqStatusEntity.getC_desc());
+					+ CRUD_타입 + ", ALM 서버를 확인해주세요. :: " + reqStatusEntity.getC_jira_server_name() + "/" + reqStatusEntity.getC_jira_project_name());
 		}
 		else {
 			chat.sendMessageByEngine("요구사항 이슈 :: "+ reqStatusEntity.getC_title() +" :: "
@@ -818,6 +820,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 	@Override
 	public void addReqStatusByReqAdd(ReqAddEntity savedReqAddEntity) throws Exception {
 
+		//신규 저장된 요구사항 정보 수집
 		Long 요구사항_아이디 = savedReqAddEntity.getC_id();
 		PdServiceEntity 요구사항_제품서비스 = savedReqAddEntity.getPdServiceEntity();
 		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
@@ -826,6 +829,7 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		String 요구사항_제품서비스_버전목록_JSON = savedReqAddEntity.getC_req_pdservice_versionset_link();
 		List<String> 요구사항_제품서비스_버전목록 = Arrays.asList(objectMapper.readValue(요구사항_제품서비스_버전목록_JSON, String[].class));
 
+		//버전 목록 정보로 지라 프로젝트 아이디 추출
 		Set<Long> 지라프로젝트_아이디_셋 = new HashSet<>();
 		for (String 디비에저장된_제품서비스하위_버전 : 요구사항_제품서비스_버전목록) {
 			GlobalTreeMapEntity globalTreeMap = new GlobalTreeMapEntity();

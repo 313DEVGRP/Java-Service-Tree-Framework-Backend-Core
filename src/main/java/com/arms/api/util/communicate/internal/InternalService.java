@@ -15,7 +15,7 @@ import java.util.List;
 public interface InternalService {
 
     @PostMapping("/arms/reqStatus/{changeReqTableName}/addStatusNode.do")
-    ResponseEntity<?> 요구사항_이슈_저장하기(@PathVariable(value = "changeReqTableName") String changeReqTableName,
+    ResponseEntity<?> 요구사항_상태_정보_저장하기(@PathVariable(value = "changeReqTableName") String changeReqTableName,
             @RequestBody ReqStatusDTO reqStatusDTO);
 
     @GetMapping("/arms/reqStatus/{changeReqTableName}/getStatusMonitor.do")
