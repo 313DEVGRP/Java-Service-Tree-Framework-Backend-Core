@@ -25,7 +25,9 @@ import com.arms.api.requirement.reqpriority.model.ReqPriorityEntity;
 import com.arms.api.requirement.reqpriority.service.ReqPriority;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
+import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.TreeServiceUtils;
+import com.arms.api.util.communicate.internal.InternalService;
 import com.arms.api.util.filerepository.model.FileRepositoryDTO;
 import com.arms.api.util.filerepository.model.FileRepositoryEntity;
 import com.arms.api.util.버전유틸;
@@ -94,12 +96,18 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
     @Qualifier("reqState")
     private ReqState reqState;
 
+    @Autowired
+    @Qualifier("reqStatus")
+    private ReqStatus reqStatus;
+
+    @Autowired
+    private InternalService internalService;
+
     @PostConstruct
     public void initialize() {
         setTreeService(reqAdd);
         setTreeEntity(ReqAddEntity.class);
     }
-
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -366,6 +374,11 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setC_req_plan_resource(총계획MM);
         ReqAddEntity savedNode = reqAdd.addReqNode(reqAddEntity, changeReqTableName);
 
+        // 요구사항 default 타입일 경우에만 REQSTATUS 생성 후 ALM 서버로 요구사항 이슈 생성 로직 처리
+        if (StringUtils.equals(savedNode.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
+            reqStatus.addReqStatusByReqAdd(savedNode);
+        }
+
         log.info("ReqAddController :: addReqNode");
         return ResponseEntity.ok(CommonResponse.success(savedNode));
 
@@ -441,7 +454,19 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         reqAddEntity.setC_req_total_resource(총작업MM);
         reqAddEntity.setC_req_plan_resource(총계획MM);
 
+        ResponseEntity<LoadReqAddDTO> 요구사항조회 = internalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+        LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
+
+        if (loadReqAddDTO == null) {
+            logger.error("ReqAddImpl :: updateReqNode :: 요구사항 수정 전 데이터 조회에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+            throw new Exception("요구사항 수정 전 데이터 조회에 실패했습니다. 관리자에게 문의해 주세요.");
+        }
+
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
+
+        if (StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
+            reqStatus.updateReqStatusByReqAdd(changeReqTableName, reqAddEntity, loadReqAddDTO);
+        }
 
         return ResponseEntity.ok(CommonResponse.success(result));
     }
@@ -521,7 +546,19 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         log.info("ReqAddController :: removeReqNode");
         ReqAddEntity reqAddEntity = modelMapper.map(reqAddDTO, ReqAddEntity.class);
 
+        ResponseEntity<LoadReqAddDTO> 요구사항조회 = internalService.요구사항조회(changeReqTableName, reqAddEntity.getC_id());
+        LoadReqAddDTO loadReqAddDTO = 요구사항조회.getBody();
+
+        if (loadReqAddDTO == null) {
+            logger.error("ReqAddImpl :: updateReqNode :: 요구사항 수정 전 데이터 조회에 실패했습니다. 요구사항 ID : " + reqAddEntity.getC_id());
+            throw new Exception("요구사항 수정 전 데이터 조회에 실패했습니다. 관리자에게 문의해 주세요.");
+        }
+
         int removedReqAddEntity = reqAdd.removeReqNode(reqAddEntity, changeReqTableName, request);
+
+        if (StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
+            reqStatus.removeReqStatusByReqAdd(changeReqTableName, reqAddEntity, loadReqAddDTO);
+        }
 
         log.info("ReqAddController :: removeReqNode");
         return ResponseEntity.ok(CommonResponse.success(removedReqAddEntity));
