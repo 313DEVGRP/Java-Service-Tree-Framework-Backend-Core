@@ -1215,4 +1215,22 @@ public class ReqStatusImpl extends TreeServiceImpl implements ReqStatus{
 		삭제된버전.removeAll(수정할버전);
 		return 삭제된버전;
 	}
+
+	@Async
+	public void reqStatusCheckAfterAlmProcess(ReqStatusDTO reqStatusDTO, Long 제품서비스_아이디) throws Exception{
+
+		ResponseEntity<List<ReqStatusEntity>> 조회_결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+		List<ReqStatusEntity> 요구사항_이슈_생성목록 = 조회_결과.getBody();
+
+		// 생성된 REQSTATUS 데이터 목록을 순회하며 ALM 서버로 요구사항 이슈 생성 후 REQSTATUS 업데이트(issue key, issue url)
+		List<ReqStatusEntity> filteredIssues = Optional.ofNullable(요구사항_이슈_생성목록)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && StringUtils.equals(CRUDType.생성.getType(), 요구사항_이슈.getC_etc()))
+				.collect(Collectors.toList());
+
+		filteredIssues.forEach(요구사항_이슈 -> this.ALM서버_요구사항_처리_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
+
+	}
 }

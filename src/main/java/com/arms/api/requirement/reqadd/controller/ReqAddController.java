@@ -386,8 +386,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
 
         // 요구사항 default 타입일 경우에만 REQSTATUS 생성 후 ALM 서버로 요구사항 이슈 생성 로직 처리
         if (StringUtils.equals(savedNode.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
-            //async 처리 됨.
-            reqStatus.addReqStatusByReqAdd(savedNode);
+            reqAdd.요구사항_생성_이후_상태정보_처리_프로세스(savedNode);
         }
 
         log.info("ReqAddController :: addReqNode");

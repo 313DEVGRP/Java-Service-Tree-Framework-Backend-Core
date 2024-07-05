@@ -35,4 +35,6 @@ public interface ReqAdd extends TreeService {
 
     public List<요구사항_담당자> getRequirementAssignee(PdServiceEntity pdServiceEntity) throws Exception;
 
+    public void 요구사항_생성_이후_상태정보_처리_프로세스(ReqAddEntity savedReqAddEntity) throws Exception;
+
 }

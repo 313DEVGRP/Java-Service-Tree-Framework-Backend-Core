@@ -52,6 +52,7 @@ public class RouteTableConfig {
         map.put("getStatusHistory.do", "getStatusHistory");
         map.put("getPdRelatedReqStats.do", "getPdRelatedReqStats");
         map.put("getReqStatusListByCReqLink.do", "getReqStatusListByCReqLink");
+        map.put("reqStatusCheckAfterAlmProcess.do","reqStatusCheckAfterAlmProcess");
 
         return map;
     }

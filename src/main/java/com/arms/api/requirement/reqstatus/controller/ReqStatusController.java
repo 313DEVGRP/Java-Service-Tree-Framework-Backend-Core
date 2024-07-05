@@ -404,4 +404,28 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
         return ResponseEntity.ok(list);
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/reqStatusCheckAfterAlmProcess.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> 요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @RequestBody ReqStatusDTO reqStatusDTO) throws Exception {
+
+        log.info("ReqStatusController :: 요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트 시작");
+        SessionUtil.setAttribute("reqStatusCheckAfterAlmProcess",changeReqTableName);
+
+        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        Long 제품서비스_아이디 = Long.parseLong(pdServiceStr);
+
+        reqStatus.reqStatusCheckAfterAlmProcess(reqStatusDTO, 제품서비스_아이디);
+
+        SessionUtil.removeAttribute("reqStatusCheckAfterAlmProcess");
+
+        log.info("ReqStatusController :: 요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트 종료");
+        return ResponseEntity.ok(CommonResponse.success("200 ok"));
+
+    }
 }
