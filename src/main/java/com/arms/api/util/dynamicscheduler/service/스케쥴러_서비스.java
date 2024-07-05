@@ -105,10 +105,11 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 				List<ReqStatusEntity> filteredIssues = Optional.ofNullable(결과)
 						.orElse(Collections.emptyList())
 						.stream()
+						.filter(요구사항_이슈 -> 요구사항_이슈.getC_issue_delete_date() == null)
 						.filter(요구사항_이슈 -> 요구사항_이슈.getC_etc() != null && !StringUtils.equals(CRUDType.완료.getType(), 요구사항_이슈.getC_etc()))
 						.collect(Collectors.toList());
 
-				filteredIssues.forEach(요구사항_이슈 -> reqStatus.ALM서버_요구사항_생성_또는_수정_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
+				filteredIssues.forEach(요구사항_이슈 -> reqStatus.ALM서버_요구사항_처리_및_REQSTATUS_업데이트(요구사항_이슈, 제품서비스_아이디));
 			}
 			else {
 				for (ReqStatusEntity 요구사항_이슈_엔티티 : 결과) {
