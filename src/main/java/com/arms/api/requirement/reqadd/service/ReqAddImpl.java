@@ -15,12 +15,9 @@ import com.arms.api.analysis.common.model.AggregationRequestDTO;
 import com.arms.api.analysis.common.model.IsReqType;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
-import com.arms.api.jira.jiraissuepriority.model.JiraIssuePriorityEntity;
-import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraproject.service.JiraProject;
 import com.arms.api.jira.jiraserver.model.JiraServerEntity;
-import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.jira.jiraserver.model.enums.TextFormattingType;
 import com.arms.api.jira.jiraserver.service.JiraServer;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
@@ -28,6 +25,7 @@ import com.arms.api.product_service.pdservice.service.PdService;
 import com.arms.api.product_service.pdserviceversion.model.PdServiceVersionEntity;
 import com.arms.api.product_service.pdserviceversion.service.PdServiceVersion;
 import com.arms.api.requirement.reqadd.model.FollowReqLinkDTO;
+import com.arms.api.requirement.reqadd.model.LoadReqAddDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddDetailDTO;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
 import com.arms.api.requirement.reqadd.model.요구사항별_담당자_목록.요구사항_담당자;
@@ -38,7 +36,6 @@ import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.TreeServiceUtils;
 import com.arms.api.util.communicate.external.EngineService;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
-import com.arms.api.util.communicate.external.response.jira.*;
 import com.arms.api.util.communicate.internal.InternalService;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.TreeConstant;
@@ -64,7 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @AllArgsConstructor
@@ -160,10 +156,10 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		PdServiceEntity pdServiceEntity = reqAddEntity.getPdServiceEntity();
 
 		String pdServiceVersionTitles = pdServiceEntity.getPdServiceVersionEntities()
-			.stream()
-			.filter(a -> followReqLinkDTO.getPdServiceVersion().contains(a.getC_id()))
-			.map(PdServiceVersionEntity::getC_title)
-			.collect(Collectors.joining(","));
+				.stream()
+				.filter(a -> followReqLinkDTO.getPdServiceVersion().contains(a.getC_id()))
+				.map(PdServiceVersionEntity::getC_title)
+				.collect(Collectors.joining(","));
 
 		if(followReqLinkDTO.getJiraProject()!=null){
 			JiraProjectEntity jiraProjectSearchEntity = new JiraProjectEntity();
@@ -179,24 +175,24 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 
 		return ReqAddDetailDTO.builder()
-			.pdService_c_title(pdServiceEntity.getC_title())
-			.pdServiceVersion_c_title(pdServiceVersionTitles)
-			.pdService_c_id(pdServiceEntity.getC_id())
-			.reqAdd_c_title(reqAddEntity.getC_title())
-			.reqAdd_c_req_writer(reqAddEntity.getC_req_writer())
-			.reqAdd_c_req_create_date(reqAddEntity.getC_req_create_date())
-			.reqAdd_c_req_reviewer01(reqAddEntity.getC_req_reviewer01())
-			.reqAdd_c_req_reviewer02(reqAddEntity.getC_req_reviewer02())
-			.reqAdd_c_req_reviewer03(reqAddEntity.getC_req_reviewer03())
-			.reqAdd_c_req_reviewer04(reqAddEntity.getC_req_reviewer04())
-			.reqAdd_c_req_reviewer05(reqAddEntity.getC_req_reviewer05())
-			.reqAdd_c_req_contents(reqAddEntity.getC_req_contents())
-			.reqAdd_c_req_state_link(reqAddEntity.getReqStateEntity().getC_id())
-			.reqAdd_c_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id())
-			.reqAdd_c_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id())
-			.reqAdd_c_req_start_date(reqAddEntity.getC_req_start_date())
-			.reqAdd_c_req_end_date(reqAddEntity.getC_req_end_date())
-			.build();
+				.pdService_c_title(pdServiceEntity.getC_title())
+				.pdServiceVersion_c_title(pdServiceVersionTitles)
+				.pdService_c_id(pdServiceEntity.getC_id())
+				.reqAdd_c_title(reqAddEntity.getC_title())
+				.reqAdd_c_req_writer(reqAddEntity.getC_req_writer())
+				.reqAdd_c_req_create_date(reqAddEntity.getC_req_create_date())
+				.reqAdd_c_req_reviewer01(reqAddEntity.getC_req_reviewer01())
+				.reqAdd_c_req_reviewer02(reqAddEntity.getC_req_reviewer02())
+				.reqAdd_c_req_reviewer03(reqAddEntity.getC_req_reviewer03())
+				.reqAdd_c_req_reviewer04(reqAddEntity.getC_req_reviewer04())
+				.reqAdd_c_req_reviewer05(reqAddEntity.getC_req_reviewer05())
+				.reqAdd_c_req_contents(reqAddEntity.getC_req_contents())
+				.reqAdd_c_req_state_link(reqAddEntity.getReqStateEntity().getC_id())
+				.reqAdd_c_req_difficulty_link(reqAddEntity.getReqDifficultyEntity().getC_id())
+				.reqAdd_c_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id())
+				.reqAdd_c_req_start_date(reqAddEntity.getC_req_start_date())
+				.reqAdd_c_req_end_date(reqAddEntity.getC_req_end_date())
+				.build();
 	}
 
 	@Override
@@ -350,8 +346,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		}
 
 		// 연결된 버전의 프로젝트 목록으로 REQSTATUS 데이터 추가
-		this.연결된_버전의_프로젝트별로_REQSTATUS_데이터추가(savedReqAddEntity, 지라프로젝트_아이디_셋, 요구사항_제품서비스, null);
-
+		this.연결된_버전의_프로젝트별로_REQSTATUS_데이터추가(savedReqAddEntity, 지라프로젝트_아이디_셋, 요구사항_제품서비스);
 
 		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
 		reqStatusDTO.setC_req_link(요구사항_아이디);
@@ -359,8 +354,7 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		internalService.요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
 	}
 
-	public void 연결된_버전의_프로젝트별로_REQSTATUS_데이터추가(ReqAddEntity savedReqAddEntity, Set<Long> 지라프로젝트_아이디_셋,
-									  PdServiceEntity 요구사항_제품서비스, List<ReqStatusEntity> reqStatusEntityList) throws Exception {
+	public void 연결된_버전의_프로젝트별로_REQSTATUS_데이터추가(ReqAddEntity savedReqAddEntity, Set<Long> 지라프로젝트_아이디_셋, PdServiceEntity 요구사항_제품서비스) throws Exception {
 
 		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
 
@@ -375,6 +369,148 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 
 			if (!결과.getStatusCode().is2xxSuccessful()) {
 				logger.error("T_ARMS_REQSTATUS_" + 제품서비스_아이디 + " :: 생성 오류 :: " + reqStatusDTO.toString());
+			}
+		}
+	}
+
+	@Override
+	public void 요구사항_수정_이후_상태정보_처리_프로세스(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception {
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
+
+		// 3. 수정 전 후 비교
+		ObjectMapper objectMapper = new ObjectMapper();
+		Set<String> 수정전버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 현재버전셋 = objectMapper.readValue(reqAddEntity.getC_req_pdservice_versionset_link(), Set.class);
+		Set<String> 루프용버전셋 = objectMapper.readValue(loadReqAddDTO.getC_req_pdservice_versionset_link(), Set.class);
+		루프용버전셋.addAll(현재버전셋);
+
+		List<Long> 수정전버전셋리스트 = 수정전버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2
+		List<Long> 현재버전셋리스트 = 현재버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 2,3
+		List<Long> 루프용버전셋리스트 = 루프용버전셋.stream().map(Long::valueOf).collect(Collectors.toList()); // 1,2,3
+
+		logger.info("수정전버전셋리스트 : {}", 수정전버전셋리스트);
+		logger.info("현재버전셋리스트 : {}", 현재버전셋리스트);
+		logger.info("루프용버전셋리스트 : {}", 루프용버전셋리스트);
+
+		List<GlobalTreeMapEntity> globalTreeMapEntities = globalTreeMapService.findAllByIds(루프용버전셋리스트, "pdserviceversion_link")
+				.stream()
+				.filter(globalTreeMap -> globalTreeMap.getJiraproject_link() != null)
+				.collect(Collectors.toList());
+
+		Set<Long> 수정전버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 수정전버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("수정전버전에연결된지라프로젝트아이디 : {}", 수정전버전에연결된지라프로젝트아이디);
+
+		Set<Long> 현재버전에연결된지라프로젝트아이디 = globalTreeMapEntities.stream()
+				.filter(globalTreeMap -> 현재버전셋리스트.contains(globalTreeMap.getPdserviceversion_link()))
+				.map(GlobalTreeMapEntity::getJiraproject_link)
+				.collect(Collectors.toSet());
+
+		logger.info("현재버전에연결된지라프로젝트아이디 : {}", 현재버전에연결된지라프로젝트아이디);
+
+		Set<Long> 추가된지라프로젝트아이디 = 추가된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 유지된지라프로젝트아이디 = 유지된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+		Set<Long> 삭제된지라프로젝트아이디 = 삭제된지라프로젝트찾기(수정전버전에연결된지라프로젝트아이디, 현재버전에연결된지라프로젝트아이디);
+
+		logger.info("유지된지라프로젝트아이디 : {}", 유지된지라프로젝트아이디);
+		logger.info("추가된지라프로젝트아이디 : {}", 추가된지라프로젝트아이디);
+		logger.info("삭제된지라프로젝트아이디 : {}", 삭제된지라프로젝트아이디);
+
+		PdServiceEntity 요구사항_제품서비스 = 제품데이터조회(pdServiceId);
+		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();		// 연결된 버전의 프로젝트 목록으로 REQSTATUS 데이터 추가
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		reqStatusDTO.setC_req_link(reqAddEntity.getC_id());
+
+		// 기존 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+		List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
+
+		List<ReqStatusEntity> 유지된_REQSTATUS_목록 = Optional.ofNullable(reqStatusEntityList)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(reqStatusEntity -> 유지된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+		List<ReqStatusEntity> 삭제된_REQSTATUS_목록 = Optional.ofNullable(reqStatusEntityList)
+				.orElse(Collections.emptyList())
+				.stream()
+				.filter(reqStatusEntity -> 삭제된지라프로젝트아이디.contains(reqStatusEntity.getC_jira_project_link()))
+				.filter(reqStatusEntity -> reqStatusEntity.getC_issue_delete_date() == null)
+				.collect(Collectors.toList());
+
+		// 새로운 버전의 프로젝트의 경우 REQSTATUS 추가로직 수행
+		this.연결된_버전의_프로젝트별로_REQSTATUS_데이터추가(reqAddEntity, 추가된지라프로젝트아이디, 요구사항_제품서비스);
+		this.연결된_버전의_프로젝트별_REQSTATUS_데이터수정(reqAddEntity, 유지된_REQSTATUS_목록, 요구사항_제품서비스, CRUDType.수정.getType());
+		// 요구사항 수정 시 연결 해제된 프로젝트의 요구사항 이슈의 경우 soft delete 처리
+		this.연결된_버전의_프로젝트별_REQSTATUS_데이터수정(reqAddEntity, 삭제된_REQSTATUS_목록, 요구사항_제품서비스, CRUDType.소프트_삭제.getType());
+
+		internalService.요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+	}
+
+	@Override
+	public void 요구사항_삭제_이후_상태정보_처리_프로세스(String changeReqTableName, ReqAddEntity reqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception {
+		// 삭제에 필요한 데이터 설정
+		reqAddEntity.setC_req_pdservice_versionset_link(loadReqAddDTO.getC_req_pdservice_versionset_link());
+		reqAddEntity.setC_title(loadReqAddDTO.getC_title());
+		reqAddEntity.setC_req_contents(loadReqAddDTO.getC_req_contents());
+
+		String pdServiceId = changeReqTableName.replace("T_ARMS_REQADD_", "");
+		PdServiceEntity 요구사항_제품서비스 = 제품데이터조회(pdServiceId);
+		Long 제품서비스_아이디 = 요구사항_제품서비스.getC_id();
+
+		ReqStatusDTO reqStatusDTO = new ReqStatusDTO();
+		reqStatusDTO.setC_req_link(loadReqAddDTO.getC_id());
+
+		// 삭제타입 application.yml에 설정된 값에 따라 변경, default - soft delete
+		String 삭제_타입 = Optional.ofNullable(armsDetailUrlConfig.getDeleteTYpe())
+				.filter(type -> !type.isEmpty()).orElse(CRUDType.소프트_삭제.getType());
+
+		// 기존 REQSTATUS 데이터 목록 조회
+		ResponseEntity<List<ReqStatusEntity>> 결과
+				= internalService.REQADD_CID_요구사항_이슈_조회("T_ARMS_REQSTATUS_" + pdServiceId, reqStatusDTO);
+		List<ReqStatusEntity> reqStatusEntityList = 결과.getBody();
+
+		this.연결된_버전의_프로젝트별_REQSTATUS_데이터수정(reqAddEntity, reqStatusEntityList, 요구사항_제품서비스, 삭제_타입);
+
+		internalService.요구사항_상태_확인후_ALM처리_및_REQSTATUS_업데이트("T_ARMS_REQSTATUS_" + 제품서비스_아이디, reqStatusDTO);
+	}
+
+	public void 연결된_버전의_프로젝트별_REQSTATUS_데이터수정(ReqAddEntity reqAddEntity, List<ReqStatusEntity> reqStatusEntityList, PdServiceEntity 요구사항_제품서비스, String CRUD_타입) throws Exception {
+
+		// 유지 또는 삭제되는 프로젝트 목록을 순회하며 REQSTATUS 데이터 생성처리
+		for (ReqStatusEntity reqStatusEntity : reqStatusEntityList) {
+
+			Long ALM프로젝트_아이디 = reqStatusEntity.getC_jira_project_link();
+
+			// REQSTATUS 수정 데이터 세팅
+			ReqStatusDTO reqStatusDTO = this.REQSTATUS_데이터_설정(ALM프로젝트_아이디, reqAddEntity, 요구사항_제품서비스, CRUD_타입);
+
+			// 업데이트할 c_id 설정
+			reqStatusDTO.setC_id(reqStatusEntity.getC_id());
+			// ALM 서버의 요구사항 생성이 아직 진행되기 전에 삭제를 할 경우 삭제 처리로 전환 / 수정이 발생할 경우 방어코드
+			if ( (StringUtils.equals(CRUD_타입, CRUDType.하드_삭제.getType()) || StringUtils.equals(CRUD_타입, CRUDType.소프트_삭제.getType()))
+											&& reqStatusEntity.getC_issue_key() == null) {
+				reqStatusDTO.setC_etc(CRUD_타입);
+			}
+			else if (reqStatusEntity.getC_issue_key() == null) {
+				// ISSUE KEY가 NULL일 경우 생성 상태로 유지
+				reqStatusDTO.setC_etc(CRUDType.생성.getType());
+			}
+			else {
+				reqStatusDTO.setC_etc(CRUD_타입);
+			}
+
+			// REQSTATUS 데이터 updateNode API 호출
+			ResponseEntity<?> 결과 = internalService.요구사항_이슈_수정하기("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id(), reqStatusDTO);
+
+			if (!결과.getStatusCode().is2xxSuccessful()) {
+				logger.error("T_ARMS_REQSTATUS_" + 요구사항_제품서비스.getC_id() + " :: 삭제 오류 :: " + reqStatusDTO.toString());
 			}
 		}
 	}
@@ -562,7 +698,6 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		return 지라프로젝트_버전아이디_맵;
 	}
 
-
 	public JiraProjectEntity ALM프로젝트_검색(Long ALM_프로젝트_아이디) {
 		if (ALM_프로젝트_아이디 == null) {
 			return null;
@@ -670,5 +805,25 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 		return 이슈내용;
 	}
 
+	private PdServiceEntity 제품데이터조회(String pdServiceId) throws Exception {
+		return TreeServiceUtils.getNode(pdService, Long.valueOf(pdServiceId), PdServiceEntity.class);
+	}
 
+	private Set<Long> 유지된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 유지된버전 = new HashSet<>(현재버전);
+		유지된버전.retainAll(수정할버전);
+		return 유지된버전;
+	}
+
+	private Set<Long> 추가된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 추가된버전 = new HashSet<>(수정할버전);
+		추가된버전.removeAll(현재버전);
+		return 추가된버전;
+	}
+
+	private Set<Long> 삭제된지라프로젝트찾기(Set<Long> 현재버전, Set<Long> 수정할버전) {
+		Set<Long> 삭제된버전 = new HashSet<>(현재버전);
+		삭제된버전.removeAll(수정할버전);
+		return 삭제된버전;
+	}
 }

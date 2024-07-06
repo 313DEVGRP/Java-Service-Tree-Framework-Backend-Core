@@ -475,7 +475,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         Integer result = reqAdd.updateReqNode(reqAddEntity, changeReqTableName);
 
         if (StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
-            reqStatus.updateReqStatusByReqAdd(changeReqTableName, reqAddEntity, loadReqAddDTO);
+            reqAdd.요구사항_수정_이후_상태정보_처리_프로세스(changeReqTableName, reqAddEntity, loadReqAddDTO);
         }
 
         return ResponseEntity.ok(CommonResponse.success(result));
@@ -567,7 +567,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
         int removedReqAddEntity = reqAdd.removeReqNode(reqAddEntity, changeReqTableName, request);
 
         if (StringUtils.equals(loadReqAddDTO.getC_type(),TreeConstant.Leaf_Node_TYPE)) {
-            reqStatus.removeReqStatusByReqAdd(changeReqTableName, reqAddEntity, loadReqAddDTO);
+            reqAdd.요구사항_삭제_이후_상태정보_처리_프로세스(changeReqTableName, reqAddEntity, loadReqAddDTO);
         }
 
         log.info("ReqAddController :: removeReqNode");
