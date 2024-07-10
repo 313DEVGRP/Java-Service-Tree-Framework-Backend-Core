@@ -63,6 +63,12 @@ public interface EngineService {
                                           @RequestParam("page") int 페이지_번호,
                                           @RequestParam("size") int 페이지_사이즈);
 
+    @GetMapping("/engine/jira/dashboard/reqIssueAndItsSubtasks")
+    public List<지라이슈> 요구사항이슈_및_하위이슈들_조회(@RequestParam("pdServiceId") Long pdServiceLink,
+                                        @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks,
+                                        @RequestParam("jiraServerId") String jiraServerId, // ALM서버 아이디
+                                        @RequestParam("issueKey") String issueKey);
+
     /*
      * 클라우드
      */
