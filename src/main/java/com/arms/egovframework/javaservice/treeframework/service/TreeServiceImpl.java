@@ -632,6 +632,14 @@ public class TreeServiceImpl implements TreeService {
         return 1;
     }
 
+    /**
+     * 트리 구조 내에서 노드를 이동합니다.
+     *
+     * @param treeSearchEntity 이동할 노드
+     * @param request HTTP 요청 객체
+     * @return 이동된 노드
+     * @throws Exception 이동 중에 오류가 발생할 경우
+     */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
