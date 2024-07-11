@@ -107,4 +107,18 @@ public class JiraServerProjectPureController extends TreeAbstractController<Jira
 
         return ResponseEntity.ok(result);
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getJiraProjectPure.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getJiraProjectPure(JiraServerProjectPureDTO jiraServerProjectPureDTO) throws Exception {
+
+        log.info("JiraServerController :: getJiraprojectPure");
+        JiraServerProjectPureEntity jiraServerProjectPureEntity = modelMapper.map(jiraServerProjectPureDTO, JiraServerProjectPureEntity.class);
+
+        return ResponseEntity.ok(jiraServerProjectPure.서버_프로젝트_가져오기(jiraServerProjectPureEntity));
+    }
+
 }

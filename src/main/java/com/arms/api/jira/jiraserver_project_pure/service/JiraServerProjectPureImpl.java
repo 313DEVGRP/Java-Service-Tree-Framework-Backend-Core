@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -95,5 +96,20 @@ public class JiraServerProjectPureImpl extends TreeServiceImpl implements JiraSe
                     .collect(Collectors.toSet());
             jiraServerProjectPureEntity.setJiraIssuePriorityEntities(filteredIssuePriorities);
         }
+    }
+
+    @Override
+    public List<JiraProjectIssueTypePureEntity> 서버_프로젝트_가져오기(JiraServerProjectPureEntity jiraServerProjectPureEntity) throws Exception {
+        JiraServerProjectPureEntity result = this.getNode(jiraServerProjectPureEntity);
+
+        if (result == null || result.getJiraProjectIssueTypePureEntities() == null) {
+            return Collections.emptyList();
+        }
+
+        return result.getJiraProjectIssueTypePureEntities()
+                .stream()
+                .filter(project -> project.getC_etc() == null
+                        || !StringUtils.equals(project.getC_etc(), "delete"))
+                .collect(Collectors.toList());
     }
 }
