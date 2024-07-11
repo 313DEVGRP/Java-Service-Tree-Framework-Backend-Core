@@ -649,8 +649,8 @@ public class TreeServiceImpl implements TreeService {
         treeDao.setClazz(treeSearchEntity.getClass());
         treeDao.getCurrentSession().setCacheMode(CacheMode.IGNORE);
 
-        logger.debug("***********************MoveNode***********************");
-        logger.debug("-----------------------getNode 완료-----------------------");
+        logger.debug("[ TreeService :: moveNode ] 시작 ");
+        logger.debug("[ TreeService :: getNode ] treeSearchEntity : " + treeSearchEntity);
 
         T nodeById = getNode(treeSearchEntity);
         if (nodeById == null) {
