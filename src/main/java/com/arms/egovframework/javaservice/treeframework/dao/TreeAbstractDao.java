@@ -44,7 +44,12 @@ public abstract class TreeAbstractDao<T extends TreeSearchEntity, ID extends Ser
 
     protected abstract Class<T> getEntityClass();
 
-
+    /**
+     * Retrieves the current Hibernate Session.
+     *
+     * @return The current Hibernate Session.
+     * @throws TreeDaoException If the Hibernate Template, SessionFactory, or Session is null.
+     */
     public Session getCurrentSession() {
         HibernateTemplate template = getHibernateTemplate();
         if(template == null) {
@@ -74,7 +79,15 @@ public abstract class TreeAbstractDao<T extends TreeSearchEntity, ID extends Ser
         return DetachedCriteria.forClass(getEntityClass());
     }
 
-
+    /**
+     * Constructs a DetachedCriteria object for the entity class based on the given
+     * TreeSearchEntity object.
+     *
+     * @param treeSearchEntity The TreeSearchEntity object containing the criteria
+     *                         to be applied to the DetachedCriteria.
+     *
+     * @return DetachedCriteria A DetachedCriteria object with the criteria applied.
+     */
     private DetachedCriteria getCriteria(T treeSearchEntity) {
         DetachedCriteria criteria = DetachedCriteria.forClass(getEntityClass());
         for(Criterion criterion : treeSearchEntity.getCriterions()) {

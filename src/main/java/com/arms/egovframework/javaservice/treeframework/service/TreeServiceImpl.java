@@ -81,31 +81,51 @@ public class TreeServiceImpl implements TreeService {
         return list;
     }
 
+    /**
+     * TreeSearchEntity로부터 페이지된 자식 노드 목록을 검색합니다.
+     *
+     * @param <T> TreeSearchEntity의 타입. TreeSearchEntity를 확장해야 합니다.
+     * @param treeSearchEntity 자식 노드 목록을 검색할 때 사용되는 TreeSearchEntity 객체.
+     * @return TreeSearchEntity로부터 검색된 자식 노드 목록.
+     * @throws Exception 검색 과정 중에 오류가 발생할 경우.
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T extends TreeSearchEntity> List<T> getPaginatedChildNode(T treeSearchEntity) throws Exception {
 
+        // DAO 세팅
         treeDao.setClazz(treeSearchEntity.getClass());
         treeDao.getCurrentSession().setCacheMode(CacheMode.IGNORE);
+
+        // 전체 레코드 수 계산
         int totalCount = treeDao.getCount(treeSearchEntity);
 
+        // 페이지 크기 계산
         double calPageSize = Math.ceil((double) totalCount / treeSearchEntity.getPageUnit());
         int autoPageSize = (int) Math.round(calPageSize);
 
-        /** paging */
+        // 페이징 정보 설정
         PaginationInfo paginationInfo = treeSearchEntity.getPaginationInfo();
         paginationInfo.setTotalRecordCount(totalCount);
         paginationInfo.setCurrentPageNo(treeSearchEntity.getPageIndex());
         paginationInfo.setRecordCountPerPage(treeSearchEntity.getPageUnit());
         paginationInfo.setPageSize(autoPageSize);
 
+        // DAO에 전달할 firstIndex, lastIndex 설정
         treeSearchEntity.setFirstIndex(paginationInfo.getFirstRecordIndex());
         treeSearchEntity.setLastIndex(paginationInfo.getLastRecordIndex());
         treeSearchEntity.setRecordCountPerPage(paginationInfo.getRecordCountPerPage());
 
+        // 검색 조건 설정
         treeSearchEntity.setOrder(Order.desc(TreeConstant.Node_ID_Column));
+
+        // DAO로부터 자식 노드 목록 가져오기
         List<T> list = treeDao.getList(treeSearchEntity);
+
+        // 자식 노드 목록에 페이지 정보 설정
         list.stream().forEach(data -> data.getPaginationInfo().setTotalRecordCount(totalCount));
+
+        // 자식 노드 목록 반환
         return list;
     }
 
@@ -151,48 +171,65 @@ public class TreeServiceImpl implements TreeService {
     @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public <T extends TreeSearchEntity> T addNode(T treeSearchEntity) throws Exception {
 
+        // DAO에서 사용할 클래스를 설정합니다.
         treeDao.setClazz(treeSearchEntity.getClass());
+        // 캐시 모드를 무시하도록 설정합니다.
         treeDao.getCurrentSession().setCacheMode(CacheMode.IGNORE);
 
+        // 부모노드 참조 값이 0보다 작은지 확인합니다.
         if (treeSearchEntity.getRef() < 0) {
             throw new RuntimeException("ref is minus");
         } else {
 
+            // 부모 노드를 가져옵니다.
             T nodeByRef = (T) treeDao.getUnique(treeSearchEntity.getRef());
 
+            // 노드 유형이 기본 유형인지 확인합니다.
             if (TreeConstant.Leaf_Node_TYPE.equals(nodeByRef.getC_type())) {
                 throw new RuntimeException("nodeByRef is default Type");
             }
 
+            // 자식 노드를 가져오기 위한 WHERE 조건을 설정합니다.
             nodeByRef.setWhere(TreeConstant.Node_ParentID_Column, nodeByRef.getC_id());
+            // 자식 노드의 개수를 가져옵니다.
             final long lastPosiotionOfNodeByRef = treeDao.getCount(nodeByRef);
 
+            // 새로운 노드의 위치를 설정합니다.
             treeSearchEntity.setC_position(lastPosiotionOfNodeByRef);
 
+            // 새로운 노드의 오른쪽 지점을 계산합니다.
             long rightPointFromNodeByRef = nodeByRef.getC_right();
             rightPointFromNodeByRef = Math.max(rightPointFromNodeByRef, 1);
 
+            // 새로운 노드에 할당할 공간을 계산합니다.
             long spaceOfTargetNode = 2;
 
+            // 새로운 노드의 왼쪽과 오른쪽 지점을 확장합니다.
             this.stretchLeftRightForMyselfFromTree(spaceOfTargetNode, rightPointFromNodeByRef,
                     treeSearchEntity.getCopy(), null, treeSearchEntity);
 
+            // 새로운 노드의 레벨을 계산합니다.
             long targetNodeLevel = treeSearchEntity.getRef() == 0 ? 0 : nodeByRef.getC_level() + 1;
 
+            // 새로운 노드의 부모 ID, 왼쪽, 오른쪽, 레벨을 설정합니다
             treeSearchEntity.setC_parentid(treeSearchEntity.getRef());
             treeSearchEntity.setC_left(rightPointFromNodeByRef);
             treeSearchEntity.setC_right(rightPointFromNodeByRef + 1);
             treeSearchEntity.setC_level(targetNodeLevel);
 
+            // 새로운 노드를 데이터베이스에 삽입합니다.
             long insertSeqResult = (long) treeDao.insert(treeSearchEntity);
             if (insertSeqResult > 0) {
                 final long SUCCESS = 1;
+                // 새로운 노드의 상태와 ID를 설정합니다.
                 treeSearchEntity.setStatus(SUCCESS);
                 treeSearchEntity.setId(insertSeqResult);
             } else {
                 throw new RuntimeException("심각한 오류 발생 - 삽입 노드");
             }
         }
+
+        // 새로운 노드를 반환합니다.
         return treeSearchEntity;
     }
 
@@ -227,6 +264,17 @@ public class TreeServiceImpl implements TreeService {
 
     }
 
+    /**
+     * 이 메서드는 주어진 매개변수를 기반으로 트리 노드의 왼쪽과 오른쪽 값을 확장합니다.
+     * 노드가 추가, 이동, 또는 제거될 때 트리 구조에서 공간을 조정하는 데 사용됩니다.
+     *
+     * @param spaceOfTargetNode 확장할 공간의 양
+     * @param rightPositionFromNodeByRef 확장이 시작할 노드의 오른쪽 위치
+     * @param copy 복사 작업 여부를 나타내는 플래그 (0: 복사, 1: 복사 아님)
+     * @param c_idsByChildNodeFromNodeById 확장에서 제외할 자식 노드 ID의 컬렉션
+     * @param treeSearchEntity TreeSearchEntity 클래스의 인스턴스로, 트리 노드를 나타냄
+     * @throws Exception 확장 프로세스 중에 오류가 발생할 경우
+     */
     @SuppressWarnings("unchecked")
     public <T extends TreeSearchEntity> void stretchLeftRightForMyselfFromTree(long spaceOfTargetNode,
                                                                             long rightPositionFromNodeByRef, long copy, Collection<Long> c_idsByChildNodeFromNodeById,
@@ -240,11 +288,23 @@ public class TreeServiceImpl implements TreeService {
                 detachedRightCriteria);
     }
 
+    /**
+     * 이 메서드는 주어진 매개변수를 기반으로 트리 노드의 오른쪽 값을 확장합니다.
+     * 노드가 추가, 이동, 또는 제거될 때 트리 구조에서 공간을 조정하는 데 사용됩니다.
+     *
+     * @param spaceOfTargetNode 확장할 공간의 양
+     * @param rightPositionFromNodeByRef 확장이 시작할 노드의 오른쪽 위치
+     * @param copy 복사 작업 여부를 나타내는 플래그 (0: 복사, 1: 복사 아님)
+     * @param c_idsByChildNodeFromNodeById 확장에서 제외할 자식 노드 ID의 컬렉션
+     * @param detachedCriteria 확장할 대상 노드를 검색하기 위해 사용되는 DetachedCriteria 객체
+     */
     @SuppressWarnings("unchecked")
     public <T extends TreeSearchEntity> void stretchRight(long spaceOfTargetNode,
                                                        long rightPositionFromNodeByRef, long copy, Collection<Long> c_idsByChildNodeFromNodeById,
                                                        DetachedCriteria detachedCriteria) {
-        logger.debug("-----------------------stretchRight 완료-----------------------");
+
+        logger.info("[ TreeService :: stretchRight ] rightPositionFromNodeByRef : " + rightPositionFromNodeByRef);
+
         Criterion where = Restrictions.ge(TreeConstant.Node_Right_Column, rightPositionFromNodeByRef);
         detachedCriteria.add(where);
         if (copy == 0) {
@@ -271,23 +331,34 @@ public class TreeServiceImpl implements TreeService {
                                                       long rightPositionFromNodeByRef, long copy, Collection<Long> c_idsByChildNodeFromNodeById,
                                                       DetachedCriteria detachedCriteria) {
 
-        logger.debug("-----------------------stretchLeft 완료-----------------------");
+        logger.info("[ TreeService :: stretchLeft ] rightPositionFromNodeByRef : " + rightPositionFromNodeByRef);
+
+        // DetachedCriteria를 사용하여 rightPositionFromNodeByRef 이상의 left 값을 가진 노드들을 찾음
         Criterion where = Restrictions.ge(TreeConstant.Node_Left_Column, rightPositionFromNodeByRef);
         detachedCriteria.add(where);
+
+        // copy가 0이 아닌 경우, c_idsByChildNodeFromNodeById에 포함된 ID를 갖는 노드들을 제외
         if (copy == 0) {
             if (c_idsByChildNodeFromNodeById != null && c_idsByChildNodeFromNodeById.size() > 0) {
                 detachedCriteria.add(Restrictions.and(Restrictions.not(Restrictions.in(TreeConstant.Node_ID_Column,
                         c_idsByChildNodeFromNodeById))));
             }
         }
+
+        // ID 순서로 오름차순 정렬
         detachedCriteria.addOrder(Order.asc(TreeConstant.Node_ID_Column));
+
+        // DetachedCriteria를 사용하여 노드 목록을 가져옴
         List<T> updateTargetList = treeDao.getListWithoutPaging(detachedCriteria);
 
+        // updateTargetList에 있는 각 노드의 left 값을 spaceOfTargetNode만큼 증가
         for (T perTreeSearchEntity : updateTargetList) {
             perTreeSearchEntity.setC_left(perTreeSearchEntity.getC_left() + spaceOfTargetNode);
             try {
+                // 노드를 업데이트
                 treeDao.update(perTreeSearchEntity);
             } catch (Exception e) {
+                // 예외가 발생할 경우, 예외 메시지를 출력
                 System.out.println(e.getMessage());
             }
         }
