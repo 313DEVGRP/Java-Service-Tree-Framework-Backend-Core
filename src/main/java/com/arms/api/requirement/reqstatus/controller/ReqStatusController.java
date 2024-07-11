@@ -259,10 +259,10 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
     @ResponseBody
     @RequestMapping(
-            value = {"/{changeReqTableName}/getIssueAndSubLinks.do"},
+            value = {"/{changeReqTableName}/getIssueAndItsSubtasks.do"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView getLinkedIssueAndSubtask(
+    public ResponseEntity<?> 요구사항_하위이슈_연결이슈_조회(
             @PathVariable(value ="changeReqTableName") String changeReqTableName,
             ReqStatusDTO reqStatusDTO, HttpServletRequest request) throws Exception {
 
@@ -271,29 +271,26 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
         statusEntity.setOrder(Order.asc("c_left"));
 
-        String pdServiceStr = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        ParameterParser parser = new ParameterParser(request);
 
-        String 서버_아이디 = request.getParameter("serverId");
-        JiraServerPureEntity 검색용_지라서버 = new JiraServerPureEntity();
-        검색용_지라서버.setC_id(Long.parseLong(서버_아이디));
-        JiraServerPureEntity 검색결과 = jiraServer.getNode(검색용_지라서버);
+        String 제품서비스_아이디 = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        String pds_version = parser.get("pdServiceVersions");
+        Long[] 제품서비스_버전 =  Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new);
+        String 지라서버_아이디 = parser.get("jiraServerId"); // ALM 서버아이디
+        String 이슈키 = parser.get("issueKey");
+
 
         ModelAndView modelAndView = new ModelAndView("jsonView");
-        if (검색결과 != null) {
-            String 엔진통신_아이디 = 검색결과.getC_jira_server_etc();
-            String 이슈키 = request.getParameter("issueKey");
 
-            List<지라이슈> 링크드이슈_서브데스크 = engineService.지라_연결된이슈_서브테스크_가져오기(Long.parseLong(엔진통신_아이디), 이슈키, 0, 10);
+        List<지라이슈> 요구사항이슈_및_하위이슈들 = engineService.요구사항이슈_및_하위이슈들_조회(Long.valueOf(제품서비스_아이디), 제품서비스_버전, 지라서버_아이디, 이슈키);
 
-            log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 링크드이슈_서브데스크 = {}", 링크드이슈_서브데스크);
-
-            modelAndView.addObject("result", 링크드이슈_서브데스크);
+        if(요구사항이슈_및_하위이슈들.isEmpty()) {
+            log.info("[ ReqStatusController :: 요구사항_하위이슈_연결이슈_조회 ] :: 가져온 요구사항 및 연결이슈 정보가 없습니다.");
         } else {
-            modelAndView.addObject("result", "");
-            log.info("[ ReqStatusEntity :: getLinkedIssueAndSubtask ] :: 검색된 지라서버가 없습니다.");
+            log.info("[ ReqStatusController :: 요구사항_하위이슈_연결이슈_조회 ] :: 가져온 요구사항 및 연결이슈의 수 => {}", 요구사항이슈_및_하위이슈들.size());
         }
 
-        return modelAndView;
+        return ResponseEntity.ok(CommonResponse.success(요구사항이슈_및_하위이슈들));
     }
 
     @ResponseBody

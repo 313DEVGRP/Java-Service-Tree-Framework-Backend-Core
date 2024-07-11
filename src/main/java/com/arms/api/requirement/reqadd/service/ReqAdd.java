@@ -37,4 +37,7 @@ public interface ReqAdd extends TreeService {
 
     public void 요구사항_생성_이후_상태정보_처리_프로세스(ReqAddEntity savedReqAddEntity) throws Exception;
 
+    public void 요구사항_수정_이후_상태정보_처리_프로세스(String changeReqTableName, ReqAddEntity savedReqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception;
+
+    public void 요구사항_삭제_이후_상태정보_처리_프로세스(String changeReqTableName, ReqAddEntity savedReqAddEntity, LoadReqAddDTO loadReqAddDTO) throws Exception;
 }
