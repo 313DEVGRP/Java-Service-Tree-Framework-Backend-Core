@@ -233,6 +233,14 @@ public class TreeServiceImpl implements TreeService {
         return treeSearchEntity;
     }
 
+    /**
+     * 이 메서드는 한 노드의 속성을 다른 노드의 속성으로 덮어씁니다.
+     *
+     * @param toEntity 속성을 덮어쓸 대상 노드
+     * @param fromEntity 속성을 가져올 노드
+     * @return 1: 성공, 그 외: 예외 발생
+     * @throws Exception 데이터베이스 작업 중에 오류 발생
+     */
     @Override
     @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public <T extends TreeSearchEntity> int overwriteNode( T toEntity ,T fromEntity) throws Exception {
@@ -326,6 +334,16 @@ public class TreeServiceImpl implements TreeService {
         }
     }
 
+    /**
+     * 이 메서드는 트리 노드의 왼쪽 값을 주어진 양만큼 확장합니다.
+     * 트리 구조에서 노드가 추가, 이동, 또는 제거될 때 공간을 조정하는 데 사용됩니다.
+     *
+     * @param spaceOfTargetNode 확장할 공간의 양
+     * @param rightPositionFromNodeByRef 확장이 시작할 노드의 오른쪽 위치
+     * @param copy 복사 작업 여부를 나타내는 플래그 (0: 복사, 1: 복사 아님)
+     * @param c_idsByChildNodeFromNodeById 확장에서 제외할 자식 노드 ID의 컬렉션
+     * @param detachedCriteria 확장할 대상 노드를 검색하기 위해 사용되는 DetachedCriteria 객체
+     */
     @SuppressWarnings("unchecked")
     public <T extends TreeSearchEntity> void stretchLeft(long spaceOfTargetNode,
                                                       long rightPositionFromNodeByRef, long copy, Collection<Long> c_idsByChildNodeFromNodeById,
@@ -380,70 +398,126 @@ public class TreeServiceImpl implements TreeService {
         return target.newInstance();
     }
 
+    /**
+     * This function removes a node from the tree structure.
+     *
+     * @param treeSearchEntity The node to be removed.
+     * @return 0 if the node is successfully removed, otherwise an exception is thrown.
+     * @throws Exception If an error occurs during the removal process.
+     */
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public <T extends TreeSearchEntity> int removeNode(T treeSearchEntity) throws Exception {
 
+        // DAO에서 사용할 클래스를 설정합니다.
         treeDao.setClazz(treeSearchEntity.getClass());
+
+        // 캐시 모드를 무시하도록 설정합니다.
         treeDao.getCurrentSession().setCacheMode(CacheMode.IGNORE);
+
+        // 제거할 노드를 ID를 사용하여 가져옵니다.
         Criterion whereGetNode = Restrictions.eq(TreeConstant.Node_ID_Column, treeSearchEntity.getC_id());
         T removeNode = (T) treeDao.getUnique(whereGetNode);
 
+        // 제거할 노드의 공간을 계산합니다.
         long spaceOfTargetNode = removeNode.getC_right() - removeNode.getC_left() + 1;
 
+        // 제거할 노드의 공간을 설정합니다.
         removeNode.setSpaceOfTargetNode(spaceOfTargetNode);
 
+        // 제거할 노드의 하위 노드를 찾기 위해 DetachedCriteria를 만듭니다.
         DetachedCriteria detachedDeleteCriteria = DetachedCriteria.forClass(treeSearchEntity.getClass());
-        Criterion where = Restrictions.ge(TreeConstant.Node_Left_Column, removeNode.getC_left());
+
+        // 제거할 노드의 왼쪽, 오른쪽 값 범위 내에 있는 노드를 찾기 위한 조건을 추가합니다.
+        Criterion where = Restrictions.and(
+                Restrictions.ge(TreeConstant.Node_Left_Column, removeNode.getC_left()),
+                Restrictions.le(TreeConstant.Node_Right_Column, removeNode.getC_right())
+        );
         detachedDeleteCriteria.add(where);
-        detachedDeleteCriteria.add(Restrictions.and(Restrictions.le(TreeConstant.Node_Right_Column, removeNode.getC_right())));
+
+        // 결과를 ID 순으로 정렬합니다.
         detachedDeleteCriteria.addOrder(Order.asc(TreeConstant.Node_ID_Column));
+
         try {
+            // DetachedCriteria를 사용하여 제거할 노드의 하위 노드를 가져옵니다.
             List<T> deleteTargetList = treeDao.getListWithoutPaging(detachedDeleteCriteria);
+
+            // 제거할 노드의 하위 노드를 삭제합니다.
             for (T deleteTreeSearchEntity : deleteTargetList) {
                 treeDao.delete(deleteTreeSearchEntity);
             }
         } catch (Exception e) {
+            // 삭제 중에 발생한 예외를 출력합니다.
             System.out.println(e.getMessage());
         }
 
+        // 제거할 노드의 오른쪽에 있는 노드를 찾기 위해 DetachedCriteria를 만듭니다.
         DetachedCriteria detachedRemovedAfterLeftFixCriteria = DetachedCriteria.forClass(treeSearchEntity.getClass());
+
+        // 제거할 노드의 오른쪽 값보다 큰 왼쪽 값을 갖는 노드를 찾기 위한 조건을 추가합니다.
         Criterion whereRemovedAfterLeftFix = Restrictions.gt(TreeConstant.Node_Left_Column, removeNode.getC_right());
         detachedRemovedAfterLeftFixCriteria.add(whereRemovedAfterLeftFix);
+
+        // 결과를 ID 순으로 정렬합니다.
         detachedRemovedAfterLeftFixCriteria.addOrder(Order.asc(TreeConstant.Node_ID_Column));
+
+        // DetachedCriteria를 사용하여 제거할 노드의 오른쪽에 있는 노드를 가져옵니다.
         List<T> updateRemovedAfterLeftFixtList = treeDao
                 .getListWithoutPaging(detachedRemovedAfterLeftFixCriteria);
+
+        // 제거할 노드의 오른쪽에 있는 노드의 왼쪽 값을 감소시킵니다.
         for (T perLeftFixTreeSearchEntity : updateRemovedAfterLeftFixtList) {
             perLeftFixTreeSearchEntity.setC_left(perLeftFixTreeSearchEntity.getC_left() - spaceOfTargetNode);
             treeDao.update(perLeftFixTreeSearchEntity);
         }
 
+        // 제거할 노드의 오른쪽에 있는 노드를 찾기 위해 DetachedCriteria를 만듭니다.
         DetachedCriteria detachedRemovedAfterRightFixCriteria = DetachedCriteria
                 .forClass(treeSearchEntity.getClass());
+
+        // 제거할 노드의 오른쪽 값보다 큰 오른쪽 값을 갖는 노드를 찾기 위한 조건을 추가합니다.
         Criterion whereRemovedAfterRightFix = Restrictions.gt(TreeConstant.Node_Right_Column, removeNode.getC_left());
         detachedRemovedAfterRightFixCriteria.add(whereRemovedAfterRightFix);
+
+        // 결과를 ID 순으로 정렬합니다.
         detachedRemovedAfterRightFixCriteria.addOrder(Order.asc(TreeConstant.Node_ID_Column));
+
+        // DetachedCriteria를 사용하여 제거할 노드의 오른쪽에 있는 노드를 가져옵니다.
         List<T> updateRemovedAfterRightFixtList = treeDao
                 .getListWithoutPaging(detachedRemovedAfterRightFixCriteria);
+
+        // 제거할 노드의 오른쪽에 있는 노드의 오른쪽 값을 감소시킵니다.
         for (T perRightFixTreeSearchEntity : updateRemovedAfterRightFixtList) {
             perRightFixTreeSearchEntity.setC_right(perRightFixTreeSearchEntity.getC_right() - spaceOfTargetNode);
             treeDao.update(perRightFixTreeSearchEntity);
         }
 
+        // 제거할 노드의 자식 노드를 찾기 위해 DetachedCriteria를 만듭니다.
         DetachedCriteria detachedRemovedAfterPositionFixCriteria = DetachedCriteria.forClass(treeSearchEntity
                 .getClass());
-        Criterion whereRemovedAfterPositionFix = Restrictions.eq(TreeConstant.Node_ParentID_Column, removeNode.getC_parentid());
+
+        // 제거할 노드의 ID를 부모 ID로 갖고, 제거할 노드의 위치보다 큰 위치 값을 갖는 노드를 찾기 위한 조건을 추가합니다.
+        Criterion whereRemovedAfterPositionFix = Restrictions.and(
+                Restrictions.eq(TreeConstant.Node_ParentID_Column, removeNode.getC_parentid()),
+                Restrictions.gt(TreeConstant.Node_Position_Column, removeNode.getC_position())
+        );
         detachedRemovedAfterPositionFixCriteria.add(whereRemovedAfterPositionFix);
-        detachedRemovedAfterPositionFixCriteria.add(Restrictions.and(Restrictions.gt(TreeConstant.Node_Position_Column,
-                removeNode.getC_position())));
+
+        // 결과를 ID 순으로 정렬합니다.
         detachedRemovedAfterPositionFixCriteria.addOrder(Order.asc(TreeConstant.Node_ID_Column));
+
+        // DetachedCriteria를 사용하여 제거할 노드의 자식 노드를 가져옵니다.
         List<T> updateRemovedAfterPositionFixtList = treeDao
                 .getListWithoutPaging(detachedRemovedAfterPositionFixCriteria);
+
+        // 제거할 노드의 자식 노드의 위치 값을 감소시킵니다.
         for (T perPositionFixTreeSearchEntity : updateRemovedAfterPositionFixtList) {
             perPositionFixTreeSearchEntity.setC_position(perPositionFixTreeSearchEntity.getC_position() - 1);
             treeDao.update(perPositionFixTreeSearchEntity);
         }
+
+        // 성공적으로 실행되었음을 나타내기 위해 0을 반환합니다.
         return 0;
     }
 
