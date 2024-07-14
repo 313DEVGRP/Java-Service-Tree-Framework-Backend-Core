@@ -25,6 +25,8 @@ public class 지라이슈 {
     private Date timestamp;
     private String issueID;
     private String key;
+    private String upperKey;
+    private String connectType;
     private String self;
     private String parentReqKey;
     private Boolean isReq;
@@ -45,6 +47,8 @@ public class 지라이슈 {
     private String created;
 
     private String updated;
+
+    private String deleted;
 
     private List<지라이슈.워크로그> worklogs;
 
