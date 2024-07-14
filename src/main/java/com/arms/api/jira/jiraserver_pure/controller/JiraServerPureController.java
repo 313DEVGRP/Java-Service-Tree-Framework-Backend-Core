@@ -12,6 +12,7 @@
 package com.arms.api.jira.jiraserver_pure.controller;
 
 import com.arms.api.jira.jiraserver.model.JiraServerDTO;
+import com.arms.api.jira.jiraserver.model.enums.ServerType;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureDTO;
 import com.arms.api.jira.jiraserver_pure.model.JiraServerPureEntity;
 import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -62,4 +64,14 @@ public class JiraServerPureController extends TreeAbstractController<JiraServerP
         return ResponseEntity.ok(jiraServerPure.getNodesWithoutRoot(jiraServerEntity));
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value= { "/getJiraServerTypeInfo.do"},
+            method= {RequestMethod.GET}
+    )
+    public ResponseEntity<Map<String, ServerType>> getJiraServerTypeInfo(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+
+        log.info("JiraServerPureController :: getJiraServerTypeInfo");
+        return ResponseEntity.ok(jiraServerPure.지라서버_아이디_타입_정보_가져오기());
+    }
 }
