@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface JiraServerPure extends TreeService {
 
-    Map<String, ServerType> 지라서버_아이디_타입_정보_가져오기() throws Exception;
+    Map<String, String> ALM서버_아이디_서버유형_맵_가져오기();
 }

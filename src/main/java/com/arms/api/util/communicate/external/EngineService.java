@@ -69,6 +69,9 @@ public interface EngineService {
                                         @RequestParam("jiraServerId") String jiraServerId, // ALM서버 아이디
                                         @RequestParam("issueKey") String issueKey);
 
+    @GetMapping("/engine/serverinfo/serverTypeMap")
+    public Map<String,String> 서버_연결아이디_유형정보_맵_조회();
+
     /*
      * 클라우드
      */
