@@ -158,6 +158,29 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
 
     @ResponseBody
     @RequestMapping(
+            value = {"/{changeReqTableName}/deletedIssueList.do"},
+            method = {RequestMethod.GET}
+    )
+    public ModelAndView 제품_버전별_삭제된_이슈조회(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, HttpServletRequest request) throws Exception {
+
+        log.info("ReqStatusController :: 제품_버전별_삭제된_이슈조회");
+
+        String 제품서비스_아이디 = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        AggregationRequestDTO 요청 = new AggregationRequestDTO();
+        ParameterParser parser = new ParameterParser(request);
+        String pds_version = parser.get("version");
+        Long[] 제품서비스_버전 =  Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", engineService.제품_버전별_삭제된_이슈조회(Long.valueOf(제품서비스_아이디), 제품서비스_버전));
+        return modelAndView;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(
             value = {"/{changeReqTableName}/updateStatusNode.do"},
             method = {RequestMethod.PUT}
     )

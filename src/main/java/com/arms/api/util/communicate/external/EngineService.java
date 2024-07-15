@@ -130,6 +130,11 @@ public interface EngineService {
     ResponseEntity<List<지라이슈>> 제품별_요구사항_연결이슈_조회(@PathVariable("pdServiceId") Long pdServiceId,
                                                 @SpringQueryMap AggregationRequestDTO aggregationRequestDTO);
 
+    @GetMapping("/engine/jira/dashboard/deletedIssueList")
+    ResponseEntity<List<지라이슈>> 제품_버전별_삭제된_이슈조회(@RequestParam("pdServiceId") Long pdServiceLink,
+                                      @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks);
+
+
     @GetMapping("/alm/account/verify")
     ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);
 
