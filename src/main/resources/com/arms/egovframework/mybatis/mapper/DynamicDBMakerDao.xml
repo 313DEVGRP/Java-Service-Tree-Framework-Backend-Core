@@ -53,6 +53,11 @@
             `c_req_state_link`              bigint null comment '요구사항 상태',
             `c_req_difficulty_link`         bigint null comment '요구사항 난이도',
 
+            `c_drawio_contents`           longtext null comment 'drawio xml',
+            `c_drawio_image_raw`              longtext null comment 'drawio image raw data',
+--             `c_drawdb_contents`           longtext null comment 'drawdb xml',
+--             `c_drawdb_image_raw`           longtext null comment 'drawdb image raw data',
+
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',
             `c_req_contents`            longtext        COMMENT '내용'
@@ -107,6 +112,11 @@
             `c_req_priority_link`           bigint null comment '요구사항 우선순위',
             `c_req_state_link`              bigint null comment '요구사항 상태',
             `c_req_difficulty_link`         bigint null comment '요구사항 난이도',
+
+            `c_drawio_contents`           bigint null comment 'drawio xml',
+            `c_drawio_image_raw`              longtext null comment 'drawio image raw data',
+--             `c_drawdb_contents`           bigint null comment 'drawdb xml',
+--             `c_drawdb_image_raw`           longtext null comment 'drawdb image raw data',
 
             `c_req_etc`                 varchar(255)    COMMENT '비고',
             `c_req_desc`                text            COMMENT '설명',

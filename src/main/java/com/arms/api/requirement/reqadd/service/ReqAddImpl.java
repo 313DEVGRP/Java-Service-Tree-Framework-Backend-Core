@@ -192,6 +192,8 @@ public class ReqAddImpl extends TreeServiceImpl implements ReqAdd {
 				.reqAdd_c_req_priority_link(reqAddEntity.getReqPriorityEntity().getC_id())
 				.reqAdd_c_req_start_date(reqAddEntity.getC_req_start_date())
 				.reqAdd_c_req_end_date(reqAddEntity.getC_req_end_date())
+				.c_drawio_contents(reqAddEntity.getC_drawio_contents())
+				.c_drawio_image_raw(reqAddEntity.getC_drawio_image_raw())
 				.build();
 	}
 

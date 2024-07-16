@@ -76,4 +76,12 @@ public class ReqAddDTO extends TreeBaseDTO {
     private String c_req_desc;
 
     private String c_req_etc;
+
+    private String c_drawio_contents;
+
+    private String c_drawio_image_raw;
+
+//    private String c_drawdb_contents;
+
+//    private String c_drawdb_image_raw;
 }

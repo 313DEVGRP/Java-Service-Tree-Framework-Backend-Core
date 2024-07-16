@@ -314,4 +314,27 @@ public class ReqAddPureController extends TreeAbstractController<ReqAddPure, Req
             )
         );
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/updateDrawIOContents.do"},
+            method = {RequestMethod.POST}
+    )
+    public ResponseEntity<?> updateDrawIOContents(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            @Validated({UpdateNode.class}) ReqAddPureDTO reqAddPureDTO,
+            HttpServletRequest request
+    ) throws Exception {
+
+        ReqAddPureEntity reqAddPureEntity = modelMapper.map(reqAddPureDTO, ReqAddPureEntity.class);
+
+        SessionUtil.setAttribute("updateDrawIOContents",changeReqTableName);
+
+        int result = reqAddPure.updateNode(reqAddPureEntity);
+
+        SessionUtil.removeAttribute("updateDrawIOContents");
+
+        return ResponseEntity.ok(CommonResponse.success(result));
+
+    }
 }

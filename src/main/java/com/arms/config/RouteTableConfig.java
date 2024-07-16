@@ -31,6 +31,7 @@ public class RouteTableConfig {
         map.put("reqProgress.do", "reqProgress");
         map.put("req-difficulty-priority-list", "req-difficulty-priority-list");
         map.put("updateReqAddOnly.do", "updateReqAddOnly");
+        map.put("updateDrawIOContents.do", "updateDrawIOContents");
         return map;
     }
 
