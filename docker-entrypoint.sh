@@ -5,7 +5,7 @@ set -e
 GC_OPTS=${GC_OPTS:="-XX:+UseNUMA -XX:+UseG1GC"}
 MEM_OPTS=${MEM_OPTS:="-Xms5120m -Xmx5120m"}
 NET_OPTS=${NET_OPTS:="-Dsun.net.inetaddr.ttl=0 -Dsun.net.inetaddr.negative.ttl=0 -Djava.net.preferIPv4Stack=true"}
-MONITOR_ELK_OPTS="-javaagent:/elastic-apm-agent.jar -Delastic.apm.service_name=middle-proxy -Delastic.apm.application_packages=com.arms -Delastic.apm.server_urls=http://apm-server:8200"
+MONITOR_ELK_OPTS="-javaagent:/elastic-apm-agent.jar -Delastic.apm.service_name=backend-core -Delastic.apm.application_packages=com.arms -Delastic.apm.server_urls=http://apm-server:8200"
 
 # Spring 프로파일 환경 변수 설정
 SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-live}
