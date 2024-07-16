@@ -66,12 +66,12 @@ public class JiraServerPureController extends TreeAbstractController<JiraServerP
 
     @ResponseBody
     @RequestMapping(
-            value= { "/getJiraServerTypeInfo.do"},
+            value= { "/serverTypeMap.do"},
             method= {RequestMethod.GET}
     )
-    public ResponseEntity<Map<String, ServerType>> getJiraServerTypeInfo(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
+    public ResponseEntity<Map<String, String>> getServerTypeMap(JiraServerDTO jiraServerDTO, ModelMap model, HttpServletRequest request) throws Exception {
 
-        log.info("JiraServerPureController :: getJiraServerTypeInfo");
-        return ResponseEntity.ok(jiraServerPure.지라서버_아이디_타입_정보_가져오기());
+        log.info("JiraServerPureController :: getServerTypeMap");
+        return ResponseEntity.ok(jiraServerPure.ALM서버_아이디_서버유형_맵_가져오기());
     }
 }
