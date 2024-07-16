@@ -43,10 +43,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -314,6 +311,38 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         }
 
         return ResponseEntity.ok(CommonResponse.success(요구사항이슈_및_하위이슈들));
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/reqIssues-created-together.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> 요구사항_이슈_묶음_조회(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, HttpServletRequest request) {
+
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+        statusEntity.setOrder(Order.asc("c_left"));
+
+        ParameterParser parser = new ParameterParser(request);
+
+        String 제품서비스_아이디 = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        String pds_version = parser.get("pdServiceVersions");
+        Long[] 제품서비스_버전 =  Arrays.stream(pds_version.split(",")).map(Long::valueOf).toArray(Long[]::new);
+        String 요구사항_아이디 = parser.get("cReqLink"); // ALM 서버아이디
+
+        log.info("[ ReqStatusController :: 요구사항_이슈_묶음_조회 reqIssues-created-together.do ] :: " +
+                "pdServiceId => {}, pds_versions => {}, cReqLink => {}",제품서비스_아이디, 제품서비스_버전, 요구사항_아이디);
+
+        ResponseEntity<List<지라이슈>> 요구사항_이슈_묶음_조회 = engineService.요구사항_묶음_조회(Long.valueOf(제품서비스_아이디), 제품서비스_버전, Long.valueOf(요구사항_아이디));
+        List<지라이슈> 요구사항_이슈_목록 = Optional.ofNullable(요구사항_이슈_묶음_조회.getBody()).orElse(new ArrayList<>());
+
+        log.info("[ ReqStatusController :: 요구사항이슈_묶음_조회 reqIssues-created-together.do ] :: " +
+                "조회된 요구사항 이슈의 수 => {} ", 요구사항_이슈_목록.size());
+
+        return ResponseEntity.ok(CommonResponse.success(요구사항_이슈_목록));
+
     }
 
     @ResponseBody
