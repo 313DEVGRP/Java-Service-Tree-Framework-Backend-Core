@@ -12,6 +12,7 @@
 package com.arms.api.requirement.reqstatus.controller;
 
 import com.arms.api.analysis.common.model.AggregationRequestDTO;
+import com.arms.api.analysis.common.model.IsReqType;
 import com.arms.api.jira.jiraissuepriority.service.JiraIssuePriority;
 import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraserver.service.JiraServer;
@@ -21,6 +22,7 @@ import com.arms.api.requirement.reqstatus.model.ReqStatusEntity;
 import com.arms.api.requirement.reqstatus.service.ReqStatus;
 import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.EngineService;
+import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
 import com.arms.api.util.communicate.external.response.jira.지라이슈;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
@@ -344,6 +346,45 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return ResponseEntity.ok(CommonResponse.success(요구사항_이슈_목록));
 
     }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/{changeReqTableName}/aggsOfLinkedIssueAndSubtasks.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> 현황관리_연결이슈_하위이슈_집계조회(
+            @PathVariable(value ="changeReqTableName") String changeReqTableName,
+            ReqStatusDTO reqStatusDTO, HttpServletRequest request) {
+
+        ReqStatusEntity statusEntity = modelMapper.map(reqStatusDTO, ReqStatusEntity.class);
+        statusEntity.setOrder(Order.asc("c_left"));
+
+        ParameterParser parser = new ParameterParser(request);
+        String 제품서비스_아이디 = StringUtils.replace(changeReqTableName, "T_ARMS_REQSTATUS_", "");
+        String pds_version = parser.get("pdServiceVersions");
+        List<Long> 버전_목록 = Arrays.stream(pds_version.split(",")).map(Long::valueOf).collect(Collectors.toList());
+        String 요구사항_아이디 = parser.get("cReqLink"); // ALM 서버아이디
+
+        log.info("[ ReqStatusController :: 현황관리_연결이슈_하위이슈_집계조회 reqIssues-created-together.do ] :: " +
+                "pdServiceId => {}, pds_versions => {}, cReqLink => {}",제품서비스_아이디, 버전_목록, 요구사항_아이디);
+        AggregationRequestDTO aggregationRequestDTO = AggregationRequestDTO.builder()
+                .pdServiceLink(Long.valueOf(제품서비스_아이디))
+                .pdServiceVersionLinks(버전_목록)
+                .메인_그룹_필드("parentReqKey")
+                .하위_그룹_필드들(List.of("status.status_name.keyword"))
+                .isReqType(IsReqType.ISSUE)
+                .build();
+
+        ResponseEntity<검색결과_목록_메인> 연결이슈_하위이슈_집계조회 = aggregationService.현황관리_연결이슈_하위이슈_집계조회(aggregationRequestDTO, Long.valueOf(요구사항_아이디));
+        검색결과_목록_메인 집계결과 = Optional.ofNullable(연결이슈_하위이슈_집계조회.getBody()).orElse(new 검색결과_목록_메인());
+
+        log.info("[ ReqStatusController :: 현황관리_연결이슈_하위이슈_집계조회(aggsOfLinkedIssueAndSubtasks) ] :: " +
+                "조회된 연결이슈 및 하위이슈 전체합계 => {} ", 집계결과.get전체합계());
+
+        return ResponseEntity.ok(CommonResponse.success(집계결과));
+
+    }
+
 
     @ResponseBody
     @RequestMapping(

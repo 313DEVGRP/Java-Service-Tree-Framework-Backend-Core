@@ -150,4 +150,8 @@ public interface AggregationService {
     public Map<String, Long> 제품서비스_버전별_상태값_통계(@PathVariable("pdService") Long 제품서비스_아이디,
                                                             @RequestParam("pdServiceVersions") Long[] 제품서비스_버전_아이디);
 
+    @GetMapping("/engine/jira/dashboard/reqStatus/aggsOfLinkedIssueAndSubtasks")
+    ResponseEntity<검색결과_목록_메인> 현황관리_연결이슈_하위이슈_집계조회(
+            @SpringQueryMap AggregationRequestDTO aggregationRequestDTO, @RequestParam("cReqLink") Long 요구사항_아이디
+    );
 }
