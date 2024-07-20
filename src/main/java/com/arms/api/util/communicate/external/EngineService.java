@@ -137,6 +137,9 @@ public interface EngineService {
     ResponseEntity<List<지라이슈>> 제품_버전별_삭제된_이슈조회(@RequestParam("pdServiceId") Long pdServiceLink,
                                       @RequestParam("pdServiceVersions") Long[] pdServiceVersionLinks);
 
+    @PutMapping("/engine/jira/dashboard/deleteWithdrawal")
+    ResponseEntity<?> 이슈삭제_철회(@RequestBody List<지라이슈> 지라이슈);
+
 
     @GetMapping("/alm/account/verify")
     ResponseEntity<계정정보_데이터> 계정정보_검증하기(@SpringQueryMap 지라서버정보_데이터 서버정보데이터);

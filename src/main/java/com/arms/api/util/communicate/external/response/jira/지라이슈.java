@@ -48,7 +48,7 @@ public class 지라이슈 {
 
     private String updated;
 
-    private String deleted;
+    private 지라이슈.삭제 deleted;
 
     private List<지라이슈.워크로그> worklogs;
 
@@ -65,7 +65,21 @@ public class 지라이슈 {
     private Long cReqLink;
 
     private String _class; //추가
+    @Getter
+    @Setter
+    @Builder
+    @ToString
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class 삭제 {
 
+        @JsonProperty("deleted_isDeleted")
+        private Boolean isDeleted;
+
+        @JsonProperty("deleted_date")
+        private String date;
+    }
     @Getter
     @Setter
     @ToString

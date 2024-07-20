@@ -177,6 +177,17 @@ public class ReqStatusController extends TreeAbstractController<ReqStatus, ReqSt
         return modelAndView;
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/deleteWithdrawal.do"},
+            method = {RequestMethod.PUT}
+    )
+    public ResponseEntity<?> 이슈삭제_철회( @RequestBody List<지라이슈> 지라이슈) throws Exception {
+
+        log.info("[ ReqStatusController :: 요구사항_하위이슈_연결이슈_조회 ] :: 이슈삭제_철회 {}",지라이슈);
+
+        return ResponseEntity.ok(CommonResponse.success(engineService.이슈삭제_철회(지라이슈)));
+    }
 
     @ResponseBody
     @RequestMapping(
