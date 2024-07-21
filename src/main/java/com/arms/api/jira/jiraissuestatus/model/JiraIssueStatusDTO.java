@@ -20,6 +20,8 @@ public class JiraIssueStatusDTO extends TreeBaseDTO {
 
     private String c_issue_status_url;
 
+    private String c_issue_type_mapping_id;
+
     //값으로 : true, false 를 가질 수 있다.
     private String c_check;
 

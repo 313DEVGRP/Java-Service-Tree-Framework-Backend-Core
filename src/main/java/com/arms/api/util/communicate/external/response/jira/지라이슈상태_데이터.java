@@ -17,4 +17,7 @@ public class 지라이슈상태_데이터 extends ALM_데이터{
     private String name;
 
     private String description;
+
+    private String issueTypeId;
+
 }
