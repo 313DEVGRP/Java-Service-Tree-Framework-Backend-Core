@@ -1,7 +1,7 @@
 /*
  * @author Dongmin.lee
- * @since 2023-03-28
- * @version 23.03.28
+ * @since 2023-10-22
+ * @version 23.10.22
  * @see <pre>
  *  Copyright (C) 2007 by 313 DEV GRP, Inc - All Rights Reserved
  *  Unauthorized copying of this file, via any medium is strictly prohibited
@@ -9,7 +9,7 @@
  *  Written by 313 developer group <313@313.co.kr>, December 2010
  * </pre>
  */
-package com.arms.api.jira.jiraissuestatus.model;
+package com.arms.api.requirement.reqstate_category.model;
 
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
@@ -28,14 +28,14 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Builder
-@Table(name = "T_ARMS_JIRAISSUESTATUS")
+@Table(name = "T_ARMS_REQSTATE_CATEGORY")
 @SelectBeforeUpdate(value=true)
 @DynamicInsert(value=true)
 @DynamicUpdate(value=true)
 @Cache(usage = CacheConcurrencyStrategy.NONE)
 @NoArgsConstructor
 @AllArgsConstructor
-public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializable {
+public class ReqStateCategoryEntity extends TreeSearchEntity implements Serializable {
 
  	@Override
     @Id
@@ -44,41 +44,7 @@ public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializa
     public Long getC_id() {
         return super.getC_id();
     }
-
     //@Getter @Setter
-
-    //온프레미스 대응 : private String id
-    //클라우드 대응 :
-    @Column(name = "c_issue_status_id")
-    @Type(type="text")
-    private String c_issue_status_id;
-
-    //온프레미스 대응 : private String description
-    //클라우드 대응 :
-    @Column(name = "c_issue_status_desc")
-    @Type(type="text")
-    private String c_issue_status_desc;
-
-    //온프레미스 대응 : private String name
-    //클라우드 대응 :
-    @Column(name = "c_issue_status_name")
-    @Type(type="text")
-    private String c_issue_status_name;
-
-    //온프레미스 대응 : private String self
-    //클라우드 대응 :
-    @Column(name = "c_issue_status_url")
-    @Type(type="text")
-    private String c_issue_status_url;
-
-    @Column(name = "c_issue_type_mapping_id")
-    @Type(type="text")
-    private String c_issue_type_mapping_id;
-
-    //값으로 : true, false 를 가질 수 있다.
-    @Column(name = "c_check")
-    private String c_check;
-
     //내용
     @Lob
     @Column(name = "c_contents")
@@ -89,14 +55,18 @@ public class JiraIssueStatusEntity extends TreeSearchEntity implements Serializa
     @Type(type="text")
     private String c_desc;
 
-
     //비고
     @Column(name = "c_etc")
     private String c_etc;
 
-    // ARMS 요구사항 상태 mapping
-    @Column(name = "c_req_state_link")
-    private Long c_req_state_mapping_link;
+    //아이콘
+    @Column(name = "c_category_icon")
+    @Type(type="text")
+    private String c_category_icon;
+
+    //완료 상태 여부
+    @Column(name = "c_closed")
+    private String c_closed;
 
     /*
      * Extend Bean Field
