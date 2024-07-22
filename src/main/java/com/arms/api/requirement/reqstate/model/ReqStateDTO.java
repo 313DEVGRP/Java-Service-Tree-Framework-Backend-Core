@@ -31,5 +31,7 @@ public class ReqStateDTO extends TreeBaseDTO {
     //비고
     private String c_etc;
 
+    //상태 카테고리
+    private Long c_state_category_mapping_id;
 
 }

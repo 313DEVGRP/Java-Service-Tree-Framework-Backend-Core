@@ -15,20 +15,27 @@ package com.arms.api.requirement.reqstate.controller;
 import com.arms.api.requirement.reqstate.model.ReqStateDTO;
 import com.arms.api.requirement.reqstate.model.ReqStateEntity;
 import com.arms.api.requirement.reqstate.service.ReqState;
+import com.arms.api.requirement.reqstate_category.model.ReqStateCategoryEntity;
+import com.arms.api.requirement.reqstate_category.service.ReqStateCategory;
 import com.arms.config.ArmsDetailUrlConfig;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
+import com.arms.egovframework.javaservice.treeframework.validation.group.UpdateNode;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +59,30 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
 
     @Autowired
     private ArmsDetailUrlConfig armsDetailUrlConfig;
+
+    @Autowired
+    @Qualifier("reqStateCategory")
+    private ReqStateCategory reqStateCategory;
+
+    @ResponseBody
+    @RequestMapping(value = "/updateNode.do", method = RequestMethod.PUT)
+    public ModelAndView updateNode(@Validated(value = UpdateNode.class) ReqStateDTO reqStateDTO,
+                                   BindingResult bindingResult, HttpServletRequest request, ModelMap model) throws Exception {
+
+        log.info("ReqStateController :: updateNode");
+        ReqStateEntity reqStateEntity = modelMapper.map(reqStateDTO, ReqStateEntity.class);
+
+        if (reqStateDTO.getC_state_category_mapping_id() != null) {
+            ReqStateCategoryEntity searchEntity = new ReqStateCategoryEntity();
+            searchEntity.setC_id(reqStateDTO.getC_state_category_mapping_id());
+            ReqStateCategoryEntity reqStateCategoryEntity = reqStateCategory.getNode(searchEntity);
+            reqStateEntity.setReqStateCategoryEntity(reqStateCategoryEntity);
+        }
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", reqState.updateNode(reqStateEntity));
+        return modelAndView;
+    }
 
     @ResponseBody
     @RequestMapping(
