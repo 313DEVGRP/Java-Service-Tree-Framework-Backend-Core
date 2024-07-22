@@ -11,9 +11,11 @@
  */
 package com.arms.api.requirement.reqstate.model;
 
+import com.arms.api.requirement.reqstate_category.model.ReqStateCategoryEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeBaseEntity;
 import com.arms.egovframework.javaservice.treeframework.model.TreeSearchEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.annotations.Cache;
@@ -59,6 +61,18 @@ public class ReqStateEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_etc")
     private String c_etc;
 
+    // 상태 카테고리 1:1 Row 단방향 연계
+    private ReqStateCategoryEntity reqStateCategoryEntity;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonManagedReference
+    @OneToOne
+    @JoinColumn(name = "c_state_category_mapping_id", referencedColumnName = "c_id")
+    public ReqStateCategoryEntity getReqStateCategoryEntity() { return reqStateCategoryEntity; }
+
+    public void setReqStateCategoryEntity(ReqStateCategoryEntity reqStateCategoryEntity) {
+        this.reqStateCategoryEntity = reqStateCategoryEntity;
+    }
 
     /*
      * Extend Bean Field
