@@ -18,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -88,6 +89,19 @@ public class ResourceController {
         ModelAndView modelAndView = new ModelAndView("jsonView");
         검색결과_목록_메인 통신결과 = 요구사항_연결이슈_일반_통계.getBody();
         modelAndView.addObject("result", 통신결과);
+        return modelAndView;
+    }
+
+    @GetMapping("/pdServiceId/{pdServiceId}/assigneeInfo.do")
+    public ModelAndView 작업자_이름_메일_집계(@PathVariable("pdServiceId") Long pdServiceId,
+                                            @RequestParam List<Long> pdServiceVersionLinks) throws Exception {
+
+        log.info("[리소스분석_컨트롤러 :: 작업자_이름_메일_집계] :: pdServiceId ==> {}, pdServiceVersionLinks ==> {}", pdServiceId, pdServiceVersionLinks.toString());
+
+        Map<String, String> 작업자_메일_이름_맵 = resourceService.작업자_메일_이름_맵(pdServiceId, pdServiceVersionLinks);
+
+        ModelAndView modelAndView = new ModelAndView("jsonView");
+        modelAndView.addObject("result", 작업자_메일_이름_맵);
         return modelAndView;
     }
 
