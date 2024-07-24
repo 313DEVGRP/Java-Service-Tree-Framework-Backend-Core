@@ -106,6 +106,16 @@ public interface EngineService {
             @RequestParam("projectKeyOrId") String 프로젝트키_또는_아이디
     );
 
+    @PostMapping("/engine/jira/{connectId}/issue/update/field/upperKey/{issueKey}")
+    public int 서브테스크_상위키_필드업데이트(
+            @PathVariable("connectId") Long 지라서버_아이디,
+            @PathVariable("issueKey") String 이슈_키,
+            @RequestParam("pdServiceId") Long 제품서비스_아이디,
+            @RequestParam("pdServiceVersions") Long[] 버전_아이디_배열,
+            @RequestParam("cReqLink") Long cReqLink,
+            @RequestParam("projectKeyOrId") String 프로젝트키_또는_아이디
+    );
+
 
     /*
      * 요구사항 상세 페이지

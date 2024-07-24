@@ -72,4 +72,14 @@ public class 스케쥴러_컨트롤러{
         return 스케쥴러.각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성();
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/pdservice/reqstatus/updateUpperKeyField"},
+            method = {RequestMethod.GET}
+    )
+    public String 서브테스크_상위키_필드업데이트() throws Exception {
+        logger.info("[ 스케쥴러_컨트롤러 :: 서브테스크_상위키_필드업데이트 ]");
+        return 스케쥴러.서브테스크_상위키_필드업데이트();
+    }
+
 }

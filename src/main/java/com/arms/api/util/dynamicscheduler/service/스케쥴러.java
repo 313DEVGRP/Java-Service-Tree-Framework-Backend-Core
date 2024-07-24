@@ -23,4 +23,6 @@ public interface 스케쥴러 extends TreeService {
 
     public String 각_제품서비스_별_생성실패한_ALM_요구사항_이슈_재생성() throws Exception;
 
+    public String 서브테스크_상위키_필드업데이트() throws Exception;
+
 }

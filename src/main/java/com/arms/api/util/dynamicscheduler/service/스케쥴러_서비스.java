@@ -82,6 +82,12 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 		return this.스케쥴러_타입별_요구사항_이슈_처리("생성_실패_요구사항_스케줄러");
 	}
 
+	@Async
+	@Override
+	public String 서브테스크_상위키_필드업데이트() throws Exception {
+		return this.스케쥴러_타입별_요구사항_이슈_처리("서브테스크_상위키_필드업데이트");
+	}
+
 	private String 스케쥴러_타입별_요구사항_이슈_처리(String 스케쥴러_타입) throws Exception {
 
 		log.info("[ 스케쥴러_서비스 :: 스케쥴러_타입별_요구사항_이슈_처리 ] :: " + 스케쥴러_타입);
@@ -237,6 +243,16 @@ public class 스케쥴러_서비스 extends TreeServiceImpl implements 스케쥴
 		}
 		else if (스케쥴러_타입.equals("증분_요구사항_이슈_검색엔진_벌크_저장")) {
 			engineService.증분이슈_검색엔진_벌크_저장(
+					Long.parseLong(지라서버.getC_jira_server_etc()),
+					요구사항_이슈_엔티티.getC_issue_key(),
+					요구사항_이슈_엔티티.getC_pdservice_link(),
+					버전_아이디_목록_배열,
+					요구사항_이슈_엔티티.getC_req_link(),
+					요구사항_이슈_엔티티.getC_jira_project_key()
+			);
+		}
+		else if (스케쥴러_타입.equals("서브테스크_상위키_필드업데이트")) {
+			engineService.서브테스크_상위키_필드업데이트(
 					Long.parseLong(지라서버.getC_jira_server_etc()),
 					요구사항_이슈_엔티티.getC_issue_key(),
 					요구사항_이슈_엔티티.getC_pdservice_link(),
