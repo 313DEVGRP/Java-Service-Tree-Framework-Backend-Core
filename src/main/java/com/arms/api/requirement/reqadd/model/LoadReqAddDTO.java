@@ -11,7 +11,7 @@ import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper=true)
+@ToString(callSuper = true)
 @Getter
 @Setter
 public class LoadReqAddDTO extends TreeBaseDTO {
@@ -37,8 +37,4 @@ public class LoadReqAddDTO extends TreeBaseDTO {
     private String c_req_etc;
     private String c_req_desc;
     private String c_req_contents;
-//    @Mapping(source = "pdServiceEntity.c_id", target = "c_req_pdservice_link")
-//    @Mapping(source = "reqPriorityEntity.c_id", target = "c_req_priority_link")
-//    @Mapping(source = "reqStateEntity.c_id", target = "c_req_state_link")
-//    @Mapping(source = "reqDifficultyEntity.c_id", target = "c_req_difficulty_link")
 }

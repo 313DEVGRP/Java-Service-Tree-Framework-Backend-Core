@@ -233,13 +233,9 @@ public class ReqAddEntity extends TreeSearchEntity implements Serializable {
     @Column(name = "c_drawio_image_raw")
     private String c_drawio_image_raw;
 
-    //    @Lob
-//    @Column(name = "c_drawdb_contents")
-//    private String c_drawdb_contents;
-//
-//    @Lob
-//    @Column(name = "c_drawdb_image_raw")
-//    private String c_drawdb_image_raw;
+    @Lob
+    @Column(name = "c_drawdb_contents", columnDefinition = "JSON")
+    private String c_drawdb_contents;
 
     //설명
     @Column(name = "c_req_desc")
