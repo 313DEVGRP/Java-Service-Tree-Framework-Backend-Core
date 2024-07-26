@@ -32,6 +32,7 @@ public class RouteTableConfig {
         map.put("req-difficulty-priority-list", "req-difficulty-priority-list");
         map.put("updateReqAddOnly.do", "updateReqAddOnly");
         map.put("updateDrawIOContents.do", "updateDrawIOContents");
+        map.put("updateDrawDBContents.do", "updateDrawDBContents");
         return map;
     }
 
