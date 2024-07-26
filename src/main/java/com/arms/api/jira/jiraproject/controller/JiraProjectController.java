@@ -109,4 +109,25 @@ public class JiraProjectController extends TreeAbstractController<JiraProject, J
         return ResponseEntity.ok(CommonResponse.success(jiraProject.프로젝트_항목별_기본값_설정(설정항목, 항목_c_id, jiraProjectEntity)));
     }
 
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getIssueStatusListByIssueType.do"},
+            method={RequestMethod.GET}
+    )
+    public ResponseEntity<?> getIssueStatusListByIssueType(
+                                    JiraProjectDTO jiraProjectDTO,
+                                    @RequestParam(name="issueTypeId") Long 이슈유형_아이디) throws Exception {
+
+        logger.info("JiraProjectController :: getIssueStatusListByIssueType");
+
+        if (이슈유형_아이디 == null) {
+            throw new IllegalArgumentException("전달된 파라미터에 이슈 유형 아이디가 없습니다.");
+        }
+        else if (jiraProjectDTO == null || jiraProjectDTO.getC_id() == null) {
+            throw new IllegalArgumentException("전달된 파라미터에 프로젝트 C 아이디가 없습니다.");
+        }
+
+        JiraProjectEntity jiraProjectEntity = modelMapper.map(jiraProjectDTO, JiraProjectEntity.class);
+        return ResponseEntity.ok(CommonResponse.success(jiraProject.해당_이슈유형_이슈상태_목록_조회(jiraProjectEntity, 이슈유형_아이디)));
+    }
 }

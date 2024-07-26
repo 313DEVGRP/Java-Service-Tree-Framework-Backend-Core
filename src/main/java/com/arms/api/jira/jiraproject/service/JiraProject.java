@@ -30,4 +30,6 @@ public interface JiraProject extends TreeService {
 
     public JiraProjectEntity 프로젝트_항목별_기본값_설정(EntityType 설정할_항목, Long 항목_c_id, JiraProjectEntity jiraProjectEntity) throws Exception;
 
+    public List<JiraIssueStatusEntity> 해당_이슈유형_이슈상태_목록_조회(JiraProjectEntity jiraProjectEntity, Long 이슈유형_아이디) throws Exception;
+
 }
