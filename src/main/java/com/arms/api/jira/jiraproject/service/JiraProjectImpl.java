@@ -14,29 +14,24 @@ package com.arms.api.jira.jiraproject.service;
 import com.arms.api.globaltreemap.model.GlobalTreeMapEntity;
 import com.arms.api.globaltreemap.service.GlobalTreeMapService;
 import com.arms.api.jira.jiraissuestatus.model.JiraIssueStatusEntity;
-import com.arms.api.jira.jiraissuestatus.service.JiraIssueStatus;
 import com.arms.api.jira.jiraissuetype.model.JiraIssueTypeEntity;
-import com.arms.api.jira.jiraissuetype.service.JiraIssueType;
 import com.arms.api.jira.jiraproject.model.JiraProjectEntity;
 import com.arms.api.jira.jiraserver.model.enums.EntityType;
-import com.arms.api.jira.jiraserver_pure.service.JiraServerPure;
 import com.arms.api.product_service.pdservice.model.PdServiceEntity;
 import com.arms.api.requirement.reqadd.model.ReqAddEntity;
-import com.arms.api.util.communicate.external.EngineService;
 import com.arms.egovframework.javaservice.treeframework.service.TreeServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -46,21 +41,7 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private EngineService engineService;
-
-    @Autowired
     private GlobalTreeMapService globalTreeMapService;
-
-    @Autowired
-    @Qualifier("jiraServerPure")
-    private JiraServerPure jiraServerPure;
-    @Autowired
-    @Qualifier("jiraIssueType")
-    private JiraIssueType jiraIssueType;
-
-    @Autowired
-    @Qualifier("jiraIssueStatus")
-    private JiraIssueStatus jiraIssueStatus;
 
     @Override
     @Transactional
@@ -124,11 +105,34 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
         검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
         JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
-        return 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream()
-                .filter(entity -> entity.getC_etc() == null
-                                    || !StringUtils.equals("delete", entity.getC_etc())
-                )
+        JiraIssueTypeEntity 조회된_이슈유형 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
+                .filter(issueType -> StringUtils.equals("true", issueType.getC_check()))
+                .findFirst().orElse(null);
+
+        // 선택된 이슈유형이 없는 경우 상태 빈값으로 전달
+        if (조회된_이슈유형 == null) {
+             return Collections.emptyList();
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String 조회된_이슈유형아이디 = 조회된_이슈유형.getC_issue_type_id();
+
+        List<JiraIssueStatusEntity> result = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream()
+                .filter(Objects::nonNull)
+                .filter(entity -> entity.getC_etc() == null || !StringUtils.equals("delete", entity.getC_etc()))
+                .filter(entity -> entity.getC_issue_type_mapping_id() != null)
+                .filter(entity -> {
+                    try {
+                        Set<String> 이슈유형_아이디_목록 = objectMapper.readValue(entity.getC_issue_type_mapping_id(), new TypeReference<Set<String>>() {});
+                        return 이슈유형_아이디_목록.contains(조회된_이슈유형아이디);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                        return false;
+                    }
+                })
                 .collect(Collectors.toList());
+
+        return result;
     }
 
     @Override
@@ -169,4 +173,40 @@ public class JiraProjectImpl extends TreeServiceImpl implements JiraProject {
         this.updateNode(검색된_프로젝트_엔티티);
         return 검색된_프로젝트_엔티티;
     }
+
+    @Override
+    public List<JiraIssueStatusEntity> 해당_이슈유형_이슈상태_목록_조회(JiraProjectEntity jiraProjectEntity, Long 이슈유형_아이디) throws Exception {
+        JiraProjectEntity 검색용_프로젝트_엔티티 = new JiraProjectEntity();
+        검색용_프로젝트_엔티티.setC_id(jiraProjectEntity.getC_id());
+        JiraProjectEntity 검색된_프로젝트_엔티티 = this.getNode(검색용_프로젝트_엔티티);
+        JiraIssueTypeEntity 조회된_이슈유형 = 검색된_프로젝트_엔티티.getJiraIssueTypeEntities().stream()
+                .filter(issueType -> Objects.equals(이슈유형_아이디, issueType.getC_id()))
+                .findFirst().orElse(null);
+
+        if (조회된_이슈유형 == null) {
+            return Collections.emptyList();
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String 조회된_이슈유형아이디 = 조회된_이슈유형.getC_issue_type_id();
+
+        List<JiraIssueStatusEntity> result = 검색된_프로젝트_엔티티.getJiraIssueStatusEntities().stream()
+                .filter(Objects::nonNull)
+                .filter(entity -> entity.getC_etc() == null || !StringUtils.equals("delete", entity.getC_etc()))
+                .filter(entity -> entity.getC_issue_type_mapping_id() != null)
+                .filter(entity -> {
+                    try {
+                        Set<String> 이슈유형_아이디_목록 = objectMapper.readValue(entity.getC_issue_type_mapping_id(), new TypeReference<Set<String>>() {});
+                        return 이슈유형_아이디_목록.contains(조회된_이슈유형아이디);
+                    }
+                    catch (IOException e) {
+                        logger.error(e.getMessage());
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        return result;
+    }
+
 }
