@@ -11,8 +11,11 @@
  */
 package com.arms.api.product_service.pdservice_pure.controller;
 
+import com.arms.api.product_service.pdservice_detail.model.PdServiceDetailEntity;
+import com.arms.api.product_service.pdservice_detail.service.PdServiceDetail;
 import com.arms.api.product_service.pdservice_pure.model.PdServicePureDTO;
 import com.arms.api.product_service.pdservice_pure.model.PdServicePureEntity;
+import com.arms.api.product_service.pdservice_pure.model.PdServiceWithDetailDTO;
 import com.arms.api.product_service.pdservice_pure.service.PdServicePure;
 import com.arms.egovframework.javaservice.treeframework.controller.CommonResponse;
 import com.arms.egovframework.javaservice.treeframework.controller.TreeAbstractController;
@@ -22,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -30,6 +34,7 @@ import javax.annotation.PostConstruct;
 public class PdServicePureController extends TreeAbstractController<PdServicePure, PdServicePureDTO, PdServicePureEntity> {
 
     private final PdServicePure pdServicePure;
+    private final PdServiceDetail pdServiceDetail;
 
     @PostConstruct
     public void initialize() {
@@ -44,6 +49,26 @@ public class PdServicePureController extends TreeAbstractController<PdServicePur
         PdServicePureEntity pdServicePureEntity = modelMapper.map(pdServicePureDTO, PdServicePureEntity.class);
 
         return ResponseEntity.ok(CommonResponse.success(pdServicePure.getNodesWithoutRoot(pdServicePureEntity)));
+
+    }
+
+    @GetMapping("getPdServiceWithDetail.do")
+    public ResponseEntity<?> getPdServiceWithDetail(PdServicePureDTO pdServicePureDTO) throws Exception {
+
+        log.info("PdServiceController :: getPdServiceWithDetail");
+
+        PdServicePureEntity pureEntity = modelMapper.map(pdServicePureDTO, PdServicePureEntity.class);
+
+        PdServicePureEntity pdServicePureEntity = pdServicePure.getNode(pureEntity);
+
+        List<PdServiceDetailEntity> pdServiceDetailEntities = pdServiceDetail.getNodesByPdService(pdServicePureEntity.getC_id());
+
+        PdServiceWithDetailDTO pdServiceWithDetailDTO = PdServiceWithDetailDTO.builder()
+                .pdServicePure(pdServicePureEntity)
+                .pdServiceDetails(pdServiceDetailEntities)
+                .build();
+
+        return ResponseEntity.ok(CommonResponse.success(pdServiceWithDetailDTO));
 
     }
 }

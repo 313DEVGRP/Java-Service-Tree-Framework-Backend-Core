@@ -60,9 +60,7 @@ public class PdServiceDetailImpl extends TreeServiceImpl implements PdServiceDet
 
         pdServiceDetailEntity.getCriterions().add(criterion);
 
-        pdServiceDetailEntity.setOrder(Order.asc("c_position"));
-
-        return this.getChildNodeWithoutPaging(pdServiceDetailEntity);
+        return this.getChildNode(pdServiceDetailEntity);
     }
 
     @Override
