@@ -50,7 +50,7 @@ public class ReqStateCategoryController extends TreeAbstractController<ReqStateC
 
     @ResponseBody
     @RequestMapping(
-            value = {"/closedCategory"},
+            value = {"/getClosedCategory.do"},
             method = {RequestMethod.GET}
     )
     public ResponseEntity<?> 완료상태_카테고리_조회() throws Exception {
