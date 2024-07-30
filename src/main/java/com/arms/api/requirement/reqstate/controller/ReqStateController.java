@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -36,9 +37,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -100,5 +100,24 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
         ModelAndView modelAndView = new ModelAndView("jsonView");
         modelAndView.addObject("result", 완료_키워드_셋);
         return modelAndView;
+    }
+
+    @ResponseBody
+    @RequestMapping(
+            value = {"/getReqStateListFilter.do"},
+            method = {RequestMethod.GET}
+    )
+    public ResponseEntity<?> 카테고리_매핑된_상태목록_조회() throws Exception {
+
+        logger.info(" [ 카테고리_매핑된_상태목록_조회 ]");
+        ReqStateEntity reqStateEntity = new ReqStateEntity();
+        List<ReqStateEntity> 전체_상태목록 = reqState.getNodesWithoutRoot(reqStateEntity);
+        List<ReqStateEntity> 카테고리_매핑된_상태목록 = 전체_상태목록.stream()
+                                                        .filter(Objects::nonNull)
+                                                        .filter(reqState -> reqState.getReqStateCategoryEntity() != null)
+                                                        .sorted()
+                                                        .collect(Collectors.toList());
+
+        return ResponseEntity.ok(카테고리_매핑된_상태목록);
     }
 }
