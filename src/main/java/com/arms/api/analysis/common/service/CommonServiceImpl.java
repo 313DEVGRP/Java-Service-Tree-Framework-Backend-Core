@@ -9,6 +9,7 @@ import com.arms.api.util.communicate.external.AggregationService;
 import com.arms.api.util.communicate.external.request.aggregation.지라이슈_단순_집계_요청;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과;
 import com.arms.api.util.communicate.external.response.aggregation.검색결과_목록_메인;
+import com.arms.egovframework.javaservice.treeframework.TreeConstant;
 import com.arms.egovframework.javaservice.treeframework.interceptor.SessionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +20,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,8 +63,8 @@ public class CommonServiceImpl implements CommonService {
         Map<String, Long> 버전_요구사항_상태별_합계 = 검색_결과_목록.stream()
                 .collect(Collectors.groupingBy(
                         entity -> {
-                            if (StringUtils.equals(entity.getC_type(), "folder")) {
-                                return "folder";
+                            if (StringUtils.equals(entity.getC_type(), TreeConstant.Branch_TYPE)) {
+                                return TreeConstant.Branch_TYPE;
                             } else {
                                 ReqStateEntity reqStateEntity = entity.getReqStateEntity();
                                 if (reqStateEntity == null) {
@@ -90,7 +87,7 @@ public class CommonServiceImpl implements CommonService {
                         Collectors.counting()
                 ));
 
-        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.getOrDefault("folder", 0L)));
+        버전_요구사항_상태별_합계.put("total", Long.valueOf(검색_결과_목록.size() - 버전_요구사항_상태별_합계.getOrDefault(TreeConstant.Branch_TYPE, 0L)));
 
         SessionUtil.removeAttribute("getReqAddListByFilter");
         log.info("[TopMenuServiceImpl  :: 톱메뉴_버전별_요구사항_자료] :: 버전_요구사항_상태별_합계 :: 총합 = {}, 열림_요구사항 = {}, 열림아닌_요구사항 = {}",

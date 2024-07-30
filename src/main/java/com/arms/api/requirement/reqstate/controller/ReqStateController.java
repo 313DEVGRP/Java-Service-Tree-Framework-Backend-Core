@@ -89,7 +89,7 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
             value = {"/complete-keyword"},
             method = {RequestMethod.GET}
     )
-    public ModelAndView 요구사항_완료_키워드조회() throws Exception {
+    public ModelAndView 요구사항_완료_키워드조회() {
         logger.info(" [ " + this.getClass().getName() + " :: 요구사항_완료_키워드조회 ]");
         Set<String> 완료_키워드_셋 = new HashSet<>();
         if (armsDetailUrlConfig != null && armsDetailUrlConfig.getCompleteKeyword() != null) {
