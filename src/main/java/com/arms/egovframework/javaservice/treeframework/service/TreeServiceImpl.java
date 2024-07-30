@@ -630,7 +630,7 @@ public class TreeServiceImpl implements TreeService {
                 nodeById.setC_type(treeSearchEntity.getC_type());
                 treeDao.update(nodeById);
             }
-        } else if ("folder".equals(treeSearchEntity.getC_type())) {
+        } else if (TreeConstant.Branch_TYPE.equals(treeSearchEntity.getC_type())) {
             nodeById.setC_type(treeSearchEntity.getC_type());
             treeDao.update(nodeById);
             return 1;

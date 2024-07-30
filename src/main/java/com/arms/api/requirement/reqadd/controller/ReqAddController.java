@@ -292,7 +292,7 @@ public class ReqAddController extends TreeAbstractController<ReqAdd, ReqAddDTO, 
                 reqAddEntity.getCriterions().add(orCondition);
                 reqAddEntity.getCriterions().add(Restrictions.eq("c_type", reqAddEntity.getC_type()));
             } else {
-                orCondition.add(Restrictions.eq("c_type","folder"));
+                orCondition.add(Restrictions.eq("c_type", TreeConstant.Branch_TYPE));
                 reqAddEntity.getCriterions().add(orCondition);
             }
 
