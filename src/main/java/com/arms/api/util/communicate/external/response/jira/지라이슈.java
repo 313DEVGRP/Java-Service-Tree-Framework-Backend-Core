@@ -62,6 +62,8 @@ public class 지라이슈 {
 
     private Long pdServiceVersion;
 
+    private String[] linkedIssues;
+
     private Long cReqLink;
 
     private String _class; //추가
