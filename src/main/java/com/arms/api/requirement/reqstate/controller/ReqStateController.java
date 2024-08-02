@@ -112,10 +112,15 @@ public class ReqStateController extends TreeAbstractController<ReqState, ReqStat
         logger.info(" [ 카테고리_매핑된_상태목록_조회 ]");
         ReqStateEntity reqStateEntity = new ReqStateEntity();
         List<ReqStateEntity> 전체_상태목록 = reqState.getNodesWithoutRoot(reqStateEntity);
+
+        // 매핑된 카테고리가 있는 상태만 필터링 및 카테고리 아이디 오름차순 정렬
         List<ReqStateEntity> 카테고리_매핑된_상태목록 = 전체_상태목록.stream()
                                                         .filter(Objects::nonNull)
                                                         .filter(reqState -> reqState.getReqStateCategoryEntity() != null)
-                                                        .sorted()
+                                                        .sorted((state1, state2) -> Long.compare(
+                                                                state1.getReqStateCategoryEntity().getC_id(),
+                                                                state2.getReqStateCategoryEntity().getC_id())
+                                                        )
                                                         .collect(Collectors.toList());
 
         return ResponseEntity.ok(카테고리_매핑된_상태목록);
