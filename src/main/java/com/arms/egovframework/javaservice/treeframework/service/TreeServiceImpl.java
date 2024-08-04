@@ -526,6 +526,14 @@ public class TreeServiceImpl implements TreeService {
     @Transactional(rollbackFor = {Exception.class}, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRED)
     public <T extends TreeSearchEntity> int updateNode(T treeSearchEntity) throws Exception {
 
+        Set<String> fieldsToAlwaysUpdate = new HashSet<>(Arrays.asList(
+                "c_issue_delete_date",
+                "c_etc",
+                "c_req_state_mapping_link",
+                "reqStateCategoryEntity",
+                "c_drawdb_contents"
+        ));
+
         treeDao.setClazz(treeSearchEntity.getClass());
         treeDao.getCurrentSession().setCacheMode(CacheMode.IGNORE);
         T alterTargetNode = (T) treeDao.getUnique(treeSearchEntity.getC_id());
@@ -536,35 +544,7 @@ public class TreeServiceImpl implements TreeService {
 
             Object value = field.get(treeSearchEntity);
 
-            if (!ObjectUtils.isEmpty(value)) {
-                field.setAccessible(true);
-                field.set(alterTargetNode, value);
-            }
-
-            /**
-             * 이 조건문은 필드 이름이 "c_issue_delete_date","c_etc", "c_req_state_mapping_link", "c_state_category_mapping_id" 인 경우 특정 동작을 수행합니다.
-             * 원칙적으로 updateNode 메소드의 경우 null 값인 필드는 업데이트 하지 않도록 설계되어 있으나,
-             * Soft Delete 처리를 위해 예외사항을 추가.
-             * @author dumbbelloper
-             * @since 2024-02-02
-             */
-            if("c_issue_delete_date".equals(field.getName())) {
-                field.setAccessible(true);
-                field.set(alterTargetNode, value);
-            }
-
-            if("c_etc".equals(field.getName())) {
-                field.setAccessible(true);
-                field.set(alterTargetNode, value);
-            }
-
-            if("c_req_state_mapping_link".equals(field.getName())) {
-                field.setAccessible(true);
-                field.set(alterTargetNode, value);
-            }
-
-            // "c_state_category_mapping_id" 상태 카테고리 Entity null 허용
-            if("reqStateCategoryEntity".equals(field.getName())) {
+            if (fieldsToAlwaysUpdate.contains(field.getName()) || !ObjectUtils.isEmpty(value)) {
                 field.setAccessible(true);
                 field.set(alterTargetNode, value);
             }
