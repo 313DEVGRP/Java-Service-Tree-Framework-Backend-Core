@@ -83,6 +83,7 @@ public class TimeServiceImpl implements TimeService {
 
         Map<String, String> 요구사항맵 = 결과.stream()
                 .filter(Objects::nonNull)
+                .filter(entity -> entity.getC_issue_key() != null && entity.getC_title() != null)
                 .collect(Collectors.toMap(
                         ReqStatusEntity::getC_issue_key,
                         ReqStatusEntity::getC_title,
@@ -96,13 +97,21 @@ public class TimeServiceImpl implements TimeService {
                 .flatMap(versions -> {
                     Long version = versions.getKey();
                     return versions.getValue().entrySet().stream()
-                            .flatMap(dates -> {
-                                return dates.getValue().entrySet().stream()
-                                        .map(nameEntry -> {
-                                            String name = nameEntry.getKey();
-                                            int value = nameEntry.getValue().size();
-                                            String summary = 요구사항목록.get(nameEntry.getKey());
-                                            return new 등고선데이터(version, dates.getKey(), name, value, summary);
+                            .flatMap(dateEntry -> {
+                                String date = dateEntry.getKey(); // 업데이트 일자
+                                Map<String, Long> 요구사항_그룹 = dateEntry.getValue().values().stream()
+                                        .flatMap(List::stream)
+                                        .collect(Collectors.groupingBy(
+                                                issue -> issue.getParentReqKey(),
+                                                Collectors.counting()
+                                        ));
+
+                                return 요구사항_그룹.entrySet().stream()
+                                        .map(entry -> {
+                                            String 요구사항_키 = entry.getKey();
+                                            int count = entry.getValue().intValue();
+                                            String summary = 요구사항목록.get(요구사항_키);
+                                            return new 등고선데이터(version, date, 요구사항_키, count, summary);
                                         });
                             });
                 })
